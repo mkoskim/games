@@ -1,3 +1,56 @@
-Quick guide to get the project compiled
----------------------------------------
+This project has been made with Linux Mint (Maya) and it is far from easy to be
+compiled at the moment. I try later simplify the process.
+
+First things you need are:
+
+1) dmd D compiler: This is easy to install to both Linux and Windows, and
+you can get it here:
+  
+  	http://dlang.org/download.html
+
+2) System side libraries: Linux users may find these from their distribution's
+   repository, if not, you can install them from sources.
+
+   * OpenGL 2.1+         For graphics
+   * SDL 2               Input, CPU side graphics, ...
+   * SDL 2 TTF           For loading & rendering fonts
+   * SDL 2 Image         For loading images
+
+   Your system should have support at least for PNG images. I'm not sure how
+   std.zip is implemented, but it may require zlib.
+
+3) D libraries:
+
+   * gl3n: 3D maths
+   * derelict: OpenGL and SDL2 bindings
+
+   You can use 'dub' to get these. Install dub:
+
+   * http://code.dlang.org/about
+
+   Then, use dub to fetch libraries:
+
+      dub fetch derelict-util
+      dub fetch derelict-sdl2
+      dub fetch derelict-gl3
+      dub fetch gl3n
+
+   On Linux, dub fetches sources to ~/.dub/packages/ directory. The paths
+   to sources should be OK, but if they are not, you can find them from:
+   
+      engine/build/Makegame.mak
+
+4) Usual Linux-side building tools:
+
+   * GCC
+   * GNU make
+
+Sadly for Windows users, current build system utilizes common Linux side
+building tools. GCC C compiler is needed to convert BLOB.zip file to
+linkable object file. I will later investigate if DMD inline assembler can
+do the job.
+
+Another sad thing for Windows users is that the project currently uses
+symbolic links, but need for those is much easier to remove than find a nice
+way to link ZIP package to executable on Windows (without GCC).
 
