@@ -1,0 +1,381 @@
+*******************************************************************************
+
+DONE:
+
+- Done: There is a great need to have improved compilation mechanism.
+  That is, separating CPU-GPU interface parts (uniforms, attributes),
+  interface between vertex and fragment shader, and have something to
+  help "plugging" different vertex and fragment shaders together.
+
+- Done: Stupid user error, the gl3n examples clearly instruct to transpose
+  matrices when sending them to GPU. (Matrix multiplication order is different
+  in GLSL than in D. It would be very nice that the multiplication order would
+  follow some standard. Investigate this problem closer, and decide what to
+  do (transpose when sending?))
+
+- Somewhat done: Trying to make runtime configurable uniforms not working...
+  Current solution is to open uniform setting outside. It is important to
+  call shader activation to do this. Because of that, we need to improve
+  the interface: exposing a method that does not work reliably is not
+  an answer, and I don't want to add shader activation to all uniform
+  settings, as they are called in performance critical parts (although
+  the time missed to see that current shader is active is probably
+  insignificant). It is just about principles.
+
+*******************************************************************************
+
+WORKLIST:
+
+- "Multi-material" meshes (batches): It would be good to think about the
+  implementation a little bit, so that it would fit to future development.
+  Later, we might want to split meshes also to different instances, for
+  example, when drawing a tree, we could put transparent parts (leaves)
+  to different instance, that is drawn after solid objects.
+
+- Mipmaps
+
+- Sprite/particle engine for textbox
+
+-------------------------------------------------------------------------------
+
+FIX:
+
+- Shader compiler (see gpucompiler.d) can only report error location for
+  noveau driver. Needs (1) driver detection, and (2) custom reporting for
+  each driver.
+
+- glVertexAttribPointer returns invalid enum when trying to use
+  GL_INT_2_10_10_10_REV for normals & tangents.
+
+- With normalized integer vectors (see gputypes.d), we use scaling, but
+  in reality (for 8-bit) -1 -> -128, +1 -> +127.
+
+- TBN calculation in current shader has its flaws (not normalized nor
+  orthogonal in fragment shader), but it might be so that it has no
+  significant effect to rendering result
+
+- Freeing fonts cause segfault
+
+-------------------------------------------------------------------------------
+
+HOTTISH TOPICS:
+
+- At lowest levels, there is a batch. It's a list of instances, rendered by
+  the same shader. This is something like Layer and Scene are at the moment.
+  I'm pretty sure this kind of mechanism does not go anywhere. At the top
+  level, you have scene data. Mapping these together is the hard part.
+
+  Anyways, it's quite clear that the current TextBox implementation prevents
+  me to implement such batch processing. So, it would be very, very
+  important to change this. Think hard how to make it happen. If we implement
+  a Blitter class to blit 2D images?
+
+-------------------------------------------------------------------------------
+
+GENERAL:
+
+- At some point, there's a need to check that destructors are called at
+  correct points. For example, when game level is changed, it would be
+  very nice if the game frees GPU resources allocated at previous level.
+
+- It might be good, that FiberQueue callbacks return boolean value
+  if they want to continue processing, or if they want them removed. Other
+  way to do that would be adding the calling queue to parameters, so that
+  callback can remove itself if wanted
+
+- It would be good to be able to send events to be processed by a Fiber.
+  If we have player Fiber, we might want to get the input events there.
+  Think & design how to do this.
+
+- Static linking: examine possibilities to link needed libraries
+  statically to remove system side dependencies.
+
+- VBO updating - or, in fact, "CPU-side" VBOs, mainly for instanced draws
+  like particle engines. See e.g.
+  
+  * https://www.opengl.org/wiki/Buffer_Object_Streaming
+
+  * http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/particles-instancing/
+
+- Layer <-> geom needs reference point... This is/was intented to help creating
+  2D HUD & games. It may be so that 2D games get their own Scene class some
+  day? And anyways, geom module has had not much to do with 3D graphics ever
+  since implementing Wavefront loader.
+
+- Maybe some offline tools for processing images, meshes and materials?
+
+- Do some debugging aids: Seeing matrices etc.
+
+- Blender file (archive) loading
+
+-------------------------------------------------------------------------------
+
+SHADERS: Shaders are so central part that they reserve their own section
+here. Shader is connected to at least objects, materials and scenes, so these
+issues have their relations to other sections in this TODO document.
+
+- I could make a block containing OpenGL settings (depth test on/off etc),
+  apply it on shader change and put apply() as private method. This way
+  you could tweak shader parameters at game side.
+
+- Also, now e.g. projection matrix is written for each object, but in
+  reality there is only need to write it again if camera perspective
+  changes. As user may want to change camera without warning, a nice
+  compromise would be writing things like these at the start of rendering
+  phase. Secondly, we need ModelView matrix, so at the moment it is
+  probably simpler just to send camera to instance rendering.
+
+- I should go to version 130 with shaders. For creating compatible shader
+  banks, it is mandatory to ensure that attributes are at the same location.
+  Otherwise, loaded VBOs do not work.
+
+- We could accept reading/writing inexisting uniforms in some cases, that is,
+  store -1 to namecache. Certain uniforms are optional as their nature, it
+  would not hurt if they do not exist in shader. This might not be a good idea
+  in general - I want to catch errors early, and this could hide them, causing
+  lots of time wasted in debugging.
+
+- Half-done: Improve introspection: dumping uniforms etc at compilation module, to
+  help improving & debugging shaders.
+
+- Design "multi-shader" shader: A shader that has several compiled shader
+  programs, that can share the same instances.
+
+- Multi-shader layers & scenes... Or should it be implemented with
+  'multi-shader shader'?
+
+- Some sort of batch processing with shaders? See:
+
+	* http://www.gamedev.net/page/resources/_/technical/opengl/opengl-batch-rendering-r3900
+
+-------------------------------------------------------------------------------
+
+OPTIMIZATIONS: While optimizations are not that important, here is some list
+of optimizing features I might consider for implementing. For that purpose,
+keep these in mind so that architecture does not prevent implementing these:
+
+- Organize triangles to strips, study primitive restart:
+
+	* glEnable(GL_PRIMITIVE_RESTART)​
+	* glPrimitiveRestartIndex(65535)​
+	* https://www.opengl.org/wiki/Vertex_Rendering#Primitive_Restart
+
+- Sorting drawing so that the same vertice is preferably used in consecutive
+  calls, to improve GPU cache performance.
+
+- Think if it is possible automatically pad things:
+
+	"Padding is added to make the vertex structure a multiple of 32 bytes
+	 since some GPUs prefer it that way, such as ATI/AMD."
+
+	https://www.opengl.org/wiki/Client-Side_Vertex_Arrays
+
+-------------------------------------------------------------------------------
+
+3D OBJECTS:
+
+- Transparent objects: Drawn back-to-front
+
+- Points & lines: (1) in meshes, separate points, lines and triangles
+  (different IBOs for each; combine somehow with material groups). Think
+  a system to tell point size (glPointSize), and finally, we might have
+  particle engine...
+
+- Multiple mesh-material pairs in same object: Maybe with vertex groups?
+  Adding IBO-Material pairs to VAOs? No need for separate IBOs, just start
+  index for each batch.
+
+- Wavefront loader: smoothed normals
+
+- Wavefront loader & mesh-material pairs: Wavefront file format has
+  groups (s[moothing group], g[group), which could be used to load
+  mesh-material pairs, so that they can use same VBOs. Between each
+  batch, we change IBO and material.
+
+- Winding: In case that winding is incorrect when loading a model, we
+  could have methods in Mesh class to try to fix it. At least, this
+  would be better than changing winding parameter (CW / CCW) when
+  rendering.
+
+- Ways to extend Mesh class. Some way to attach more vertex data to
+  Mesh so that Shader understands it, for example, skeleton.
+
+- Reconsider rotation, it's very unintuitive at the moment. Currently you
+  need to make parent hierarchies to keep rotations in order...
+  
+- Scaling is not working, mainly because it would need updating of
+  bounding sphere.
+
+- Half-done: Objects without mesh & mat... Static objects... "Bones" are
+  now objects without shape. So, missing static bone (hierarchy)...
+
+- Half-done: Redesign instances: "immovable" instances having only Model
+  matrix, movable instances with pos & rot, etc. Now we have Bone, need
+  just static bone hierarchies...
+
+- LOD, Level of Detail: like textures have mipmaps, 3D objects could also have
+  representations in various details. Including materials. And shaders? No
+  need for high-quality shading for low-detail objects.
+
+- Billboards and imposters
+
+- Instanced rendering: Layers with single mesh type for OpenGL instanced
+  rendering? Probably no, it is probably better idea to have "instanced
+  instance", instance with single shape and multiple positions. But well...
+  Maybe a particle layer is not a bad idea? Need thinking...
+  
+- Where instanced rendering would perform best? If there is multiples of same
+  mesh near each other, then we could take the advantage of both worlds:
+  having efficient CPU-side prunings, AND instanced rendering. For example,
+  branches and leaves in a tree.
+
+- Investigate using of GL_ARB_vertex_attrib_binding functions to bind
+  buffers and attributes, instead of glVertexAttribPointer.
+
+-------------------------------------------------------------------------------
+
+TEXTBOX, PARTICLE & SPRITE ENGINE: It might be nice to have specialized
+classes to blit lots of things into 2D/3D space.
+
+- The way TextBox is implemented prevents us to implement shaders as
+  instance batch processors. We may reconsider that implementation.
+
+  * In fact, currently TextBox is more like special "Layer", not instance
+  
+  * I feel that the way TextBox works might be suitable for e.g. particle
+    engines. So, instead of changing the TextBox implementation, we might
+    improve architecture to deal with these kinds of things.
+
+- Particle engine can (most probably) have only 1 texture. So, the solution
+  is to create sprite sheets?
+  
+- Anyways, there are probably at least three different sprite engines:
+
+  1) Lowest performance engine works like current TextBox: We could add
+     depth things there, so that you could draw text background *after*
+     printing the text. Or can we? It will be tricky...
+
+  2) Highest performance engine is "regular" particle engine.
+
+- We might want to separate static and dynamic sprite engines: backgrounds,
+  starfields and such would be rendered by static engine, moving sprites
+  by dynamic engine.
+
+-------------------------------------------------------------------------------
+
+ANIMATION:
+
+- Animation
+
+- EasingCurve: http://qt-project.org/doc/qt-4.8/qeasingcurve.html
+
+- Blender: http://wiki.blender.org/index.php/Doc:2.6/Manual/Animation
+
+-------------------------------------------------------------------------------
+
+LIGHTS, MATERIALS: Lights and materials are fragment shader inputs. It would be
+good that these are generic (but simple enough) to support different kinds of
+shaders.
+
+- Design light management... Shaders will always possess limitations to how
+  many lights they can handle per object
+
+- Shadows
+
+- Study other shading models
+
+- Half-done: Design some sort of mechanism for some uniform material parameters,
+  so that you can change shading model and still have somewhat similar results
+
+-------------------------------------------------------------------------------
+
+CAMERA:
+
+- Viewport settings to camera
+
+-------------------------------------------------------------------------------
+
+SCENES, LAYERS:
+
+- Some simple file format to create scenes (placing objects, creating
+  object hierarchies, ...) could be useful. POVRay may be too complex.
+  Something that can be used together with .obj & .mtl files... Of
+  course, we need support to other mesh data formats, too, but .obj is
+  quite common & useful anyways.
+
+- Probably it is better to classify objects at Layer/Scene level already...
+  Keeping objects in one single list helps lookups, but (1) I assume that
+  they are more rare operations than rendering calls, and (2) that can
+  be simulated anyways (lookup looks from all lists).
+  
+  * Look at Cylinderium: it has 2 interleaved scenes, one for mother ship,
+    one for star field. We might consider generalizing something similar?
+
+- Because of this, it might make some sense to bind lights, visibility
+  checks and such to camera. The same information could then be used
+  by all scene layers. Need thinking...
+
+- Fog
+
+- Occlusion queries?
+
+	* https://www.opengl.org/wiki/Query_Object#Occlusion_queries
+
+-------------------------------------------------------------------------------
+
+BITMAPS:
+
+- Some sort of "tile toolkit" to create tiles
+
+- Also, some sort of normal map toolkit to create normal maps
+
+-------------------------------------------------------------------------------
+
+TEXTURES:
+
+- Texture mipmaps: In 3D scenes, this could make them prettier.
+
+- Texture update
+
+-------------------------------------------------------------------------------
+
+FONTS:
+
+- For some reason, rendered text at plain alpha channel does not work. Investigate
+
+- Bitmap sheet loading need to be generalized, needed for both text and (at least 2D)
+  game objects 
+
+- At some point, we need to modify text to support UTF-8 (for moe3d)
+
+- Investigate possible alternative solutions for rendering (HUD) text. Maybe rendering
+  at CPU, and using subtextures?
+  
+- Also, we could use GPU to scale letters, no need to create font for all sizes. Check
+  the result.
+
+- Also, current system is made for HUD (screen coordinates), design a way to use it
+  for 3D objects
+
+-------------------------------------------------------------------------------
+
+SOUNDS:
+
+- Think a little bit about them...
+
+-------------------------------------------------------------------------------
+
+ARCHITECTURE:
+
+- Shaders and layers... VAOs, VBOs and such, they are sort of bind to shader.
+  At some point, we might need to ensure that shader can't be switched after
+  meshes in layer are bind to certain shader. Or something like that.
+
+-------------------------------------------------------------------------------
+
+LOW PRIORITY:
+
+- Display lists are still useful??? Find it out.
+
+- Study Manhattan distance to be used as quick way to filter nearby elements
+

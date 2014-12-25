@@ -1,0 +1,100 @@
+*******************************************************************************
+
+*******************************************************************************
+
+-------------------------------------------------------------------------------
+
+Version something:
+
+- Done: Reducing vertex data size to improve GPU cache performance: Normals and
+  UV coordinates could have smaller input precision:
+  
+  	* https://www.opengl.org/wiki/Vertex_Specification_Best_Practices#Attribute_sizes
+
+- Done: Vertex data compression. There are bugs to fix, thought.
+
+- Done: We now compute frustum planes every time, but it is only necessary
+  when changing camera projection... Now Frustum (planes) are cached.
+
+- Done: It might be good to separate exotic data formats needed in VBOs to
+  their own source file.
+
+- Done: Stupid user error, didn't change the field type at 2D shader side.
+  (unsigned short does not work as UV coordinates. Colormaps on 3D models
+  work without problem, but not on 2D objects (e.g. text and pacman).
+  Investigate the problem. It is also true, that UV coordinates can be
+  larger (absolute value) than 1.0, so it could be better to look for
+  half floats.)
+
+- Done: UV coordinates are sent as half floats
+
+- Done: attrib function needs a mechanism to automatically choose correct attribute
+  binding based on the Mesh.VERTEX types, just like uniforms work. Current
+  implementation is a bit clumpsy, but it works.
+
+- Done: "static if" now forces vertex data to be 32 bytes. It would be nice to
+  have automatic padding, but even this is a step forward to improve GPU cache
+  performance.
+
+-------------------------------------------------------------------------------
+
+Version something:
+
+- Done: (GL) VAOs not working, maybe because of OpenGL version? No, it was
+  just some missing code in certain positions.
+
+- Done: Implement interleaved vertex attribute arrays. Interleaved data is
+  definitely the easiest one from programming side, I just didnt know how
+  to implement it when started developing the engine.
+
+- Postponed: Joystick support; don't forget feedback. Sadly, my game controller
+  has no force feedback.
+
+- Done: Normal mapping
+
+-------------------------------------------------------------------------------
+
+Version something:
+
+- Done: Wavefront obj files: Compute (face) normals, if they are missing
+
+- Done: Shape class: We need Layer.Instance 'stencils', or color & texture
+  in Mesh: most of time, at least texture is strictly bound to mesh, and will
+  not work at other meshes.
+
+- Done: Basic CPU-side bitmap manipulation
+
+- Done: Object hierarchies: parenting cameras and lights to 3D space, very
+  much needed feature. Somewhat done...
+
+- Done: Currently, parent objects need not to be in draw lists. How about
+  naming them bones?
+
+- Done: Now matrix transform hierarchies are encapsulated under Bone
+  class. It can be parented, and it is not part of Scene drawing lists.
+  This may cause some problems to clean up "bones" when deleting
+  3D objcts?
+
+-------------------------------------------------------------------------------
+
+Version something:
+
+- Done: Fiber cleaning... Fiber list is now a class. Going out of scope
+  destroys it.
+
+- Done: Get rid of game.start() - now e.g. performance timers are created
+  automatically if they are requested.
+
+- Done: Fonts (TTF font loading & rendering)
+
+- Done: Frustum culling using bounding spheres.
+
+- Done: With Fibers, at least. Some sort of mechanism to create 'temporal'
+  objects to layer: for example, explosions and such, which have known & limited
+  life time.
+  
+- Done: Textures from sheet images
+
+- Done: When creating Layer instances, pass them to shader to prepare them (filling
+  missing values with reasonable defaults)
+
