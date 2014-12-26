@@ -1,0 +1,4 @@
+Game rendering
+
+This directory contains modules for rendering the game using OpenGL.
+

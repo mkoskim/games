@@ -41,19 +41,22 @@ static this()
     DerelictSDL2ttf.load();
     DerelictGL3.load();
 
+    //-------------------------------------------------------------------------
+
     SDL_Init(0);
-	int img_formats = IMG_INIT_PNG;
-	if(IMG_Init(img_formats) != img_formats)
-	{
-		throw new Exception(format("IMG_Init: %s", to!string(IMG_GetError())));
-	}
+
+    int img_formats = IMG_INIT_PNG;
+    if(IMG_Init(img_formats) != img_formats) {
+        throw new Exception(format("IMG_Init: %s", to!string(IMG_GetError())));
+    }
+
     TTF_Init();
 }
 
 static ~this()
 {
-	TTF_Quit();
-	IMG_Quit();
+    TTF_Quit();
+    IMG_Quit();
     SDL_Quit();
 }
 

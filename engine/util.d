@@ -6,6 +6,8 @@
 
 module engine.util;
 
+//-----------------------------------------------------------------------------
+
 public import derelict.sdl2.sdl;
 public import derelict.opengl3.gl3;
 public import gl3n.linalg;
@@ -14,22 +16,22 @@ public import std.stdio: writeln, writefln, write, writef;
 public import std.string: format;
 public import std.conv: to;
 
-public import std.math: fabs;
+public import std.math: abs;
 
 //-----------------------------------------------------------------------------
 
-void TODO(string msg = null, string file = __FILE__, int line = __LINE__, string func = __FUNCTION__)
-{
+void TODO(string msg = null,
+	string file = __FILE__,
+	int line = __LINE__,
+	string func = __FUNCTION__
+) {
 	//return;
 	//throw new Exception("Not done yet.");
-	if(msg)
-	{
-		writefln("TODO: %s (%s)", msg, func);
-	}
-	else
-	{
-		writefln("TODO: %s", func);
-	}
+    if(msg) {
+        writefln("TODO: %s (%s)", msg, func);
+    } else {
+        writefln("TODO: %s", func);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -39,11 +41,9 @@ void TODO(string msg = null, string file = __FILE__, int line = __LINE__, string
 //
 //-----------------------------------------------------------------------------
 
-import std.math: abs;
-
 float manhattan(vec3 a, vec3 b)
 {
-	return abs(b.x-a.x) + abs(b.y-a.y) + abs(b.z-a.z);
+    return abs(b.x-a.x) + abs(b.y-a.y) + abs(b.z-a.z);
 }
 
 //-----------------------------------------------------------------------------
@@ -54,30 +54,34 @@ float manhattan(vec3 a, vec3 b)
 
 class SlidingAverage
 {
-	float average = 0;
+    float average = 0;
 
-	void update(float value)
-	{
-		const float window = 10.0;
-		average += (value - average) / window;
-	}
+    void update(float value)
+    {
+	    const float window = 10.0;
+	    average += (value - average) / window;
+    }
 }
 
 //-----------------------------------------------------------------------------
-
-import std.conv : to;
+//
+// function to simplify getting SDL attributes. Example:
+//
+//      writeln(_sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION));
+//
+//-----------------------------------------------------------------------------
 
 int _sdlattr(alias func)(int arg)
 {
-	int result;
-	func(arg, &result);
-	return result;
+    int result;
+    func(arg, &result);
+    return result;
 }
 
 string _sdlattr2str(alias func, string arg)()
 {
-	int result;
-	func(mixin(arg), &result);
-	return arg ~ " = " ~ to!string(result);
+    int result;
+    func(mixin(arg), &result);
+    return arg ~ " = " ~ to!string(result);
 }
 

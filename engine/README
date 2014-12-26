@@ -1,0 +1,42 @@
+Game engine root directory
+
+Directories:
+
+engine/blob/
+
+    BLOB management. BLOB is a zip file baked with the executable to contain
+    data files the game needs. This directory contains different loaders to
+    get data from BLOB to the game.
+    
+engine/build/
+
+    Build scripts and templates.
+
+engine/doc/
+
+    Various documents (e.g. TODO, CHANGELOG)
+    
+engine/experimental/
+
+    Possible experimental code.
+    
+engine/ext/
+
+    Different "extras" that are not part of the core functionality. For
+    example, this directory contains CPU side bitmap manipulation, geometry
+    creation, text rendering and such.
+
+engine/game/
+
+    Modules to implement game logic. This directory contains e.g. input event
+    handling, general initialization (opening window, loading libraries), and
+    Fiber class for concurrency.
+
+engine/render/
+
+    Modules to implement frame rendering.
+
+engine/stock/
+
+    Various stock items, like fonts, bitmaps, ...
+

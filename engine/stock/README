@@ -1,14 +1,17 @@
 
 
-                             SOURCES FOR STOCK ITEMS
-                             -----------------------
+                             STOCK ITEMS
+                             -----------
 
 
----
+This directory tree contains some stock items possibly useful for games. Most
+importantly, it contains the default font used by text rendering functions, if
+font is not explicitly specified. Second, it contains some basic geometric
+shapes for 2D/3D graphics.
+
+Here are some locations where stock items were loaded:
 
 http://www.tutorialsforblender3d.com/
 
-	AlternatingBrick.zip
-
----
+    Various tiles with normal maps
 

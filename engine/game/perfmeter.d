@@ -15,11 +15,11 @@ import engine.util;
 
 class PerfMeter : SlidingAverage
 {
-	private int ticks;
+    private int ticks;
 
-	void start()   { ticks = SDL_GetTicks(); }
-	void stop()    { super.update(SDL_GetTicks() - ticks); }
-	void restart() { stop(); start(); }
+    void start()   { ticks = SDL_GetTicks(); }
+    void stop()    { super.update(SDL_GetTicks() - ticks); }
+    void restart() { stop(); start(); }
 }
 
 //-----------------------------------------------------------------------------

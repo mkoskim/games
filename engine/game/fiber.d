@@ -16,47 +16,49 @@ import std.algorithm: remove, SwapStrategy;
 
 class Fiber : CoreFiber
 {
-	this(void delegate() dg) { super(dg); }
-	this() { this(&run); }
-	
-	this(FiberQueue queue) {
-		this();
-		queue.add(this);
-	}
-	
-	this(FiberQueue queue, void delegate() dg) {
-		this(dg);
-		queue.add(this);
-	}
+    this(void delegate() dg) { super(dg); }
+    this() { this(&run); }
 
-	void nextframe() { yield(); }
+    this(FiberQueue queue) {
+        this();
+        queue.add(this);
+    }
 
-	void run() { }
+    this(FiberQueue queue, void delegate() dg) {
+        this(dg);
+        queue.add(this);
+    }
+
+    void nextframe() { yield(); }
+
+    void run() { }
 }
 
 //-----------------------------------------------------------------------------
 
 class FiberQueue
 {
-	private bool callbacks[void delegate()];	
-	private Fiber queue[];
+    private bool callbacks[void delegate()];	
+    private Fiber queue[];
 
-	void add(Fiber f) { queue ~= f;	}
-	void add(void delegate() f) { queue ~= new Fiber(f); }
+    void add(Fiber f) { queue ~= f;	}
+    void add(void delegate() f) { queue ~= new Fiber(f); }
+
+    void addcallback(void delegate() f) { callbacks[f] = true; }
+    void removecallback(void delegate() f) { callbacks.remove(f); }
 	
-	void addcallback(void delegate() f) { callbacks[f] = true; }
-	void removecallback(void delegate() f) { callbacks.remove(f); }
-	
-	void update()
-	{
-		foreach(callback; callbacks.keys) callback();
+    void update()
+    {
+        foreach(callback; callbacks.keys) callback();
 
-		if(queue.length)
-		{
-			foreach(f; queue) f.call();
+        if(queue.length) {
+            foreach(f; queue) f.call();
 
-			queue = queue.remove!(f => f.state == Fiber.State.TERM, SwapStrategy.unstable);
-		}
-	}
+            queue = queue.remove!(
+                f => f.state == Fiber.State.TERM,
+                SwapStrategy.unstable
+            );
+        }
+    }
 }
 

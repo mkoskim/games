@@ -72,6 +72,18 @@ HOTTISH TOPICS:
 
 -------------------------------------------------------------------------------
 
+"USER-FRIENDLINESS": Some planned efforts to make code more "user-friendly":
+
+- I should go through code and correct intendation
+
+- It would be nice to add D doc comments, at least test it. Finally, it would
+  be nice if I could make it to compile with dub, and use dub registry.
+
+- Make game controller optional, at least for games that does not need them
+  that much (i.e. have also keyboard control)
+
+-------------------------------------------------------------------------------
+
 GENERAL:
 
 - At some point, there's a need to check that destructors are called at
