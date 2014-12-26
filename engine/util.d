@@ -21,12 +21,12 @@ public import std.math: abs;
 //-----------------------------------------------------------------------------
 
 void TODO(string msg = null,
-	string file = __FILE__,
-	int line = __LINE__,
-	string func = __FUNCTION__
+    string file = __FILE__,
+    int line = __LINE__,
+    string func = __FUNCTION__
 ) {
-	//return;
-	//throw new Exception("Not done yet.");
+    //return;
+    //throw new Exception("Not done yet.");
     if(msg) {
         writefln("TODO: %s (%s)", msg, func);
     } else {
@@ -58,8 +58,8 @@ class SlidingAverage
 
     void update(float value)
     {
-	    const float window = 10.0;
-	    average += (value - average) / window;
+        const float window = 10.0;
+        average += (value - average) / window;
     }
 }
 

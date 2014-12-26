@@ -1,6 +1,32 @@
-Game engine root directory
 
-Directories:
+
+                                GAME ENGINE
+                                -----------
+
+MAIN PURPOSE: Studying, learning, game prototyping & demonstrating,
+experimenting.
+
+-------------------------------------------------------------------------------
+
+FEATURES: Current main features:
+
+- Embedded zip archive (blob) for baking game data to executable
+
+- TTF fonts and bitmaps
+
+- Wavefront .obj loading
+
+- Texture and normal maps
+
+- Bounding sphere calculation from mesh data
+
+- Frustum culling using bounding spheres
+
+- VAOs (Vertex Array Objects), VBOs, interleaved vertex data
+
+-------------------------------------------------------------------------------
+
+DIRECTORIES:
 
 engine/blob/
 

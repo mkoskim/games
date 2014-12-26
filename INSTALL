@@ -5,8 +5,8 @@ First things you need are:
 
 1) dmd D compiler: This is easy to install to both Linux and Windows, and
 you can get it here:
-  
-  	http://dlang.org/download.html
+
+    http://dlang.org/download.html
 
 2) System side libraries: Linux users may find these from their distribution's
    repository, if not, you can install them from sources.
@@ -45,7 +45,7 @@ you can get it here:
    * GCC
    * GNU make
 
-Sadly for Windows users, current build system utilizes common Linux side
+Sadly to Windows users, current build system utilizes common Linux side
 building tools. GCC C compiler is needed to convert BLOB.zip file to
 linkable object file. I will later investigate if DMD inline assembler can
 do the job.

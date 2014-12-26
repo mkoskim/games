@@ -9,8 +9,8 @@ module engine.blob.extract;
 //-----------------------------------------------------------------------------
 
 private extern(C) {
-	extern __gshared ubyte __BLOB_zip;
-	extern __gshared uint  __BLOB_zip_size;
+    extern __gshared ubyte __BLOB_zip;
+    extern __gshared uint  __BLOB_zip_size;
 }
 
 //-----------------------------------------------------------------------------

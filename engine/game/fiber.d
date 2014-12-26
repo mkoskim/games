@@ -46,7 +46,7 @@ class FiberQueue
 
     void addcallback(void delegate() f) { callbacks[f] = true; }
     void removecallback(void delegate() f) { callbacks.remove(f); }
-	
+
     void update()
     {
         foreach(callback; callbacks.keys) callback();

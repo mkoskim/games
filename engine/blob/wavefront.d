@@ -30,7 +30,7 @@ private struct VERTEX {
 
         foreach(i, index; indices) if(!index.length) indices[i] = "0";
 
-        v_ind = to!uint(indices[0]);		
+        v_ind = to!uint(indices[0]);
         vt_ind = (indices.length > 1) ? to!uint(indices[1]) : 0;
         vn_ind = (indices.length > 2) ? to!uint(indices[2]) : 0;
     }
@@ -71,11 +71,11 @@ Mesh loadmesh(string filename)
     // Information extracted from OBJ file
     //-------------------------------------------------------------------------
 
-    vec3[] v;	// Vertices
-    vec2[] vt;	// UV (texture) coords
-    vec3[] vn;	// Vertex normals
+    vec3[] v;       // Vertices
+    vec2[] vt;      // UV (texture) coords
+    vec3[] vn;      // Vertex normals
 
-    TRIANGLE[] f;	// Faces
+    TRIANGLE[] f;   // Faces
 
     bool smoothing = false;
 
@@ -110,17 +110,26 @@ Mesh loadmesh(string filename)
 
             // Vertex data (position, UV, normal)
 
-            case "v": v ~= vec3(to!float(args[1]), to!float(args[2]), to!float(args[3])); break;
-            case "vt": vt ~= vec2(to!float(args[1]), to!float(args[2])); break;
-            case "vn":
-                vn ~= vec3(to!float(args[1]), to!float(args[2]), to!float(args[3])).normalized();
-                break;
+            case "v": v ~= vec3(
+                to!float(args[1]),
+                to!float(args[2]),
+                to!float(args[3])
+            ); break;
+            case "vt": vt ~= vec2(
+                to!float(args[1]),
+                to!float(args[2])
+            ); break;
+            case "vn": vn ~= vec3(
+                to!float(args[1]),
+                to!float(args[2]),
+                to!float(args[3])
+            ).normalized(); break;
 
             // Triangularize faces (assume polygon is convex)
 
             case "f":
                 foreach(i; 3 .. args.length) {
-	                f ~= TRIANGLE(args[1], args[i-1], args[i]);
+                    f ~= TRIANGLE(args[1], args[i-1], args[i]);
                 }
                 break;
 
@@ -136,7 +145,7 @@ Mesh loadmesh(string filename)
             case "o":
             case "mtllib":
             case "usemtl": break;
-        }		
+        }
     }
 
     /*
@@ -169,9 +178,9 @@ Mesh loadmesh(string filename)
 
         vn ~= a.cross(b).normalized();
 
-	    foreach(j, vertex; face.vertices) {
+        foreach(j, vertex; face.vertices) {
             if(!vertex.vn_ind) f[i].vertices[j].vn_ind = cast(uint)vn.length;
-	    }
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -193,9 +202,9 @@ Mesh loadmesh(string filename)
         if(!(key in indices))
         {
             indices[key] = mesh.addvertex(
-                v[vertex.v_ind - 1],	// Position
-                vt[vertex.vt_ind - 1],	// Texture (UV) coordinates
-                vn[vertex.vn_ind - 1],	// Vertex normal
+                v[vertex.v_ind - 1],    // Position
+                vt[vertex.vt_ind - 1],  // Texture (UV) coordinates
+                vn[vertex.vn_ind - 1],  // Vertex normal
             );
         }
         return indices[key];

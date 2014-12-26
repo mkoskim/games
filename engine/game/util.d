@@ -17,7 +17,7 @@ void quit()
     import core.runtime: Runtime;
     import std.c.stdlib: exit;
 
-    Runtime.terminate();	// Execute destructors, and...
-    exit(0);				// ...exit
+    Runtime.terminate();    // Execute destructors, and...
+    exit(0);                // ...exit
 }
 

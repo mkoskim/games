@@ -31,8 +31,8 @@ struct JOY
     //-------------------------------------------------------------------------
 
     enum AXIS : uint {
-        LX = 0, LY, LT,		// Left X & Y, and left trigger
-        RX = 3, RY, RT		// Right X & Y, and right trigger
+        LX = 0, LY, LT,     // Left X & Y, and left trigger
+        RX = 3, RY, RT      // Right X & Y, and right trigger
     }
 
     //-------------------------------------------------------------------------
@@ -52,13 +52,13 @@ struct JOY
         // and right/down. Keep the order the same as the order of axes.
         //---------------------------------------------------------------------
 
-        LS_LEFT, LS_RIGHT,		// Left stick X
-        LS_UP, LS_DOWN,			// Left stick Y
-        LT_FREE, LT,			// Left trigger
+        LS_LEFT, LS_RIGHT,      // Left stick X
+        LS_UP, LS_DOWN,         // Left stick Y
+        LT_FREE, LT,            // Left trigger
 
-        RS_LEFT, RS_RIGHT,		// Right stick X
-        RS_UP, RS_DOWN,			// Right stick Y
-        RT_FREE, RT,			// Right trigger
+        RS_LEFT, RS_RIGHT,      // Right stick X
+        RS_UP, RS_DOWN,         // Right stick Y
+        RT_FREE, RT,            // Right trigger
 
         //---------------------------------------------------------------------
         // Emulated "hat buttons": Each hat has four virtual buttons: left,
@@ -70,7 +70,7 @@ struct JOY
         DPAD_UP, DPAD_DOWN,
     }
 }
-	
+
 //-----------------------------------------------------------------------------
 // Game controller class
 //-----------------------------------------------------------------------------
@@ -99,154 +99,154 @@ class Joystick
 
     protected void update(SDL_Event *event)
     {
-	    void emulate(ubyte btn, uint type)
-	    {
-		    SDL_Event ev;
-		    ev.type = type;
-		    ev.jbutton.button = btn;
-		    ev.jbutton.state = (type == SDL_JOYBUTTONDOWN) ? 1 : 0;
-		    SDL_PushEvent(&ev);
-	    }
+        void emulate(ubyte btn, uint type)
+        {
+            SDL_Event ev;
+            ev.type = type;
+            ev.jbutton.button = btn;
+            ev.jbutton.state = (type == SDL_JOYBUTTONDOWN) ? 1 : 0;
+            SDL_PushEvent(&ev);
+        }
 
-	    switch(event.type)
-	    {
-		    default: break;
+        switch(event.type)
+        {
+            default: break;
 
-		    //-----------------------------------------------------------------
-		    // Update button status
-		    //-----------------------------------------------------------------
-		
-		    case SDL_JOYBUTTONDOWN:
-		    case SDL_JOYBUTTONUP:
-			    buttons[event.jbutton.button] = event.jbutton.state;
-			    break;
+            //-----------------------------------------------------------------
+            // Update button status
+            //-----------------------------------------------------------------
 
-		    //-----------------------------------------------------------------
-		    // Analog triggers/sticks. Scale axis value between -1 ... 1,
-		    // and emulate two buttons (at positive and negative ends),
-		    // with hysteresis.
-		    //-----------------------------------------------------------------
-		
-		    case SDL_JOYAXISMOTION: {
-			    float value = (event.jaxis.value + 0.5) / 32768.0;
-			    if(abs(value) < AXIS_TRESHOLD) value = 0.0;
-			    axes[event.jaxis.axis] = value;
-			
-			    //-------------------------------------------------------------
-			    // Emulated button at negative range
-			    //-------------------------------------------------------------
-			
-			    ubyte btn = cast(ubyte)(AXISBTN_FIRST + event.jaxis.axis*2);
+            case SDL_JOYBUTTONDOWN:
+            case SDL_JOYBUTTONUP:
+                buttons[event.jbutton.button] = event.jbutton.state;
+                break;
 
-			    if(!buttons[btn] && value < -0.66) {
-				    emulate(btn, SDL_JOYBUTTONDOWN);
-			    }
-			    else if(buttons[btn] && value > -0.33) {
-				    emulate(btn, SDL_JOYBUTTONUP);
-			    }
-					
-			    //-------------------------------------------------------------
-			    // Emulated button at positive range
-			    //-------------------------------------------------------------
-			
-			    btn = cast(ubyte)(AXISBTN_FIRST + event.jaxis.axis*2 + 1);
-			    if(!buttons[btn] && value > 0.66) {
-				    emulate(btn, SDL_JOYBUTTONDOWN);
-			    }
-			    else if(buttons[btn] && value < 0.33) {
-				    emulate(btn, SDL_JOYBUTTONUP);
-			    }				
-		    }
-		    break;
-		
-		    //-----------------------------------------------------------------
-		    // Hats (digital directional pads)
-		    //-----------------------------------------------------------------
+            //-----------------------------------------------------------------
+            // Analog triggers/sticks. Scale axis value between -1 ... 1,
+            // and emulate two buttons (at positive and negative ends),
+            // with hysteresis.
+            //-----------------------------------------------------------------
 
-		    case SDL_JOYHATMOTION:
-		    {
-			    static ubyte[] masks = [
-				    SDL_HAT_LEFT,
-				    SDL_HAT_RIGHT,
-				    SDL_HAT_UP,
-				    SDL_HAT_DOWN,
-			    ];
-			
-			    ubyte prev = hats[event.jhat.hat];
-			    ubyte current = event.jhat.value;
+            case SDL_JOYAXISMOTION: {
+                float value = (event.jaxis.value + 0.5) / 32768.0;
+                if(abs(value) < AXIS_TRESHOLD) value = 0.0;
+                axes[event.jaxis.axis] = value;
 
-			    ubyte rising  =  current & ~prev;
-			    ubyte falling = ~current &  prev;
-			
-			    ubyte btn = cast(ubyte)(HATBTN_FIRST + event.jhat.hat*4);
+                //-------------------------------------------------------------
+                // Emulated button at negative range
+                //-------------------------------------------------------------
 
-			    foreach(i, mask; masks)
-			    {
-				    if(rising & mask)
-					    emulate(cast(ubyte)(btn + i), SDL_JOYBUTTONDOWN);
-				    else if(falling & mask)
-					    emulate(cast(ubyte)(btn + i), SDL_JOYBUTTONUP);
-			    }
-			
-			    hats[event.jhat.hat] = current;
-		    }
-		    break;
+                ubyte btn = cast(ubyte)(AXISBTN_FIRST + event.jaxis.axis*2);
 
-		    //-----------------------------------------------------------------
-		    // Trackballs (not yet implemented)
-		    //-----------------------------------------------------------------
+                if(!buttons[btn] && value < -0.66) {
+                    emulate(btn, SDL_JOYBUTTONDOWN);
+                }
+                else if(buttons[btn] && value > -0.33) {
+                    emulate(btn, SDL_JOYBUTTONUP);
+                }
 
-		    case SDL_JOYBALLMOTION:
-			    break;
-	    }
+                //-------------------------------------------------------------
+                // Emulated button at positive range
+                //-------------------------------------------------------------
+
+                btn = cast(ubyte)(AXISBTN_FIRST + event.jaxis.axis*2 + 1);
+                if(!buttons[btn] && value > 0.66) {
+                    emulate(btn, SDL_JOYBUTTONDOWN);
+                }
+                else if(buttons[btn] && value < 0.33) {
+                    emulate(btn, SDL_JOYBUTTONUP);
+                }
+            }
+            break;
+
+            //-----------------------------------------------------------------
+            // Hats (digital directional pads)
+            //-----------------------------------------------------------------
+
+            case SDL_JOYHATMOTION:
+            {
+                static ubyte[] masks = [
+                    SDL_HAT_LEFT,
+                    SDL_HAT_RIGHT,
+                    SDL_HAT_UP,
+                    SDL_HAT_DOWN,
+                ];
+
+                ubyte prev = hats[event.jhat.hat];
+                ubyte current = event.jhat.value;
+
+                ubyte rising  =  current & ~prev;
+                ubyte falling = ~current &  prev;
+
+                ubyte btn = cast(ubyte)(HATBTN_FIRST + event.jhat.hat*4);
+
+                foreach(i, mask; masks)
+                {
+                    if(rising & mask)
+                        emulate(cast(ubyte)(btn + i), SDL_JOYBUTTONDOWN);
+                    else if(falling & mask)
+                        emulate(cast(ubyte)(btn + i), SDL_JOYBUTTONUP);
+                }
+
+                hats[event.jhat.hat] = current;
+            }
+            break;
+
+            //-----------------------------------------------------------------
+            // Trackballs (not yet implemented)
+            //-----------------------------------------------------------------
+
+            case SDL_JOYBALLMOTION:
+                break;
+        }
     }
 
     //-------------------------------------------------------------------------
 
-    private SDL_Joystick *stick;	// SDL Joystick
-    private SDL_Haptic *ffb;		// SDL Force Feedback
+    private SDL_Joystick *stick;    // SDL Joystick
+    private SDL_Haptic *ffb;        // SDL Force Feedback
 
     private this(int num)
     {
-	    stick = SDL_JoystickOpen(num);
+        stick = SDL_JoystickOpen(num);
 
-	    if(SDL_JoystickIsHaptic(stick) == 1) {
-		    ffb = SDL_HapticOpenFromJoystick(stick);
-	    } else {
-		    ffb = null;
-	    }
+        if(SDL_JoystickIsHaptic(stick) == 1) {
+            ffb = SDL_HapticOpenFromJoystick(stick);
+        } else {
+            ffb = null;
+        }
 
-	    axes = new float[SDL_JoystickNumAxes(stick)];
-	    hats = new byte[SDL_JoystickNumHats(stick)];
+        axes = new float[SDL_JoystickNumAxes(stick)];
+        hats = new byte[SDL_JoystickNumHats(stick)];
 
-	    buttons = new byte[
-		    SDL_JoystickNumButtons(stick)	// Normal buttons
-		    + 2*axes.length					// Emulated axis buttons
-		    + 4*hats.length					// Emulated hat buttons
-	    ];
+        buttons = new byte[
+            SDL_JoystickNumButtons(stick)	// Normal buttons
+            + 2*axes.length					// Emulated axis buttons
+            + 4*hats.length					// Emulated hat buttons
+        ];
 
-	    AXISBTN_FIRST = SDL_JoystickNumButtons(stick);
-	    HATBTN_FIRST  = AXISBTN_FIRST + cast(uint)axes.length*2;
+        AXISBTN_FIRST = SDL_JoystickNumButtons(stick);
+        HATBTN_FIRST  = AXISBTN_FIRST + cast(uint)axes.length*2;
 
-	    SDL_JoystickUpdate(stick);
+        SDL_JoystickUpdate(stick);
 
-	    foreach(i; 0 .. axes.length)    axes[i] = SDL_JoystickGetAxis(stick, cast(int)i);
-	    foreach(i; 0 .. buttons.length) buttons[i] = SDL_JoystickGetButton(stick, cast(int)i);
-	    foreach(i; 0 .. hats.length)    hats[i] = SDL_JoystickGetHat(stick, cast(int)i);
+        foreach(i; 0 .. axes.length)    axes[i] = SDL_JoystickGetAxis(stick, cast(int)i);
+        foreach(i; 0 .. buttons.length) buttons[i] = SDL_JoystickGetButton(stick, cast(int)i);
+        foreach(i; 0 .. hats.length)    hats[i] = SDL_JoystickGetHat(stick, cast(int)i);
 
-	    SDL_JoystickEventState(SDL_ENABLE);
+        SDL_JoystickEventState(SDL_ENABLE);
 
-	    debug writefln("Joystick#%d: %s (haptic: %s)",
-		    num,
-		    to!string(SDL_JoystickName(stick)),
-		    ffb ? "yes" : "no"
-	    );
+        debug writefln("Joystick#%d: %s (haptic: %s)",
+            num,
+            to!string(SDL_JoystickName(stick)),
+            ffb ? "yes" : "no"
+        );
     }
 
     ~this()
     {
-	    SDL_JoystickClose(stick);
-	    SDL_HapticClose(ffb);
+        SDL_JoystickClose(stick);
+        SDL_HapticClose(ffb);
     }
 
     //-------------------------------------------------------------------------
@@ -258,7 +258,7 @@ class Joystick
         int num = SDL_NumJoysticks();
 
         foreach(i; 0 .. num) {
-	        joysticks ~= new Joystick(i);		
+            joysticks ~= new Joystick(i);		
         }
     }
 }
@@ -300,16 +300,16 @@ SDL_Event*[] getevents()
                 break;
 
             case SDL_KEYUP:
-            	keystatus[event.key.keysym.sym] = false;
-            	break;
+                keystatus[event.key.keysym.sym] = false;
+                break;
 
             case SDL_KEYDOWN:
-            	keystatus[event.key.keysym.sym] = true;
-            	if(event.key.keysym.sym == quitkey) goto case SDL_QUIT;
-            	break;
+                keystatus[event.key.keysym.sym] = true;
+                if(event.key.keysym.sym == quitkey) goto case SDL_QUIT;
+                break;
 
             case SDL_QUIT:
-            	quit();
+                quit();
         }
 
         eventbuf ~= event;

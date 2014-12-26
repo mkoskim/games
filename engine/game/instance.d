@@ -1,6 +1,7 @@
 //*****************************************************************************
 //
-// Game engine instance variables
+// Game engine instance variables. These can be used for example to query
+// window size.
 //
 //*****************************************************************************
 
