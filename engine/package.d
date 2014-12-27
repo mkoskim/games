@@ -50,6 +50,8 @@ static this()
         throw new Exception(format("IMG_Init: %s", to!string(IMG_GetError())));
     }
 
+    //-------------------------------------------------------------------------
+
     TTF_Init();
 }
 

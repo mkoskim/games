@@ -4,11 +4,11 @@
 
 struct MATERIAL
 {
-	vec4 color;
-	sampler2D colormap;
-	sampler2D normalmap;
+    vec4 color;
+    sampler2D colormap;
+    sampler2D normalmap;
 
-	float roughness;
+    float roughness;
 };
 
 //-----------------------------------------------------------------------------
@@ -17,9 +17,9 @@ struct MATERIAL
 
 struct LIGHT
 {
-	vec3  color;			// Light color
-	vec3  pos;				// Light position
-	float radius;			// Linear attenuation factor
-	float ambient;			// Ambient lightning factor
+    vec3  color;            // Light color
+    vec3  pos;              // Light position
+    float radius;           // Linear attenuation factor
+    float ambient;          // Ambient lightning factor
 };
 

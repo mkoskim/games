@@ -2,9 +2,9 @@
 //
 // Lightning calculations:
 //
-//		n = surface normal
-//		v = viewer direction
-//		l = light direction
+//      n = surface normal
+//      v = viewer direction
+//      l = light direction
 //
 //*****************************************************************************
 
@@ -22,7 +22,7 @@
 
 float Lambert_diffuse(vec3 n, vec3 v, vec3 l)
 {
-	return max(0, dot(n, l));
+    return max(0, dot(n, l));
 }
 
 //-----------------------------------------------------------------------------
@@ -31,32 +31,32 @@ float Lambert_diffuse(vec3 n, vec3 v, vec3 l)
 
 float OrenNayar_diffuse(vec3 n, vec3 v, vec3 l)
 {
-	float roughness = material.roughness;
-	const float PI = 3.141592653589;
+    float roughness = material.roughness;
+    const float PI = 3.141592653589;
 
-	float NdotL = dot(n, l);
-	float NdotV = dot(n, v);
+    float NdotL = dot(n, l);
+    float NdotV = dot(n, v);
 
-	float angleVN = acos(NdotV);
+    float angleVN = acos(NdotV);
     float angleLN = acos(NdotL);
     
     float alpha = max(angleVN, angleLN);
     float beta = min(angleVN, angleLN);
     float gamma = dot(v - n * dot(v, n), l - n * dot(l, n));
     
-	float roughness2 = roughness * roughness;
-    
+    float roughness2 = roughness * roughness;
+
     // calculate A and B
     float A = 1.0 - 0.5 * (roughness2 / (roughness2 + 0.57));
 
     float B = 0.45 * (roughness2 / (roughness2 + 0.09));
- 
+
     float C = sin(alpha) * tan(beta);
-    
+
     // put it all together
     float L1 = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
         
-	return max(0, L1);
+    return max(0, L1);
 }
 
 //-----------------------------------------------------------------------------
@@ -65,22 +65,22 @@ float OrenNayar_diffuse(vec3 n, vec3 v, vec3 l)
 
 float compute_Phong_f()
 {
-	float r = material.roughness;
-	return 5 + (1 - sqrt(r)) * 25;
+    float r = material.roughness;
+    return 5 + (1 - sqrt(r)) * 25;
 }
 
 float Phong_specular(vec3 n, vec3 v, vec3 l)
 {
-	vec3  r = normalize(reflect(-l, n));
-	float f = compute_Phong_f();
-	return pow(max(0, dot(r, v)), f);
+    vec3  r = normalize(reflect(-l, n));
+    float f = compute_Phong_f();
+    return pow(max(0, dot(r, v)), f);
 }
 
 float BlinnPhong_specular(vec3 n, vec3 v, vec3 l)
 {
-	vec3  h = normalize(l + v);
-	float f = compute_Phong_f();
-	return pow(max(0, dot(n, h)), f);
+    vec3  h = normalize(l + v);
+    float f = compute_Phong_f();
+    return pow(max(0, dot(n, h)), f);
 }
 
 //-----------------------------------------------------------------------------
@@ -91,8 +91,8 @@ float CookTorrance_specular(vec3 n, vec3 v, vec3 l)
 {
     // Material values
     float roughness = 0.2 + 0.4*material.roughness; // 0 : smooth, 1: rough
-	float F0 = 0.4 + 0.6*(1 - material.roughness);
-	//float F0 = 0.2 + material.extra;
+    float F0 = 0.4 + 0.6*(1 - material.roughness);
+    //float F0 = 0.2 + material.extra;
     //float F0 = 1 - roughness; // fresnel reflectance at normal incidence
     
     // do the lighting calculation for each fragment.
@@ -133,7 +133,6 @@ float CookTorrance_specular(vec3 n, vec3 v, vec3 l)
 
 float quantify(float value, int quants)
 {
-	return float(int(value * quants)) / quants;
+    return float(int(value * quants)) / quants;
 }
-
 

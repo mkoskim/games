@@ -29,99 +29,99 @@ import std.algorithm: sort, filter;
 
 class Scene
 {
-	//---------------------------------------------------------------------
-	// Objects can be rendered with different shaders, e.g. some shaders
-	// support animation, some do not. Each object in game world
-	// "belongs" to specific shader.
-	//---------------------------------------------------------------------
+    //---------------------------------------------------------------------
+    // Objects can be rendered with different shaders, e.g. some shaders
+    // support animation, some do not. Each object in game world
+    // "belongs" to specific shader.
+    //---------------------------------------------------------------------
 
-	Shader shader;
-	bool instances[Instance];
+    Shader shader;
+    bool instances[Instance];
 
-	Light light;
+    Light light;
 
-	auto length() { return instances.length; }
+    auto length() { return instances.length; }
 
-	bool useFrustumCulling = true;
-	bool useSorting = true;
-	
-	//-------------------------------------------------------------------------
+    bool useFrustumCulling = true;
+    bool useSorting = true;
 
-	this(Shader shader)
-	{
-		this.shader = shader;
-	}
+    //-------------------------------------------------------------------------
 
-	this()
-	{
-		this(Default3D.create());
-	}
-	
-	//-------------------------------------------------------------------------
+    this(Shader shader)
+    {
+        this.shader = shader;
+    }
 
-	Instance add(Instance instance) { instances[instance] = true; return instance; }
-	void remove(Instance instance) { instances.remove(instance); }
+    this()
+    {
+        this(Default3D.create());
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	Instance add(vec3 pos, Shader.VAO mesh, Material mat) { return add(new Instance(pos, mesh, mat)); }
-	Instance add(vec3 pos, Shape shape) { return add(new Instance(null, pos, vec3(0, 0, 0), shape)); }
-	Instance add(vec3 pos, vec3 rot, Shape shape) { return add(new Instance(null, pos, rot, shape)); }
-	Instance add(Bone parent, Shape shape) { return add(new Instance(parent, shape)); }
+    Instance add(Instance instance) { instances[instance] = true; return instance; }
+    void remove(Instance instance) { instances.remove(instance); }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	void draw(View cam)
-	{
-		perf.reset();
+    Instance add(vec3 pos, Shader.VAO mesh, Material mat) { return add(new Instance(pos, mesh, mat)); }
+    Instance add(vec3 pos, Shape shape) { return add(new Instance(null, pos, vec3(0, 0, 0), shape)); }
+    Instance add(vec3 pos, vec3 rot, Shape shape) { return add(new Instance(null, pos, rot, shape)); }
+    Instance add(Bone parent, Shape shape) { return add(new Instance(parent, shape)); }
 
-		//---------------------------------------------------------------------
-		
-		Instance[] drawlist;
-		
-		if(useFrustumCulling) {
-			foreach(object; instances.keys) {
-				object.project(cam);
-				if(!object.viewspace.infrustum) continue;
-				drawlist ~= object;
-			}
-		} else {
-			drawlist = instances.keys;
-		}
-		
-		//---------------------------------------------------------------------
-		
-		shader.activate();
-		if(light) shader.light(light);
+    //-------------------------------------------------------------------------
 
-		if(useSorting) {
-			auto front2back(Instance[] drawlist) {
-				return sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(drawlist);
-			}
-			auto back2front(Instance[] drawlist) {
-				return sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(drawlist);
-			}
+    void draw(View cam)
+    {
+        perf.reset();
 
-			foreach(object; front2back(drawlist)) {
-				object.render(shader, cam);
-				perf.drawed++;
-			}
-		} else {
-			foreach(object; drawlist) {
-				object.render(shader, cam);
-				perf.drawed++;
-			}
-		}
-	}
+        //---------------------------------------------------------------------
 
-	//-------------------------------------------------------------------------
+        Instance[] drawlist;
 
-	struct Performance
-	{
-		int drawed;
+        if(useFrustumCulling) {
+            foreach(object; instances.keys) {
+                object.project(cam);
+                if(!object.viewspace.infrustum) continue;
+                drawlist ~= object;
+            }
+        } else {
+            drawlist = instances.keys;
+        }
 
-		void reset() { drawed = 0; }
-	}
-	Performance perf;
+        //---------------------------------------------------------------------
+
+        shader.activate();
+        if(light) shader.light(light);
+
+        if(useSorting) {
+            auto front2back(Instance[] drawlist) {
+                return sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(drawlist);
+            }
+            auto back2front(Instance[] drawlist) {
+                return sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(drawlist);
+            }
+
+            foreach(object; front2back(drawlist)) {
+                object.render(shader, cam);
+                perf.drawed++;
+            }
+        } else {
+            foreach(object; drawlist) {
+                object.render(shader, cam);
+                perf.drawed++;
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------
+
+    struct Performance
+    {
+        int drawed;
+
+        void reset() { drawed = 0; }
+    }
+    Performance perf;
 }
 

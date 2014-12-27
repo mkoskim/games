@@ -18,11 +18,11 @@ FEATURES: Current main features:
 
 - Texture and normal maps
 
+- VAOs (Vertex Array Objects), VBOs, interleaved vertex data
+
 - Bounding sphere calculation from mesh data
 
 - Frustum culling using bounding spheres
-
-- VAOs (Vertex Array Objects), VBOs, interleaved vertex data
 
 -------------------------------------------------------------------------------
 

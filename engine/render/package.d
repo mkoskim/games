@@ -36,23 +36,23 @@ import std.stdio;
 void init()
 {
     auto glv = DerelictGL3.reload();
-	
-	//debug writefln("OpenGL: Version %s", glv);
-    
-	//-------------------------------------------------------------------------
 
-	/*
+    //debug writefln("OpenGL: Version %s", glv);
+
+    //-------------------------------------------------------------------------
+
+    /*
     checkgl!glEnable(GL_MULTISAMPLE);
-   	
-	checkgl!glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-	checkgl!glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
- 
-	checkgl!glEnable(GL_LINE_SMOOTH);
-	checkgl!glEnable(GL_POLYGON_SMOOTH);
-	/**/
 
-	//-------------------------------------------------------------------------
-	
+    checkgl!glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
+    checkgl!glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+
+    checkgl!glEnable(GL_LINE_SMOOTH);
+    checkgl!glEnable(GL_POLYGON_SMOOTH);
+    /**/
+
+    //-------------------------------------------------------------------------
+
     checkgl!glClearColor(0, 0, 0, 1);
     checkgl!glClearDepth(1);
 }
@@ -61,12 +61,12 @@ void init()
 
 void start()
 {
-	checkgl!glViewport(0, 0, screen.width, screen.height);
-	checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    checkgl!glViewport(0, 0, screen.width, screen.height);
+    checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void flush()
 {
-	//checkgl!glFinish();
+    //checkgl!glFinish();
 }
 

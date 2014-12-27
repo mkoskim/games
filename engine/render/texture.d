@@ -24,11 +24,11 @@ import derelict.sdl2.sdl;
 
 private GLuint _GLformat(SDL_Surface *surface)
 {
-	//debug writeln(SDL_PIXELORDER(surface.format.format));
+    //debug writeln(SDL_PIXELORDER(surface.format.format));
 
-	auto nbOfColors = surface.format.BytesPerPixel;
-	
-	switch (nbOfColors) {
+    auto nbOfColors = surface.format.BytesPerPixel;
+
+    switch (nbOfColors) {
         case 1:
             return GL_ALPHA;
         case 3:     // no alpha channel
@@ -41,9 +41,9 @@ private GLuint _GLformat(SDL_Surface *surface)
                 return GL_RGBA;
             else
                 return GL_BGRA;
-		default:
-			return GL_RGB;
-	}
+        default:
+            return GL_RGB;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -52,151 +52,152 @@ private GLuint _GLformat(SDL_Surface *surface)
 
 class Texture
 {
-	GLuint ID;
+    GLuint ID;
 
-	uint width, height;
+    uint width, height;
 
-	//-------------------------------------------------------------------------
-	// Creating texture from byte buffer
-	//-------------------------------------------------------------------------
-	
-	this(uint w, uint h, void* buffer, GLenum format)
-	{
-		GLenum internal;
-		
-		switch(format)
-		{
-			case GL_BGRA: internal = GL_RGBA; break;
-			case GL_BGR: internal = GL_RGB; break;
-			default: internal = format; break;
-		}
+    //-------------------------------------------------------------------------
+    // Creating texture from byte buffer
+    //-------------------------------------------------------------------------
 
-		//TODO("Alpha maps not working");
+    this(uint w, uint h, void* buffer, GLenum format)
+    {
+        GLenum internal;
 
-    	checkgl!glGenTextures(1, &ID);
-    	checkgl!glBindTexture(GL_TEXTURE_2D, ID);
+        switch(format)
+        {
+            case GL_BGRA: internal = GL_RGBA; break;
+            case GL_BGR: internal = GL_RGB; break;
+            default: internal = format; break;
+        }
 
-		width = w;
-		height = h;
+        //TODO("Alpha maps not working");
 
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		//glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        checkgl!glGenTextures(1, &ID);
+        checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
-    	checkgl!glTexImage2D(GL_TEXTURE_2D,
-    		0, 					// Mipmap level
-    		internal, 			// Internal format
-    		w, h,
-    		0, 					// Border
-    		format,				// Format of data
-    		GL_UNSIGNED_BYTE,	// Data width
-    		buffer				// Actual data
-    	);
-   	
-   		checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   		checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   		//checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-   		//checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        width = w;
+        height = h;
 
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        //glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-		checkgl!glBindTexture(GL_TEXTURE_2D, 0);
-	}
+        checkgl!glTexImage2D(GL_TEXTURE_2D,
+            0,                  // Mipmap level
+            internal,           // Internal format
+            w, h,
+            0,                  // Border
+            format,             // Format of data
+            GL_UNSIGNED_BYTE,   // Data width
+            buffer              // Actual data
+        );
 
-	//-------------------------------------------------------------------------
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	~this()
-	{
-		glDeleteTextures(1, &ID);
-	}
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 
-	//-------------------------------------------------------------------------
-	// SDL surface to texture
-	//-------------------------------------------------------------------------
+        checkgl!glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
-	this(SDL_Surface *surface)
-	{
-		this(
-			surface.w, surface.h,
-			surface.pixels,
-			_GLformat(surface)
-		);		
-	}
-	
-	//-------------------------------------------------------------------------
-	// Loading texture from blob file
-	//-------------------------------------------------------------------------
-	
-	this(string filename)
-	{
-		SDL_Surface* img = blob.loadimage(filename);		
-		this(img);
-		//debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
-		//debug writeln("- Pixels: ", img.pixels[0 .. 5]);
+    //-------------------------------------------------------------------------
 
-		SDL_FreeSurface(img);
-	}
-	
-	//-------------------------------------------------------------------------
-	// Creating single pixel "dummy" textures
-	//-------------------------------------------------------------------------
-	
-	this(vec4 color)
-	{
-		ubyte[] buffer = [
-			cast(ubyte)(color.r*255),
-			cast(ubyte)(color.g*255),
-			cast(ubyte)(color.b*255),
-			cast(ubyte)(color.a*255)
-		];
-		this(1, 1, buffer.ptr, GL_RGBA);
-	}
-	
-	//-------------------------------------------------------------------------
-	// Creating textures from sheet
-	//-------------------------------------------------------------------------
+    ~this()
+    {
+        glDeleteTextures(1, &ID);
+    }
 
-	static Texture[][] loadSheet(
-		string filename,
-		int texw, int texh,
-		int padx = 0, int pady = 0
-	)
-	{
-		SDL_Surface* sheet = blob.loadimage(filename);		
-		//debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
-		//debug writeln("- Pixels: ", img.pixels[0 .. 5]);
+    //-------------------------------------------------------------------------
+    // SDL surface to texture
+    //-------------------------------------------------------------------------
 
-		int cols = sheet.w / (texw+padx);
-		int rows = sheet.h / (texh+pady);
+    this(SDL_Surface *surface)
+    {
+        this(
+            surface.w, surface.h,
+            surface.pixels,
+            _GLformat(surface)
+        );
+    }
 
-		Texture[][] grid = new Texture[][](rows, cols);
-	
-		SDL_Surface *temp = SDL_CreateRGBSurface(0, texw, texh, 32, 0, 0, 0, 0);
-		SDL_Surface *sprite = SDL_ConvertSurface(temp, sheet.format, 0);
-		SDL_FreeSurface(temp);
-	
-		SDL_Rect srcrect = {x: 0, y: 0, w: texw, h: texh};
-		SDL_Rect dstrect = {x: 0, y: 0, w: texw, h: texh};
+    //-------------------------------------------------------------------------
+    // Loading texture from blob file
+    //-------------------------------------------------------------------------
 
-		foreach(y; 0 .. rows) foreach(x; 0 .. cols)
-		{
-			srcrect.y = y*(texh + pady);
-			srcrect.x = x*(texw + padx);
+    this(string filename)
+    {
+        SDL_Surface* img = blob.loadimage(filename);		
+        this(img);
+        //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
+        //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
 
-			SDL_FillRect(sprite, &dstrect, 0);
-			SDL_BlitSurface(
-				sheet, &srcrect,
-				sprite, &dstrect
-			);
+        SDL_FreeSurface(img);
+    }
 
-			//SDL_SaveBMP(sprite, "test.bmp");
-			//throw new Exception();
-		
-			grid[y][x] = new Texture(sprite);
-		}		
-		
-		SDL_FreeSurface(sheet);
-		SDL_FreeSurface(sprite);
+    //-------------------------------------------------------------------------
+    // Creating single pixel "dummy" textures
+    //-------------------------------------------------------------------------
 
-		return grid;
-	}
+    this(vec4 color)
+    {
+        ubyte[] buffer = [
+            cast(ubyte)(color.r*255),
+            cast(ubyte)(color.g*255),
+            cast(ubyte)(color.b*255),
+            cast(ubyte)(color.a*255)
+        ];
+        this(1, 1, buffer.ptr, GL_RGBA);
+    }
+
+    //-------------------------------------------------------------------------
+    // Creating textures from sheet
+    //-------------------------------------------------------------------------
+
+    static Texture[][] loadSheet(
+        string filename,
+        int texw, int texh,
+        int padx = 0, int pady = 0
+    )
+    {
+        SDL_Surface* sheet = blob.loadimage(filename);		
+        //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
+        //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
+
+        int cols = sheet.w / (texw+padx);
+        int rows = sheet.h / (texh+pady);
+
+        Texture[][] grid = new Texture[][](rows, cols);
+
+        SDL_Surface *temp = SDL_CreateRGBSurface(0, texw, texh, 32, 0, 0, 0, 0);
+        SDL_Surface *sprite = SDL_ConvertSurface(temp, sheet.format, 0);
+        SDL_FreeSurface(temp);
+
+        SDL_Rect srcrect = {x: 0, y: 0, w: texw, h: texh};
+        SDL_Rect dstrect = {x: 0, y: 0, w: texw, h: texh};
+
+        foreach(y; 0 .. rows) foreach(x; 0 .. cols)
+        {
+            srcrect.y = y*(texh + pady);
+            srcrect.x = x*(texw + padx);
+
+            SDL_FillRect(sprite, &dstrect, 0);
+            SDL_BlitSurface(
+                sheet, &srcrect,
+                sprite, &dstrect
+            );
+
+            //SDL_SaveBMP(sprite, "test.bmp");
+            //throw new Exception();
+
+            grid[y][x] = new Texture(sprite);
+        }
+
+        SDL_FreeSurface(sheet);
+        SDL_FreeSurface(sprite);
+
+        return grid;
+    }
 }
+

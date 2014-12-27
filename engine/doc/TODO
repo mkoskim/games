@@ -22,6 +22,8 @@ DONE:
   the time missed to see that current shader is active is probably
   insignificant). It is just about principles.
 
+- DONE: use size_t instead of ulong/uint (sizeof, length, ...)
+
 *******************************************************************************
 
 WORKLIST:
@@ -73,6 +75,9 @@ HOTTISH TOPICS:
 -------------------------------------------------------------------------------
 
 "USER-FRIENDLINESS": Some planned efforts to make code more "user-friendly":
+more portable (32-bit, 64-bit, Linux, Windows), easier to set up, and so on.
+
+- SDL FillRect & Font rendering segfaults on 32-bit machine
 
 - I should go through code and correct intendation
 
@@ -85,6 +90,8 @@ HOTTISH TOPICS:
 -------------------------------------------------------------------------------
 
 GENERAL:
+
+- Keyboard emulated game controller
 
 - At some point, there's a need to check that destructors are called at
   correct points. For example, when game level is changed, it would be

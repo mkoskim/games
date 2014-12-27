@@ -21,6 +21,7 @@ SRCPATH+=~/.dub/packages/gl3n-1.0.0/
 
 DMD=rdmd
 #DMD+=--compiler=gdmd
+#DMD+=-m32
 DMD+=-ofbin/$(EXE)
 DMD+=$(addprefix -I, $(SRCPATH))
 DMD+=$(addprefix -L-l, $(LIBS))

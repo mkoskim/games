@@ -21,95 +21,95 @@ import engine.render.texture;
 
 class Material
 {
-	vec4 color;
-	Texture colormap;
-	Texture normalmap;
+    vec4 color;
+    Texture colormap;
+    Texture normalmap;
 
-	//-------------------------------------------------------------------------
-	// Material reflectivity is approximated with roughness coefficient. The
-	// smoother material (smaller roughness), the more specular lightning.
-	//-------------------------------------------------------------------------
-	
-	float roughness;
-	
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    // Material reflectivity is approximated with roughness coefficient. The
+    // smoother material (smaller roughness), the more specular lightning.
+    //-------------------------------------------------------------------------
 
-	static Texture whitemap = null;
-	static Texture flatmap = null;
-	
-	this()
-	{
-		if(!whitemap) whitemap = new Texture(vec4(1, 1, 1, 1));
-		if(!flatmap)  flatmap  = new Texture(vec4(0.5, 0.5, 1, 1));
-		
-		color = vec4(1, 1, 1, 1);
-		colormap = whitemap;
-		normalmap = flatmap;
-		roughness = 0.5;
-	}
+    float roughness;
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	this(Texture colormap, Texture normalmap, float roughness)
-	{
-		this();
-		this.colormap = colormap;
-		this.normalmap = normalmap;
-		this.roughness = roughness;
-	}
+    static Texture whitemap = null;
+    static Texture flatmap = null;
 
-	this(vec3 color, Texture normalmap, float roughness)
-	{
-		this();
-		this.color = vec4(color, 1);
-		this.normalmap = normalmap;
-		this.roughness = roughness;
-	}
+    this()
+    {
+        if(!whitemap) whitemap = new Texture(vec4(1, 1, 1, 1));
+        if(!flatmap)  flatmap  = new Texture(vec4(0.5, 0.5, 1, 1));
 
-	this(Texture colormap, float roughness)
-	{
-		this();
-		this.colormap = colormap;
-		this.roughness = roughness;
-	}
-	
-	this(SDL_Surface *colormap, float roughness)
-	{
-		this();
-		this.colormap = new Texture(colormap);
-		this.roughness = roughness;
-	}
-	
-	this(vec3 color, float roughness)
-	{
-		this();
-		this.color = vec4(color, 1);
-		this.roughness = roughness;
-	}
-	
-	//-------------------------------------------------------------------------
+        color = vec4(1, 1, 1, 1);
+        colormap = whitemap;
+        normalmap = flatmap;
+        roughness = 0.5;
+    }
 
-	this(vec4 color)
-	{
-		this();
-		this.color = color;
-	}
+    //-------------------------------------------------------------------------
 
-	this(float r, float g, float b, float a = 1)
-	{
-		this(vec4(r, g, b, a));
-	}
+    this(Texture colormap, Texture normalmap, float roughness)
+    {
+        this();
+        this.colormap = colormap;
+        this.normalmap = normalmap;
+        this.roughness = roughness;
+    }
 
-	this(Texture tex)
-	{
-		this();
-		this.colormap = tex;
-	}
+    this(vec3 color, Texture normalmap, float roughness)
+    {
+        this();
+        this.color = vec4(color, 1);
+        this.normalmap = normalmap;
+        this.roughness = roughness;
+    }
 
-	this(SDL_Surface *surface)
-	{
-		this();
-		this.colormap = new Texture(surface);
-	}
+    this(Texture colormap, float roughness)
+    {
+        this();
+        this.colormap = colormap;
+        this.roughness = roughness;
+    }
+
+    this(SDL_Surface *colormap, float roughness)
+    {
+        this();
+        this.colormap = new Texture(colormap);
+        this.roughness = roughness;
+    }
+
+    this(vec3 color, float roughness)
+    {
+        this();
+        this.color = vec4(color, 1);
+        this.roughness = roughness;
+    }
+
+    //-------------------------------------------------------------------------
+
+    this(vec4 color)
+    {
+        this();
+        this.color = color;
+    }
+
+    this(float r, float g, float b, float a = 1)
+    {
+        this(vec4(r, g, b, a));
+    }
+
+    this(Texture tex)
+    {
+        this();
+        this.colormap = tex;
+    }
+
+    this(SDL_Surface *surface)
+    {
+        this();
+        this.colormap = new Texture(surface);
+    }
 }
 

@@ -24,36 +24,36 @@ import engine.render.light;
 
 abstract class Default : Shader
 {
-	protected this(string[] common, string[] vsfiles, string[] fsfiles)
-	{
-		super(common, vsfiles, fsfiles);
-	}
-	protected this(string filename) { super(filename); }
-	protected this(string vsfile, string fsfile) { super(vsfile, fsfile); }
-	
-	//-------------------------------------------------------------------------
+    protected this(string[] common, string[] vsfiles, string[] fsfiles)
+    {
+        super(common, vsfiles, fsfiles);
+    }
+    protected this(string filename) { super(filename); }
+    protected this(string vsfile, string fsfile) { super(vsfile, fsfile); }
 
-	protected void bindMaterial(Material material)
-	{
-		uniform("material.color", material.color);
-		texture("material.colormap", 0, material.colormap);
-	}
+    //-------------------------------------------------------------------------
 
-	protected void bindMatrices(View cam, Instance instance)
-	{
-		uniform("mProjection", cam.mProjection());
-		uniform("mModelView", cam.mModelView(instance.mModel()));
-	}
+    protected void bindMaterial(Material material)
+    {
+        uniform("material.color", material.color);
+        texture("material.colormap", 0, material.colormap);
+    }
 
-	override void render(View cam, Instance instance)
-	{
-		if(!enabled) return;
-		
-		bindMatrices(cam, instance);
-		bindMaterial(instance.shape.material);
+    protected void bindMatrices(View cam, Instance instance)
+    {
+        uniform("mProjection", cam.mProjection());
+        uniform("mModelView", cam.mModelView(instance.mModel()));
+    }
 
-		instance.shape.vao.draw();
-	}
+    override void render(View cam, Instance instance)
+    {
+        if(!enabled) return;
+
+        bindMatrices(cam, instance);
+        bindMaterial(instance.shape.material);
+
+        instance.shape.vao.draw();
+    }
 }
 
 //*****************************************************************************
@@ -64,51 +64,51 @@ abstract class Default : Shader
 
 class Default2D : Default
 {
-	static Shader create()
-	{
-		static Shader instance = null;
-		if(!instance) instance = new Default2D();
-		return instance;
-	}
+    static Shader create()
+    {
+        static Shader instance = null;
+        if(!instance) instance = new Default2D();
+        return instance;
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	private this()
-	{
-		super("engine/render/shaders/glsl/default2d.glsl");
-	}
+    private this()
+    {
+        super("engine/render/shaders/glsl/default2d.glsl");
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	protected override void apply()
-	{
-		super.apply();
+    protected override void apply()
+    {
+        super.apply();
 
-		checkgl!glDisable(GL_CULL_FACE);
-		checkgl!glDisable(GL_DEPTH_TEST);
+        checkgl!glDisable(GL_CULL_FACE);
+        checkgl!glDisable(GL_DEPTH_TEST);
 
-    	checkgl!glEnable(GL_BLEND);
-    	checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    	//checkgl!glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+        checkgl!glEnable(GL_BLEND);
+        checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //checkgl!glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	override protected void addVBOs(VAO vao, Mesh mesh)
-	{
-		VBO vbo = new VBO(
-			mesh.vertices.ptr,
-			mesh.vertices.length,
-			mesh.VERTEX.sizeof
-		);
+    override protected void addVBOs(VAO vao, Mesh mesh)
+    {
+        VBO vbo = new VBO(
+            mesh.vertices.ptr,
+            mesh.vertices.length,
+            mesh.VERTEX.sizeof
+        );
 
-		attrib!(mesh.VERTEX.pos)(vbo, "vert_pos");
-		attrib!(mesh.VERTEX.uv)(vbo, "vert_uv");
+        attrib!(mesh.VERTEX.pos)(vbo, "vert_pos");
+        attrib!(mesh.VERTEX.uv)(vbo, "vert_uv");
 
-		vao.vbos = [ vbo ];
-	}
+        vao.vbos = [ vbo ];
+    }
 }
 
 //*****************************************************************************
@@ -119,85 +119,85 @@ class Default2D : Default
 
 class Default3D : Default
 {
-	static Shader create()
-	{
-		static Shader instance = null;
-		if(!instance) instance = new Default3D();
-		return instance;
-	}
+    static Shader create()
+    {
+        static Shader instance = null;
+        if(!instance) instance = new Default3D();
+        return instance;
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	protected this(string conffile)
-	{
-		super(
-			[
-				conffile,
-				"engine/render/shaders/glsl/types.3d.glsl",
-				"engine/render/shaders/glsl/default3d.in.glsl",
-			], [
-				"engine/render/shaders/glsl/verts.lib.glsl",
-				"engine/render/shaders/glsl/verts.3d.glsl",
-			], [
-				"engine/render/shaders/glsl/frags.lib.glsl",
-				"engine/render/shaders/glsl/frags.3d.glsl",
-			]			
-		);
-	}
+    protected this(string conffile)
+    {
+        super(
+            [
+                conffile,
+                "engine/render/shaders/glsl/types.3d.glsl",
+                "engine/render/shaders/glsl/default3d.in.glsl",
+            ], [
+                "engine/render/shaders/glsl/verts.lib.glsl",
+                "engine/render/shaders/glsl/verts.3d.glsl",
+            ], [
+                "engine/render/shaders/glsl/frags.lib.glsl",
+                "engine/render/shaders/glsl/frags.3d.glsl",
+            ]
+        );
+    }
 
-	private this()
-	{
-		this(null);
-	}
+    private this()
+    {
+        this(null);
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	protected override void apply()
-	{
-		super.apply();
-		checkgl!glEnable(GL_CULL_FACE);
-		checkgl!glFrontFace(GL_CCW);
-		checkgl!glEnable(GL_DEPTH_TEST);
+    protected override void apply()
+    {
+        super.apply();
+        checkgl!glEnable(GL_CULL_FACE);
+        checkgl!glFrontFace(GL_CCW);
+        checkgl!glEnable(GL_DEPTH_TEST);
 
-    	checkgl!glDisable(GL_BLEND);
-	}
+        checkgl!glDisable(GL_BLEND);
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	override void light(Light l)
-	{
-		uniform("light.pos", l.grip.pos);
-		uniform("light.radius", l.radius);
-		uniform("light.ambient", l.ambient);
-		uniform("light.color", l.color);
-	}
+    override void light(Light l)
+    {
+        uniform("light.pos", l.grip.pos);
+        uniform("light.radius", l.radius);
+        uniform("light.ambient", l.ambient);
+        uniform("light.color", l.color);
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	override protected void addVBOs(VAO vao, Mesh mesh)
-	{
-		VBO vbo = new VBO(
-			mesh.vertices.ptr,
-			mesh.vertices.length,
-			mesh.VERTEX.sizeof
-		);
+    override protected void addVBOs(VAO vao, Mesh mesh)
+    {
+        VBO vbo = new VBO(
+            mesh.vertices.ptr,
+            mesh.vertices.length,
+            mesh.VERTEX.sizeof
+        );
 
-		attrib!(mesh.VERTEX.pos)(vbo, "vert_pos");
-		attrib!(mesh.VERTEX.uv)(vbo, "vert_uv");
-		attrib!(mesh.VERTEX.normal)(vbo, "vert_norm");
-		attrib!(mesh.VERTEX.tangent)(vbo, "vert_tangent");
+        attrib!(mesh.VERTEX.pos)(vbo, "vert_pos");
+        attrib!(mesh.VERTEX.uv)(vbo, "vert_uv");
+        attrib!(mesh.VERTEX.normal)(vbo, "vert_norm");
+        attrib!(mesh.VERTEX.tangent)(vbo, "vert_tangent");
 
-		vao.vbos = [ vbo ];
-	}
+        vao.vbos = [ vbo ];
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	override void bindMaterial(Material material)
-	{
-		super.bindMaterial(material);
-		texture("material.normalmap", 1, material.normalmap);
-		uniform("material.roughness", material.roughness);
-	}
+    override void bindMaterial(Material material)
+    {
+        super.bindMaterial(material);
+        texture("material.normalmap", 1, material.normalmap);
+        uniform("material.roughness", material.roughness);
+    }
 }
 
 //*****************************************************************************
@@ -208,24 +208,24 @@ class Default3D : Default
 
 class Lightless3D : Default2D
 {
-	static Shader create()
-	{
-		static Shader instance = null;
-		if(!instance) instance = new Lightless3D();
-		return instance;
-	}
+    static Shader create()
+    {
+        static Shader instance = null;
+        if(!instance) instance = new Lightless3D();
+        return instance;
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	protected override void apply()
-	{
-		super.apply();
-		checkgl!glEnable(GL_CULL_FACE);
-		checkgl!glFrontFace(GL_CCW);
-		checkgl!glEnable(GL_DEPTH_TEST);
+    protected override void apply()
+    {
+        super.apply();
+        checkgl!glEnable(GL_CULL_FACE);
+        checkgl!glFrontFace(GL_CCW);
+        checkgl!glEnable(GL_DEPTH_TEST);
 
-    	checkgl!glDisable(GL_BLEND);
-	}
+        checkgl!glDisable(GL_BLEND);
+    }
 }
 
 //*****************************************************************************
@@ -236,19 +236,18 @@ class Lightless3D : Default2D
 
 class Toon3D : Default3D
 {
-	static Shader create()
-	{
-		static Shader instance = null;
-		if(!instance) instance = new Toon3D();
-		return instance;
-	}
+    static Shader create()
+    {
+        static Shader instance = null;
+        if(!instance) instance = new Toon3D();
+        return instance;
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	private this()
-	{
-		super("engine/render/shaders/glsl/conf.toon3d.glsl");
-	}
+    private this()
+    {
+        super("engine/render/shaders/glsl/conf.toon3d.glsl");
+    }
 }
-
 

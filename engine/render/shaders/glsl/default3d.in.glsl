@@ -19,12 +19,12 @@ uniform MATERIAL material;
 
 //-----------------------------------------------------------------------------
 
-varying vec2 frag_uv;		// Fragment texture coordinates
-varying vec3 frag_pos;		// Fragment position (view space)
-varying mat3 frag_TBN;		// Fragment tangent space
+varying vec2 frag_uv;       // Fragment texture coordinates
+varying vec3 frag_pos;      // Fragment position (view space)
+varying mat3 frag_TBN;      // Fragment tangent space
 
-varying vec3 frag_light_pos;			// Light direction in tangent space
-varying float frag_light_strength;		// Computed intensity
+varying vec3 frag_light_pos;            // Light direction in tangent space
+varying float frag_light_strength;      // Computed intensity
 
 //-----------------------------------------------------------------------------
 // Runtime configurations

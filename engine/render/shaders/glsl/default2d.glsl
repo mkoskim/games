@@ -14,8 +14,8 @@ uniform mat4 mModelView;
 
 struct MATERIAL
 {
-	vec4 color;
-	sampler2D colormap;
+    vec4 color;
+    sampler2D colormap;
 };
 
 uniform MATERIAL material;
@@ -41,7 +41,7 @@ varying vec2 frag_uv;
 
 void main()
 {
-	frag_uv = vert_uv;
+    frag_uv = vert_uv;
 
     gl_Position = mProjection * mModelView * vec4(vert_pos, 1);
 }
@@ -53,15 +53,15 @@ void main()
 
 void main(void)
 {
-	vec4 texel = texture2D(material.colormap, frag_uv);
+    vec4 texel = texture2D(material.colormap, frag_uv);
 
-	// Discarding fully transparent fragments may or may not help at some cases,
-	// at least when using depth buffer with transparency and without sorting
-	// drawing order the result can be almost correct.
-	
-	if(texel.a < 1.0/255) discard;
-	
-	gl_FragColor = texel * material.color;
+    // Discarding fully transparent fragments may or may not help at some cases,
+    // at least when using depth buffer with transparency and without sorting
+    // drawing order the result can be almost correct.
+
+    if(texel.a < 1.0/255) discard;
+
+    gl_FragColor = texel * material.color;
 }
 #endif
 

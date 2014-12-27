@@ -24,19 +24,19 @@ import engine.render.material;
 
 class Shape
 {
-	Shader.VAO vao;
-	Material material;
+    Shader.VAO vao;
+    Material material;
 
-	this(Shader.VAO vao, Material material)
-	{
-		this.vao = vao;
-		this.material = material;
-	}
+    this(Shader.VAO vao, Material material)
+    {
+        this.vao = vao;
+        this.material = material;
+    }
 
-	this(Shader shader, Mesh mesh, Material material)
-	{
-		this(shader.upload(mesh), material);
-	}
+    this(Shader shader, Mesh mesh, Material material)
+    {
+        this(shader.upload(mesh), material);
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -46,76 +46,76 @@ class Shape
 
 class Instance : Bone
 {
-	Shape shape;
+    Shape shape;
 
-	//-------------------------------------------------------------------------
-	
-	this(Bone parent, vec3 pos, vec3 rot, Shape shape)
-	{
-		super(parent, pos, rot);
-		this.shape = shape;
-	}
-	
-	this(vec3 pos, Shader.VAO vao, Material m)
-	{
-		this(null, pos, vec3(0, 0, 0), new Shape(vao, m));
-	}	
+    //-------------------------------------------------------------------------
 
-	this(Bone parent, Shape shape)
-	{
-		this(parent, vec3(0, 0, 0), vec3(0, 0, 0), shape);
-	}	
+    this(Bone parent, vec3 pos, vec3 rot, Shape shape)
+    {
+        super(parent, pos, rot);
+        this.shape = shape;
+    }
 
-	//-------------------------------------------------------------------------
-	// Cached values from rendering phase
-	//-------------------------------------------------------------------------
+    this(vec3 pos, Shader.VAO vao, Material m)
+    {
+        this(null, pos, vec3(0, 0, 0), new Shape(vao, m));
+    }
 
-	struct VIEWSPACE {
-		vec3 pos;		// Position relative to camera
+    this(Bone parent, Shape shape)
+    {
+        this(parent, vec3(0, 0, 0), vec3(0, 0, 0), shape);
+    }
 
-		vec3 bsp;		// Bounding sphere position relative to camera
-		float bspdst2;	// Bouding sphere (squared) distance to camera
+    //-------------------------------------------------------------------------
+    // Cached values from rendering phase
+    //-------------------------------------------------------------------------
 
-		int infrustum;	// = INSIDE, INTERSECT or OUTSIDE
-	}
+    struct VIEWSPACE {
+        vec3 pos;		// Position relative to camera
 
-	VIEWSPACE viewspace;
+        vec3 bsp;		// Bounding sphere position relative to camera
+        float bspdst2;	// Bouding sphere (squared) distance to camera
 
-	vec3 transform(vec3 v)
-	{
-		return (mModel() * vec4(v, 1)).xyz;
-	}
+        int infrustum;	// = INSIDE, INTERSECT or OUTSIDE
+    }
 
-	void project(View cam)
-	{
-		viewspace.pos = cam.viewspace(pos);
+    VIEWSPACE viewspace;
 
-		viewspace.bsp = cam.viewspace(mModel(), shape.vao.bsp.center);
-		viewspace.bspdst2 = viewspace.bsp.magnitude_squared;
+    vec3 transform(vec3 v)
+    {
+        return (mModel() * vec4(v, 1)).xyz;
+    }
 
-		Frustum frustum = cam.frustum;
+    void project(View cam)
+    {
+        viewspace.pos = cam.viewspace(pos);
 
-		viewspace.infrustum = INSIDE;
-		foreach(plane; frustum.planes)
-		{
-			float dist = plane.distance(viewspace.bsp);
-			if (dist < -shape.vao.bsp.radius)
-			{
-				viewspace.infrustum = OUTSIDE;
-				break;
-			}
-			else if(dist < shape.vao.bsp.radius)
-			{
-				viewspace.infrustum = INTERSECT;
-			}
-		}
-	}
+        viewspace.bsp = cam.viewspace(mModel(), shape.vao.bsp.center);
+        viewspace.bspdst2 = viewspace.bsp.magnitude_squared;
 
-	//-------------------------------------------------------------------------
+        Frustum frustum = cam.frustum;
 
-	void render(Shader shader, View cam)
-	{
-		shader.render(cam, this);
-	}
+        viewspace.infrustum = INSIDE;
+        foreach(plane; frustum.planes)
+        {
+            float dist = plane.distance(viewspace.bsp);
+            if (dist < -shape.vao.bsp.radius)
+            {
+                viewspace.infrustum = OUTSIDE;
+                break;
+            }
+            else if(dist < shape.vao.bsp.radius)
+            {
+                viewspace.infrustum = INTERSECT;
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------
+
+    void render(Shader shader, View cam)
+    {
+        shader.render(cam, this);
+    }
 }
 

@@ -1,0 +1,34 @@
+GLSL shader prorgams.
+
+-------------------------------------------------------------------------------
+
+default2d.glsl
+
+    Simple, "all in one" shader program having
+    both vertex and fragment shaders.
+
+-------------------------------------------------------------------------------
+
+The rest are part of 3D shader family. New shader compilation system takes
+in three groups of files: common, fragment and vertex. Common files are
+combined with both shaders.
+
+types.3d.glsl
+default3d.in.glsl
+
+    Common types and inputs for shaders.
+
+verts.lib.glsl
+frags.lib.glsl
+
+    Function library for vertex and fragment shader.
+    
+verts.3d.glsl
+frags.3d.glsl
+
+    Vertex and fragment shader program main.
+    
+conf.toon3d.glsl
+
+    Configuration files to get different behaviour.
+

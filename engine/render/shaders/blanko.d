@@ -14,20 +14,20 @@ import engine.render.view;
 
 class Blanko : Shader
 {
-	static Shader create()
-	{
-		static Blanko instance = null;
-		if(!instance) instance = new Blanko();
-		return instance;
-	}
+    static Shader create()
+    {
+        static Blanko instance = null;
+        if(!instance) instance = new Blanko();
+        return instance;
+    }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	override protected void addVBOs(VAO vao, Mesh mesh) { }
-	override void render(View cam, Instance instance) { }
+    override protected void addVBOs(VAO vao, Mesh mesh) { }
+    override void render(View cam, Instance instance) { }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	private this() { super(); }
+    private this() { super(); }
 }
 
