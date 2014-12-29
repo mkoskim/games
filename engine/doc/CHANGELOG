@@ -6,6 +6,32 @@
 
 Version something:
 
+- Done: There is a great need to have improved compilation mechanism.
+  That is, separating CPU-GPU interface parts (uniforms, attributes),
+  interface between vertex and fragment shader, and have something to
+  help "plugging" different vertex and fragment shaders together.
+
+- Done: Stupid user error, the gl3n examples clearly instruct to transpose
+  matrices when sending them to GPU. (Matrix multiplication order is different
+  in GLSL than in D. It would be very nice that the multiplication order would
+  follow some standard. Investigate this problem closer, and decide what to
+  do (transpose when sending?))
+
+- Somewhat done: Trying to make runtime configurable uniforms not working...
+  Current solution is to open uniform setting outside. It is important to
+  call shader activation to do this. Because of that, we need to improve
+  the interface: exposing a method that does not work reliably is not
+  an answer, and I don't want to add shader activation to all uniform
+  settings, as they are called in performance critical parts (although
+  the time missed to see that current shader is active is probably
+  insignificant). It is just about principles.
+
+- DONE: use size_t instead of ulong/uint (sizeof, length, ...)
+
+-------------------------------------------------------------------------------
+
+Version something:
+
 - Done: Reducing vertex data size to improve GPU cache performance: Normals and
   UV coordinates could have smaller input precision:
   
