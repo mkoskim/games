@@ -117,14 +117,14 @@ class Maze : render.Scene
             0.85);
 
         auto matAlienCarving = new render.Material(
-            new render.Texture("engine/stock/tiles/AlienCarving/ColorMap.png"),
-            //vec3(0.75, 0.5, 0.25),
+            //new render.Texture("engine/stock/tiles/AlienCarving/ColorMap.png"),
+            vec3(0.75, 0.5, 0.25),
             new render.Texture("engine/stock/tiles/AlienCarving/NormalMap.png"),
             0.15);
 
         auto matMetallicAssembly = new render.Material(
-            new render.Texture("engine/stock/tiles/MetallicAssembly/ColorMap.png"),
-            //vec3(0.5, 0.5, 0.5),
+            //new render.Texture("engine/stock/tiles/MetallicAssembly/ColorMap.png"),
+            vec3(0.5, 0.5, 0.5),
             new render.Texture("engine/stock/tiles/MetallicAssembly/NormalMap.png"),
             0.15);
 

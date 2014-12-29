@@ -1,10 +1,11 @@
-This project has been made with Linux Mint (Maya) and it is far from easy to be
-compiled at the moment. I try later simplify the process.
+This project has been made with 64-bit Linux Mint (Maya) and it is far from
+easy to be compiled on other platforms at the moment. I try later simplify the
+process in the future.
 
 First things you need are:
 
 1) dmd D compiler: This is easy to install to both Linux and Windows, and
-you can get it here:
+   you can get it here:
 
     http://dlang.org/download.html
 
