@@ -220,9 +220,9 @@ class Joystick
         hats = new byte[SDL_JoystickNumHats(stick)];
 
         buttons = new byte[
-            SDL_JoystickNumButtons(stick)	// Normal buttons
-            + 2*axes.length					// Emulated axis buttons
-            + 4*hats.length					// Emulated hat buttons
+            SDL_JoystickNumButtons(stick)   // Normal buttons
+            + 2*axes.length                 // Emulated axis buttons
+            + 4*hats.length                 // Emulated hat buttons
         ];
 
         AXISBTN_FIRST = SDL_JoystickNumButtons(stick);
@@ -246,7 +246,7 @@ class Joystick
     ~this()
     {
         SDL_JoystickClose(stick);
-        SDL_HapticClose(ffb);
+        if(ffb) SDL_HapticClose(ffb);
     }
 
     //-------------------------------------------------------------------------
@@ -258,7 +258,7 @@ class Joystick
         int num = SDL_NumJoysticks();
 
         foreach(i; 0 .. num) {
-            joysticks ~= new Joystick(i);		
+            joysticks ~= new Joystick(i);
         }
     }
 }

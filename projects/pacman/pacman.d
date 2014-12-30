@@ -223,7 +223,7 @@ void play(string mazename)
         void checkinput()
         {
             bool isdown(uint keycode, uint joycode) {
-                return game.keydown(keycode) || game.joysticks[0].buttons[joycode];
+                return game.keydown(keycode) || (game.joysticks.length && game.joysticks[0].buttons[joycode]);
             }
 
             if(isdown(SDLK_LEFT, game.JOY.BTN.LS_LEFT))         next = Head.left;
