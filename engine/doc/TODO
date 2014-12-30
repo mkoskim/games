@@ -21,7 +21,17 @@ WORKLIST:
 
 -------------------------------------------------------------------------------
 
-FIX:
+FIX: Crashes, flaws etc.
+
+- Font rendering fails randomly:
+
+    http://stackoverflow.com/questions/26956658/sdl-ttf-rendertext-blended-fails-randomly
+
+- On 32-bit Ubuntu, SDL FillRect segfaults (code that cuts textures from
+  sprite sheet).
+
+- Freeing fonts cause segfault (most probably, TTF is already closed when
+  calling font destructor)
 
 - Shader compiler (see gpucompiler.d) can only report error location for
   noveau driver. Needs (1) driver detection, and (2) custom reporting for
@@ -36,8 +46,6 @@ FIX:
 - TBN calculation in current shader has its flaws (not normalized nor
   orthogonal in fragment shader), but it might be so that it has no
   significant effect to rendering result
-
-- Freeing fonts cause segfault
 
 -------------------------------------------------------------------------------
 
