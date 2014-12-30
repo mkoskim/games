@@ -2,9 +2,14 @@
 
 DONE:
 
+- Somewhat done: I should go through code and correct indentation
+
+
 *******************************************************************************
 
 WORKLIST:
+
+- Sprite/particle engine for textbox
 
 - "Multi-material" meshes (batches): It would be good to think about the
   implementation a little bit, so that it would fit to future development.
@@ -13,8 +18,6 @@ WORKLIST:
   to different instance, that is drawn after solid objects.
 
 - Mipmaps
-
-- Sprite/particle engine for textbox
 
 -------------------------------------------------------------------------------
 
@@ -57,10 +60,14 @@ more portable (32-bit, 64-bit, Linux, Windows), easier to set up, and so on.
 
 - SDL FillRect & Font rendering segfaults on 32-bit machine
 
-- I should go through code and correct intendation
-
 - It would be nice to add D doc comments, at least test it. Finally, it would
   be nice if I could make it to compile with dub, and use dub registry.
+
+-------------------------------------------------------------------------------
+
+USER INPUT:
+
+- Keyboard emulated game controller
 
 - Make game controller optional, at least for games that does not need them
   that much (i.e. have also keyboard control)
@@ -68,8 +75,6 @@ more portable (32-bit, 64-bit, Linux, Windows), easier to set up, and so on.
 -------------------------------------------------------------------------------
 
 GENERAL:
-
-- Keyboard emulated game controller
 
 - At some point, there's a need to check that destructors are called at
   correct points. For example, when game level is changed, it would be
@@ -143,7 +148,7 @@ issues have their relations to other sections in this TODO document.
 
 - Some sort of batch processing with shaders? See:
 
-	* http://www.gamedev.net/page/resources/_/technical/opengl/opengl-batch-rendering-r3900
+    * http://www.gamedev.net/page/resources/_/technical/opengl/opengl-batch-rendering-r3900
 
 -------------------------------------------------------------------------------
 
@@ -153,19 +158,19 @@ keep these in mind so that architecture does not prevent implementing these:
 
 - Organize triangles to strips, study primitive restart:
 
-	* glEnable(GL_PRIMITIVE_RESTART)​
-	* glPrimitiveRestartIndex(65535)​
-	* https://www.opengl.org/wiki/Vertex_Rendering#Primitive_Restart
+    * glEnable(GL_PRIMITIVE_RESTART)​
+    * glPrimitiveRestartIndex(65535)​
+    * https://www.opengl.org/wiki/Vertex_Rendering#Primitive_Restart
 
 - Sorting drawing so that the same vertice is preferably used in consecutive
   calls, to improve GPU cache performance.
 
 - Think if it is possible automatically pad things:
 
-	"Padding is added to make the vertex structure a multiple of 32 bytes
-	 since some GPUs prefer it that way, such as ATI/AMD."
+    "Padding is added to make the vertex structure a multiple of 32 bytes
+     since some GPUs prefer it that way, such as ATI/AMD."
 
-	https://www.opengl.org/wiki/Client-Side_Vertex_Arrays
+    https://www.opengl.org/wiki/Client-Side_Vertex_Arrays
 
 -------------------------------------------------------------------------------
 
@@ -177,7 +182,10 @@ keep these in mind so that architecture does not prevent implementing these:
   (different IBOs for each; combine somehow with material groups). Think
   a system to tell point size (glPointSize), and finally, we might have
   particle engine...
-
+  
+  * In fact: Meshes are meshes. Lines and points are rendered by different
+    shaders, or at least, they form different kind of objects, not meshes.
+    
 - Multiple mesh-material pairs in same object: Maybe with vertex groups?
   Adding IBO-Material pairs to VAOs? No need for separate IBOs, just start
   index for each batch.
@@ -316,7 +324,7 @@ SCENES, LAYERS:
 
 - Occlusion queries?
 
-	* https://www.opengl.org/wiki/Query_Object#Occlusion_queries
+    * https://www.opengl.org/wiki/Query_Object#Occlusion_queries
 
 -------------------------------------------------------------------------------
 

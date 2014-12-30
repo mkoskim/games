@@ -1,0 +1,32 @@
+*******************************************************************************
+
+SKETCHING: This is general-purpose file to put down ideas for future
+development.
+
+*******************************************************************************
+
+-------------------------------------------------------------------------------
+
+USER INPUT: Personally, I'm designing games to be controlled with game
+controller (XBox 360). The reason for this is that keyboard controlling is
+too coarse for the main projects I have been thinking (e.g. Skyrim-like
+stealth that is dependent on movement speed), and on the other hand, I have
+never learnt to use mouse in games.
+
+But not all games need or benefit from game controller, for example pacman.
+I need a system to hide 'dirty details' that is easy to use in games. It may
+also give some configurability. Some current thoughts:
+
+    * Keyboard & mouse emulated game controller
+
+    * One more indirection layer, a configurable logical controller, which
+      connects to the actual controllers.
+
+One way could be to create a bunch of "logical controllers": one would be
+simple 4-direction joystick for pacman-like games, some other would contain
+more directions (that is, movement + look) and buttons.
+
+-------------------------------------------------------------------------------
+
+RENDERING FRAMEWORK:
+
