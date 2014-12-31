@@ -1,0 +1,38 @@
+Some sort of development diary, which I hope to help me to give me clear
+thoughts about the development.
+
+-------------------------------------------------------------------------------
+
+Dec 31, 2014: I have been struggling with architectural things. On my TODO
+list, there is lots of things to be done, but I can't start implementing
+them before I have clean idea of the future directions. I don't want to write
+too much code which I then need to rewrite.
+
+There are many small things:
+
+- I have been thinking how to implement player input. What is the game's
+  responsibilty of processing input? Should I write a package that translates
+  mouse, keyboard and joystick inputs to something usable for a game, or
+  should game itself implement interpretation of input devices?
+  
+- Player object: in many ways, everything is inside player object. Player
+  may have "avatar" on a screen, but player actions dominate what happens
+  in the game - opening menus, quitting, etc.
+
+- When thinking implementation of new text rendering mechanism, I was thinking
+  the architecture in general. There is a need for separate sprite blitting
+  shader, divided to sprite sheet shader, static sprite sheet shader, and so
+  on. I started to think that what if shaders are connected to data structures
+  they can blit? That is, all current shaders are "MeshShader" classes, they
+  take in a Mesh and blit it on screen. Similar way, programmer could create
+  sprite sheets and get them on screen with dedicated shader.
+  
+- Interaction between things: texts, sprites, 3D objects, they all can have
+  some relationships to each other. You may want text to appear at the top of
+  a 3D model. Text itself is highly related - characters follow each other,
+  lines follow each other. Text blocks are anchored to different points.
+
+In general, I started to think what is the responsibility of an engine, and
+what is needed from game side to implement a game? Is engine more like a tool
+box, offering different tools to a game? Or
+

@@ -142,7 +142,7 @@ private void validate(GLuint programID)
     checkgl!glValidateProgram(programID);
     bool status = getProgram!bool(programID, GL_VALIDATE_STATUS);
 
-    writeln("Validate program ", programID, ": ", status ? "OK" : "Fail");
+    writeln("GLSL: Validate program ", programID, ": ", status ? "OK" : "Fail");
 
     if(!status) writeln("- Message: ", getProgramInfoLog(programID));
 }
