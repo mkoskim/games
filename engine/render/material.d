@@ -2,6 +2,9 @@
 //
 // Materials for rendering
 //
+// TO BE REWORKED! Objects have object-specific modifiers (e.g. color
+// modifier).
+//
 //*****************************************************************************
 
 module engine.render.material;

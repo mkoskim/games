@@ -128,7 +128,7 @@ class Texture
 
     this(string filename)
     {
-        SDL_Surface* img = blob.loadimage(filename);		
+        SDL_Surface* img = blob.loadimage(filename);
         this(img);
         //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
         //debug writeln("- Pixels: ", img.pixels[0 .. 5]);

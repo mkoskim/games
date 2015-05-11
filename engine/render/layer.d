@@ -1,6 +1,9 @@
 //*****************************************************************************
 //
-// Render core file.
+// Layer is a bunch of rendered objects.
+//
+// TO BE REWORKED! Layers are integrated to 'blitter' object, which combines
+// shader control, layers and such together.
 //
 //*****************************************************************************
 

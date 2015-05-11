@@ -2,6 +2,8 @@
 //
 // Instance combine vertex and material data
 //
+// TO BE REWORKED!
+//
 //*****************************************************************************
 
 module engine.render.instance;

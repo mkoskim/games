@@ -40,7 +40,7 @@ class BoundSphere
     private this(vec3 center, float radius)
     {
         this.center = center;
-        this.radius = radius;	
+        this.radius = radius;
     }
 }
 

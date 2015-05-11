@@ -7,6 +7,26 @@ development.
 
 -------------------------------------------------------------------------------
 
+RENDERING FRAMEWORK:
+
+The current (May 11, 2015) idea is to change underlaying architecture
+considerably:
+
+- Shader class becomes just interface between CPU and GLSL. It has
+  methods to upload and update data structures needed by GLSL.
+  
+- 'Layers' and such are combined with Shader to create yet unnamed
+  object, that holds shader code and uploaded data, and process
+  batches.
+
+- Different kind of batch processors: spritesheet blitter, generic
+  3D blitter, text blitter, ...
+
+- Game combines several such objects to form a pipeline to render
+  the screen.
+
+-------------------------------------------------------------------------------
+
 USER INPUT: Personally, I'm designing games to be controlled with game
 controller (XBox 360). The reason for this is that keyboard controlling is
 too coarse for the main projects I have been thinking (e.g. Skyrim-like
@@ -25,9 +45,5 @@ also give some configurability. Some current thoughts:
 One way could be to create a bunch of "logical controllers": one would be
 simple 4-direction joystick for pacman-like games, some other would contain
 more directions (that is, movement + look) and buttons.
-
--------------------------------------------------------------------------------
-
-RENDERING FRAMEWORK:
 
 

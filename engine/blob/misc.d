@@ -20,6 +20,8 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 import derelict.sdl2.image;
 
+//-----------------------------------------------------------------------------
+
 SDL_Surface* loadimage(string filename)
 {
     auto buffer = extract(filename);
@@ -32,6 +34,8 @@ SDL_Surface* loadimage(string filename)
 
     return img;
 }
+
+//-----------------------------------------------------------------------------
 
 TTF_Font* loadfont(string filename, int ptsize)
 {
