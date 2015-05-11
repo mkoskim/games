@@ -24,7 +24,7 @@ static import std.string;
 
 class TTFError : Exception
 {
-	this(string msg) { super(msg); }
+    this(string msg) { super(msg); }
 }
 
 //*****************************************************************************
@@ -32,137 +32,137 @@ class TTFError : Exception
 
 class TextBox : Instance
 {
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //
+    //-------------------------------------------------------------------------
 
-	this(Layer layer, float x, float y, string text, Font font_ = null)
-	{
-		//---------------------------------------------------------------------
-		
-		if(!font_)
-		{
-			font_ = Font.load("engine/stock/fonts/Courier Prime/Courier Prime.ttf", 12);
-		}
-		font = font_;
+    this(Layer layer, float x, float y, string text, Font font_ = null)
+    {
+        //---------------------------------------------------------------------
 
-		//---------------------------------------------------------------------
-		
-		if(!(layer.shader in unitbox))
-		{
-			unitbox[layer.shader] = layer.shader.upload(rect(1, 1));
-		}
+        if(!font_)
+        {
+            font_ = Font.load("engine/stock/fonts/Courier Prime/Courier Prime.ttf", 12);
+        }
+        font = font_;
 
-		super(vec3(x, y, 0), unitbox[layer.shader], new Material());
+        //---------------------------------------------------------------------
 
-		//---------------------------------------------------------------------
-		
-		//tex = font.texture(text);		
-		
-		foreach(i, s; std.string.split(text, "%"))
-		{
-			if(i & 1)
-			{
-				if(s.length)
-				{
-					fields[s] = new Dynamic(s);
-					elems ~= fields[s];
-				}
-				else
-				{
-					elems ~= new Static("%");
-				}
-			}
-			else if(s.length)
-			{
-				elems ~= new Static(s);
-			}
-		}
-		
-		layer.add(this);
-	}
+        if(!(layer.shader in unitbox))
+        {
+            unitbox[layer.shader] = layer.shader.upload(rect(1, 1));
+        }
 
-	~this() { }
+        super(vec3(x, y, 0), unitbox[layer.shader], new Material());
 
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	
-	class Element
-	{
-		vec4 color;
-		this() { color = vec4(1, 1, 1, 1); }
-		abstract string content();
-	}
-	
-	class Static : Element
-	{
-		string text;
-		this(string s) { super(); text = s; }
-		override string content() { return text; }
-	}
+        //---------------------------------------------------------------------
 
-	class Dynamic : Element
-	{
-		string value;
-		this(string s) { super(); value = s; }
-		override string content() { return value; }
-	}
-	
-	//-------------------------------------------------------------------------
-	//
-	//-------------------------------------------------------------------------
-	
-	Dynamic fields[string];
-	Element[] elems;
-	Font font;
+        //tex = font.texture(text);
 
-	void   opIndexAssign(string value, string name) { fields[name].value = value; }
-	Dynamic opIndex(string name) { return fields[name]; }
+        foreach(i, s; std.string.split(text, "%"))
+        {
+            if(i & 1)
+            {
+                if(s.length)
+                {
+                    fields[s] = new Dynamic(s);
+                    elems ~= fields[s];
+                }
+                else
+                {
+                    elems ~= new Static("%");
+                }
+            }
+            else if(s.length)
+            {
+                elems ~= new Static(s);
+            }
+        }
 
-	//-------------------------------------------------------------------------
+        layer.add(this);
+    }
 
-	mat4 mChar;
-	
-	override mat4 mModel()
-	{
-		return super.mModel() * mChar;
-	}
+    ~this() { }
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //
+    //-------------------------------------------------------------------------
 
-	override void render(Shader shader, View cam)
-	{
-		import engine.render.util;
+    class Element
+    {
+        vec4 color;
+        this() { color = vec4(1, 1, 1, 1); }
+        abstract string content();
+    }
 
-		//mat4 mVP = mVP * super.mModel();
-		vec3 cursor = vec3(0, 0, 0);
-		
-		foreach(elem; elems) {
-			shape.material.color = elem.color;
-			foreach(c; elem.content) {
-				shape.material.colormap = font.render(c);
+    class Static : Element
+    {
+        string text;
+        this(string s) { super(); text = s; }
+        override string content() { return text; }
+    }
 
-				mChar = mat4.identity;
-				mChar.scale(
-					shape.material.colormap.width,
-					shape.material.colormap.height,
-					0
-				);
-				mChar.translate(cursor.x, cursor.y, cursor.z);
+    class Dynamic : Element
+    {
+        string value;
+        this(string s) { super(); value = s; }
+        override string content() { return value; }
+    }
 
-				shader.render(cam, this);
-				cursor.x += shape.material.colormap.width;
-			}
-		}
-	}
-	
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    //
+    //-------------------------------------------------------------------------
 
-	private static Shader.VAO unitbox[Shader];
+    Dynamic fields[string];
+    Element[] elems;
+    Font font;
 
-	//-----------------------------------------------------------------------------
-	//-----------------------------------------------------------------------------
+    void   opIndexAssign(string value, string name) { fields[name].value = value; }
+    Dynamic opIndex(string name) { return fields[name]; }
+
+    //-------------------------------------------------------------------------
+
+    mat4 mChar;
+
+    override mat4 mModel()
+    {
+        return super.mModel() * mChar;
+    }
+
+    //-------------------------------------------------------------------------
+
+    override void render(Shader shader, View cam)
+    {
+        import engine.render.util;
+
+        //mat4 mVP = mVP * super.mModel();
+        vec3 cursor = vec3(0, 0, 0);
+
+        foreach(elem; elems) {
+            shape.material.color = elem.color;
+            foreach(c; elem.content) {
+                shape.material.colormap = font.render(c);
+
+                mChar = mat4.identity;
+                mChar.scale(
+                    shape.material.colormap.width,
+                    shape.material.colormap.height,
+                    0
+                );
+                mChar.translate(cursor.x, cursor.y, cursor.z);
+
+                shader.render(cam, this);
+                cursor.x += shape.material.colormap.width;
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------
+
+    private static Shader.VAO unitbox[Shader];
+
+    //-----------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------
 }
 
 //*****************************************************************************
@@ -170,83 +170,83 @@ class TextBox : Instance
 
 class Font
 {
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
-	static Font fonts[string];
+    static Font fonts[string];
 
-	static Font load(string filename, int size)
-	{
-		string fontname = filename ~ ":" ~ to!string(size);
-	
-		if(!(fontname in fonts))
-		{
-			fonts[fontname] = new Font(blob.loadfont(filename, size), fontname);
-		}
-		return fonts[fontname];
-	}
+    static Font load(string filename, int size)
+    {
+        string fontname = filename ~ ":" ~ to!string(size);
 
-	//-------------------------------------------------------------------------
+        if(!(fontname in fonts))
+        {
+            fonts[fontname] = new Font(blob.loadfont(filename, size), fontname);
+        }
+        return fonts[fontname];
+    }
 
-	import derelict.sdl2.ttf;
+    //-------------------------------------------------------------------------
 
-	private
-	{
-		string ID;
-		TTF_Font *font;
-		Texture rendered[char];
+    import derelict.sdl2.ttf;
 
-		this(TTF_Font *font, string ID)
-		{
-			this.font = font;
-			this.ID = ID;
-		}
+    private
+    {
+        string ID;
+        TTF_Font *font;
+        Texture rendered[char];
 
-		~this()
-		{
-			TODO("Segfaults");
-			//TTF_CloseFont(font); font = null;
-		}
-	}
+        this(TTF_Font *font, string ID)
+        {
+            this.font = font;
+            this.ID = ID;
+        }
 
-	//-------------------------------------------------------------------------
+        ~this()
+        {
+            TODO("Segfaults");
+            //TTF_CloseFont(font); font = null;
+        }
+    }
 
-	Font setstyle(int style)
-	{
-		TTF_SetFontStyle(font, style);
-		return this;
-	}
+    //-------------------------------------------------------------------------
 
-	Font setoutline(int width)
-	{
-		TTF_SetFontOutline(font, width);
-		return this;
-	}
+    Font setstyle(int style)
+    {
+        TTF_SetFontStyle(font, style);
+        return this;
+    }
 
-	//-------------------------------------------------------------------------
+    Font setoutline(int width)
+    {
+        TTF_SetFontOutline(font, width);
+        return this;
+    }
 
-	Texture render(char c) {
-		if(!(c in rendered)) {
-			rendered[c] = texture(to!string(c));
-		}
-		return rendered[c];
-	}
+    //-------------------------------------------------------------------------
 
-	Texture texture(string text) {
-		SDL_Color color={255, 255, 255, 255};
-		
-		auto bitmap = TTF_RenderText_Blended(font, std.string.toStringz(text), color);
-		if(!bitmap) throw new TTFError(
-			format(
-				"TTF_RenderText_Blended: %s ('%s')",
-				to!string(TTF_GetError()),
-				text
-			)
-		);
-		auto texture = new Texture(bitmap);
-		SDL_FreeSurface(bitmap);
-		return texture;
-	}
+    Texture render(char c) {
+        if(!(c in rendered)) {
+            rendered[c] = texture(to!string(c));
+        }
+        return rendered[c];
+    }
 
-	//-------------------------------------------------------------------------
+    Texture texture(string text) {
+        SDL_Color color={255, 255, 255, 255};
+
+        auto bitmap = TTF_RenderText_Blended(font, std.string.toStringz(text), color);
+        if(!bitmap) throw new TTFError(
+            format(
+                "TTF_RenderText_Blended: %s ('%s')",
+                to!string(TTF_GetError()),
+                text
+            )
+        );
+        auto texture = new Texture(bitmap);
+        SDL_FreeSurface(bitmap);
+        return texture;
+    }
+
+    //-------------------------------------------------------------------------
 }
 

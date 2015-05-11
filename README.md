@@ -1,7 +1,7 @@
 Game projects with common engine
 ================================
 
-**Desription:** See:
+**Description:** See:
 
 [games wiki](https://github.com/mkoskim/games/wiki)
 
