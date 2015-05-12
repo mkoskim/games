@@ -43,7 +43,7 @@ private struct VERTEX {
 //-----------------------------------------------------------------------------
 
 private struct TRIANGLE {
-    VERTEX vertices[3];
+    VERTEX[3] vertices;
 
     this(string v1, string v2, string v3) {
         vertices = [ VERTEX(v1), VERTEX(v2), VERTEX(v3) ];

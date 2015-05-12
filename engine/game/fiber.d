@@ -38,10 +38,10 @@ class Fiber : CoreFiber
 
 class FiberQueue
 {
-    private bool callbacks[void delegate()];	
-    private Fiber queue[];
+    private bool[void delegate()] callbacks;
+    private Fiber[] queue;
 
-    void add(Fiber f) { queue ~= f;	}
+    void add(Fiber f) { queue ~= f; }
     void add(void delegate() f) { queue ~= new Fiber(f); }
 
     void addcallback(void delegate() f) { callbacks[f] = true; }

@@ -117,7 +117,7 @@ private GLuint compileShader(GLenum shadertype, string[] files)
     // some built-ins. We allow null filenames for missing optional parts.
     //-------------------------------------------------------------------------
 
-    const(char)* source[] = [
+    const(char)*[] source = [
         toStringz("#version 120\n"),
         toStringz(header[shadertype])
     ];

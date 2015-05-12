@@ -129,7 +129,7 @@ void play(string mazename)
 
     enum Head { left, right, up, down, none }
 
-    vec3 directions[Head] = [
+    vec3[Head] directions = [
         Head.left:  vec3(-1,  0, 0),
         Head.right: vec3(+1,  0, 0),
         Head.up:    vec3( 0, -1, 0),
@@ -313,7 +313,7 @@ void play(string mazename)
             {
                 bool currentvalid = checkgrid(current);
 
-                Head choices[] = valid(turndirs(current));
+                Head[] choices = valid(turndirs(current));
                 if(choices.length && (currentvalid ? dice(50, 50) : 1))
                 {
                     current = pick(choices);

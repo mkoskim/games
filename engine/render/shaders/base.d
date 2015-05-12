@@ -283,8 +283,8 @@ abstract class Shader
         uint ID;
 
         BoundSphere bsp;
-        VBO vbos[];
-        IBO ibo;
+        VBO[] vbos;
+        IBO   ibo;
 
         this()  { checkgl!glGenVertexArrays(1, &ID); }
         ~this() { checkgl!glDeleteVertexArrays(1, &ID); }

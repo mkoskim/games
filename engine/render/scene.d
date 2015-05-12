@@ -36,7 +36,7 @@ class Scene
     //---------------------------------------------------------------------
 
     Shader shader;
-    bool instances[Instance];
+    bool[Instance] instances;
 
     Light light;
 

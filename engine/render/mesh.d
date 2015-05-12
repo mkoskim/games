@@ -37,7 +37,7 @@ class Mesh
         ivec4x8b normal;
         ivec4x8b tangent;
 
-        uint padding[2];
+        uint[2] padding;
 
         //---------------------------------------------------------------------
 
@@ -135,8 +135,8 @@ class Mesh
     {
         assert(mode == GL_TRIANGLES);
 
-        vec3 tan1[] = new vec3[vertices.length];
-        vec3 tan2[] = new vec3[vertices.length];
+        vec3[] tan1 = new vec3[vertices.length];
+        vec3[] tan2 = new vec3[vertices.length];
 
         foreach(i; 0 .. vertices.length)
         {

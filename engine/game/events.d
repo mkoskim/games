@@ -263,7 +263,7 @@ class Joystick
     }
 }
 
-Joystick joysticks[];
+Joystick[] joysticks;
 
 //-----------------------------------------------------------------------------
 //
@@ -276,7 +276,7 @@ int quitkey = SDLK_ESCAPE;
 
 SDL_Event*[] getevents()
 {
-    SDL_Event* eventbuf[];
+    SDL_Event*[] eventbuf;
 
     for(;;)
     {

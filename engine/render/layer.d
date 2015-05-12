@@ -26,7 +26,7 @@ class Layer
     Shader shader;
 
     View cam;
-    bool instances[Instance];
+    bool[Instance] instances;
 
     auto length() { return instances.length; }
 

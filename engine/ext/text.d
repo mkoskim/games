@@ -115,7 +115,7 @@ class TextBox : Instance
     //
     //-------------------------------------------------------------------------
 
-    Dynamic fields[string];
+    Dynamic[string] fields;
     Element[] elems;
     Font font;
 
@@ -161,7 +161,7 @@ class TextBox : Instance
 
     //-------------------------------------------------------------------------
 
-    private static Shader.VAO unitbox[Shader];
+    private static Shader.VAO[Shader] unitbox;
 
     //-----------------------------------------------------------------------------
     //-----------------------------------------------------------------------------
@@ -174,7 +174,7 @@ class Font
 {
     //-------------------------------------------------------------------------
 
-    static Font fonts[string];
+    static Font[string] fonts;
 
     static Font load(string filename, int size)
     {
@@ -195,7 +195,7 @@ class Font
     {
         string ID;
         TTF_Font *font;
-        Texture rendered[char];
+        Texture[char] rendered;
 
         this(TTF_Font *font, string ID)
         {
