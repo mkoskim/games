@@ -13,7 +13,7 @@ import engine;
 // Unit length tells how large is one maze block (1 x 1) at screen.
 //-----------------------------------------------------------------------------
 
-int unitlength = 18;
+const int unitlength = 18;
 
 //*****************************************************************************
 //
