@@ -2,6 +2,8 @@
 //
 // Texts - and fonts
 //
+// Text blitting is more like a layout engine.
+//
 //*****************************************************************************
 
 module engine.ext.text;

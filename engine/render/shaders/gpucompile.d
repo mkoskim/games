@@ -46,159 +46,68 @@ number from the message.
 
 -----------------------------------------------------------------------------*/
 
-//*****************************************************************************
-//*****************************************************************************
-
 class ShaderCompileError : Exception
 {
     this(string msg) { super(msg); }
     this(char[] msg) { super(to!string(msg)); }
 }
 
-//-----------------------------------------------------------------------------
-// Getting source ID and line number from error message. TODO: Determine
-// video driver, and write driver-specific regexes.
-//-----------------------------------------------------------------------------
+//*****************************************************************************
+//
+// Compilation main function: compile vertex and fragment shaders, from
+// common source combined with shader specific source.
+//
+//*****************************************************************************
 
-private class Location
+GLuint gpuCompileProgram(string[] common, string[] vsfiles, string[] fsfiles)
 {
-    ulong fileid, line;
-    string filename;
-    string msg;
+    //-------------------------------------------------------------------------
 
-    this(string msg)
-    {
-        auto re = regex(
-            r"^\s*(?P<fileid>\d+)\:(?P<line>\d+)\((?P<column>\d+)\)\:"
-        );
-        auto c = matchFirst(msg, re);
-
-        this.fileid = to!ulong(c["fileid"]);
-        this.line = to!ulong(c["line"]);
-        this.msg = c.post();
-        this.filename = "<unknown>";
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-debug private string getShaderSource(GLuint shaderID)
-{
-    int src_length;
-    checkgl!glGetShaderiv(shaderID, GL_SHADER_SOURCE_LENGTH, &src_length);
-    char[] buffer = new char[src_length];
-    checkgl!glGetShaderSource(shaderID, src_length, null, buffer.ptr);
-    return to!string(buffer);
-}
-
-private auto getShader(T)(GLuint shaderID, GLenum name)
-{
-    GLint result;
-    checkgl!glGetShaderiv(shaderID, name, &result);
-    return cast(T)result;
-}
-
-private string getShaderInfoLog(GLuint shaderID)
-{
-    int log_length;
-    checkgl!glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &log_length);
-
-    if(log_length)
-    {
-        char[] buffer = new char[log_length];
-        checkgl!glGetShaderInfoLog(shaderID, log_length, null, buffer.ptr);
-        return to!string(buffer.ptr);
-    }
-    return "";
-}
-
-//-----------------------------------------------------------------------------
-
-private auto getProgram(T)(GLuint programID, GLenum name)
-{
-    GLint result;
-    checkgl!glGetProgramiv(programID, name, &result);
-    return cast(T)result;
-}
-
-private string getProgramInfoLog(GLuint programID)
-{
-    int log_length;
-    checkgl!glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &log_length);
-
-    if(log_length)
-    {
-        char[] buffer = new char[log_length];
-        glGetProgramInfoLog(programID, log_length, null, buffer.ptr);
-        return to!string(buffer.ptr);
-    }
-    return "";
-}
-
-//-----------------------------------------------------------------------------
-
-private void validate(GLuint programID)
-{
-    checkgl!glValidateProgram(programID);
-    bool status = getProgram!bool(programID, GL_VALIDATE_STATUS);
-
-    writeln("GLSL: Validate program ", programID, ": ", status ? "OK" : "Fail");
-
-    if(!status) writeln("- Message: ", getProgramInfoLog(programID));
-}
-
-private void dumpSymbols(GLuint programID)
-{
-    int count = getProgram!int(programID, GL_ACTIVE_UNIFORMS);
-    int maxlen = getProgram!int(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH);
-    char[] namebuf = new char[maxlen];
-
-    string[GLenum] type2str = [
-        GL_FLOAT: "float", GL_FLOAT_VEC2: "vec2", GL_FLOAT_VEC3: "vec3", GL_FLOAT_VEC4: "vec4",
-        GL_INT: "int", GL_INT_VEC2: "ivec2", GL_INT_VEC3: "ivec3", GL_INT_VEC4: "ivec4",
-        GL_BOOL: "bool", GL_BOOL_VEC2: "bvec2", GL_BOOL_VEC3: "bvec3", GL_BOOL_VEC4: "bvec4",
-        GL_FLOAT_MAT2: "mat2", GL_FLOAT_MAT3: "mat3", GL_FLOAT_MAT4: "mat4",
-        GL_SAMPLER_2D: "sampler2d",
-        GL_SAMPLER_CUBE: "samplercube",
+    GLuint[] shaders = [
+        compileShader(GL_VERTEX_SHADER,   common ~ vsfiles),
+        compileShader(GL_FRAGMENT_SHADER, common ~ fsfiles)
     ];
 
-    writeln("Program: ", programID);
+    //-------------------------------------------------------------------------
 
-    writeln("- Uniforms:");
+    GLuint programID = checkgl!glCreateProgram();
+    foreach(shaderID; shaders) checkgl!glAttachShader(programID, shaderID);
+    checkgl!glLinkProgram(programID);
 
-    foreach(uint i; 0 .. count)
+    if(!getProgram!bool(programID, GL_LINK_STATUS))
     {
-        GLint size;
-        GLenum type;
-
-        checkgl!glGetActiveUniform(
-            programID, i, maxlen,
-            null, 
-            &size,
-            &type,
-            namebuf.ptr
-        );
-
-        writefln("    %2d: %-" ~ to!string(maxlen) ~"s: %d x %s",
-            i,
-            to!string(namebuf.ptr),
-            size, type2str[type],
+        throw new ShaderCompileError
+        (
+            "Linking:\n" ~ getProgramInfoLog(programID)
         );
     }
 
-    writeln("- Vertex attributes: Not yet implemented.");
-    writeln("- Varying: Not yet implemented.");
+    //-------------------------------------------------------------------------
 
-    //writeln("Uniforms: ", count);
-    //writeln("Maxlen: ", maxlen);
+    debug validate(programID);
+
+    //debug dumpSymbols(programID);
+
+    //-------------------------------------------------------------------------
+
+    foreach(shaderID; shaders)
+    {
+        checkgl!glDetachShader(programID, shaderID);
+        checkgl!glDeleteShader(shaderID);
+    }
+
+    return programID;
 }
 
 //*****************************************************************************
+//
+// Compiling shader
+//
 //*****************************************************************************
 
 private GLuint compileShader(GLenum shadertype, string[] files)
 {
-    const string[uint] header = [
+    const string[GLenum] header = [
         GL_VERTEX_SHADER: "#define VERTEX_SHADER\n",
         GL_FRAGMENT_SHADER: "#define FRAGMENT_SHADER\n"
     ];
@@ -267,45 +176,150 @@ private GLuint compileShader(GLenum shadertype, string[] files)
     );
 }
 
+//*****************************************************************************
+//*****************************************************************************
+
+//-----------------------------------------------------------------------------
+// Getting source ID and line number from error message. TODO: Determine
+// video driver, and write driver-specific regexes.
 //-----------------------------------------------------------------------------
 
-GLuint gpuCompileProgram(string[] common, string[] vsfiles, string[] fsfiles)
+private class Location
 {
-    //-------------------------------------------------------------------------
+    ulong fileid, line;
+    string filename;
+    string msg;
 
-    GLuint[] shaders = [
-        compileShader(GL_VERTEX_SHADER,   common ~ vsfiles),
-        compileShader(GL_FRAGMENT_SHADER, common ~ fsfiles)
+    this(string msg)
+    {
+        auto re = regex(
+            r"^\s*(?P<fileid>\d+)\:(?P<line>\d+)\((?P<column>\d+)\)\:"
+        );
+        auto c = matchFirst(msg, re);
+
+        this.fileid = to!ulong(c["fileid"]);
+        this.line = to!ulong(c["line"]);
+        this.msg = c.post();
+        this.filename = "<unknown>";
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Querying compiled shader program parameters from GPU
+//-----------------------------------------------------------------------------
+
+private auto getShader(T)(GLuint shaderID, GLenum name)
+{
+    GLint result;
+    checkgl!glGetShaderiv(shaderID, name, &result);
+    return cast(T)result;
+}
+
+debug private string getShaderSource(GLuint shaderID)
+{
+    int src_length;
+    checkgl!glGetShaderiv(shaderID, GL_SHADER_SOURCE_LENGTH, &src_length);
+    char[] buffer = new char[src_length];
+    checkgl!glGetShaderSource(shaderID, src_length, null, buffer.ptr);
+    return to!string(buffer);
+}
+
+private string getShaderInfoLog(GLuint shaderID)
+{
+    int log_length;
+    checkgl!glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &log_length);
+
+    if(log_length)
+    {
+        char[] buffer = new char[log_length];
+        checkgl!glGetShaderInfoLog(shaderID, log_length, null, buffer.ptr);
+        return to!string(buffer.ptr);
+    }
+    return "";
+}
+
+//-----------------------------------------------------------------------------
+// Querying compiled program parameters from GPU
+//-----------------------------------------------------------------------------
+
+private auto getProgram(T)(GLuint programID, GLenum name)
+{
+    GLint result;
+    checkgl!glGetProgramiv(programID, name, &result);
+    return cast(T)result;
+}
+
+private string getProgramInfoLog(GLuint programID)
+{
+    int log_length;
+    checkgl!glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &log_length);
+
+    if(log_length)
+    {
+        char[] buffer = new char[log_length];
+        glGetProgramInfoLog(programID, log_length, null, buffer.ptr);
+        return to!string(buffer.ptr);
+    }
+    return "";
+}
+
+//-----------------------------------------------------------------------------
+// Validation & symbol dumping
+//-----------------------------------------------------------------------------
+
+private void validate(GLuint programID)
+{
+    checkgl!glValidateProgram(programID);
+    bool status = getProgram!bool(programID, GL_VALIDATE_STATUS);
+
+    writeln("GLSL: Validate program ", programID, ": ", status ? "OK" : "Fail");
+
+    if(!status) writeln("- Message: ", getProgramInfoLog(programID));
+}
+
+private void dumpSymbols(GLuint programID)
+{
+    int count = getProgram!int(programID, GL_ACTIVE_UNIFORMS);
+    int maxlen = getProgram!int(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH);
+    char[] namebuf = new char[maxlen];
+
+    string[GLenum] type2str = [
+        GL_FLOAT: "float", GL_FLOAT_VEC2: "vec2", GL_FLOAT_VEC3: "vec3", GL_FLOAT_VEC4: "vec4",
+        GL_INT: "int", GL_INT_VEC2: "ivec2", GL_INT_VEC3: "ivec3", GL_INT_VEC4: "ivec4",
+        GL_BOOL: "bool", GL_BOOL_VEC2: "bvec2", GL_BOOL_VEC3: "bvec3", GL_BOOL_VEC4: "bvec4",
+        GL_FLOAT_MAT2: "mat2", GL_FLOAT_MAT3: "mat3", GL_FLOAT_MAT4: "mat4",
+        GL_SAMPLER_2D: "sampler2d",
+        GL_SAMPLER_CUBE: "samplercube",
     ];
 
-    //-------------------------------------------------------------------------
+    writeln("Program: ", programID);
 
-    GLuint programID = checkgl!glCreateProgram();
-    foreach(shaderID; shaders) checkgl!glAttachShader(programID, shaderID);
-    checkgl!glLinkProgram(programID);
+    writeln("- Uniforms:");
 
-    if(!getProgram!bool(programID, GL_LINK_STATUS))
+    foreach(uint i; 0 .. count)
     {
-        throw new ShaderCompileError
-        (
-            "Linking:\n" ~ getProgramInfoLog(programID)
+        GLint size;
+        GLenum type;
+
+        checkgl!glGetActiveUniform(
+            programID, i, maxlen,
+            null, 
+            &size,
+            &type,
+            namebuf.ptr
+        );
+
+        writefln("    %2d: %-" ~ to!string(maxlen) ~"s: %d x %s",
+            i,
+            to!string(namebuf.ptr),
+            size, type2str[type],
         );
     }
 
-    //-------------------------------------------------------------------------
+    writeln("- Vertex attributes: Not yet implemented.");
+    writeln("- Varying: Not yet implemented.");
 
-    debug validate(programID);
-
-    //debug dumpSymbols(programID);
-
-    //-------------------------------------------------------------------------
-
-    foreach(shaderID; shaders)
-    {
-        checkgl!glDetachShader(programID, shaderID);
-        checkgl!glDeleteShader(shaderID);
-    }
-
-    return programID;
+    //writeln("Uniforms: ", count);
+    //writeln("Maxlen: ", maxlen);
 }
 

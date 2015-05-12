@@ -118,7 +118,7 @@ abstract class Shader
         checkgl!glUniform1f(location("uniform", name), value);
     }
 
-    final void uniform(string name, bool value)
+    protected final void uniform(string name, bool value)
     {
         checkgl!glUniform1ui(location("uniform", name), value);
     }
@@ -145,8 +145,8 @@ abstract class Shader
 
     protected class VBO
     {
-        GLuint ID;          // VBO ID
-        ulong rowsize;      // Data row size
+        GLuint ID;      // VBO ID
+        ulong rowsize; // Data row size
 
         this(void* buffer, size_t length, size_t elemsize, uint mode = GL_STATIC_DRAW)
         {

@@ -16,8 +16,7 @@ considerably:
   methods to upload and update data structures needed by GLSL.
   
 - 'Layers' and such are combined with Shader to create yet unnamed
-  object, that holds shader code and uploaded data, and process
-  batches.
+  object, that holds uploaded data, and feeds batches to shader.
 
 - Different kind of batch processors: spritesheet blitter, generic
   3D blitter, text blitter, ...

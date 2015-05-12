@@ -53,6 +53,7 @@ class Maze : render.Scene
     {
         super();
         //super(render.shaders.Toon3D.create());
+        //super(render.shaders.Lightless3D.create());
 
         //---------------------------------------------------------------------
 

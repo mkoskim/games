@@ -152,7 +152,9 @@ class Texture
     }
 
     //-------------------------------------------------------------------------
-    // Creating textures from sheet
+    // Creating textures from sheet:
+    // TODO: To be removed - sheets are used as they are, instead we need
+    // functions to create sheets from single sprites.
     //-------------------------------------------------------------------------
 
     static Texture[][] loadSheet(
@@ -161,7 +163,7 @@ class Texture
         int padx = 0, int pady = 0
     )
     {
-        SDL_Surface* sheet = blob.loadimage(filename);		
+        SDL_Surface* sheet = blob.loadimage(filename);
         //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
         //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
 

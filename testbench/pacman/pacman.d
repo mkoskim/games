@@ -343,7 +343,7 @@ void play(string mazename)
         rect1x1  = shader.upload(geom.rect(1, 1)),
         rect2x2  = shader.upload(geom.rect(1.66, 1.66)),
         foodmesh = shader.upload(geom.rect(0.25, 0.25)),
-        actorbox = shader.upload(geom.rect(1.66, 1.66, geom.center)),		
+        actorbox = shader.upload(geom.rect(1.66, 1.66, geom.center)),
         doormesh = shader.upload(geom.rect(1.66, 1));
 
     auto doormat = new render.Material(0.7, 0.7, 0.7);
