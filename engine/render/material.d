@@ -32,7 +32,7 @@ class Material
 
     //-------------------------------------------------------------------------
     // Material reflectivity is approximated with roughness coefficient. The
-    // smoother material (smaller roughness), the less specular lightning.
+    // smoother material (smaller roughness), the more specular lightning.
     //-------------------------------------------------------------------------
 
     float roughness;

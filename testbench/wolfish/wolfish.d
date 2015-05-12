@@ -65,7 +65,10 @@ class Maze : render.Scene
         );
 
         //---------------------------------------------------------------------
-        // Load different materials for later use
+        //
+        // Load different materials for later use... It would be very nice
+        // to have some kind of material database to ease this process...
+        //
         //---------------------------------------------------------------------
 
         auto matCaveWall = new render.Material(
@@ -76,46 +79,46 @@ class Maze : render.Scene
         auto matCrackedPlaster = new render.Material(
             new render.Texture("engine/stock/tiles/CrackedPlaster/ColorMap.png"),
             new render.Texture("engine/stock/tiles/CrackedPlaster/NormalMap.png"),
-            0.5);
+            0.95);
 
         auto matSantaFeStucco = new render.Material(
             //new render.Texture("engine/stock/tiles/SantaFeStucco/ColorMap.png"),
             new render.Texture("engine/stock/tiles/CaveWall/ColorMap.png"),
             new render.Texture("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
-            0.85);
+            0.95);
 
         auto matTanStucco = new render.Material(
             //new render.Texture("engine/stock/tiles/SantaFeStucco/ColorMap.png"),
             new render.Texture("engine/stock/tiles/TanStucco/ColorMap.png"),
             new render.Texture("engine/stock/tiles/TanStucco/NormalMap.png"),
-            0.85);
+            0.95);
 
         auto matBrickWall = new render.Material(
             new render.Texture("engine/stock/tiles/BrickWall1/ColorMap.png"),
             new render.Texture("engine/stock/tiles/BrickWall1/NormalMap.png"),
-            0.85);
+            0.95);
 
         auto matGraniteWall = new render.Material(
             new render.Texture("engine/stock/tiles/GraniteWall/ColorMap.png"),
             new render.Texture("engine/stock/tiles/GraniteWall/NormalMap.png"),
-            0.85);
+            0.95);
 
         auto matCrustyConcrete = new render.Material(
             new render.Texture("engine/stock/tiles/Concrete/Crusty/ColorMap.png"),
             new render.Texture("engine/stock/tiles/Concrete/Crusty/NormalMap.png"),
-            0.85);
+            0.95);
 
         auto matDirtyConcrete = new render.Material(
             new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
             new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
-            0.85);
+            0.95);
 
         auto matCarvedSandstone = new render.Material(
             new render.Texture("engine/stock/tiles/CarvedSandstone/ColorMap.png"),
             //new render.Texture("engine/stock/tiles/CaveWall/ColorMap.png"),
             //vec3(0.5, 0.4, 0.2),
             new render.Texture("engine/stock/tiles/CarvedSandstone/NormalMap.png"),
-            0.85);
+            0.95);
 
         auto matAlienCarving = new render.Material(
             //new render.Texture("engine/stock/tiles/AlienCarving/ColorMap.png"),
@@ -133,7 +136,7 @@ class Maze : render.Scene
 
         auto wallmesh = shader.upload(blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj"));
 
-        render.Shape wallshape[] = [
+        render.Shape[] wallshape = [
             new render.Shape(wallmesh, matCaveWall),
             new render.Shape(wallmesh, matBrickWall),
             new render.Shape(wallmesh, matDirtyConcrete),
@@ -265,7 +268,7 @@ class Player : game.Fiber
                 -30, 30
             );
 
-            //maze.mat.roughness = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
+            maze.mat.roughness = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
             //maze.light.color.b = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
             //maze.light.color.g = maze.light.color.b;
         }
@@ -341,12 +344,14 @@ void main()
                     default: break;
                     case SDLK_w: maze.shader.fill = !maze.shader.fill; break;
                     case SDLK_e: maze.shader.enabled = !maze.shader.enabled; break;
+                    /*
                     case SDLK_r: {
                         static bool normmaps = true;
                         normmaps = !normmaps;
                         maze.shader.activate();
                         maze.shader.uniform("useNormalMapping", normmaps);
                     } break;
+                    */
                 }
             }
             return true;

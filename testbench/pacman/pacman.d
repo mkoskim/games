@@ -59,6 +59,9 @@ string choosemaze()
 }
 
 //*****************************************************************************
+//*****************************************************************************
+
+//*****************************************************************************
 //
 // Game: First we load the maze, then we play.
 //
@@ -92,7 +95,8 @@ void play(string mazename)
         }
     }
 
-    ulong width = grid[0].length, height = grid.length;
+    ulong width = grid[0].length;
+    ulong height = grid.length;
 
     //-------------------------------------------------------------------------
     // Create view and adjust maze to center of window.
@@ -120,6 +124,20 @@ void play(string mazename)
     auto mazecolor = new render.Material(0.3, 0.3, 0.6);
 
     background.add(0, 0, shader.upload(geom.rect(width, height)), mazecolor);
+
+    //*************************************************************************
+    //
+    // Navigation map. In pacman like game, actors are only allowed to move
+    // from one empty location to neighboring empty location.
+    //
+    //*************************************************************************
+
+    enum Head { left, right, up, down, none }
+
+    class Node
+    {
+        Node[Head] route;
+    }
 
     //*************************************************************************
     //
@@ -171,16 +189,12 @@ void play(string mazename)
 
     //-------------------------------------------------------------------------
 
-    enum Head { left, right, up, down, none }
-
     vec3[Head] directions = [
         Head.left:  vec3(-1,  0, 0),
         Head.right: vec3(+1,  0, 0),
         Head.up:    vec3( 0, -1, 0),
         Head.down:  vec3( 0, +1, 0)
     ]; 
-
-    //-------------------------------------------------------------------------
 
     abstract class Actor : game.Fiber
     {

@@ -8,19 +8,32 @@ Simple game projects in this directory serve as test benches for engine
 creation, and step-by-step approach for implementing some more ambitious
 game projects.
 
-One line of development is to create 3D maze games. The intended path is:
+One line of development is to create 3D maze games. The planned road map
+is:
 
-    pacman/ The first project is simple pacman. It demonstrates some
-    fundamentals of maze based games, and games in general.
+    pacman/
+    
+        The first project is simple pacman. It demonstrates some
+        fundamentals of maze based games, and games in general.
 
-    wolfish/ Wolfenstein-style first person maze shooter is a step forward from
-    pacman.
+    wolfish/
+    
+        Wolfenstein-style first person maze shooter is a step forward from
+        pacman. In addition to act as basic 3D demonstration, it is also
+        planned to have at least preliminary implementation of navigation
+        mesh.
 
-    platform/ At some point, I have planned to implement a simple platform game.
-    This project would sketch some basics of physics.
+    platform/
+    
+        At some point, I have planned to implement a simple platform game.
+        This project would sketch some basics of physics.
 
-    quakish/ (Located in projects) Combining Wolfenstein-style shooter and
-    platform game should lead to regular modern Quake-like shooter game.
+    quakish/
+    
+        Combining Wolfenstein-style shooter and platform game should lead to
+        regular "modern" Quake-like shooter game with three degrees of freedom.
+        It is possible that this project is realized as guerrilla/ game project
+        located in projects/ directory.
 
 The technologies and solutions used in quakish/ shooter game would then be used
 to prototype different kind of dungeon games.

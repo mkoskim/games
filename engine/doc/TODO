@@ -29,6 +29,15 @@ WORKLIST:
 - Add support for "multi-textured" instances - the idea is to have sort
   of "stamping", textures over textures.
 
+- Start working with navigation. The first step is to create a network
+  of nodes suitable for pacman-like games.
+
+- It is possible to compile GLSL library code to shader program, and then
+  link multiple of these programs together with specific main(). Investigate
+  this:
+  
+      http://stackoverflow.com/questions/9168252/attaching-multiple-shaders-of-the-same-type-in-a-single-opengl-program
+
 -------------------------------------------------------------------------------
 
 FIX: Crashes, flaws etc.
@@ -108,7 +117,7 @@ GENERAL:
   Think & design how to do this.
 
 - Static linking: examine possibilities to link needed libraries
-  statically to remove system side dependencies.
+  (SDL?) statically to remove system side dependencies.
 
 - VBO updating - or, in fact, "CPU-side" VBOs, mainly for instanced draws
   like particle engines. See e.g.
@@ -309,6 +318,12 @@ shaders.
 
 - Half-done: Design some sort of mechanism for some uniform material parameters,
   so that you can change shading model and still have somewhat similar results
+
+- It would be nice to have some kind of "database" system for materials,
+  combining e.g. color & normal maps and roughness together, so that you
+  could load materials with fewer lines in the code. Similarly, there
+  could be data files for other assets like sprite sheets (describing the
+  dimensions of the sheet) for loading them with less efforts.
 
 -------------------------------------------------------------------------------
 

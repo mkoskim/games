@@ -31,8 +31,8 @@ void main()
     );
 
     //-------------------------------------------------------------------------
-    // Create shape sheet from sprite sheet. As spritesheet used contains
-    // some duplicate images, we post-process the result a bit.
+    // Create shape sheet from sprite sheet. As second spritesheet used
+    // contains some duplicate images, we post-process the result a bit.
     //-------------------------------------------------------------------------
     
     auto explosions = [
@@ -50,25 +50,25 @@ void main()
                 shader,
                 new render.Texture("engine/stock/spritesheets/explosion1.png"),
                 128, 128,
-                80.0, 80.0
-            );
+                100.0, 100.0
+            )[0];
             
             return [
-                grid[0][0], grid[0][1], grid[0][2], grid[0][3],
-                grid[0][5], grid[0][6], grid[0][7], grid[0][8]
+                grid[0], grid[1], grid[2], grid[3],
+                grid[5], grid[6], grid[7], grid[8]
             ];
-        }(layer.shader)
+        }(layer.shader),
     ];
 
     //-------------------------------------------------------------------------
-    // Explosion animation
+    // Explosion animation: after random waiting (to prevent all explosions
+    // to be in the same phase), pick random animation and position, and
+    // run it. Rinse and repeat.
     //-------------------------------------------------------------------------
     
     class Explosion : game.Fiber
     {
-        this() {
-            super(&run);
-        }
+        this() { super(&run); }
 
         override void run()
         {
