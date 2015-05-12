@@ -20,6 +20,8 @@ import engine.render.texture;
 // independend", that is, the actual shading model parameters are calculated
 // elsewhere.
 //
+// TODO: Remove color. It is instance specific material modifier.
+//
 //-----------------------------------------------------------------------------
 
 class Material
@@ -30,7 +32,7 @@ class Material
 
     //-------------------------------------------------------------------------
     // Material reflectivity is approximated with roughness coefficient. The
-    // smoother material (smaller roughness), the more specular lightning.
+    // smoother material (smaller roughness), the less specular lightning.
     //-------------------------------------------------------------------------
 
     float roughness;

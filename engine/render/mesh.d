@@ -112,14 +112,50 @@ class Mesh
 
     Mesh move(float x, float y, float z)
     {
-        move(vec3(x, y, z));
-        return this;
+        return move(vec3(x, y, z));
     }
 
     Mesh scale(float factor)
     {
         foreach(i; 0 .. vertices.length) vertices[i].pos *= factor;
         return this;
+    }
+
+    //-------------------------------------------------------------------------
+    // UV transforms
+    //-------------------------------------------------------------------------
+
+    Mesh uv_scale(vec2 factor)
+    {
+        foreach(i; 0 .. vertices.length)
+        {
+            vec2 uv = vertices[i].uv.unpack();
+            uv.x *= factor.x;
+            uv.y *= factor.y;
+            vertices[i].uv.pack(uv);
+        }
+        return this;
+    }
+
+    Mesh uv_scale(float factor)
+    {
+        return uv_scale(vec2(factor, factor));
+    }
+
+    Mesh uv_move(vec2 delta)
+    {
+        foreach(i; 0 .. vertices.length)
+        {
+            vec2 uv = vertices[i].uv.unpack();
+            uv += delta;
+            vertices[i].uv.pack(uv);
+        }
+        return this;
+    }
+
+    Mesh uv_move(float x, float y)
+    {
+        return uv_move(vec2(x, y));
     }
 
     //-------------------------------------------------------------------------

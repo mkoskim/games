@@ -153,7 +153,7 @@ class TextBox : Instance
                 );
                 mChar.translate(cursor.x, cursor.y, cursor.z);
 
-                shader.render(cam, this);
+                shader.render(cam, this, shape.material, shape.vao);
                 cursor.x += shape.material.colormap.width;
             }
         }

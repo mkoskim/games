@@ -12,9 +12,11 @@ import engine.render.util;
 import engine.render.shaders.gputypes;
 import engine.render.shaders.gpucompile: gpuCompileProgram;
 
+import engine.render.bone;
 import engine.render.mesh;
+import engine.render.material;
 import engine.render.bound;
-import engine.render.instance;
+//import engine.render.instance;
 import engine.render.texture;
 import engine.render.view;
 import engine.render.light;
@@ -37,7 +39,7 @@ abstract class Shader
 
     //abstract static Shader create();
 
-    abstract void render(View cam, Instance instance);
+    abstract void render(View cam, Bone transform, Material mat, VAO vao);
     abstract protected void addVBOs(VAO vao, Mesh mesh);
 
     void light(Light l) { }

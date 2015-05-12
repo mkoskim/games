@@ -127,20 +127,19 @@ void play(string mazename)
     //
     //*************************************************************************
 
-    enum Head { left, right, up, down, none }
-
-    vec3[Head] directions = [
-        Head.left:  vec3(-1,  0, 0),
-        Head.right: vec3(+1,  0, 0),
-        Head.up:    vec3( 0, -1, 0),
-        Head.down:  vec3( 0, +1, 0)
-    ]; 
-
     //-------------------------------------------------------------------------
-
-    auto textures = function render.Texture[][][]()
+    // Create sprite shapes (rectangular meshes) from sprite sheet. Organize
+    // shapes so that they are easily referenced from code.
+    //-------------------------------------------------------------------------
+    
+    auto shapes = function render.Shape[][][]()
     {
-        auto sheet = render.Texture.loadSheet("data/images/ChomperSprites.png", 32, 32);
+        auto sheet = render.Shape.sheet(
+            shader,
+            new render.Texture("data/images/ChomperSprites.png"),
+            32, 32,
+            1.66, 1.66
+        );
         return
             [[
                 [sheet[2][10], sheet[2][11]],
@@ -172,19 +171,33 @@ void play(string mazename)
 
     //-------------------------------------------------------------------------
 
+    enum Head { left, right, up, down, none }
+
+    vec3[Head] directions = [
+        Head.left:  vec3(-1,  0, 0),
+        Head.right: vec3(+1,  0, 0),
+        Head.up:    vec3( 0, -1, 0),
+        Head.down:  vec3( 0, +1, 0)
+    ]; 
+
+    //-------------------------------------------------------------------------
+
     abstract class Actor : game.Fiber
     {
-        render.Instance shape;
+        render.Instance sprite;
 
-        this(render.Instance shape)
+        this(render.Instance sprite)
         {
             super(&run);
-            this.shape = shape;
+            this.sprite = sprite;
+            setshape();
         }
 
+        abstract void setshape(Head current = Head.up);
+    
         bool checkgrid(Head next, string walls = "#=")
         {
-            vec3 p = shape.pos + directions[next];
+            vec3 p = sprite.pos + directions[next];
             return !inPattern(grid[cast(int)p.y][cast(int)p.x], walls);
         }
 
@@ -193,7 +206,7 @@ void play(string mazename)
         void step(Head next)
         {
             vec3 delta = directions[next] * (1.0/steps);
-            shape.pos += delta;
+            sprite.pos += delta;
         }
 
         int animframe() { return (game.frame >> 2) & 1; }
@@ -206,13 +219,19 @@ void play(string mazename)
         Head next = Head.none;
         int points = 0;
 
-        this(render.Instance shape) { super(shape); }
+        this(render.Instance sprite) {
+            super(sprite);
+        }
+
+        override void setshape(Head current) {
+            sprite.shape = shapes[0][current][animframe()];
+        }
 
         void checkfood()
         {
             foreach(food; foods.instances.keys)
             {
-                if(distance(shape.pos, food.pos) < 0.5)
+                if(distance(sprite.pos, food.pos) < 0.5)
                 {
                     foods.remove(food);
                     points += 10;
@@ -253,8 +272,8 @@ void play(string mazename)
                     if(next != Head.none && checkgrid(next, "#=-")) current = next;
                     if(checkgrid(current, "#=-")) moving = steps;
                 }
-                shape.shape.material.colormap = textures[0][current][animframe()];
 
+                setshape(current);
                 nextframe();
             }
         }
@@ -268,10 +287,14 @@ void play(string mazename)
     {
         ubyte num;
 
-        this(render.Instance shape, ulong num)
+        this(render.Instance sprite, ulong num)
         {
-            super(shape);
+            super(sprite);
             this.num = num % 4;
+        }
+
+        override void setshape(Head current) {
+            sprite.shape = shapes[num + 1][current][animframe()];
         }
 
         import std.random;
@@ -323,8 +346,11 @@ void play(string mazename)
                     current = anyvalid();
                 }
 
-                shape.shape.material.colormap = textures[num + 1][current][animframe()];
-                for(int i = steps; i--; nextframe()) step(current);
+                for(int i = steps; i--; nextframe())
+                {
+                    step(current);
+                    setshape(current);
+                }
             }
         }
     }
@@ -343,7 +369,6 @@ void play(string mazename)
         rect1x1  = shader.upload(geom.rect(1, 1)),
         rect2x2  = shader.upload(geom.rect(1.66, 1.66)),
         foodmesh = shader.upload(geom.rect(0.25, 0.25)),
-        actorbox = shader.upload(geom.rect(1.66, 1.66, geom.center)),
         doormesh = shader.upload(geom.rect(1.66, 1));
 
     auto doormat = new render.Material(0.7, 0.7, 0.7);
@@ -368,17 +393,16 @@ void play(string mazename)
 
     void add_ghost(size_t x, size_t y) {
         add_empty(x, y);
-        auto shape = mobs.add(x + 0.5, y + 0.5, actorbox, new render.Material());
+        auto sprite = mobs.add(x + 0.5, y + 0.5);
         grid[y][x] = ' ';
-        actors.add(new Ghost(shape, mobs.length));
+        actors.add(new Ghost(sprite, mobs.length));
     }
 
     void add_player(size_t x, size_t y) {
         add_empty(x, y);
-        auto shape = mobs.add(x + 0.5, y + 0.5, actorbox, new render.Material());
+        auto sprite = mobs.add(x + 0.5, y + 0.5);
         grid[y][x] = ' ';
-        shape.shape.material.colormap = textures[0][0][0];
-        player = new Player(shape);
+        player = new Player(sprite);
     }
 
     //-------------------------------------------------------------------------

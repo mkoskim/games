@@ -3,6 +3,23 @@ thoughts about the development.
 
 -------------------------------------------------------------------------------
 
+May 12, 2015: After few months break, I came back to develop this game engine
+and game collection. I am still struggling with the architectural problems.
+
+The main source of inconvience is how text rendering class works. It causes
+problems to restructure architecture.
+
+At high levels, I need to continue developing a framework to ease game
+prototyping further. Then, I definitely need to continue work at low levels.
+I have been thinking to separate shaders and whole GPU infrastructure to
+separate "subsystem", and design some sort of middleware between game and
+low level primitives.
+
+I have been examining existing game engine architectures with no luck and
+great ideas so far.
+
+-------------------------------------------------------------------------------
+
 Dec 31, 2014: I have been struggling with architectural things. On my TODO
 list, there is lots of things to be done, but I can't start implementing
 them before I have clean idea of the future directions. I don't want to write

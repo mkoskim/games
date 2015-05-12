@@ -10,10 +10,11 @@ development.
 RENDERING FRAMEWORK:
 
 The current (May 11, 2015) idea is to change underlaying architecture
-considerably:
+considerably. Thoughts I have:
 
 - Shader class becomes just interface between CPU and GLSL. It has
-  methods to upload and update data structures needed by GLSL.
+  methods to upload and update data structures needed by GLSL. I should
+  separate shader data structures from the ones used by game.
   
 - 'Layers' and such are combined with Shader to create yet unnamed
   object, that holds uploaded data, and feeds batches to shader.

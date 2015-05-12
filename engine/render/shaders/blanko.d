@@ -8,8 +8,9 @@ module engine.render.shaders.blanko;
 
 import engine.render.util;
 import engine.render.shaders.base;
+import engine.render.bone;
 import engine.render.mesh;
-import engine.render.instance;
+import engine.render.material;
 import engine.render.view;
 
 class Blanko : Shader
@@ -24,7 +25,7 @@ class Blanko : Shader
     //-------------------------------------------------------------------------
 
     override protected void addVBOs(VAO vao, Mesh mesh) { }
-    override void render(View cam, Instance instance) { }
+    override void render(View cam, Bone transform, Material mat, VAO vao) { }
 
     //-------------------------------------------------------------------------
 

@@ -18,6 +18,7 @@ import engine.render.view;
 import engine.render.mesh;
 import engine.render.bound;
 import engine.render.material;
+import engine.render.texture;
 
 //-------------------------------------------------------------------------
 // Shape combines shader vertex data (VAO, Vertex Array Object) with
@@ -39,6 +40,42 @@ class Shape
     {
         this(shader.upload(mesh), material);
     }
+
+    //-------------------------------------------------------------------------
+    // "ShapeSheet" from "SpriteSheet"
+    //-------------------------------------------------------------------------
+
+    static Shape[][] sheet(
+        Shader shader,
+        Texture sheet,
+        int texw, int texh,
+        float meshw = 1.0, float meshh = 1.0,
+        int padx = 0, int pady = 0
+    )
+    {
+        import geom = engine.ext.geom;
+
+        int cols = sheet.width / (texw+padx);
+        int rows = sheet.height / (texh+pady);
+        
+        float uvw = texw / cast(float)sheet.width;
+        float uvh = texh / cast(float)sheet.height;
+
+        auto material = new Material(sheet, 1.0);   // TODO: Determine roughness
+        auto grid = new Shape[][](rows, cols);
+
+        foreach(y; 0 .. rows) foreach(x; 0 .. cols)
+        {
+            auto mesh = geom.rect(vec2(meshw, meshh), geom.center);
+
+            mesh.uv_scale(vec2(uvw, uvh));
+            mesh.uv_move(x * uvw, y * uvh);
+            
+            grid[y][x] = new Shape(shader, mesh, material);
+        }
+
+        return grid;
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -56,6 +93,11 @@ class Instance : Bone
     {
         super(parent, pos, rot);
         this.shape = shape;
+    }
+
+    this(vec3 pos, Shape shape = null)
+    {
+        this(null, pos, vec3(0, 0, 0), shape);
     }
 
     this(vec3 pos, Shader.VAO vao, Material m)
@@ -117,7 +159,8 @@ class Instance : Bone
 
     void render(Shader shader, View cam)
     {
-        shader.render(cam, this);
+        if(!shape) return;
+        shader.render(cam, this, shape.material, shape.vao);
     }
 }
 

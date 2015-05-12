@@ -9,9 +9,10 @@ module engine.render.shaders.defaults;
 
 import engine.render.shaders.base;
 import engine.render.util;
+
+import engine.render.bone;
 import engine.render.mesh;
 import engine.render.material;
-import engine.render.instance;
 import engine.render.texture;
 import engine.render.view;
 import engine.render.light;
@@ -39,20 +40,22 @@ abstract class Default : Shader
         texture("material.colormap", 0, material.colormap);
     }
 
-    protected void bindMatrices(View cam, Instance instance)
+    protected void bindMatrices(View cam, Bone grip)
     {
         uniform("mProjection", cam.mProjection());
-        uniform("mModelView", cam.mModelView(instance.mModel()));
+        uniform("mModelView", cam.mModelView(grip.mModel()));
     }
 
-    override void render(View cam, Instance instance)
+    override void render(View cam, Bone grip, Material mat, VAO vao)
     {
         if(!enabled) return;
 
-        bindMatrices(cam, instance);
-        bindMaterial(instance.shape.material);
+        bindMatrices(cam, grip);
+        bindMaterial(mat);
+        vao.draw();
 
-        instance.shape.vao.draw();
+        //bindMaterial(instance.shape.material);
+        //instance.shape.vao.draw();
     }
 }
 

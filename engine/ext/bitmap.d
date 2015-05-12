@@ -73,5 +73,54 @@ class Bitmap
         );
         SDL_RenderDrawPoint(renderer, x, y);
     }
+
+    //-------------------------------------------------------------------------
+    // Spritesheet splitter
+    //-------------------------------------------------------------------------
+
+    static Bitmap[][] splitSheet(
+        string filename,
+        int texw, int texh,
+        int padx = 0, int pady = 0
+    )
+    {
+        SDL_Surface* sheet = blob.loadimage(filename);
+        //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
+        //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
+
+        int cols = sheet.w / (texw+padx);
+        int rows = sheet.h / (texh+pady);
+
+        Bitmap[][] grid = new Bitmap[][](rows, cols);
+
+        SDL_Surface *temp = SDL_CreateRGBSurface(0, texw, texh, 32, 0, 0, 0, 0);
+        SDL_Surface *sprite = SDL_ConvertSurface(temp, sheet.format, 0);
+        SDL_FreeSurface(temp);
+
+        SDL_Rect srcrect = {x: 0, y: 0, w: texw, h: texh};
+        SDL_Rect dstrect = {x: 0, y: 0, w: texw, h: texh};
+
+        foreach(y; 0 .. rows) foreach(x; 0 .. cols)
+        {
+            srcrect.y = y*(texh + pady);
+            srcrect.x = x*(texw + padx);
+
+            SDL_FillRect(sprite, &dstrect, 0);
+            SDL_BlitSurface(
+                sheet, &srcrect,
+                sprite, &dstrect
+            );
+
+            //SDL_SaveBMP(sprite, "test.bmp");
+            //throw new Exception();
+
+            grid[y][x] = new Bitmap(sprite);
+        }
+
+        SDL_FreeSurface(sheet);
+        SDL_FreeSurface(sprite);
+
+        return grid;
+    }
 }
 
