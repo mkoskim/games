@@ -1,0 +1,128 @@
+
+
+                                WARRIORS
+                                --------
+                                
+
+Skyrim is a fine game, definitely. But it has certain flawnesses:
+
+1) No end game. Once you finally have made your character what it is, there
+   is no more content to run with that. The most fascinating part of the
+   game is middle game, where you run dungeons to improve certain aspects
+   in your character.
+   
+2) Just little tactics in fights. There are fine aspects in NPC AI, but in
+   general, the only tactics in the fights is smash buttons (and to prepare
+   your character).
+
+"Warriors" game project tries to answer to these problems, with following
+princpiles:
+
+1) It is only endgame content. You get all the even remotely possible skills,
+   traits, perks, anything, straight from the beginning. What you do is to
+   run dungeons, with chosen difficulty. What you get is 'cosmetics' and
+   'unlocks' (further dungeons and additional classes) - not new skills, no
+   new traits, no new perks (except that beginner level dungeons might have
+   this sort of 'tutorial' function).
+   
+2) Make fighting more complex by introducing different skills with different
+   effects and availability.
+   
+- - -
+
+DUNGEONS: The sole idea is to create dungeons to fight. For a fight, you choose a dungeon
+and the difficulty. The difficulty level is something like:
+
+    Tier 1: "Too young to die!": Very easy, meant for players just starting to
+            play.
+            
+    Tier 2: "Not too rough!": Somewhere at middle, a step forward after Tier 1
+            towards nominal level Tier 3.
+    
+    Tier 3: "Hurt me plenty!": Normal difficulty is sort of nominal level of
+            playing. The actual difficulty can depend on your class choices,
+            and how well you can adapt your class to the dungeon.
+            
+    Tier 4: "Ultra-Violence": The idea here is to raise up the difficulty so
+            that it starts to be difficult even for classes/builds suitable for
+            the instance. For non-suitable classes, these can be just a
+            nightmare!
+            
+    Tier 5: "Nightmare!": Nightmare difficulty is aimed to give ultimate
+            challenges for experienced players, playing most suitable class for
+            the instance. These difficulty levels are not necessarily
+            completeable except for just certain character setup in the hands
+            of experienced player - and even then, it may require some luck.
+
+In addition to this, dungeons are classified based on their "availability".
+Dungeons that are aimed to be runned at the beginning of the game, have
+all difficulty tiers available. Dungeons which you unlock after lots of
+playing, might have only highest difficulty tier available. But still, even
+beginner dungeons have their "Nightmare!" difficulty tier, to make them
+replayable even with very skilled players:
+
+                            Chosable difficulty
+                            
+                            Tier    1   2   3   4   5
+
+    Training courses                x   x   x   x   x
+
+    Beginner dungeon                -   x   x   x   x
+
+    Intermediate dungeon            -   -   x   x   x
+
+    Expert dungeon                  -   -   -   x   x
+
+    Master dungeon                  -   -   -   -   x
+
+
+So: (1) High level dungeons do not have easy difficulty levels, and
+(2) all dungeons have high difficulty levels.
+
+
+This way:
+
+    (1) You (hopefully) will find challenges even from beginner dungeons,
+        choosing "Nightmare!" tier, as experienced player.
+    
+    (2) Completing an "Master" level dungeons is an achievement as its own,
+        because it has no handicapped tiers (Master dungeons have only highest
+        tier difficulty available). It is possible, that it is possible to
+        choose a dungeon with -1 Tier just for practising: that is, it might
+        be possible to practise Master (Tier 5) dungeons with Tier 4 difficulty,
+        but you cant get anything out of that.
+    
+    (3) As a single player game, you will find challenges in even intermediate
+        dungeons with different (not that suitable) classes. Completing a
+        Master difficulty dungeon with a class thought not suited for the
+        dungeon is something - amazing! But most possibly impossible.
+
+    (4) As a single player game, the whole purpose of the game is to give
+        you: (1) "casual" playability, you choose to try to run some dungeon
+        when having 15 min time, (2) content that you can't finish quickly:
+        even content that is so hard that not many people believe you have
+        made it, once you have completed it - maybe there is a need for
+        screenshots...
+
+- - -
+
+CLASSES: I have talked about classes. Why I think there is such?
+
+When playing your character, you have three levels of tweaking:
+
+    (1) off-dungeon: When out of dungeon, you can pretty freely tweak your
+        character in different means, to prepare it for next dungeon.
+        
+    (2) in-dungeon, off-combat: When running dungeons, your possibilities
+        to tweak your character are solely based on the choices you made
+        in the first phase.
+
+What classes are for, are to *FORCE* you for certain play style and adapt for
+that. Most probably, there is a sort of generic "Warrior" type class. Most
+probably, many of the other classes are unlocked by playing. Most probably,
+other than generic warrior class, other classes make some things easier and
+some things harder.
+
+You choose a class, and you accept that it has its limitations. You can tweak
+your character only to certain limits, you can not make it to an another class.
+
