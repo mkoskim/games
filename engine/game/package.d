@@ -117,11 +117,10 @@ class Profile
             rendertime = timers.render.average;
 
         return format(
-            "FPS: %5.1f : busy %5.1f : logic/render/idle %5.1f%% / %5.1f%% / %5.1f%%",
+            "FPS: %5.1f : busy %5.1f : busy/idle %5.1f%% / %5.1f%%",
             timers.fps,
             busytime,
-            100.0*(busytime-rendertime)/frametime,
-            100.0*rendertime/frametime,
+            100.0*busytime/frametime,
             100.0*(frametime-busytime)/frametime,
         );
     }

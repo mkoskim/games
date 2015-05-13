@@ -120,9 +120,9 @@ void play(string mazename)
         foodmesh = shader.upload(geom.rect(0.25, 0.25)),
         doormesh = shader.upload(geom.rect(1.66, 1));
 
-    auto doormat  = new render.Material(0.7, 0.7, 0.7);
+    auto doormat = new render.Material(0.7, 0.7, 0.7);
     auto pathmat = new render.Material(0, 0, 0);
-    auto wallmat  = new render.Material(0.3, 0.3, 0.6);
+    auto wallmat = new render.Material(0.3, 0.3, 0.6);
     
     //-------------------------------------------------------------------------
     //
