@@ -120,25 +120,32 @@ void play(string mazename)
         foodmesh = shader.upload(geom.rect(0.25, 0.25)),
         doormesh = shader.upload(geom.rect(1.66, 1));
 
-    auto doormat = new render.Material(0.7, 0.7, 0.7);
-    auto mazemat = new render.Material(0, 0, 0);
+    auto doormat  = new render.Material(0.7, 0.7, 0.7);
+    auto pathmat = new render.Material(0, 0, 0);
+    auto wallmat  = new render.Material(0.3, 0.3, 0.6);
     
     //-------------------------------------------------------------------------
-    // Layers
+    //
+    // Layers: There is one trick here for visual purpose. In fact, we draw
+    // clean routes with black, over a blue background. This choice was made
+    // after complex attempts to try to "thin" walls based on what they are
+    // neighboring.
+    //
+    // Other than this (maze and background layers), the rest are pretty
+    // self-explanatory: layers for food, doors and mobs.
+    //
     //-------------------------------------------------------------------------
 
-    auto maze  = new render.Cloner(shader, cam, new render.Shape(rect2x2, mazemat));
+    auto background = new render.Layer(shader, cam);
+    auto maze  = new render.Cloner(background, new render.Shape(rect2x2, pathmat));
+
+    background.add(0, 0, shader.upload(geom.rect(width, height)), wallmat);
+
+    //-------------------------------------------------------------------------
+
     auto doors = new render.Layer(maze);
     auto foods = new render.Layer(maze);
     auto mobs  = new render.Layer(maze);
-
-    auto background = new render.Layer(maze);
-
-    auto mazecolor = new render.Material(0.3, 0.3, 0.6);
-
-    background.add(0, 0, shader.upload(geom.rect(width, height)), mazecolor);
-
-    //-------------------------------------------------------------------------
 
     //*************************************************************************
     //
