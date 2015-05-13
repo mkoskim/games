@@ -11,8 +11,16 @@ game projects. They all serve several purposes to various levels: (1) test
 benches for engine development, (2) sketching solutions, (3) demonstrate
 technologies, and so on.
 
-Still: Demos are small code snippets, and they have some kind of focus, main
-purpose for their existence. Testbenches are more freeform code blocks,
-more complex, and they do not necessarily have strict and simple focus.
-Projects are more ambitious goals, more complete as games (or applications).
+But still, we can find some differences:
+
+(1) Demos are small code snippets that are assumed not to drive engine
+development forward but to use existing features, and they have some kind of
+focus, main purpose for their existence.
+
+(2) Testbenches are more freeform code blocks, more complex, driving engine
+development, and they do not necessarily have strict and simple focus, but they
+serve as intermediate steps towards actual game projects.
+
+(3) Projects are more ambitious goals, more complete as games (or
+applications), and they are main drivers for engine development.
 
