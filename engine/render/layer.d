@@ -97,7 +97,7 @@ class Layer : Batch
 
 //-----------------------------------------------------------------------------
 
-class InstancedLayer : Batch
+class Cloner : Batch
 {
     Shape shape;
     Bone[] grips;

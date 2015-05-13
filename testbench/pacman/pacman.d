@@ -383,7 +383,7 @@ void play(string mazename)
     // Layers
     //-------------------------------------------------------------------------
 
-    auto maze  = new render.InstancedLayer(shader, cam, new render.Shape(rect2x2, mazemat));
+    auto maze  = new render.Cloner(shader, cam, new render.Shape(rect2x2, mazemat));
     auto doors = new render.Layer(maze);
     auto foods = new render.Layer(maze);
     auto mobs  = new render.Layer(maze);

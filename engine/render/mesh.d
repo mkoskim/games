@@ -26,9 +26,13 @@ import engine.render.shaders.gputypes;
 class Mesh
 {
     //-------------------------------------------------------------------------
-    // Vertex data
+    //
+    // 'Shader-compatible' packed & interleaved vertex data. Using these makes
+    // processing a bit harder, but saves us from creating the buffer inside
+    // Shader.upload().
+    //
     //-------------------------------------------------------------------------
-
+    
     struct VERTEX
     {
         vec3 pos;
@@ -54,13 +58,11 @@ class Mesh
         }
     }
 
-    //-------------------------------------------------------------------------
-    // Vertex & Face data
-    //-------------------------------------------------------------------------
-
     uint mode;
     VERTEX[] vertices;
     ushort[] faces;
+
+    //-------------------------------------------------------------------------
 
     this(uint mode)
     {

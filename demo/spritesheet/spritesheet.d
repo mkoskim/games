@@ -1,6 +1,9 @@
 //*****************************************************************************
 //
-// General 'sketching' project to develop new features.
+// Simple spritesheet demo. Sprite sheet handling was changed so that
+// instead of splitting sheet to separate textures, the sheet is loaded
+// as is. The new function generates separate rectangular meshes with
+// correct UV coordinates to use individual sprites from sheet.
 //
 //*****************************************************************************
 
@@ -40,8 +43,8 @@ void main()
         render.Shape.sheet(
             layer.shader,
             new render.Texture("engine/stock/spritesheets/explosion2.png"),
-            40, 40,
-            40.0, 40.0
+            40, 40,         // Dimensions of single sprite in sheet (in pixles)
+            40.0, 40.0      // Dimensions for created rectangular mesh
         )[0],
 
         function render.Shape[](render.Shader shader)
@@ -72,21 +75,30 @@ void main()
 
         override void run()
         {
+            // ----------------------------------------------------------------
+            // Wait random time before starting
+            // ----------------------------------------------------------------
+
             foreach(_; 0 .. std.random.uniform(0, 10)) nextframe();
+
+            // ----------------------------------------------------------------
 
             auto sprite = layer.add(0, 0);
 
             for(;;) {
             
+                // (1) Random placement
                 sprite.grip.pos = vec3(
                     std.random.uniform(0, game.screen.width),
                     std.random.uniform(0, game.screen.height),
                     0
                 );
                 
+                // (2) Random shape
                 render.Shape[] animation = explosions[std.random.uniform(0, 2)];
                 //render.Shape[] animation = explosions[1];
                 
+                // (3) Run the sequence
                 foreach(phase; 0 .. animation.length) {
                     sprite.shape = animation[phase];
                     nextframe();
@@ -94,6 +106,8 @@ void main()
             }
         }
     }
+
+    //-------------------------------------------------------------------------
 
     auto actors = new game.FiberQueue();
 

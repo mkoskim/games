@@ -6,6 +6,22 @@
 
 Version something:
 
+- Somewhat done: I should go through code and correct indentation
+
+- Shader: moved Shader class a little bit lower level, and added initial
+  support for instanced drawing to interface.
+
+- Remove color attribute from Material: it is meant to be instance-specific
+  material modifier, analogous to Model matrix which is instance-specific
+  transformation modifier. For example, for particle engines, we need
+  instance specific struct, like:
+  
+        struct INSTANCE { mat4 model; vec4 color }
+
+-------------------------------------------------------------------------------
+
+Version something:
+
 - Done: There is a great need to have improved compilation mechanism.
   That is, separating CPU-GPU interface parts (uniforms, attributes),
   interface between vertex and fragment shader, and have something to

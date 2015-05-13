@@ -69,7 +69,7 @@ abstract class Shader
     final void render(Bone[] grips, Material mat, VAO vao)
     {
         loadMaterial(mat);
-        foreach(grip; grips) render(grip, vao);
+        render(grips, vao);
     }
 
     //*************************************************************************

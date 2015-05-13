@@ -45,6 +45,8 @@ abstract class Default : Shader
         texture("material.colormap", 0, mat.colormap);
     }
     
+    //-------------------------------------------------------------------------
+
     override void render(Bone grip, VAO vao)
     {
         uniform("mModel", grip.mModel());

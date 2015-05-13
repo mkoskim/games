@@ -2,14 +2,16 @@
 
 DONE:
 
-- Somewhat done: I should go through code and correct indentation
-
-- Shader: moved Shader class a little bit lower level, and added initial
-  support for instanced drawing to interface.
+- ...
 
 *******************************************************************************
 
 WORKLIST:
+
+- Combine Layer and Scene... Somehow... And implement sort of worksets. The
+  idea is to divide drawing to two separate phases. Programmer classifies
+  the objects and puts them to different containers. For drawing, s/he chooses
+  the strategies how objects from containers are moved to rendering.
 
 - Sprite/particle engine for textbox
 
@@ -22,12 +24,8 @@ WORKLIST:
 - Mipmaps
 
 - Combine Texture and Material files, they are pretty much related to each
-  other.
+  other. Except that I might need texture when creating framebuffers...
   
-- Remove color attribute from Material: it is meant to be instance-specific
-  material modifier, analogous to Model matrix which is instance-specific
-  transformation modifier.
-
 - Add support for "multi-textured" instances - the idea is to have sort
   of "stamping", textures over textures.
 
@@ -40,9 +38,12 @@ WORKLIST:
   
       http://stackoverflow.com/questions/9168252/attaching-multiple-shaders-of-the-same-type-in-a-single-opengl-program
 
+- Think Shader subsystem. We would like to have specialized shaders for
+  particle engines, not using the regular mesh-material data structures.
+
 -------------------------------------------------------------------------------
 
-FIX: Crashes, flaws etc.
+FIX/INVESTIGATE: Crashes, flaws etc.
 
 - Font rendering fails randomly:
 

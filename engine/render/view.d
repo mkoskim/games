@@ -100,6 +100,13 @@ class Camera : View
         );
     }
 
+    static Camera basic3D(float near, float far, vec3 pos)
+    {
+        return basic3D(near, far, new Bone(null, pos));
+    }
+
+    //-------------------------------------------------------------------------
+
     static Camera topleft2D(float unitlength = 1)
     {
         return new Camera(

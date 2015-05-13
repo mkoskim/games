@@ -2,7 +2,21 @@
 //
 // Instance combine vertex and material data
 //
-// TO BE REWORKED!
+// TO BE REWORKED! Instances are related to 'Batches' or layers or such.
+// Different layers may hold different kind of instance data.
+//
+// Furthermore, instances itselves have their pecularities. Some instances
+// may have LOD levels, meaning that the actual shape to render depends on
+// the distance of the object.
+//
+// And furthermore, there are different kind of 'strategies' for rendering
+// game scenes. Depending on the content, e.g.
+//
+// - Use instanced draw
+// - Sort drawing order (back to front, front to back)
+// - Frustum culling
+// - Portals and occluders
+// - BSP etc
 //
 //*****************************************************************************
 

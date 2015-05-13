@@ -1,4 +1,20 @@
-Game rendering
 
-This directory contains modules for rendering the game using OpenGL.
+
+                            RENDERING FRAMEWORK
+                            -------------------
+                            
+                            
+(To be written) This directory contains modules for rendering the game using
+OpenGL.
+
+Some thoughts...
+
+- Game programmer knows it best. We should offer means to build up rendering
+  pipeline, instead of trying to guess things. Basically this means that
+  it is the programmer who classifies the game objects and chooses the
+  correct mechanisms to get them to screen.
+
+- For prototyping purposes, the framework should not be overly complex. We
+  can easily sacrifice performance and special effects & features for
+  flexibility.
 

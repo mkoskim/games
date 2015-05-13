@@ -20,6 +20,11 @@ import engine.render.texture;
 // independend", that is, the actual shading model parameters are calculated
 // elsewhere (for example, in corresponding Shader class implementation).
 //
+// Note: This material scheme is aimed for textured objects. Creating
+// solid color objects require to create (single pixel) solid color
+// texture. The assumption is that solid color objects are temporal
+// placeholders, and rare in later phases of game development.
+//
 //-----------------------------------------------------------------------------
 
 class Material
@@ -36,8 +41,10 @@ class Material
 
     //-------------------------------------------------------------------------
 
-    static Texture whitemap = null;
-    static Texture flatmap = null;
+    private static Texture whitemap = null;
+    private static Texture flatmap = null;
+
+    //-------------------------------------------------------------------------
 
     this(Texture colormap, Texture normalmap, float roughness = 1.0)
     {
@@ -82,6 +89,8 @@ class Material
     {
         this(vec4(r, g, b, a));
     }
+
+    //-------------------------------------------------------------------------
 
     this(Texture tex)
     {
