@@ -137,9 +137,9 @@ void play(string mazename)
     //-------------------------------------------------------------------------
 
     auto background = new render.Layer(shader, cam);
-    auto maze  = new render.Cloner(background, new render.Shape(rect2x2, pathmat));
-
     background.add(0, 0, shader.upload(geom.rect(width, height)), wallmat);
+
+    auto maze  = new render.Cloner(background, new render.Shape(rect2x2, pathmat));
 
     //-------------------------------------------------------------------------
 
