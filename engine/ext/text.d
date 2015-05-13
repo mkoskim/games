@@ -16,6 +16,7 @@ import engine.render.texture;
 import engine.render.material;
 import engine.render.instance;
 import engine.render.view;
+import engine.render.bone;
 import engine.render.layer;
 import engine.render.shaders.base;
 import engine.ext.geom;
@@ -66,7 +67,7 @@ class TextBox : Instance
             unitbox[layer.shader] = layer.shader.upload(rect(1, 1));
         }
 
-        super(vec3(x, y, 0), unitbox[layer.shader], new Material());
+        super(vec3(x, y, 0), unitbox[layer.shader], new Material(null, null));
 
         //---------------------------------------------------------------------
 
@@ -135,36 +136,29 @@ class TextBox : Instance
 
     //-------------------------------------------------------------------------
 
-    mat4 mChar;
-
-    override mat4 mModel()
-    {
-        return super.mModel() * mChar;
-    }
-
-    //-------------------------------------------------------------------------
-
-    override void render(Shader shader, View cam)
+    override void render(Shader shader)
     {
         import engine.render.util;
 
-        //mat4 mVP = mVP * super.mModel();
         vec3 cursor = vec3(0, 0, 0);
 
         foreach(elem; elems) {
-            shape.material.color = elem.color;
+            //shape.material.color = elem.color;
             foreach(c; elem.content) {
                 shape.material.colormap = font.render(c);
 
-                mChar = mat4.identity;
-                mChar.scale(
-                    shape.material.colormap.width,
-                    shape.material.colormap.height,
-                    0
+                Bone charpos = new Bone(
+                    grip,
+                    cursor,
+                    vec3(0, 0, 0),
+                    vec3(
+                        shape.material.colormap.width,
+                        shape.material.colormap.height,
+                        0
+                    )
                 );
-                mChar.translate(cursor.x, cursor.y, cursor.z);
 
-                shader.render(cam, this, shape.material, shape.vao);
+                shader.render(charpos, shape.material, shape.vao);
                 cursor.x += shape.material.colormap.width;
             }
         }

@@ -18,15 +18,12 @@ import engine.render.texture;
 //
 // One thing to keep in mind is that material parameters should be "shader
 // independend", that is, the actual shading model parameters are calculated
-// elsewhere.
-//
-// TODO: Remove color. It is instance specific material modifier.
+// elsewhere (for example, in corresponding Shader class implementation).
 //
 //-----------------------------------------------------------------------------
 
 class Material
 {
-    vec4 color;
     Texture colormap;
     Texture normalmap;
 
@@ -42,62 +39,43 @@ class Material
     static Texture whitemap = null;
     static Texture flatmap = null;
 
-    this()
+    this(Texture colormap, Texture normalmap, float roughness = 1.0)
     {
         if(!whitemap) whitemap = new Texture(vec4(1, 1, 1, 1));
         if(!flatmap)  flatmap  = new Texture(vec4(0.5, 0.5, 1, 1));
 
-        color = vec4(1, 1, 1, 1);
-        colormap = whitemap;
-        normalmap = flatmap;
-        roughness = 0.5;
+        this.colormap = colormap ? colormap : whitemap;
+        this.normalmap = normalmap ? normalmap : flatmap;
+        this.roughness = roughness;
     }
 
     //-------------------------------------------------------------------------
 
-    this(Texture colormap, Texture normalmap, float roughness)
+    this(vec4 color, Texture normalmap, float roughness)
     {
-        this();
-        this.colormap = colormap;
-        this.normalmap = normalmap;
-        this.roughness = roughness;
-    }
-
-    this(vec3 color, Texture normalmap, float roughness)
-    {
-        this();
-        this.color = vec4(color, 1);
-        this.normalmap = normalmap;
-        this.roughness = roughness;
+        this(new Texture(color), normalmap, roughness);
     }
 
     this(Texture colormap, float roughness)
     {
-        this();
-        this.colormap = colormap;
-        this.roughness = roughness;
+        this(colormap, null, roughness);
     }
 
     this(SDL_Surface *colormap, float roughness)
     {
-        this();
-        this.colormap = new Texture(colormap);
-        this.roughness = roughness;
+        this(new Texture(colormap), null, roughness);
     }
 
-    this(vec3 color, float roughness)
+    this(vec4 color, float roughness)
     {
-        this();
-        this.color = vec4(color, 1);
-        this.roughness = roughness;
+        this(new Texture(color), null, roughness);
     }
 
     //-------------------------------------------------------------------------
 
     this(vec4 color)
     {
-        this();
-        this.color = color;
+        this(new Texture(color), null);
     }
 
     this(float r, float g, float b, float a = 1)
@@ -107,14 +85,12 @@ class Material
 
     this(Texture tex)
     {
-        this();
-        this.colormap = tex;
+        this(tex, null);
     }
 
     this(SDL_Surface *surface)
     {
-        this();
-        this.colormap = new Texture(surface);
+        this(new Texture(surface));
     }
 }
 

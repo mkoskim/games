@@ -32,7 +32,7 @@ abstract class View
         return (mView() * vec4(pos, 1)).xyz;
     }
 
-    vec3 viewspace(mat4 mModel, vec3 pos) {
+    vec3 viewspace(mat4 mModel, vec3 pos = vec3(0, 0, 0)) {
         return (mModelView(mModel) * vec4(pos, 1)).xyz;
     }
 
@@ -88,7 +88,7 @@ class Camera : View
 
     //-------------------------------------------------------------------------
 
-    static Camera basic3D(float near, float far, Bone grip = new Bone(vec3(0, 0, 0)))
+    static Camera basic3D(float near, float far, Bone grip = new Bone(null, vec3(0, 0, 0)))
     {
         return new Camera(
             mat4.perspective(

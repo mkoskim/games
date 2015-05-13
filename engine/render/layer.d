@@ -22,14 +22,10 @@ import engine.render.shaders.base;
 
 //-----------------------------------------------------------------------------
 
-class Layer
+abstract class Batch
 {
     Shader shader;
-
     View cam;
-    bool[Instance] instances;
-
-    auto length() { return instances.length; }
 
     //-------------------------------------------------------------------------
 
@@ -39,10 +35,36 @@ class Layer
         this.cam = cam;
     }
 
-    this(Layer layer)
+    this(Batch batch)
     {
-        this(layer.shader, layer.cam);
+        this(batch.shader, batch.cam);
     }
+
+    //-------------------------------------------------------------------------
+
+    Shader.VAO upload(Mesh mesh) { return shader.upload(mesh); }
+
+    //-------------------------------------------------------------------------
+
+    void draw()
+    {
+        shader.activate();
+        shader.loadView(cam);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+class Layer : Batch
+{
+    bool[Instance] instances;
+
+    auto length() { return instances.length; }
+
+    //-------------------------------------------------------------------------
+
+    this(Shader shader, View cam) { super(shader, cam); }
+    this(Batch batch) { super(batch); }
 
     //-------------------------------------------------------------------------
 
@@ -65,15 +87,47 @@ class Layer
 
     //-------------------------------------------------------------------------
 
-    Shader.VAO upload(Mesh mesh) { return shader.upload(mesh); }
+    override void draw()
+    {
+        super.draw();
+
+        foreach(instance; instances.keys) instance.render(shader);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+class InstancedLayer : Batch
+{
+    Shape shape;
+    Bone[] grips;
 
     //-------------------------------------------------------------------------
 
-    void draw()
+    this(Shader shader, View cam, Shape shape)
     {
-        shader.activate();
+        super(shader, cam);
+        this.shape = shape;
+    }
+    
+    this(Batch batch, Shape shape)
+    {
+        super(batch);
+        this.shape = shape;
+    }
 
-        foreach(instance; instances.keys) instance.render(shader, cam);
+    //-------------------------------------------------------------------------
+
+    void add(vec3 pos) { grips ~= new Bone(pos); }
+    void add(float x, float y, float z = 0) { add(vec3(x, y, z)); }
+    
+    //-------------------------------------------------------------------------
+
+    override void draw()
+    {
+        super.draw();
+       
+        shader.render(grips, shape.material, shape.vao);
     }
 }
 

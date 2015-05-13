@@ -5,7 +5,15 @@
 //*****************************************************************************
 
 uniform mat4 mProjection;
-uniform mat4 mModelView;
+uniform mat4 mView;
+uniform mat4 mModel;
+
+uniform LIGHT light;
+uniform MATERIAL material;
+
+//-----------------------------------------------------------------------------
+// Vertex data format
+//-----------------------------------------------------------------------------
 
 #ifdef VERTEX_SHADER
 attribute vec3 vert_pos;
@@ -14,9 +22,8 @@ attribute vec4 vert_norm;
 attribute vec4 vert_tangent;
 #endif
 
-uniform LIGHT light;
-uniform MATERIAL material;
-
+//-----------------------------------------------------------------------------
+// Data from vertex shader to fragment shader
 //-----------------------------------------------------------------------------
 
 varying vec2 frag_uv;       // Fragment texture coordinates

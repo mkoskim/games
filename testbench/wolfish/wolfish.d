@@ -51,9 +51,10 @@ class Maze : render.Scene
 
     this(string[] grid)
     {
-        super();
-        //super(render.shaders.Toon3D.create());
-        //super(render.shaders.Lightless3D.create());
+        super(
+            //render.shaders.Toon3D.create()
+            //render.shaders.Lightless3D.create()
+        );
 
         //---------------------------------------------------------------------
 
@@ -122,13 +123,13 @@ class Maze : render.Scene
 
         auto matAlienCarving = new render.Material(
             //new render.Texture("engine/stock/tiles/AlienCarving/ColorMap.png"),
-            vec3(0.75, 0.5, 0.25),
+            vec4(0.75, 0.5, 0.25, 1),
             new render.Texture("engine/stock/tiles/AlienCarving/NormalMap.png"),
             0.15);
 
         auto matMetallicAssembly = new render.Material(
             //new render.Texture("engine/stock/tiles/MetallicAssembly/ColorMap.png"),
-            vec3(0.5, 0.5, 0.5),
+            vec4(0.5, 0.5, 0.5, 1),
             new render.Texture("engine/stock/tiles/MetallicAssembly/NormalMap.png"),
             0.15);
 
@@ -169,7 +170,7 @@ class Maze : render.Scene
         auto floorshape2 = new render.Shape(
             floorshape.vao,
             new render.Material(
-                vec3(0.25, 0.25, 0.25),
+                vec4(0.25, 0.25, 0.25, 1),
                 //matCrackedPlaster.normalmap,
                 floorshape.material.normalmap,
                 0.15
@@ -182,8 +183,8 @@ class Maze : render.Scene
                 .scale(0.66)
             ),
             new render.Material(
-                vec3(0.75, 0.5, 0.25),
-                matSantaFeStucco.normalmap,
+                vec4(0.75, 0.5, 0.25, 1),
+                //matSantaFeStucco.normalmap,
                 0.5
             )
         );

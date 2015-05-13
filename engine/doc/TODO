@@ -4,6 +4,8 @@ DONE:
 
 - Somewhat done: I should go through code and correct indentation
 
+- Shader: moved Shader class a little bit lower level, and added initial
+  support for instanced drawing to interface.
 
 *******************************************************************************
 
@@ -65,6 +67,12 @@ FIX: Crashes, flaws etc.
 - TBN calculation in current shader has its flaws (not normalized nor
   orthogonal in fragment shader), but it might be so that it has no
   significant effect to rendering result
+
+- Current Bone implementation has a transformation cache. It is unclear to me,
+  how it works with games loading levels (that is, does it cause memory leak).
+
+- TextBox currently has no color: it is waiting color to be added to
+  instance specific modifier.
 
 -------------------------------------------------------------------------------
 

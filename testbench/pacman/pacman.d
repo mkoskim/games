@@ -110,21 +110,6 @@ void play(string mazename)
         0
     );
 
-    //-------------------------------------------------------------------------
-    // Create layers
-    //-------------------------------------------------------------------------
-
-    auto maze  = new render.Layer(shader, cam);
-    auto doors = new render.Layer(maze);
-    auto foods = new render.Layer(maze);
-    auto mobs  = new render.Layer(maze);
-
-    auto background = new render.Layer(maze);
-
-    auto mazecolor = new render.Material(0.3, 0.3, 0.6);
-
-    background.add(0, 0, shader.upload(geom.rect(width, height)), mazecolor);
-
     //*************************************************************************
     //
     // Navigation map. In pacman like game, actors are only allowed to move
@@ -211,7 +196,7 @@ void play(string mazename)
     
         bool checkgrid(Head next, string walls = "#=")
         {
-            vec3 p = sprite.pos + directions[next];
+            vec3 p = sprite.grip.pos + directions[next];
             return !inPattern(grid[cast(int)p.y][cast(int)p.x], walls);
         }
 
@@ -220,7 +205,7 @@ void play(string mazename)
         void step(Head next)
         {
             vec3 delta = directions[next] * (1.0/steps);
-            sprite.pos += delta;
+            sprite.grip.pos += delta;
         }
 
         int animframe() { return (game.frame >> 2) & 1; }
@@ -243,14 +228,16 @@ void play(string mazename)
 
         void checkfood()
         {
+            /*
             foreach(food; foods.instances.keys)
             {
-                if(distance(sprite.pos, food.pos) < 0.5)
+                if(distance(sprite.grip.pos, food.grip.pos) < 0.5)
                 {
                     foods.remove(food);
                     points += 10;
                 }
             }
+            */
         }
 
         void checkinput()
@@ -379,6 +366,10 @@ void play(string mazename)
     //
     //*************************************************************************
 
+    //-------------------------------------------------------------------------
+    // Shapes
+    //-------------------------------------------------------------------------
+    
     render.Shader.VAO
         rect1x1  = shader.upload(geom.rect(1, 1)),
         rect2x2  = shader.upload(geom.rect(1.66, 1.66)),
@@ -386,12 +377,30 @@ void play(string mazename)
         doormesh = shader.upload(geom.rect(1.66, 1));
 
     auto doormat = new render.Material(0.7, 0.7, 0.7);
+    auto mazemat = new render.Material(0, 0, 0);
+    
+    //-------------------------------------------------------------------------
+    // Layers
+    //-------------------------------------------------------------------------
+
+    auto maze  = new render.InstancedLayer(shader, cam, new render.Shape(rect2x2, mazemat));
+    auto doors = new render.Layer(maze);
+    auto foods = new render.Layer(maze);
+    auto mobs  = new render.Layer(maze);
+
+    auto background = new render.Layer(maze);
+
+    auto mazecolor = new render.Material(0.3, 0.3, 0.6);
+
+    background.add(0, 0, shader.upload(geom.rect(width, height)), mazecolor);
+
+    //-------------------------------------------------------------------------
 
     void add_wall(size_t x, size_t y) {
     }
 
     void add_empty(size_t x, size_t y) {
-        maze.add(x - 0.33, y - 0.33, rect2x2, vec4(0, 0, 0, 1));
+        maze.add(x - 0.33, y - 0.33);
     }
 
     void add_door(size_t x, size_t y) {
@@ -510,7 +519,7 @@ void play(string mazename)
 
     foreach(y, line; grid) foreach(x, c; line) if(c == '=') grid[y][x] = '-';
 
-    doormat.color = vec4(0, 0, 0, 1);
+    //doormat.color = vec4(0, 0, 0, 1);
     actors.add(player);
 
     //-------------------------------------------------------------------------

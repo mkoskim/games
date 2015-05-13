@@ -78,7 +78,7 @@ void main()
 
             for(;;) {
             
-                sprite.pos = vec3(
+                sprite.grip.pos = vec3(
                     std.random.uniform(0, game.screen.width),
                     std.random.uniform(0, game.screen.height),
                     0

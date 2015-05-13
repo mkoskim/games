@@ -61,6 +61,9 @@ void init()
 
 void start()
 {
+    import engine.render.bone;
+    Bone.clearcache();
+
     checkgl!glViewport(0, 0, screen.width, screen.height);
     checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

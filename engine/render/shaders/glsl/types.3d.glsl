@@ -4,7 +4,6 @@
 
 struct MATERIAL
 {
-    vec4 color;
     sampler2D colormap;
     sampler2D normalmap;
 

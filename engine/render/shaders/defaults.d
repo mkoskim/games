@@ -34,28 +34,35 @@ abstract class Default : Shader
 
     //-------------------------------------------------------------------------
 
-    protected void bindMaterial(Material material)
-    {
-        uniform("material.color", material.color);
-        texture("material.colormap", 0, material.colormap);
-    }
-
-    protected void bindMatrices(View cam, Bone grip)
+    override void loadView(View cam)
     {
         uniform("mProjection", cam.mProjection());
-        uniform("mModelView", cam.mModelView(grip.mModel()));
+        uniform("mView", cam.mView());
     }
 
-    override void render(View cam, Bone grip, Material mat, VAO vao)
+    override void loadMaterial(Material mat)
     {
-        if(!enabled) return;
+        texture("material.colormap", 0, mat.colormap);
+    }
+    
+    override void render(Bone grip, VAO vao)
+    {
+        uniform("mModel", grip.mModel());
 
-        bindMatrices(cam, grip);
-        bindMaterial(mat);
-        vao.draw();
+        vao.bind();
+        vao.ibo.draw();
+        vao.unbind();
+    }
 
-        //bindMaterial(instance.shape.material);
-        //instance.shape.vao.draw();
+    override void render(Bone[] grips, VAO vao)
+    {
+        vao.bind();
+        foreach(grip; grips)
+        {
+            uniform("mModel", grip.mModel());
+            vao.ibo.draw();
+        }
+        vao.unbind();
     }
 }
 
@@ -195,11 +202,11 @@ class Default3D : Default
 
     //-------------------------------------------------------------------------
 
-    override void bindMaterial(Material material)
+    override void loadMaterial(Material mat)
     {
-        super.bindMaterial(material);
-        texture("material.normalmap", 1, material.normalmap);
-        uniform("material.roughness", material.roughness);
+        super.loadMaterial(mat);
+        texture("material.normalmap", 1, mat.normalmap);
+        uniform("material.roughness", mat.roughness);
     }
 }
 

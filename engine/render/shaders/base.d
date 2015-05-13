@@ -6,6 +6,14 @@
 
 module engine.render.shaders.base;
 
+//*****************************************************************************
+//
+// Current plan is to move shader a lower level component. We implement
+// primitives to set up rendering, and functions to render different
+// primitive data types.
+//
+//*****************************************************************************
+
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
@@ -16,7 +24,6 @@ import engine.render.bone;
 import engine.render.mesh;
 import engine.render.material;
 import engine.render.bound;
-//import engine.render.instance;
 import engine.render.texture;
 import engine.render.view;
 import engine.render.light;
@@ -28,27 +35,50 @@ import std.string: toStringz;
 
 abstract class Shader
 {
+    /* TODO: Implement mechanism for shader options */
+
     bool fill = true;       // Fill / wireframe
     bool enabled = true;    // Render on/off
 
     //*************************************************************************
     //
-    // Methods that custom shaders need implement
+    // Methods that custom shaders need implement.
     //
     //*************************************************************************
 
     //abstract static Shader create();
 
-    abstract void render(View cam, Bone transform, Material mat, VAO vao);
     abstract protected void addVBOs(VAO vao, Mesh mesh);
 
-    void light(Light l) { }
+    //-------------------------------------------------------------------------
+    
+    abstract void loadView(View cam);
+    abstract void loadMaterial(Material mat);
+
+    abstract void render(Bone grip, VAO vao);
+    abstract void render(Bone[] grips, VAO vao);
+
+    //-------------------------------------------------------------------------
+    
+    final void render(Bone grip, Material mat, VAO vao)
+    {
+        loadMaterial(mat);
+        render(grip, vao);
+    }
+
+    final void render(Bone[] grips, Material mat, VAO vao)
+    {
+        loadMaterial(mat);
+        foreach(grip; grips) render(grip, vao);
+    }
 
     //*************************************************************************
     //
     // Methods that custom shaders can override
     //
     //*************************************************************************
+
+    void light(Light l) { }
 
     protected void apply()
     {
@@ -314,12 +344,14 @@ abstract class Shader
         // multiple phases (binding new materials between).
         //---------------------------------------------------------------------
 
+        /*
         void draw()
         {
             bind();
             ibo.draw();
             unbind();
         }
+        */
     }
 
     VAO upload(Mesh mesh)

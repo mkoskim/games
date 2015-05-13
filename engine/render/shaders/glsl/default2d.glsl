@@ -10,11 +10,11 @@
 //-----------------------------------------------------------------------------
 
 uniform mat4 mProjection;
-uniform mat4 mModelView;
+uniform mat4 mView;
+uniform mat4 mModel;
 
 struct MATERIAL
 {
-    vec4 color;
     sampler2D colormap;
 };
 
@@ -45,7 +45,7 @@ void main()
 {
     frag_uv = vert_uv;
 
-    gl_Position = mProjection * mModelView * vec4(vert_pos, 1);
+    gl_Position = mProjection * mView * mModel * vec4(vert_pos, 1);
 }
 #endif
 
@@ -65,7 +65,7 @@ void main(void)
 
     if(texel.a < 1.0/255) discard;
 
-    gl_FragColor = texel * material.color;
+    gl_FragColor = texel;
 }
 #endif
 

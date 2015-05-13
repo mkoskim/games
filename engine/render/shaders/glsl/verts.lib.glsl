@@ -2,7 +2,7 @@
 
 mat3 compute_TBN(vec4 normal, vec4 tangent)
 {
-    mat3 m = mat3(mModelView);
+    mat3 m = mat3(mView * mModel);
 
     vec3 n = m * normal.xyz;
     vec3 t = m * tangent.xyz;

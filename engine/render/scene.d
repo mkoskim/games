@@ -92,6 +92,8 @@ class Scene
         //---------------------------------------------------------------------
 
         shader.activate();
+        shader.loadView(cam);
+        
         if(light) shader.light(light);
 
         if(useSorting) {
@@ -103,12 +105,12 @@ class Scene
             }
 
             foreach(object; front2back(drawlist)) {
-                object.render(shader, cam);
+                object.render(shader);
                 perf.drawed++;
             }
         } else {
             foreach(object; drawlist) {
-                object.render(shader, cam);
+                object.render(shader);
                 perf.drawed++;
             }
         }

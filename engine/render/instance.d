@@ -20,9 +20,15 @@ import engine.render.bound;
 import engine.render.material;
 import engine.render.texture;
 
+//*****************************************************************************
+//
+// Renderable: These classes know how to send themselves to shader.
+//
+//*****************************************************************************
+
 //-------------------------------------------------------------------------
 // Shape combines shader vertex data (VAO, Vertex Array Object) with
-// material info (color, colormap, ...)
+// material info (colormap, ...)
 //-------------------------------------------------------------------------
 
 class Shape
@@ -83,15 +89,18 @@ class Shape
 // Shape
 //-------------------------------------------------------------------------
 
-class Instance : Bone
+class Instance
 {
+    //-------------------------------------------------------------------------
+
     Shape shape;
+    Bone grip;
 
     //-------------------------------------------------------------------------
 
     this(Bone parent, vec3 pos, vec3 rot, Shape shape)
     {
-        super(parent, pos, rot);
+        this.grip = new Bone(parent, pos, rot);
         this.shape = shape;
     }
 
@@ -127,14 +136,14 @@ class Instance : Bone
 
     vec3 transform(vec3 v)
     {
-        return (mModel() * vec4(v, 1)).xyz;
+        return (grip.mModel() * vec4(v, 1)).xyz;
     }
 
     void project(View cam)
     {
-        viewspace.pos = cam.viewspace(pos);
+        viewspace.pos = cam.viewspace(grip.mModel());
 
-        viewspace.bsp = cam.viewspace(mModel(), shape.vao.bsp.center);
+        viewspace.bsp = cam.viewspace(grip.mModel(), shape.vao.bsp.center);
         viewspace.bspdst2 = viewspace.bsp.magnitude_squared;
 
         Frustum frustum = cam.frustum;
@@ -157,10 +166,10 @@ class Instance : Bone
 
     //-------------------------------------------------------------------------
 
-    void render(Shader shader, View cam)
+    void render(Shader shader)
     {
         if(!shape) return;
-        shader.render(cam, this, shape.material, shape.vao);
+        shader.render(grip, shape.material, shape.vao);
     }
 }
 

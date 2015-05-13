@@ -25,7 +25,12 @@ class Blanko : Shader
     //-------------------------------------------------------------------------
 
     override protected void addVBOs(VAO vao, Mesh mesh) { }
-    override void render(View cam, Bone transform, Material mat, VAO vao) { }
+
+    override void loadView(View cam) { }
+    override void loadMaterial(Material mat) { }
+
+    override void render(Bone grip, VAO vao) { }
+    override void render(Bone[] grips, VAO vao) { }
 
     //-------------------------------------------------------------------------
 
