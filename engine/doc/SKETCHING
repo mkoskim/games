@@ -25,6 +25,83 @@ considerably. Thoughts I have:
 - Game combines several such objects to form a pipeline to render
   the screen.
 
+What I can be quite certainly sure, is that we have Shader object(s), and
+we have collections of instances that are fed to shader to render. At high
+levels, we have higher level game objects and their grouping. Then we have
+'middleware' to construct shader work sets from high level game objects,
+based on different criterias (like camera position).
+
+We know that what we are doing, is to generate draw instructions to
+OpenGL from high level data structures.
+
+
+    High                         OpenGL
+    Level      ---> magic --->   Function
+    Game                         Calls
+    Objects
+
+- - -
+
+Lets start from very simple mechanics.
+
+    Group<Instance> ---> Shader
+
+We have simple unordered group of instances (instance holds data needed
+for rendering: shape, material, position). It is directly fed to shader
+to render.
+
+To go further, we create several groups, and feed them to Shader in
+specific order to ensure correct drawing order:
+
+    Group<Instance> ---> Shader
+    Group<Instance> ---> Shader
+
+We might want to have specialized groups. One example is to have a
+instanced group - a group that 'clones' specific shapes. For example,
+spaceships in a fleet, or particles in an explosion, or a star field.
+
+    Clone<Shape, Pos> ---> Shader
+    Group<Instance>   ---> Shader
+
+Both freeform instance group and cloning group should work together.
+
+FRUSTUM CULLING, DRAWING ORDER: So far, so good. But then, we might want to
+apply different kind of filters and such for optimizing larger scenes.
+
+    |-- Source ---|
+                        |---------- Filtering ----------|
+
+    Group<Instance> --> Frustum Culling --> front-to-back --> Shader
+    Group<Instance> --> Frustum Culling --> back-to-front --> Shader
+    
+The first one, drawing objects from front-to-back, works well for
+solid objects with fragment heavy shaders. The latter one is needed
+to (somewhat) correctly render transparent objects.
+
+Frustum culling is an example of exclusive filtering. Somewhat similar
+is occlusion culling (using occluders). An example of inclusive filter
+are portals.
+
+INSTANCED DRAWING: Filtering phase should also work with instanced
+drawing.
+
+- - -
+
+ROOMS AND PORTALS: The idea here is that there is a network of Rooms,
+which are connected to each other with portals. Camera is located in
+one specific room. Everything inside a room is included. For portals,
+we do frustum culling, and for every visible portal, we include
+items from the target room, using portal as 'frustum culling'.
+
+Rooms & Portals have my main interest, as many of the projects I am
+planning are more or less dungeon based games.
+
+BTW: Portals are single faced. So, in addition to check if they are
+inside frustum, it is also necessary to check if we are looking
+its front face. For example, consider a hut with a door in a landscape:
+if we are looking the hut from back side, even that the portal is inside
+frustum, it is at the opposite side.
+
 -------------------------------------------------------------------------------
 
 USER INPUT: Personally, I'm designing games to be controlled with game

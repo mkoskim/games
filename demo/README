@@ -6,3 +6,13 @@
 This directory contains different kinds of demonstrations. Their main purpose
 is to sketch out different kind of technologies and their use.
 
+It is impossible to make strict separation of demos, testbenches and actual
+game projects. They all serve several purposes to various levels: (1) test
+benches for engine development, (2) sketching solutions, (3) demonstrate
+technologies, and so on.
+
+Still: Demos are small code snippets, and they have some kind of focus, main
+purpose for their existence. Testbenches are more freeform code blocks,
+more complex, and they do not necessarily have strict and simple focus.
+Projects are more ambitious goals, more complete as games (or applications).
+

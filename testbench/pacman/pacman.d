@@ -110,10 +110,40 @@ void play(string mazename)
         0
     );
 
+    //-------------------------------------------------------------------------
+    // Shapes
+    //-------------------------------------------------------------------------
+    
+    render.Shader.VAO
+        rect1x1  = shader.upload(geom.rect(1, 1)),
+        rect2x2  = shader.upload(geom.rect(1.66, 1.66)),
+        foodmesh = shader.upload(geom.rect(0.25, 0.25)),
+        doormesh = shader.upload(geom.rect(1.66, 1));
+
+    auto doormat = new render.Material(0.7, 0.7, 0.7);
+    auto mazemat = new render.Material(0, 0, 0);
+    
+    //-------------------------------------------------------------------------
+    // Layers
+    //-------------------------------------------------------------------------
+
+    auto maze  = new render.Cloner(shader, cam, new render.Shape(rect2x2, mazemat));
+    auto doors = new render.Layer(maze);
+    auto foods = new render.Layer(maze);
+    auto mobs  = new render.Layer(maze);
+
+    auto background = new render.Layer(maze);
+
+    auto mazecolor = new render.Material(0.3, 0.3, 0.6);
+
+    background.add(0, 0, shader.upload(geom.rect(width, height)), mazecolor);
+
+    //-------------------------------------------------------------------------
+
     //*************************************************************************
     //
-    // Navigation map. In pacman like game, actors are only allowed to move
-    // from one empty location to neighboring empty location.
+    // Navigation map (incomplete). In pacman like game, actors are only
+    // allowed to move from one empty location to neighboring empty location.
     //
     //*************************************************************************
 
@@ -228,7 +258,6 @@ void play(string mazename)
 
         void checkfood()
         {
-            /*
             foreach(food; foods.instances.keys)
             {
                 if(distance(sprite.grip.pos, food.grip.pos) < 0.5)
@@ -237,7 +266,6 @@ void play(string mazename)
                     points += 10;
                 }
             }
-            */
         }
 
         void checkinput()
@@ -365,36 +393,6 @@ void play(string mazename)
     // Functions to add shapes to layers from maze data
     //
     //*************************************************************************
-
-    //-------------------------------------------------------------------------
-    // Shapes
-    //-------------------------------------------------------------------------
-    
-    render.Shader.VAO
-        rect1x1  = shader.upload(geom.rect(1, 1)),
-        rect2x2  = shader.upload(geom.rect(1.66, 1.66)),
-        foodmesh = shader.upload(geom.rect(0.25, 0.25)),
-        doormesh = shader.upload(geom.rect(1.66, 1));
-
-    auto doormat = new render.Material(0.7, 0.7, 0.7);
-    auto mazemat = new render.Material(0, 0, 0);
-    
-    //-------------------------------------------------------------------------
-    // Layers
-    //-------------------------------------------------------------------------
-
-    auto maze  = new render.Cloner(shader, cam, new render.Shape(rect2x2, mazemat));
-    auto doors = new render.Layer(maze);
-    auto foods = new render.Layer(maze);
-    auto mobs  = new render.Layer(maze);
-
-    auto background = new render.Layer(maze);
-
-    auto mazecolor = new render.Material(0.3, 0.3, 0.6);
-
-    background.add(0, 0, shader.upload(geom.rect(width, height)), mazecolor);
-
-    //-------------------------------------------------------------------------
 
     void add_wall(size_t x, size_t y) {
     }
