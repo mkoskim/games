@@ -87,6 +87,15 @@ void cleantrash()
 //
 // Basic performance measurement
 //
+//      frametime:  Length of the frame cycle
+//
+//      busytime:   Time between SDL_Delay() calls
+//
+//      rendertime: Time from render start to return from buffer swapping.
+//                  This measurement does not tell much about CPU/GPU load.
+//
+//      idletime:   Time used in SDL_Delay()
+//
 //*****************************************************************************
 
 class Profile
@@ -94,7 +103,7 @@ class Profile
     auto frame  = new PerfMeter();
     auto busy   = new PerfMeter();
     auto render = new PerfMeter();
-    auto renderCPU = new PerfMeter();
+    //auto renderCPU = new PerfMeter();
 
     float fps()    { return 1000 / frame.average; }
     float fpsmax() { return 1000 / busy.average; }
@@ -117,10 +126,11 @@ class Profile
             rendertime = timers.render.average;
 
         return format(
-            "FPS: %5.1f : busy %5.1f : busy/idle %5.1f%% / %5.1f%%",
+            "FPS: %5.1f : busy %5.1f ms : logic/render/idle %5.1f%% / %5.1f%% / %5.1f%%",
             timers.fps,
             busytime,
-            100.0*busytime/frametime,
+            100.0*(busytime-rendertime)/frametime,
+            100.0*(rendertime)/frametime,
             100.0*(frametime-busytime)/frametime,
         );
     }

@@ -1,6 +1,6 @@
 //*****************************************************************************
 //
-// Simple object viewer
+// Portal demonstration.
 //
 //*****************************************************************************
 
@@ -8,7 +8,13 @@ import engine;
 
 //-----------------------------------------------------------------------------
 
-import std.random;
+class Room
+{
+    InstanceGroup content;
+
+    this() { }
+    ~this() { }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -27,12 +33,12 @@ void main()
     scene.light = new render.Light(
         vec3(0, 2, 0),      // Position
         vec3(1, 1, 1),      // Color
-        7.5,                // Range
-        0.25                // Ambient level
+        10,                 // Range
+        0.1                 // Ambient level
     );
 
     auto cam = render.Camera.basic3D(
-        0.1, 10,        // Near - far
+        0.1, 20,        // Near - far
         vec3(0, 0, 5)
     );
 
@@ -46,10 +52,9 @@ void main()
             blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj")
         ),
         new render.Material(
-            //new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
-            new render.Texture(vec4(1, 0.8, 0, 1)),
-            new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
-            0.75
+            new render.Texture("engine/stock/tiles/Concrete/Crusty/ColorMap.png"),
+            new render.Texture("engine/stock/tiles/Concrete/Crusty/NormalMap.png"),
+            0.95
         )
     );
 
@@ -67,7 +72,7 @@ void main()
         const float turnrate = 5;
         
         object.grip.pos += vec3(
-            joystick.axes[game.JOY.AXIS.LX],
+            -joystick.axes[game.JOY.AXIS.LX],
             0,
             -joystick.axes[game.JOY.AXIS.LY]
         ) * moverate;

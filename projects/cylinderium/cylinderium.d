@@ -35,8 +35,8 @@ class StarField : render.Scene
     {
         super(render.shaders.Lightless3D.create());
 
-        useFrustumCulling = false;
-        useSorting = false;
+        //useFrustumCulling = false;
+        //useSorting = false;
 
         auto mesh = new render.Mesh(GL_POINTS);
 

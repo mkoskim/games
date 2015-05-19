@@ -123,6 +123,8 @@ void play(string mazename)
     auto doormat = new render.Material(0.7, 0.7, 0.7);
     auto pathmat = new render.Material(0, 0, 0);
     auto wallmat = new render.Material(0.3, 0.3, 0.6);
+
+    auto pathshape = new render.Shape(rect2x2, pathmat);
     
     //-------------------------------------------------------------------------
     //
@@ -139,7 +141,7 @@ void play(string mazename)
     auto background = new render.Layer(shader, cam);
     background.add(0, 0, shader.upload(geom.rect(width, height)), wallmat);
 
-    auto maze  = new render.Cloner(background, new render.Shape(rect2x2, pathmat));
+    auto maze  = new render.Layer(background);
 
     //-------------------------------------------------------------------------
 
@@ -405,7 +407,7 @@ void play(string mazename)
     }
 
     void add_empty(size_t x, size_t y) {
-        maze.add(x - 0.33, y - 0.33);
+        maze.add(x - 0.33, y - 0.33, pathshape);
     }
 
     void add_door(size_t x, size_t y) {

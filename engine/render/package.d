@@ -16,7 +16,6 @@ public import engine.render.instance;
 
 public import engine.render.view;
 public import engine.render.layer;
-public import engine.render.scene;
 public import engine.render.light;
 
 public import engine.render.shaders.base;

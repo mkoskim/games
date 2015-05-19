@@ -8,14 +8,9 @@ DONE:
 
 WORKLIST:
 
-- Combine Layer and Scene... Somehow... And implement sort of worksets. The
-  idea is to divide drawing to two separate phases. Programmer classifies
-  the objects and puts them to different containers. For drawing, s/he chooses
-  the strategies how objects from containers are moved to rendering.
-
 - Sprite/particle engine for textbox
 
-- "Multi-material" meshes (batches): It would be good to think about the
+- "Multi-material" meshes: It would be good to think about the
   implementation a little bit, so that it would fit to future development.
   Later, we might want to split meshes also to different instances, for
   example, when drawing a tree, we could put transparent parts (leaves)
@@ -210,6 +205,39 @@ keep these in mind so that architecture does not prevent implementing these:
 
 -------------------------------------------------------------------------------
 
+SCENES, LAYERS:
+
+- Some simple file format to create scenes (placing objects, creating
+  object hierarchies, ...) could be useful. POVRay may be too complex.
+  Something that can be used together with .obj & .mtl files... Of
+  course, we need support to other mesh data formats, too, but .obj is
+  quite common & useful anyways.
+
+- Probably it is better to classify objects at Layer/Scene level already...
+  Keeping objects in one single list helps lookups, but (1) I assume that
+  they are more rare operations than rendering calls, and (2) that can
+  be simulated anyways (lookup looks from all lists).
+  
+  * Look at Cylinderium: it has 2 interleaved scenes, one for mother ship,
+    one for star field. We might consider generalizing something similar?
+
+- Combine Layer and Scene... Somehow... And implement sort of worksets. The
+  idea is to divide drawing to two separate phases. Programmer classifies
+  the objects and puts them to different containers. For drawing, s/he chooses
+  the strategies how objects from containers are moved to rendering.
+
+- Because of this, it might make some sense to bind lights, visibility
+  checks and such to camera. The same information could then be used
+  by all scene layers. Need thinking...
+
+- Fog
+
+- Occlusion queries?
+
+    * https://www.opengl.org/wiki/Query_Object#Occlusion_queries
+
+-------------------------------------------------------------------------------
+
 3D OBJECTS:
 
 - Transparent objects: Drawn back-to-front
@@ -339,34 +367,6 @@ shaders.
 CAMERA:
 
 - Viewport settings to camera
-
--------------------------------------------------------------------------------
-
-SCENES, LAYERS:
-
-- Some simple file format to create scenes (placing objects, creating
-  object hierarchies, ...) could be useful. POVRay may be too complex.
-  Something that can be used together with .obj & .mtl files... Of
-  course, we need support to other mesh data formats, too, but .obj is
-  quite common & useful anyways.
-
-- Probably it is better to classify objects at Layer/Scene level already...
-  Keeping objects in one single list helps lookups, but (1) I assume that
-  they are more rare operations than rendering calls, and (2) that can
-  be simulated anyways (lookup looks from all lists).
-  
-  * Look at Cylinderium: it has 2 interleaved scenes, one for mother ship,
-    one for star field. We might consider generalizing something similar?
-
-- Because of this, it might make some sense to bind lights, visibility
-  checks and such to camera. The same information could then be used
-  by all scene layers. Need thinking...
-
-- Fog
-
-- Occlusion queries?
-
-    * https://www.opengl.org/wiki/Query_Object#Occlusion_queries
 
 -------------------------------------------------------------------------------
 
