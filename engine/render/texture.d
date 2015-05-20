@@ -29,8 +29,10 @@ private GLuint _GLformat(SDL_Surface *surface)
     auto nbOfColors = surface.format.BytesPerPixel;
 
     switch (nbOfColors) {
+        /*
         case 1:
             return GL_ALPHA;
+        */
         case 3:     // no alpha channel
             if (surface.format.Rmask == 0x000000ff)
                 return GL_RGB;
@@ -62,14 +64,42 @@ class Texture
 
     this(uint w, uint h, void* buffer, GLenum format)
     {
-        GLenum internal;
+        const string[GLenum] _name = [
+            GL_BGRA: "GL_BGRA",
+            GL_RGBA: "GL_RGBA",
+            GL_BGR: "GL_BGR",
+            GL_RGB: "GL_RGB",
+            
+            GL_RGB8: "GL_RGB8",
 
-        switch(format)
+            GL_COMPRESSED_RGB: "GL_COMPRESSED_RGB",
+            GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
+        ];
+        
+        GLenum internal;
+        GLenum data_width = GL_UNSIGNED_BYTE;
+        GLint align_unpack;
+
+        final switch(format)
         {
-            case GL_BGRA: internal = GL_RGBA; break;
-            case GL_BGR: internal = GL_RGB; break;
-            default: internal = format; break;
+            // TODO: BGR(A) formats seem not to work
+            case GL_BGRA: format = GL_RGBA; goto case GL_RGBA;
+            case GL_BGR: format = GL_RGB; goto case GL_RGB;
+                
+            case GL_RGB8: format = GL_RGB; goto case GL_RGB;
+            
+            case GL_RGBA:
+                internal = GL_COMPRESSED_RGBA;
+                align_unpack = 4;
+                break;
+            
+            case GL_RGB:
+                internal = GL_COMPRESSED_RGB;
+                align_unpack = 1;
+                break;
         }
+
+        //debug writeln("Format: ", _name[format], " internal: ", _name[internal]);
 
         //TODO("Alpha maps not working");
 
@@ -79,21 +109,22 @@ class Texture
         width = w;
         height = h;
 
-        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, align_unpack);
         //glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
         checkgl!glTexImage2D(GL_TEXTURE_2D,
             0,                  // Mipmap level
-            internal,           // Internal format
+            format,             // Internal format
             w, h,
             0,                  // Border
             format,             // Format of data
-            GL_UNSIGNED_BYTE,   // Data width
+            data_width,         // Data width
             buffer              // Actual data
         );
 
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
         //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 

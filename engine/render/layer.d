@@ -28,9 +28,11 @@ import engine.render.mesh;
 import engine.render.texture;
 import engine.render.material;
 import engine.render.light;
-import engine.render.instance;
-import engine.render.shaders.base;
-import engine.render.shaders.defaults;
+import engine.render.model;
+import engine.render.batch;
+
+//import engine.render.shaders.base;
+//import engine.render.shaders.defaults;
 
 //*****************************************************************************
 //
@@ -38,115 +40,147 @@ import engine.render.shaders.defaults;
 //
 //*****************************************************************************
 
-class InstanceGroup
+abstract class NodeGroup
 {
-    Shader shader;
-    bool[Instance] instances;
+    //-------------------------------------------------------------------------
 
-    auto length() { return instances.length; }
+    abstract Node _add(Node node);
+    abstract void remove(Node node);
 
     //-------------------------------------------------------------------------
 
-    this(Shader shader) { this.shader = shader; }
+    Node add(Node node) { return _add(node); }
+    Node add(vec3 pos) { return _add(new Node(pos)); }
+    Node add(vec3 pos, Model model) { return _add(new Node(pos, model)); }
+    Node add(Bone parent, Model model) { return _add(new Node(parent, model)); }
 
-    //-------------------------------------------------------------------------
+    Node add(float x, float y) { return _add(new Node(vec3(x, y, 0))); }
+    Node add(float x, float y, Model model) { return _add(new Node(vec3(x, y, 0), model)); }
 
-    Shader.VAO upload(Mesh mesh) { return shader.upload(mesh); }
+    /*
+    Node add(vec3 pos, Shader.VAO mesh, Material mat) { return add(new Node(pos, mesh, mat)); }
+    Node add(vec3 pos, Shader.VAO mesh, vec4 color) { return add(new Node(pos, mesh, new Material(color))); }
+    Node add(vec3 pos, Shader.VAO mesh, Texture tex) { return add(new Node(pos, mesh, new Material(tex))); }
 
-    //-------------------------------------------------------------------------
-
-    Instance add(Instance instance) { instances[instance] = true; return instance; }
-    void remove(Instance instance) { instances.remove(instance); }
-
-    Instance add(vec3 pos) { return add(new Instance(pos)); }
-    Instance add(vec3 pos, Shape shape) { return add(new Instance(pos, shape)); }
-    Instance add(Bone parent, Shape shape) { return add(new Instance(parent, shape)); }
-
-    Instance add(vec3 pos, Shader.VAO mesh, Material mat) { return add(new Instance(pos, mesh, mat)); }
-    Instance add(vec3 pos, Shader.VAO mesh, vec4 color) { return add(new Instance(pos, mesh, new Material(color))); }
-    Instance add(vec3 pos, Shader.VAO mesh, Texture tex) { return add(new Instance(pos, mesh, new Material(tex))); }
-
-    Instance add(float x, float y) { return add(new Instance(vec3(x, y, 0))); }
-    Instance add(float x, float y, Shape shape) { return add(new Instance(vec3(x, y, 0), shape)); }
-
-    Instance add(float x, float y, Shader.VAO mesh, Material mat) { return add(new Instance(vec3(x, y, 0), mesh, mat)); }
-    Instance add(float x, float y, Shader.VAO mesh, vec4 color) { return add(vec3(x, y, 0), mesh, color); }
-    Instance add(float x, float y, Shader.VAO mesh, Texture tex) { return add(vec3(x, y, 0), mesh, tex); }
+    Node add(float x, float y, Shader.VAO mesh, Material mat) { return add(new Node(vec3(x, y, 0), mesh, mat)); }
+    Node add(float x, float y, Shader.VAO mesh, vec4 color) { return add(vec3(x, y, 0), mesh, color); }
+    Node add(float x, float y, Shader.VAO mesh, Texture tex) { return add(vec3(x, y, 0), mesh, tex); }
+    */
 }
 
 //*****************************************************************************
 //
-// Object sorting & filtering
+// Direct storage: stores nodes directly to batches, and renders them in
+// order which batches are created.
 //
 //*****************************************************************************
 
-import std.algorithm;
-
-class Batch
+class DirectRender : NodeGroup
 {
-    Instance[] instances;
-
-    this() { }
-    ~this() { }
-
-    void add(InstanceGroup group)
-    {
-        foreach(k, v; group.instances) instances ~= k;
-    }
-
-    void filter(View cam)
-    {
-    }
-
-    void front2back() {
-        sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(instances);
-    }
-    void back2front() {
-        sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(instances);
-    }
-}
-
-//*****************************************************************************
-//
-//
-//
-//*****************************************************************************
-
-class Layer : InstanceGroup
-{
+    RenderState rs;
     View cam;
+    Light light;
+    BatchGroup batches;
     
     //-------------------------------------------------------------------------
 
-    this(Shader shader, View cam)
+    this(View cam, RenderState rs)
     {
-        super(shader);
         this.cam = cam;
+        this.rs = rs;
+        this.batches = new BatchGroup();
     }
 
-    this(Layer layer)
-    {
-        this(layer.shader, layer.cam);
-    }
+    //-------------------------------------------------------------------------
+
+    override Node _add(Node node) { batches.add(node); return node; }
+    override void remove(Node node) { batches.remove(node); }    
+
+    //-------------------------------------------------------------------------
+
+    Batch addbatch() { return batches.addbatch(new Batch(rs)); }
 
     //-------------------------------------------------------------------------
 
     void draw()
     {
-        shader.activate();
-        shader.loadView(cam);
-
-        foreach(instance; instances.keys) instance.render(shader);
+        // TODO: Hack! Design light subsystem
+        rs.activate();    
+        if(light) rs.shader.light(light);
+        
+        batches.draw(cam);
     }
 }
 
 //*****************************************************************************
 //
+// Collectable rendering: Models (Mesh + Material) are separated from
+// Nodes (Model + transform).
+//
+//*****************************************************************************
+
+abstract class CollectableNodeGroup : NodeGroup
+{
+    abstract void collect(View cam, BatchGroup batches);
+}
+
+//-----------------------------------------------------------------------------
+// Define separate Node storage
+//-----------------------------------------------------------------------------
+
+class BasicNodeGroup : CollectableNodeGroup
+{
+    bool[Node] nodes;
+
+    ulong length() { return nodes.length; }
+    
+    override Node _add(Node node) { nodes[node] = true; return node; }
+    override void remove(Node node) { nodes.remove(node); }
+
+    override void collect(View cam, BatchGroup batches)
+    {
+        foreach(node, _; nodes) {
+            node.project(cam);
+            if(!node.viewspace.infrustum) continue;
+            batches.add(node);
+        }
+    }
+}
+
+/*
+import std.algorithm;
+
+class Batch
+{
+    Node[] nodes;
+
+    auto length() { return nodes.length; }
+
+    void add(Node node) { nodes ~= node; }
+
+    void front2back() {
+        sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(nodes);
+    }
+    void back2front() {
+        sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(nodes);
+    }
+
+    void draw(Shader shader)
+    {
+        foreach(node; nodes) node.render(shader);
+    }
+}
+*/
+
+//*****************************************************************************
+//
 //
 //
 //*****************************************************************************
 
-class Scene : InstanceGroup
+class xScene : NodeGroup
+{
+static if(0)
 {
     Light light;
 
@@ -164,18 +198,22 @@ class Scene : InstanceGroup
 
         //---------------------------------------------------------------------
 
-        Instance[] drawlist;
+        Batch batch = new Batch();
 
         if(useFrustumCulling) {
-            foreach(object; instances.keys) {
-                object.project(cam);
-                if(!object.viewspace.infrustum) continue;
-                drawlist ~= object;
+            foreach(node, _; nodes) {
+                node.project(cam);
+                if(!node.viewspace.infrustum) continue;
+                batch.add(node);
             }
         } else {
-            drawlist = instances.keys;
+            batch.nodes = nodes.keys;
         }
 
+        //---------------------------------------------------------------------
+
+        if(useSorting) batch.front2back();
+        
         //---------------------------------------------------------------------
 
         shader.activate();
@@ -183,24 +221,8 @@ class Scene : InstanceGroup
         
         if(light) shader.light(light);
 
-        if(useSorting) {
-            auto front2back(Instance[] drawlist) {
-                return sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(drawlist);
-            }
-            auto back2front(Instance[] drawlist) {
-                return sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(drawlist);
-            }
-
-            foreach(object; front2back(drawlist)) {
-                object.render(shader);
-                perf.drawed++;
-            }
-        } else {
-            foreach(object; drawlist) {
-                object.render(shader);
-                perf.drawed++;
-            }
-        }
+        batch.draw(shader);
+        perf.drawed += batch.length();
     }
 
     //-------------------------------------------------------------------------
@@ -212,6 +234,7 @@ class Scene : InstanceGroup
         void reset() { drawed = 0; }
     }
     Performance perf;
+}
 }
 
 

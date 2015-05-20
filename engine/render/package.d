@@ -6,17 +6,17 @@
 
 module engine.render;
 
+public import engine.render.bone;
 public import engine.render.mesh;
 public import engine.render.bound;
 public import engine.render.material;
 public import engine.render.texture;
-
-public import engine.render.bone;
-public import engine.render.instance;
+public import engine.render.model;
 
 public import engine.render.view;
-public import engine.render.layer;
 public import engine.render.light;
+public import engine.render.batch;
+public import engine.render.layer;
 
 public import engine.render.shaders.base;
 public import shaders = engine.render.shaders;

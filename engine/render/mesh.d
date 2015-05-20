@@ -38,8 +38,8 @@ class Mesh
         vec3 pos;
 
         fvec2x16b uv;
-        ivec4x8b normal;
-        ivec4x8b tangent;
+        ivec4x8b normal;    // TODO: GL_INT_2_10_10_10_REV
+        ivec4x8b tangent;   // TODO: GL_INT_2_10_10_10_REV
 
         uint[2] padding;
 

@@ -27,30 +27,34 @@ void main()
     // Create layer, using default 2D shader and "pixel" camera (camera coords
     // are window coords).
     //-------------------------------------------------------------------------
-    
-    auto layer = new render.Layer(
-        render.shaders.Default2D.create(),
-        render.Camera.topleft2D()
+
+    auto scene = new render.DirectRender(
+        render.Camera.topleft2D(),
+        new render.RenderState2D()
     );
 
+    auto batch = scene.addbatch();
+    
     //-------------------------------------------------------------------------
     // Create shape sheet from sprite sheet. As second spritesheet used
     // contains some duplicate images, we post-process the result a bit.
     //-------------------------------------------------------------------------
     
+    auto empty = batch.upload();
+    
     auto explosions = [
 
-        render.Shape.sheet(
-            layer.shader,
+        render.Model.sheet(
+            batch,
             new render.Texture("engine/stock/spritesheets/explosion2.png"),
             40, 40,         // Dimensions of single sprite in sheet (in pixles)
             40.0, 40.0      // Dimensions for created rectangular mesh
         )[0],
 
-        function render.Shape[](render.Shader shader)
+        function render.Model[](render.Batch batch)
         {
-            auto grid = render.Shape.sheet(
-                shader,
+            auto grid = render.Model.sheet(
+                batch,
                 new render.Texture("engine/stock/spritesheets/explosion1.png"),
                 128, 128,
                 100.0, 100.0
@@ -60,7 +64,7 @@ void main()
                 grid[0], grid[1], grid[2], grid[3],
                 grid[5], grid[6], grid[7], grid[8]
             ];
-        }(layer.shader),
+        }(batch),
     ];
 
     //-------------------------------------------------------------------------
@@ -83,7 +87,7 @@ void main()
 
             // ----------------------------------------------------------------
 
-            auto sprite = layer.add(0, 0);
+            auto sprite = scene.add(vec3(0, 0, 0), empty);
 
             for(;;) {
             
@@ -95,12 +99,12 @@ void main()
                 );
                 
                 // (2) Random shape
-                render.Shape[] animation = explosions[std.random.uniform(0, 2)];
+                render.Model[] animation = explosions[std.random.uniform(0, 2)];
                 //render.Shape[] animation = explosions[1];
                 
                 // (3) Run the sequence
                 foreach(phase; 0 .. animation.length) {
-                    sprite.shape = animation[phase];
+                    sprite.model = animation[phase];
                     nextframe();
                 }
             }
@@ -115,6 +119,8 @@ void main()
 
     //-------------------------------------------------------------------------
 
-    simple.gameloop(25, &layer.draw, actors, null);
+    actors.reportperf();
+
+    simple.gameloop(25, &scene.draw, actors, null);
 }
 

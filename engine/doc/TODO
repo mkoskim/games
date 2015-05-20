@@ -74,15 +74,7 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 
 HOTTISH TOPICS:
 
-- At lowest levels, there is a batch. It's a list of instances, rendered by
-  the same shader. This is something like Layer and Scene are at the moment.
-  I'm pretty sure this kind of mechanism does not go anywhere. At the top
-  level, you have scene data. Mapping these together is the hard part.
-
-  Anyways, it's quite clear that the current TextBox implementation prevents
-  me to implement such batch processing. So, it would be very, very
-  important to change this. Think hard how to make it happen. If we implement
-  a Blitter class to blit 2D images?
+- ...
 
 -------------------------------------------------------------------------------
 
@@ -116,6 +108,8 @@ GENERAL:
   way to do that would be adding the calling queue to parameters, so that
   callback can remove itself if wanted
 
+- It would be good to implement timers to Fiber queue.
+
 - It would be good to be able to send events to be processed by a Fiber.
   If we have player Fiber, we might want to get the input events there.
   Think & design how to do this.
@@ -146,10 +140,6 @@ GENERAL:
 SHADERS: Shaders are so central part that they reserve their own section
 here. Shader is connected to at least objects, materials and scenes, so these
 issues have their relations to other sections in this TODO document.
-
-- I could make a block containing OpenGL settings (depth test on/off etc),
-  apply it on shader change and put apply() as private method. This way
-  you could tweak shader parameters at game side.
 
 - Also, now e.g. projection matrix is written for each object, but in
   reality there is only need to write it again if camera perspective
@@ -221,11 +211,6 @@ SCENES, LAYERS:
   * Look at Cylinderium: it has 2 interleaved scenes, one for mother ship,
     one for star field. We might consider generalizing something similar?
 
-- Combine Layer and Scene... Somehow... And implement sort of worksets. The
-  idea is to divide drawing to two separate phases. Programmer classifies
-  the objects and puts them to different containers. For drawing, s/he chooses
-  the strategies how objects from containers are moved to rendering.
-
 - Because of this, it might make some sense to bind lights, visibility
   checks and such to camera. The same information could then be used
   by all scene layers. Need thinking...
@@ -272,7 +257,7 @@ SCENES, LAYERS:
 - Reconsider rotation, it's very unintuitive at the moment. Currently you
   need to make parent hierarchies to keep rotations in order...
   
-- Scaling is not working, mainly because it would need updating of
+- Matrix Scaling is not working, mainly because it would need updating of
   bounding sphere.
 
 - Half-done: Objects without mesh & mat... Static objects... "Bones" are
@@ -288,8 +273,8 @@ SCENES, LAYERS:
 
 - Billboards and imposters
 
-- Instanced rendering: Layers with single mesh type for OpenGL instanced
-  rendering? Probably no, it is probably better idea to have "instanced
+- Half-done: Instanced rendering: Layers with single mesh type for OpenGL
+  instanced rendering? Probably no, it is probably better idea to have "instanced
   instance", instance with single shape and multiple positions. But well...
   Maybe a particle layer is not a bad idea? Need thinking...
   
@@ -362,11 +347,16 @@ shaders.
   could be data files for other assets like sprite sheets (describing the
   dimensions of the sheet) for loading them with less efforts.
 
+- It might be wise to move normal maps from material to "mesh": it is more
+  like added geometry than a material parameter... Although it can be
+  that, too...
+
 -------------------------------------------------------------------------------
 
 CAMERA:
 
-- Viewport settings to camera
+- Viewport settings to camera... In fact, create sort of RenderTarget
+  class.
 
 -------------------------------------------------------------------------------
 

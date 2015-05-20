@@ -110,21 +110,10 @@ void play(string mazename)
         0
     );
 
-    //-------------------------------------------------------------------------
-    // Shapes
-    //-------------------------------------------------------------------------
-    
-    render.Shader.VAO
-        rect1x1  = shader.upload(geom.rect(1, 1)),
-        rect2x2  = shader.upload(geom.rect(1.66, 1.66)),
-        foodmesh = shader.upload(geom.rect(0.25, 0.25)),
-        doormesh = shader.upload(geom.rect(1.66, 1));
-
-    auto doormat = new render.Material(0.7, 0.7, 0.7);
-    auto pathmat = new render.Material(0, 0, 0);
-    auto wallmat = new render.Material(0.3, 0.3, 0.6);
-
-    auto pathshape = new render.Shape(rect2x2, pathmat);
+    auto scene = new render.DirectRender(
+        cam,
+        new render.RenderState2D()
+    );
     
     //-------------------------------------------------------------------------
     //
@@ -136,48 +125,56 @@ void play(string mazename)
     // Other than this (maze and background layers), the rest are pretty
     // self-explanatory: layers for food, doors and mobs.
     //
+    // Creating different batches for different game objects does not only
+    // serve for determining drawing order, but it can also help collision
+    // detection (that is, each group is also collision group).
+    //
     //-------------------------------------------------------------------------
 
-    auto background = new render.Layer(shader, cam);
-    background.add(0, 0, shader.upload(geom.rect(width, height)), wallmat);
-
-    auto maze  = new render.Layer(background);
+    auto background = scene.addbatch();
+    auto path  = scene.addbatch();
+    auto doors = scene.addbatch();
+    auto foods = scene.addbatch();
+    auto mobs  = scene.addbatch();
 
     //-------------------------------------------------------------------------
+    // Shapes (Models: mesh + material)
+    //-------------------------------------------------------------------------
+    
+    render.Mesh
+        rect1x1  = geom.rect(1, 1),
+        rect2x2  = geom.rect(1.66, 1.66),
+        foodmesh = geom.rect(0.25, 0.25),
+        doormesh = geom.rect(1.66, 0.33);
 
-    auto doors = new render.Layer(maze);
-    auto foods = new render.Layer(maze);
-    auto mobs  = new render.Layer(maze);
+    auto doormat = new render.Material(0.7, 0.7, 0.7);
+    auto pathmat = new render.Material(0, 0, 0);
+    auto wallmat = new render.Material(0.3, 0.3, 0.6);
+    auto foodmat = new render.Material(0.6, 0.6, 0.2);
 
-    //*************************************************************************
-    //
-    // Navigation map (incomplete). In pacman like game, actors are only
-    // allowed to move from one empty location to neighboring empty location.
-    //
-    //*************************************************************************
+    auto mBG   = background.upload(geom.rect(width, height), wallmat);
+    auto mDoor = doors.upload(doormesh, doormat);
+    auto mPath = path.upload(rect2x2, pathmat);
+    auto mFood = foods.upload(foodmesh, foodmat);
 
-    enum Head { left, right, up, down, none }
+    //-------------------------------------------------------------------------
+    // Adding models to scene takes them automatically to the layer
+    // (Batch), where the shape is created.
+    //-------------------------------------------------------------------------
 
-    class Node
-    {
-        Node[Head] route;
-    }
-
-    //*************************************************************************
-    //
-    // Actors (player and ghosts)
-    //
-    //*************************************************************************
+    scene.add(0, 0, mBG);
 
     //-------------------------------------------------------------------------
     // Create sprite shapes (rectangular meshes) from sprite sheet. Organize
     // shapes so that they are easily referenced from code.
     //-------------------------------------------------------------------------
     
-    auto shapes = function render.Shape[][][]()
+    auto mMob = mobs.upload(rect2x2, cast(render.Material)(null));
+    
+    auto mMobAnim = function render.Model[][][](render.Batch batch)
     {
-        auto sheet = render.Shape.sheet(
-            shader,
+        auto sheet = render.Model.sheet(
+            batch,
             new render.Texture("data/images/ChomperSprites.png"),
             32, 32,
             1.66, 1.66
@@ -209,9 +206,27 @@ void play(string mazename)
                 [sheet[3][6], sheet[3][7]],
                 [sheet[1][6], sheet[1][7]],
             ]];
-    }();
+    }(mobs);
 
-    //-------------------------------------------------------------------------
+    //*************************************************************************
+    //
+    // Navigation map (incomplete). In pacman like game, actors are only
+    // allowed to move from one empty location to neighboring empty location.
+    //
+    //*************************************************************************
+
+    enum Head { left, right, up, down, none }
+
+    class Node
+    {
+        Node[Head] route;
+    }
+
+    //*************************************************************************
+    //
+    // Actors (player and ghosts)
+    //
+    //*************************************************************************
 
     vec3[Head] directions = [
         Head.left:  vec3(-1,  0, 0),
@@ -220,18 +235,26 @@ void play(string mazename)
         Head.down:  vec3( 0, +1, 0)
     ]; 
 
+    //-------------------------------------------------------------------------
+
     abstract class Actor : game.Fiber
     {
-        render.Instance sprite;
+        ulong num;
+        render.Node sprite;
 
-        this(render.Instance sprite)
+        this(render.Node sprite, ulong num)
         {
             super(&run);
             this.sprite = sprite;
+            this.num = num;
             setshape();
         }
 
-        abstract void setshape(Head current = Head.up);
+        void setshape(Head current = Head.up)
+        {
+            int animframe = (game.frame >> 2) & 1;
+            sprite.model = mMobAnim[num][current][animframe];
+        }
     
         bool checkgrid(Head next, string walls = "#=")
         {
@@ -247,27 +270,19 @@ void play(string mazename)
             sprite.grip.pos += delta;
         }
 
-        int animframe() { return (game.frame >> 2) & 1; }
     }
 
     //-------------------------------------------------------------------------
 
     class Player : Actor
     {
-        Head next = Head.none;
         int points = 0;
 
-        this(render.Instance sprite) {
-            super(sprite);
-        }
-
-        override void setshape(Head current) {
-            sprite.shape = shapes[0][current][animframe()];
-        }
+        this(render.Node sprite) { super(sprite, 0); }
 
         void checkfood()
         {
-            foreach(food; foods.instances.keys)
+            foreach(food; foods.nodes.keys)
             {
                 if(distance(sprite.grip.pos, food.grip.pos) < 0.5)
                 {
@@ -276,6 +291,8 @@ void play(string mazename)
                 }
             }
         }
+
+        Head next = Head.none;
 
         void checkinput()
         {
@@ -317,24 +334,19 @@ void play(string mazename)
         }
     }
 
-    Player player;
-
     //-------------------------------------------------------------------------
 
     class Ghost : Actor
     {
-        ubyte num;
-
-        this(render.Instance sprite, ulong num)
+        this(render.Node sprite, ulong num)
         {
-            super(sprite);
-            this.num = num % 4;
+            super(sprite, (num % 4) + 1);
         }
 
-        override void setshape(Head current) {
-            sprite.shape = shapes[num + 1][current][animframe()];
-        }
-
+        //---------------------------------------------------------------------
+        // AI
+        //---------------------------------------------------------------------
+        
         import std.random;
         import std.algorithm: filter;
 
@@ -365,6 +377,8 @@ void play(string mazename)
         {
             return pick(valid([Head.up, Head.down, Head.left, Head.right]));
         }
+
+        //---------------------------------------------------------------------
 
         override void run()
         {
@@ -397,6 +411,8 @@ void play(string mazename)
 
     auto actors = new game.FiberQueue();
 
+    Player player;
+
     //*************************************************************************
     //
     // Functions to add shapes to layers from maze data
@@ -407,30 +423,30 @@ void play(string mazename)
     }
 
     void add_empty(size_t x, size_t y) {
-        maze.add(x - 0.33, y - 0.33, pathshape);
+        scene.add(x - 0.33, y - 0.33, mPath);
     }
 
     void add_door(size_t x, size_t y) {
         //add_empty(x, y);
-        doors.add(x - 0.33, y, doormesh, doormat);
+        scene.add(x - 0.33, y + 0.33, mDoor);
     }
 
     void add_food(size_t x, size_t y) {
         add_empty(x, y);
-        foods.add(x + 0.5, y + 0.5, foodmesh, vec4(0.6, 0.6, 0.2, 1));
+        scene.add(x + 0.5, y + 0.5, mFood);
         grid[y][x] = ' ';
     }
 
     void add_ghost(size_t x, size_t y) {
         add_empty(x, y);
-        auto sprite = mobs.add(x + 0.5, y + 0.5);
+        auto sprite = scene.add(x + 0.5, y + 0.5, mMob);
         grid[y][x] = ' ';
         actors.add(new Ghost(sprite, mobs.length));
     }
 
     void add_player(size_t x, size_t y) {
         add_empty(x, y);
-        auto sprite = mobs.add(x + 0.5, y + 0.5);
+        auto sprite = scene.add(x + 0.5, y + 0.5, mMob);
         grid[y][x] = ' ';
         player = new Player(sprite);
     }
@@ -462,6 +478,7 @@ void play(string mazename)
     //
     //*************************************************************************
 
+    /*
     auto hud = new render.Layer(shader, render.Camera.topleft2D);
 
     //-------------------------------------------------------------------------
@@ -471,18 +488,16 @@ void play(string mazename)
         Font.load("engine/stock/fonts/Digital-7/digital-7__mono_.ttf", 26)
     );
 
+    txtPoints.prepare("0123456789");
+
     actors.addcallback(() {
         txtPoints["points"] = format("%06d", player.points);
     });
+    */
 
     //-------------------------------------------------------------------------
 
-    actors.addcallback(() {
-        static int ticks = 0;
-        if(SDL_GetTicks() - ticks < 1000) return;
-        writeln(game.Profile.info());
-        ticks = SDL_GetTicks();
-    });
+    actors.reportperf();
 
     //*************************************************************************
     //
@@ -492,6 +507,8 @@ void play(string mazename)
 
     void drawscreen()
     {
+        scene.draw();
+        /*
         background.draw();
         doors.draw();
         maze.draw();
@@ -499,6 +516,7 @@ void play(string mazename)
         mobs.draw();
 
         hud.draw();
+        */
     }
 
     //-------------------------------------------------------------------------

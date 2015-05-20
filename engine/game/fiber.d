@@ -14,6 +14,12 @@ import std.algorithm: remove, SwapStrategy;
 
 //-----------------------------------------------------------------------------
 
+import std.stdio: writeln;
+import derelict.sdl2.sdl: SDL_GetTicks;
+import engine.game: Profile;
+
+//-----------------------------------------------------------------------------
+
 class Fiber : CoreFiber
 {
     this(void delegate() dg) { super(dg); }
@@ -60,5 +66,20 @@ class FiberQueue
             );
         }
     }
+
+    //-------------------------------------------------------------------------
+
+    void reportperf()
+    {
+        addcallback(() {
+            static int ticks = 0;
+            if(SDL_GetTicks() - ticks < 1000) return;
+            writeln(Profile.info());
+            ticks = SDL_GetTicks();
+        });
+    }
 }
+
+//-----------------------------------------------------------------------------
+
 

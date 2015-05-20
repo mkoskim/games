@@ -64,6 +64,8 @@ class Camera : View
 
     override Frustum frustum() { return _frustum; }
 
+    //-------------------------------------------------------------------------
+
     this(mat4 projection, Bone grip)
     {
         this.projection = projection;

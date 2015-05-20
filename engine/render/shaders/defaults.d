@@ -92,22 +92,6 @@ class Default2D : Default
 
     //-------------------------------------------------------------------------
 
-    protected override void apply()
-    {
-        super.apply();
-
-        checkgl!glDisable(GL_CULL_FACE);
-        checkgl!glDisable(GL_DEPTH_TEST);
-
-        checkgl!glEnable(GL_BLEND);
-        checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //checkgl!glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
-    //-------------------------------------------------------------------------
-
     override protected void addVBOs(VAO vao, Mesh mesh)
     {
         VBO vbo = new VBO(
@@ -164,18 +148,6 @@ class Default3D : Default
 
     //-------------------------------------------------------------------------
 
-    protected override void apply()
-    {
-        super.apply();
-        checkgl!glEnable(GL_CULL_FACE);
-        checkgl!glFrontFace(GL_CCW);
-        checkgl!glEnable(GL_DEPTH_TEST);
-
-        checkgl!glDisable(GL_BLEND);
-    }
-
-    //-------------------------------------------------------------------------
-
     override void light(Light l)
     {
         uniform("light.pos", l.grip.pos);
@@ -209,34 +181,6 @@ class Default3D : Default
         super.loadMaterial(mat);
         texture("material.normalmap", 1, mat.normalmap);
         uniform("material.roughness", mat.roughness);
-    }
-}
-
-//*****************************************************************************
-//
-// Lightless (just textures) 3D shader
-//
-//*****************************************************************************
-
-class Lightless3D : Default2D
-{
-    static Shader create()
-    {
-        static Shader instance = null;
-        if(!instance) instance = new Lightless3D();
-        return instance;
-    }
-
-    //-------------------------------------------------------------------------
-
-    protected override void apply()
-    {
-        super.apply();
-        checkgl!glEnable(GL_CULL_FACE);
-        checkgl!glFrontFace(GL_CCW);
-        checkgl!glEnable(GL_DEPTH_TEST);
-
-        checkgl!glDisable(GL_BLEND);
     }
 }
 

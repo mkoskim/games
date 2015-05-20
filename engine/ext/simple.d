@@ -16,6 +16,7 @@ import engine.util;
 //
 //-----------------------------------------------------------------------------
 
+/*
 render.Layer init2D(int blocksize = 1)
 {
     game.init();
@@ -25,6 +26,7 @@ render.Layer init2D(int blocksize = 1)
         render.Camera.topleft2D(blocksize)	// Camera
     );
 }
+*/
 
 //*****************************************************************************
 //

@@ -14,10 +14,13 @@
 import engine;
 
 static import std.random;
-import std.stdio;
+import std.stdio: writeln;
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+//*****************************************************************************
+//
+// Maze
+//
+//*****************************************************************************
 
 string[] grid = [
 //   12345678901234567890
@@ -42,29 +45,19 @@ string[] grid = [
     "###################",
 ];
 
-//-----------------------------------------------------------------------------
+//*****************************************************************************
+//
+// Create batch group, and assign models to batches
+//
+//*****************************************************************************
 
-class Maze : render.Scene
+class MazeBatch : render.BatchGroup
 {
-    render.Material* mat;
-    Player player;
 
-    this(string[] grid)
+    render.Model[] wallshapes, floorshapes, propshapes;
+
+    this()
     {
-        super(
-            //render.shaders.Toon3D.create()
-            //render.shaders.Lightless3D.create()
-        );
-
-        //---------------------------------------------------------------------
-
-        light = new render.Light(
-            vec3(0, 2, 0),
-            vec3(1, 1, 1),
-            10,
-            0.1
-        );
-
         //---------------------------------------------------------------------
         //
         // Load different materials for later use... It would be very nice
@@ -134,15 +127,33 @@ class Maze : render.Scene
             0.15);
 
         //---------------------------------------------------------------------
+        // Load meshes
+        //---------------------------------------------------------------------
 
-        auto wallmesh = shader.upload(blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj"));
+        auto wallmesh = blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj");
+        auto floormesh = blob.wavefront.loadmesh("engine/stock/mesh/Cube/Floor.obj");
+        auto monkeymesh = blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj").scale(0.66);
+        
+        //---------------------------------------------------------------------
+        // Create batches: we create several now just for testing the system.
+        //---------------------------------------------------------------------
 
-        render.Shape[] wallshape = [
-            new render.Shape(wallmesh, matCaveWall),
-            new render.Shape(wallmesh, matBrickWall),
-            new render.Shape(wallmesh, matDirtyConcrete),
-            new render.Shape(wallmesh, matMetallicAssembly),
-            new render.Shape(wallmesh, matAlienCarving),
+        auto rs = new render.RenderState3D();
+
+        auto walls  = addbatch(new render.Batch(rs));
+        auto floors = addbatch(new render.Batch(rs));
+        auto props  = addbatch(new render.Batch(rs));
+        
+        //---------------------------------------------------------------------
+        // Create models to batches
+        //---------------------------------------------------------------------
+        
+        wallshapes = [
+            walls.upload(wallmesh, matCaveWall),
+            walls.upload(wallmesh, matBrickWall),
+            walls.upload(wallmesh, matDirtyConcrete),
+            walls.upload(wallmesh, matMetallicAssembly),
+            walls.upload(wallmesh, matAlienCarving),
             //matCrackedPlaster
             //matCrustyConcrete
             //matDirtyConcrete
@@ -153,43 +164,60 @@ class Maze : render.Scene
             //matMetallicAssembly
         ];
 
-        auto floorshape = new render.Shape(
-            shader.upload(blob.wavefront.loadmesh("engine/stock/mesh/Cube/Floor.obj")),
-            //matCaveWall
-            //matCarvedSandstone
-            //matCrustyConcrete
-            //matDirtyConcrete
-            //matAlienCarving
-            //matCrackedPlaster
-            //matBrickWall
-            //matTanStucco
-            //matSantaFeStucco
-            matGraniteWall
-        );
+        auto floormat = matGraniteWall;
 
-        auto floorshape2 = new render.Shape(
-            floorshape.vao,
-            new render.Material(
+        floorshapes = [
+            floors.upload(floormesh, matGraniteWall),
+            floors.upload(floormesh, new render.Material(
                 vec4(0.25, 0.25, 0.25, 1),
-                //matCrackedPlaster.normalmap,
-                floorshape.material.normalmap,
+                floormat.normalmap,
                 0.15
-            )
-        );
+            )),
+        ];
 
-        auto monkeyshape = new render.Shape(
-            shader.upload(
-                blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj")
-                .scale(0.66)
-            ),
-            new render.Material(
+        propshapes = [
+            props.upload(monkeymesh, new render.Material(
                 vec4(0.75, 0.5, 0.25, 1),
                 //matSantaFeStucco.normalmap,
                 0.5
-            )
+            )),
+        ];
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+class Maze
+{
+    Player player;
+    render.Light light;
+    MazeBatch batches;
+    render.BasicNodeGroup nodes;
+
+    void draw()
+    {
+        batches.clear();
+        nodes.collect(player.cam, batches);
+        
+        // TODO: Hack! Design light subsystem
+        auto rs = batches.batches[0].rs;
+        rs.activate();
+        if(light) rs.shader.light(light);
+
+        batches.draw(player.cam);
+    }
+
+    this(string[] grid)
+    {
+        light = new render.Light(
+            vec3(0, 2, 0),
+            vec3(1, 1, 1),
+            10,
+            0.1
         );
 
-        mat = &monkeyshape.material;
+        batches = new MazeBatch();
+        nodes = new render.BasicNodeGroup();
 
         //---------------------------------------------------------------------
 
@@ -201,19 +229,19 @@ class Maze : render.Scene
                 switch(c)
                 {
                     case '1', '2', '3', '4', '5':
-                        add(pos, wallshape[c - '1']);
+                        nodes.add(pos, batches.wallshapes[c - '1']);
                         break;
                     case '#':
-                        add(pos, wallshape[0]);
+                        nodes.add(pos, batches.wallshapes[0]);
                         break;
                     case ' ':
-                        add(pos, floorshape);
+                        nodes.add(pos, batches.floorshapes[0]);
                         break;
                     case 'n':
-                        add(pos, floorshape2);
+                        nodes.add(pos, batches.floorshapes[1]);
                         break;
                     case 'X':
-                        add(pos, monkeyshape);
+                        nodes.add(pos, batches.propshapes[0]);
                         goto case ' ';
                     case '@':
                         player = new Player(this, pos); 
@@ -231,10 +259,12 @@ class Maze : render.Scene
 class Player : game.Fiber
 {
     Maze maze;
-    render.Bone root;
 
+    render.Bone root;
     render.Camera cam;
+
     game.Joystick joystick;
+    render.Material* mat;
 
     this(Maze maze, vec3 pos)
     {
@@ -247,6 +277,8 @@ class Player : game.Fiber
         cam = render.Camera.basic3D(0.1, 20, new render.Bone(root));
 
         joystick = game.joysticks[0];
+        
+        mat = &maze.batches.propshapes[0].material;
     }
 
     override void run()
@@ -269,7 +301,7 @@ class Player : game.Fiber
                 -30, 30
             );
 
-            maze.mat.roughness = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
+            mat.roughness = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
             //maze.light.color.b = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
             //maze.light.color.g = maze.light.color.b;
         }
@@ -294,39 +326,44 @@ void main()
 
     //-------------------------------------------------------------------------
 
+    /*
     auto hud = new render.Layer(
         render.shaders.Default2D.create(),
         render.Camera.topleft2D
     );
 
-    auto txtPerf   = new TextBox(hud, 2, 2 + 0*12, "%info%");
-    auto txtCamPos = new TextBox(hud, 2, 2 + 1*12, "CAM....: (%x%, %z%)");
-    auto txtDrawn  = new TextBox(hud, 2, 2 + 2*12, "Objects: %drawn% / %total%");
-    auto txtGL     = new TextBox(hud, 2, 2 + 3*12, "GL.....: %calls%");
-    auto txtMat    = new TextBox(hud, 2, 2 + 4*12, "Mat....: r = %r%");
+    auto txtInfo = new TextBox(hud, 2, 2,
+        "%info%\n"
+        "CAM....: (%cam.x%, %cam.z%)\n"
+        "Objects: %drawn% / %total%\n"
+        "GL.....: %calls%\n"
+        " \n"
+        "Mat....: r = %mat.r%\n"
+    );
 
     actors.addcallback(() {
-        txtPerf["info"] = game.Profile.info();
-        txtCamPos["x"] = format("%.1f", maze.player.root.pos.x);
-        txtCamPos["z"] = format("%.1f", maze.player.root.pos.z);
-        txtDrawn["drawn"] = format("%d", maze.perf.drawed);
-        txtDrawn["total"] = format("%d", maze.instances.length);
-        txtMat["r"] = format("%.2f", maze.mat.roughness);
+        txtInfo["info"] = game.Profile.info();
+        txtInfo["cam.x"] = format("%.1f", maze.player.root.pos.x);
+        txtInfo["cam.z"] = format("%.1f", maze.player.root.pos.z);
+        txtInfo["drawn"] = format("%d", maze.perf.drawed);
+        txtInfo["total"] = format("%d", maze.nodes.length);
+        txtInfo["mat.r"] = format("%.2f", maze.mat.roughness);
 
         import engine.render.util: glcalls;
-        txtGL["calls"] = format("%d", glcalls);
+        txtInfo["calls"] = format("%d", glcalls);
         glcalls = 0;
     });
 
     //writeln("VBO row size: ", render.Mesh.VERTEX.sizeof);
     //writeln(to!string(glGetString(GL_EXTENSIONS)));
+    */
 
     //-------------------------------------------------------------------------
 
     void draw()
     {
-        maze.draw(maze.player.cam);
-        hud.draw();
+        maze.draw();
+        //hud.draw();
     }
 
     //-------------------------------------------------------------------------
@@ -343,16 +380,8 @@ void main()
                 case SDL_KEYDOWN: switch(event.key.keysym.sym)
                 {
                     default: break;
-                    case SDLK_w: maze.shader.fill = !maze.shader.fill; break;
-                    case SDLK_e: maze.shader.enabled = !maze.shader.enabled; break;
-                    /*
-                    case SDLK_r: {
-                        static bool normmaps = true;
-                        normmaps = !normmaps;
-                        maze.shader.activate();
-                        maze.shader.uniform("useNormalMapping", normmaps);
-                    } break;
-                    */
+                    //case SDLK_w: maze.shader.fill = !maze.shader.fill; break;
+                    //case SDLK_e: maze.shader.enabled = !maze.shader.enabled; break;
                 }
             }
             return true;

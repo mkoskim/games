@@ -1,6 +1,6 @@
 //*****************************************************************************
 //
-// Instance combine vertex and material data
+// Model combine vertex and material with transform
 //
 // TO BE REWORKED! Instances are related to 'Batches' or layers or such.
 // Different layers may hold different kind of instance data.
@@ -20,19 +20,20 @@
 //
 //*****************************************************************************
 
-module engine.render.instance;
+module engine.render.model;
 
 //-------------------------------------------------------------------------
 
 import engine.render.util;
+
 import engine.render.shaders.base;
 import engine.render.bone;
-import engine.render.view;
-
 import engine.render.mesh;
 import engine.render.bound;
-import engine.render.material;
 import engine.render.texture;
+import engine.render.material;
+import engine.render.view;
+import engine.render.batch;
 
 //*****************************************************************************
 //
@@ -41,11 +42,11 @@ import engine.render.texture;
 //*****************************************************************************
 
 //-------------------------------------------------------------------------
-// Shape combines shader vertex data (VAO, Vertex Array Object) with
+// Model combines shader vertex data (VAO, Vertex Array Object) with
 // material info (colormap, ...)
 //-------------------------------------------------------------------------
 
-class Shape
+class Model
 {
     Shader.VAO vao;
     Material material;
@@ -56,17 +57,21 @@ class Shape
         this.material = material;
     }
 
+    /*
     this(Shader shader, Mesh mesh, Material material)
     {
-        this(shader.upload(mesh), material);
+        Shader.VAO vao = mesh ? shader.upload(mesh) : null;
+        this(vao, material);
     }
+    */
 
     //-------------------------------------------------------------------------
-    // "ShapeSheet" from "SpriteSheet"
+    // "ShapeSheet" from "SpriteSheet": This is better than the old one,
+    // but could be improved by moving it to somewhere else.
     //-------------------------------------------------------------------------
 
-    static Shape[][] sheet(
-        Shader shader,
+    static Model[][] sheet(
+        Batch batch,
         Texture sheet,
         int texw, int texh,
         float meshw = 1.0, float meshh = 1.0,
@@ -82,7 +87,7 @@ class Shape
         float uvh = texh / cast(float)sheet.height;
 
         auto material = new Material(sheet, 1.0);   // TODO: Determine roughness
-        auto grid = new Shape[][](rows, cols);
+        auto grid = new Model[][](rows, cols);
 
         foreach(y; 0 .. rows) foreach(x; 0 .. cols)
         {
@@ -91,7 +96,7 @@ class Shape
             mesh.uv_scale(vec2(uvw, uvh));
             mesh.uv_move(x * uvw, y * uvh);
             
-            grid[y][x] = new Shape(shader, mesh, material);
+            grid[y][x] = batch.upload(mesh, material);
         }
 
         return grid;
@@ -99,38 +104,33 @@ class Shape
 }
 
 //-------------------------------------------------------------------------
-// Instances are drawable objects that combine "Bone" (transforms) with
+// Nodes are drawable objects that combine "Bone" (transforms) with
 // Shape
 //-------------------------------------------------------------------------
 
-class Instance
+class Node
 {
     //-------------------------------------------------------------------------
 
-    Shape shape;
+    Model model;
     Bone grip;
 
     //-------------------------------------------------------------------------
 
-    this(Bone parent, vec3 pos, vec3 rot, Shape shape)
+    this(Bone parent, vec3 pos, vec3 rot, Model model)
     {
         this.grip = new Bone(parent, pos, rot);
-        this.shape = shape;
+        this.model = model;
     }
 
-    this(vec3 pos, Shape shape = null)
+    this(vec3 pos, Model model = null)
     {
-        this(null, pos, vec3(0, 0, 0), shape);
+        this(null, pos, vec3(0, 0, 0), model);
     }
 
-    this(vec3 pos, Shader.VAO vao, Material m)
+    this(Bone parent, Model model = null)
     {
-        this(null, pos, vec3(0, 0, 0), new Shape(vao, m));
-    }
-
-    this(Bone parent, Shape shape)
-    {
-        this(parent, vec3(0, 0, 0), vec3(0, 0, 0), shape);
+        this(parent, vec3(0, 0, 0), vec3(0, 0, 0), model);
     }
 
     //-------------------------------------------------------------------------
@@ -157,7 +157,7 @@ class Instance
     {
         viewspace.pos = cam.viewspace(grip.mModel());
 
-        viewspace.bsp = cam.viewspace(grip.mModel(), shape.vao.bsp.center);
+        viewspace.bsp = cam.viewspace(grip.mModel(), model.vao.bsp.center);
         viewspace.bspdst2 = viewspace.bsp.magnitude_squared;
 
         Frustum frustum = cam.frustum;
@@ -166,24 +166,16 @@ class Instance
         foreach(plane; frustum.planes)
         {
             float dist = plane.distance(viewspace.bsp);
-            if (dist < -shape.vao.bsp.radius)
+            if (dist < -model.vao.bsp.radius)
             {
                 viewspace.infrustum = OUTSIDE;
                 break;
             }
-            else if(dist < shape.vao.bsp.radius)
+            else if(dist < model.vao.bsp.radius)
             {
                 viewspace.infrustum = INTERSECT;
             }
         }
-    }
-
-    //-------------------------------------------------------------------------
-
-    void render(Shader shader)
-    {
-        if(!shape) return;
-        shader.render(grip, shape.material, shape.vao);
     }
 }
 

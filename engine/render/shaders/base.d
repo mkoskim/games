@@ -35,11 +35,6 @@ import std.string: toStringz;
 
 abstract class Shader
 {
-    /* TODO: Implement mechanism for shader options */
-
-    bool fill = true;       // Fill / wireframe
-    bool enabled = true;    // Render on/off
-
     //*************************************************************************
     //
     // Methods that custom shaders need implement.
@@ -51,10 +46,16 @@ abstract class Shader
     abstract protected void addVBOs(VAO vao, Mesh mesh);
 
     //-------------------------------------------------------------------------
+    // Interfacing to shader uniforms
+    //-------------------------------------------------------------------------
     
     abstract void loadView(View cam);
     abstract void loadMaterial(Material mat);
 
+    //-------------------------------------------------------------------------
+    // Rendering VAOs (Vertex Array Objects)
+    //-------------------------------------------------------------------------
+    
     abstract void render(Bone grip, VAO vao);
     abstract void render(Bone[] grips, VAO vao);
 
@@ -79,11 +80,6 @@ abstract class Shader
     //*************************************************************************
 
     void light(Light l) { }
-
-    protected void apply()
-    {
-        glPolygonMode(GL_FRONT, fill ? GL_FILL : GL_LINE);
-    }
 
     //*************************************************************************
     //
@@ -403,7 +399,6 @@ abstract class Shader
         if(currentProgramID != programID)
         {
             checkgl!glUseProgram(programID);
-            apply();
             currentProgramID = programID;
         }
     }

@@ -6,6 +6,39 @@
 
 Version something:
 
+- DONE: Naming conventions - modified class names somewhat according
+  to naming used by:
+  
+        https://github.com/gameplay3d/GamePlay/wiki
+
+- DONE: Render batches: nodes can now be retrieved from scene graph(s)
+  to batches, and then feed them to shader(s).
+
+- NOTE: Text rendering not working!
+
+- DONE: At lowest levels, there is a batch. It's a list of instances, rendered
+  by the same shader. This is something like Layer and Scene are at the moment.
+  I'm pretty sure this kind of mechanism does not go anywhere. At the top
+  level, you have scene data. Mapping these together is the hard part.
+
+  Anyways, it's quite clear that the current TextBox implementation prevents
+  me to implement such batch processing. So, it would be very, very
+  important to change this. Think hard how to make it happen. If we implement
+  a Blitter class to blit 2D images?
+
+- DONE: I could make a block containing OpenGL settings (depth test on/off etc),
+  apply it on shader change and put apply() as private method. This way
+  you could tweak shader parameters at game side.
+
+- DONE: Combine Layer and Scene... Somehow... And implement sort of worksets.
+  The idea is to divide drawing to two separate phases. Programmer classifies
+  the objects and puts them to different containers. For drawing, s/he chooses
+  the strategies how objects from containers are moved to rendering.
+
+-------------------------------------------------------------------------------
+
+Version something:
+
 - Somewhat done: I should go through code and correct indentation
 
 - Shader: moved Shader class a little bit lower level, and added initial

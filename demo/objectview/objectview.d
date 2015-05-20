@@ -9,6 +9,7 @@ import engine;
 //-----------------------------------------------------------------------------
 
 import std.random;
+import std.stdio;
 
 //-----------------------------------------------------------------------------
 
@@ -22,7 +23,15 @@ void main()
     // Scene! Lights! Camera!
     //-------------------------------------------------------------------------
         
-    auto scene = new render.Scene();
+    auto cam = render.Camera.basic3D(
+        0.1, 10,        // Near - far
+        vec3(0, 0, 5)
+    );
+
+    auto scene = new render.DirectRender(
+        cam,
+        new render.RenderState3D()
+    );
 
     scene.light = new render.Light(
         vec3(0, 2, 0),      // Position
@@ -31,20 +40,15 @@ void main()
         0.25                // Ambient level
     );
 
-    auto cam = render.Camera.basic3D(
-        0.1, 10,        // Near - far
-        vec3(0, 0, 5)
-    );
+    auto nodes = scene.addbatch();
 
     //-------------------------------------------------------------------------
     // Actor to stage
     //-------------------------------------------------------------------------
     
-    auto shape = new render.Shape(
-        scene.shader.upload(
-            //blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj")
-            blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj")
-        ),
+    auto model = nodes.upload(
+        //blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj")
+        blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj"),
         new render.Material(
             //new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
             new render.Texture(vec4(1, 0.8, 0, 1)),
@@ -53,7 +57,7 @@ void main()
         )
     );
 
-    auto object = scene.add(vec3(0, 0, 0), shape);
+    auto object = scene.add(new render.Node(vec3(0, 0, 0), model));
 
     //-------------------------------------------------------------------------
     // Control
@@ -81,10 +85,14 @@ void main()
 
     //-------------------------------------------------------------------------
 
+    actors.reportperf();
+
+    //-------------------------------------------------------------------------
+
     simple.gameloop(
-        50,                         // FPS (limit)
-        (){ scene.draw(cam); },     // Drawing
-        actors,                     // list of actors
+        50,             // FPS (limit)
+        &scene.draw,    // Drawing
+        actors,         // list of actors
 
         //---------------------------------------------------------------------
 
@@ -95,8 +103,8 @@ void main()
                 case SDL_KEYDOWN: switch(event.key.keysym.sym)
                 {
                     default: break;
-                    case SDLK_w: scene.shader.fill = !scene.shader.fill; break;
-                    case SDLK_e: scene.shader.enabled = !scene.shader.enabled; break;
+                    //case SDLK_w: scene.shader.fill = !scene.shader.fill; break;
+                    //case SDLK_e: scene.shader.enabled = !scene.shader.enabled; break;
                     /*
                     case SDLK_r: {
                         static bool normmaps = true;

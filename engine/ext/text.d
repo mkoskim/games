@@ -14,7 +14,7 @@ import engine.util;
 import blob = engine.blob;
 import engine.render.texture;
 import engine.render.material;
-import engine.render.instance;
+import engine.render.model;
 import engine.render.view;
 import engine.render.bone;
 import engine.render.layer;
@@ -22,6 +22,8 @@ import engine.render.shaders.base;
 import engine.ext.geom;
 
 static import std.string;
+
+import std.algorithm: max;
 
 //-----------------------------------------------------------------------------
 
@@ -35,8 +37,8 @@ class TTFError : Exception
 
 //-----------------------------------------------------------------------------
 //
-// TODO: TextBox is currently Instance, so that it can be added to (HUD)
-// Layer (Layer objects accept only Instances). To render glyphs, TextBox
+// TODO: TextBox is currently Node, so that it can be added to (HUD)
+// Layer (Layer objects accept only Nodes). To render glyphs, TextBox
 // modifies its position and dimensions, and feeds itself to Shader.
 //
 // This is a bit problematic approach. It would be great to figure out
@@ -44,7 +46,9 @@ class TTFError : Exception
 //
 //-----------------------------------------------------------------------------
 
-class TextBox : Instance
+class TextBox
+{
+static if(0)
 {
     //-------------------------------------------------------------------------
     //
@@ -136,30 +140,42 @@ class TextBox : Instance
 
     //-------------------------------------------------------------------------
 
-    override void render(Shader shader)
+    void prepare(string chars)
+    {
+        foreach(c; chars) font.render(c);
+    }
+
+    //-------------------------------------------------------------------------
+    // TODO: Does not work
+
+    void render(Shader shader)
     {
         import engine.render.util;
 
-        vec3 cursor = vec3(0, 0, 0);
-
+        auto cursor = new Bone(grip);
+        int max_height = 0;
+        
         foreach(elem; elems) {
             //shape.material.color = elem.color;
             foreach(c; elem.content) {
-                shape.material.colormap = font.render(c);
+                if(c == '\n') {
+                    cursor.pos.x = 0;
+                    cursor.pos.y += max_height;
+                    max_height = 0;
+                }
+                else {
+                    model.material.colormap = font.render(c);
 
-                Bone charpos = new Bone(
-                    grip,
-                    cursor,
-                    vec3(0, 0, 0),
-                    vec3(
-                        shape.material.colormap.width,
-                        shape.material.colormap.height,
+                    cursor.scale = vec3(
+                        model.material.colormap.width,
+                        model.material.colormap.height,
                         0
-                    )
-                );
+                    );
 
-                shader.render(charpos, shape.material, shape.vao);
-                cursor.x += shape.material.colormap.width;
+                    shader.render(cursor, model.material, model.vao);
+                    cursor.pos.x += model.material.colormap.width;
+                    max_height = max(max_height, model.material.colormap.height);
+                }
             }
         }
     }
@@ -170,6 +186,7 @@ class TextBox : Instance
 
     //-----------------------------------------------------------------------------
     //-----------------------------------------------------------------------------
+}
 }
 
 //*****************************************************************************
