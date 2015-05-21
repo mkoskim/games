@@ -38,6 +38,39 @@ WORKLIST:
 
 -------------------------------------------------------------------------------
 
+HOTTISH TOPICS:
+
+- TEXT OUTPUT: This has troubled me a long time, is there anything I can
+  do for it? Let's think about it.
+  
+  There is definitely many ways to get text in to screen. What method to use
+  depends on the purpose.
+  
+  The first and most obvious two ways to render text are:
+  
+  1) Create a bitmap from given text, and add it to game world as a textured
+     rectangle.
+
+  2) Create bitmaps from letters, and add letters to game world as textured
+     rectangles.
+
+  These two ways create text that can be manipulated in the same ways as
+  any other game world object. You can move them around, animate them and
+  so on.
+  
+  Then, there is third way, which I have used so far. It works more like
+  drawing letters to canvas-like object: you don't have 'handles' to
+  separate letters, instead they are emitted by the text object.
+
+  So: maybe I (need to) create all these methods? Well, at least two
+  first ones are eventually mandatory, for example, for floating
+  points and other written information in the game world itself. The
+  third one then, at the moment it feels that it is related to creating
+  rendering mechanism for GUI purposes: so, at the moment it feels
+  totally worth to examine.
+
+-------------------------------------------------------------------------------
+
 FIX/INVESTIGATE: Crashes, flaws etc.
 
 - Font rendering fails randomly:
@@ -72,12 +105,6 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 
 -------------------------------------------------------------------------------
 
-HOTTISH TOPICS:
-
-- ...
-
--------------------------------------------------------------------------------
-
 "USER-FRIENDLINESS": Some planned efforts to make code more "user-friendly":
 more portable (32-bit, 64-bit, Linux, Windows), easier to set up, and so on.
 
@@ -103,17 +130,6 @@ GENERAL:
   correct points. For example, when game level is changed, it would be
   very nice if the game frees GPU resources allocated at previous level.
 
-- It might be good, that FiberQueue callbacks return boolean value
-  if they want to continue processing, or if they want them removed. Other
-  way to do that would be adding the calling queue to parameters, so that
-  callback can remove itself if wanted
-
-- It would be good to implement timers to Fiber queue.
-
-- It would be good to be able to send events to be processed by a Fiber.
-  If we have player Fiber, we might want to get the input events there.
-  Think & design how to do this.
-
 - Static linking: examine possibilities to link needed libraries
   (SDL?) statically to remove system side dependencies.
 
@@ -134,6 +150,24 @@ GENERAL:
 - Do some debugging aids: Seeing matrices etc.
 
 - Blender file (archive) loading
+
+-------------------------------------------------------------------------------
+
+FIBERS, EVENT PROCESSING:
+
+- It would be good to be able to send events to be processed by a Fiber.
+  If we have player Fiber, we might want to get the input events there.
+  Think & design how to do this.
+
+- It might be good, that FiberQueue callbacks return boolean value
+  if they want to continue processing, or if they want them removed. Other
+  way to do that would be adding the calling queue to parameters, so that
+  callback can remove itself if wanted
+
+- It would be good to implement (frame) timers to Fiber queue.
+
+- simple.gameloop may need a function to determine loop breaking? That
+  could simplify certain things...
 
 -------------------------------------------------------------------------------
 
@@ -288,17 +322,8 @@ SCENES, LAYERS:
 
 -------------------------------------------------------------------------------
 
-TEXTBOX, PARTICLE & SPRITE ENGINE: It might be nice to have specialized
+PARTICLE & SPRITE ENGINE: It might be nice to have specialized
 classes to blit lots of things into 2D/3D space.
-
-- The way TextBox is implemented prevents us to implement shaders as
-  instance batch processors. We may reconsider that implementation.
-
-  * In fact, currently TextBox is more like special "Layer", not instance
-  
-  * I feel that the way TextBox works might be suitable for e.g. particle
-    engines. So, instead of changing the TextBox implementation, we might
-    improve architecture to deal with these kinds of things.
 
 - Particle engine can (most probably) have only 1 texture. So, the solution
   is to create sprite sheets?
@@ -373,6 +398,19 @@ TEXTURES:
 - Texture mipmaps: In 3D scenes, this could make them prettier.
 
 - Texture update
+
+-------------------------------------------------------------------------------
+
+TEXTBOX, GUI:
+
+- The way TextBox is implemented prevents us to implement shaders as
+  instance batch processors. We may reconsider that implementation.
+
+  * In fact, currently TextBox is more like special "Layer", not instance
+  
+  * I feel that the way TextBox works might be suitable for e.g. particle
+    engines. So, instead of changing the TextBox implementation, we might
+    improve architecture to deal with these kinds of things.
 
 -------------------------------------------------------------------------------
 

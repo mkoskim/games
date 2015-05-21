@@ -141,8 +141,8 @@ class MazeBatch : render.BatchGroup
         auto rs = new render.RenderState3D();
 
         auto walls  = addbatch(new render.Batch(rs));
-        auto floors = addbatch(new render.Batch(rs));
         auto props  = addbatch(new render.Batch(rs));
+        auto floors = addbatch(new render.Batch(rs));
         
         //---------------------------------------------------------------------
         // Create models to batches
@@ -358,6 +358,8 @@ void main()
     //writeln(to!string(glGetString(GL_EXTENSIONS)));
     */
 
+    actors.reportperf;
+    
     //-------------------------------------------------------------------------
 
     void draw()

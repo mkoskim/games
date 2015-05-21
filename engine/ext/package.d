@@ -8,9 +8,12 @@ module engine.ext;
 
 //-----------------------------------------------------------------------------
 
-public import geom = engine.ext.geom;
-public import engine.ext.bitmap: Bitmap;
-public import engine.ext.text;
+public {
+    import geom = engine.ext.geom;
+    import engine.ext.bitmap: Bitmap;
+    //import engine.ext.canvas;
+    import engine.ext.font;
 
-public import simple = engine.ext.simple;
+    import simple = engine.ext.simple;
+}
 

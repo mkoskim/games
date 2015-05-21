@@ -68,6 +68,13 @@ abstract class NodeGroup
     */
 }
 
+//-----------------------------------------------------------------------------
+
+abstract class CollectableNodeGroup : NodeGroup
+{
+    abstract void collect(View cam, BatchGroup batches);
+}
+
 //*****************************************************************************
 //
 // Direct storage: stores nodes directly to batches, and renders them in
@@ -119,9 +126,9 @@ class DirectRender : NodeGroup
 //
 //*****************************************************************************
 
-abstract class CollectableNodeGroup : NodeGroup
+class CollectRender
 {
-    abstract void collect(View cam, BatchGroup batches);
+    BatchGroup batches;
 }
 
 //-----------------------------------------------------------------------------

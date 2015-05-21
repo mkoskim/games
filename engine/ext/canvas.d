@@ -1,35 +1,20 @@
 //*****************************************************************************
 //
-// Texts - and fonts
+// Canvas stores objects that (actively) draw something: that is, objects
+// are not drawn, but they draw. This is mainly intended for GUI purposes.
 //
-// Text blitting is more like a layout engine.
+// This is part of sketching mechanisms to create GUI. It may lead to
+// unpredicted directions when seeing how Canvas and rest of the rendering
+// framework interferes to each other :)
 //
 //*****************************************************************************
 
-module engine.ext.text;
+module engine.ext.canvas;
 
 //-----------------------------------------------------------------------------
 
-import engine.util;
-import blob = engine.blob;
-import engine.render.texture;
-import engine.render.material;
-import engine.render.model;
-import engine.render.view;
-import engine.render.bone;
-import engine.render.layer;
-import engine.render.shaders.base;
-import engine.ext.geom;
-
-static import std.string;
-
-import std.algorithm: max;
-
-//-----------------------------------------------------------------------------
-
-class TTFError : Exception
+class Canvas
 {
-    this(string msg) { super(msg); }
 }
 
 //*****************************************************************************
@@ -184,93 +169,8 @@ static if(0)
 
     private static Shader.VAO[Shader] unitbox;
 
-    //-----------------------------------------------------------------------------
-    //-----------------------------------------------------------------------------
-}
-}
-
-//*****************************************************************************
-//*****************************************************************************
-
-class Font
-{
     //-------------------------------------------------------------------------
-
-    static Font[string] fonts;
-
-    static Font load(string filename, int size)
-    {
-        string fontname = filename ~ ":" ~ to!string(size);
-
-        if(!(fontname in fonts))
-        {
-            fonts[fontname] = new Font(blob.loadfont(filename, size), fontname);
-        }
-        return fonts[fontname];
-    }
-
-    //-------------------------------------------------------------------------
-
-    import derelict.sdl2.ttf;
-
-    private
-    {
-        string ID;
-        TTF_Font *font;
-        Texture[char] rendered;
-
-        this(TTF_Font *font, string ID)
-        {
-            this.font = font;
-            this.ID = ID;
-        }
-
-        ~this()
-        {
-            TODO("Segfaults");
-            //TTF_CloseFont(font); font = null;
-        }
-    }
-
-    //-------------------------------------------------------------------------
-
-    Font setstyle(int style)
-    {
-        TTF_SetFontStyle(font, style);
-        return this;
-    }
-
-    Font setoutline(int width)
-    {
-        TTF_SetFontOutline(font, width);
-        return this;
-    }
-
-    //-------------------------------------------------------------------------
-
-    Texture render(char c) {
-        if(!(c in rendered)) {
-            rendered[c] = texture(to!string(c));
-        }
-        return rendered[c];
-    }
-
-    Texture texture(string text) {
-        SDL_Color color={255, 255, 255, 255};
-
-        auto bitmap = TTF_RenderText_Blended(font, std.string.toStringz(text), color);
-        if(!bitmap) throw new TTFError(
-            format(
-                "TTF_RenderText_Blended: %s ('%s')",
-                to!string(TTF_GetError()),
-                text
-            )
-        );
-        auto texture = new Texture(bitmap);
-        SDL_FreeSurface(bitmap);
-        return texture;
-    }
-
     //-------------------------------------------------------------------------
 }
+
 
