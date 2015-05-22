@@ -7,6 +7,8 @@ Game projects with common engine
 
 [games wiki](https://github.com/mkoskim/games/wiki)
 
+[Engine Architecture (googledocs)](https://drive.google.com/open?id=1naIU1XoFX2Qmj-EIo02rn3QQdQ-95cXKt9H4fcCajGo&authuser=0)
+
 **TODO:** Things that need to be done, many of them affecting to architecture:
 
 [TODO](https://github.com/mkoskim/games/blob/master/engine/doc/TODO)
