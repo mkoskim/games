@@ -22,17 +22,18 @@ module engine.render.layer;
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.view;
-import engine.render.bone;
+import engine.render.transform;
 import engine.render.mesh;
 import engine.render.texture;
 import engine.render.material;
-import engine.render.light;
 import engine.render.model;
+import engine.render.node;
+import engine.render.view;
+import engine.render.light;
 import engine.render.batch;
+import engine.render.state;
 
-//import engine.render.shaders.base;
-//import engine.render.shaders.defaults;
+import engine.game.fiber;
 
 //*****************************************************************************
 //
@@ -48,14 +49,26 @@ abstract class NodeGroup
     abstract void remove(Node node);
 
     //-------------------------------------------------------------------------
-
+    // By default, we add immovable objects, as guess is that they dominate
+    // scenes. BTW, immovable node is not necessarily that immovable, it may
+    // contain skeleton - which can, in addition to deform mesh, also move
+    // the mesh around...
+    //-------------------------------------------------------------------------
+    
     Node add(Node node) { return _add(node); }
+
+    Node add(Transform transform, Model model) { return _add(new Node(transform, model)); }
+    Node add(vec3 pos, Model model) { return add(Grip.fixed(pos), model); }
+    Node add(float x, float y, float z, Model model) { return add(Grip.fixed(x, y, z), model); }
+    Node add(float x, float y, Model model) { return add(Grip.fixed(x, y), model); }
+
+    /*
     Node add(vec3 pos) { return _add(new Node(pos)); }
-    Node add(vec3 pos, Model model) { return _add(new Node(pos, model)); }
     Node add(Bone parent, Model model) { return _add(new Node(parent, model)); }
 
     Node add(float x, float y) { return _add(new Node(vec3(x, y, 0))); }
     Node add(float x, float y, Model model) { return _add(new Node(vec3(x, y, 0), model)); }
+    */
 
     /*
     Node add(vec3 pos, Shader.VAO mesh, Material mat) { return add(new Node(pos, mesh, mat)); }
@@ -75,6 +88,31 @@ abstract class CollectableNodeGroup : NodeGroup
     abstract void collect(View cam, BatchGroup batches);
 }
 
+//-----------------------------------------------------------------------------
+
+class BasicNodeGroup : CollectableNodeGroup
+{
+    bool[Node] nodes;
+
+    ulong length() { return nodes.length; }
+
+    this() { }
+    
+    override Node _add(Node node) { nodes[node] = true; return node; }
+    override void remove(Node node) { nodes.remove(node); }
+
+    void clear() { foreach(node, _; nodes) remove(node); }
+
+    override void collect(View cam, BatchGroup batches)
+    {
+        foreach(node, _; nodes) {
+            node.project(cam);
+            if(!node.viewspace.infrustum) continue;
+            batches.add(node);
+        }
+    }
+}
+
 //*****************************************************************************
 //
 // Direct storage: stores nodes directly to batches, and renders them in
@@ -84,17 +122,17 @@ abstract class CollectableNodeGroup : NodeGroup
 
 class DirectRender : NodeGroup
 {
-    RenderState rs;
+    State state;
     View cam;
     Light light;
     BatchGroup batches;
     
     //-------------------------------------------------------------------------
 
-    this(View cam, RenderState rs)
+    this(View cam, State state)
     {
         this.cam = cam;
-        this.rs = rs;
+        this.state = state;
         this.batches = new BatchGroup();
     }
 
@@ -105,15 +143,15 @@ class DirectRender : NodeGroup
 
     //-------------------------------------------------------------------------
 
-    Batch addbatch() { return batches.addbatch(new Batch(rs)); }
+    Batch addbatch() { return batches.addbatch(new Batch(state)); }
 
     //-------------------------------------------------------------------------
 
     void draw()
     {
         // TODO: Hack! Design light subsystem
-        rs.activate();    
-        if(light) rs.shader.light(light);
+        state.activate();    
+        if(light) state.shader.light(light);
         
         batches.draw(cam);
     }
@@ -126,122 +164,51 @@ class DirectRender : NodeGroup
 //
 //*****************************************************************************
 
+//-----------------------------------------------------------------------------
+
 class CollectRender
 {
-    BatchGroup batches;
-}
-
-//-----------------------------------------------------------------------------
-// Define separate Node storage
-//-----------------------------------------------------------------------------
-
-class BasicNodeGroup : CollectableNodeGroup
-{
-    bool[Node] nodes;
-
-    ulong length() { return nodes.length; }
-    
-    override Node _add(Node node) { nodes[node] = true; return node; }
-    override void remove(Node node) { nodes.remove(node); }
-
-    override void collect(View cam, BatchGroup batches)
-    {
-        foreach(node, _; nodes) {
-            node.project(cam);
-            if(!node.viewspace.infrustum) continue;
-            batches.add(node);
-        }
-    }
-}
-
-/*
-import std.algorithm;
-
-class Batch
-{
-    Node[] nodes;
-
-    auto length() { return nodes.length; }
-
-    void add(Node node) { nodes ~= node; }
-
-    void front2back() {
-        sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(nodes);
-    }
-    void back2front() {
-        sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(nodes);
-    }
-
-    void draw(Shader shader)
-    {
-        foreach(node; nodes) node.render(shader);
-    }
-}
-*/
-
-//*****************************************************************************
-//
-//
-//
-//*****************************************************************************
-
-class xScene : NodeGroup
-{
-static if(0)
-{
+    View cam;
     Light light;
 
-    bool useFrustumCulling = true;
-    bool useSorting = true;
+    BatchGroup batches;             // Rendering batches
+    CollectableNodeGroup[] groups;  // Scene node groups
+    
+    NodeGroup nodes;
 
-    this(Shader shader) { super(shader); }
-    this() { this(Default3D.create()); }
+    FiberQueue actors;
+    
+    //-------------------------------------------------------------------------
+
+    this()
+    {
+        batches = new BatchGroup();
+        nodes = addgroup();
+        actors = new FiberQueue();
+    }
 
     //-------------------------------------------------------------------------
 
-    void draw(View cam)
+    Batch addbatch(Batch batch) { return batches.addbatch(batch); }
+    Batch addbatch(State state) { return batches.addbatch(state); }
+
+    CollectableNodeGroup addgroup(CollectableNodeGroup group) { groups ~= group; return group; }
+    CollectableNodeGroup addgroup() { return addgroup(new BasicNodeGroup()); }
+
+    //-------------------------------------------------------------------------
+
+    void draw()
     {
-        perf.reset();
+        batches.clear();
+        foreach(group; groups) group.collect(cam, batches);
 
-        //---------------------------------------------------------------------
-
-        Batch batch = new Batch();
-
-        if(useFrustumCulling) {
-            foreach(node, _; nodes) {
-                node.project(cam);
-                if(!node.viewspace.infrustum) continue;
-                batch.add(node);
-            }
-        } else {
-            batch.nodes = nodes.keys;
+        // TODO: Hack! Design light subsystem
+        if(light) {
+            batches.batches[0].state.activate();    
+            batches.batches[0].state.shader.light(light);
         }
 
-        //---------------------------------------------------------------------
-
-        if(useSorting) batch.front2back();
-        
-        //---------------------------------------------------------------------
-
-        shader.activate();
-        shader.loadView(cam);
-        
-        if(light) shader.light(light);
-
-        batch.draw(shader);
-        perf.drawed += batch.length();
+        batches.draw(cam);
     }
-
-    //-------------------------------------------------------------------------
-
-    struct Performance
-    {
-        int drawed;
-
-        void reset() { drawed = 0; }
-    }
-    Performance perf;
 }
-}
-
 

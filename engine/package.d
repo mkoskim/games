@@ -10,9 +10,11 @@ module engine;
 // Engine core
 //-----------------------------------------------------------------------------
 
-public import game = engine.game;
-public import render = engine.render;
-public import blob = engine.blob;
+public {
+    import game = engine.game;
+    import render = engine.render;
+    import blob = engine.blob;
+}
 
 //-----------------------------------------------------------------------------
 // Some helpers
@@ -24,11 +26,13 @@ public import engine.ext;
 // Default libraries (for types and functions to work with them)
 //-----------------------------------------------------------------------------
 
-public import derelict.sdl2.sdl;
-public import derelict.sdl2.image;
-public import derelict.sdl2.ttf;
-public import derelict.opengl3.gl3;
-public import gl3n.linalg;
+public {
+    import derelict.sdl2.sdl;
+    import derelict.sdl2.image;
+    import derelict.sdl2.ttf;
+    import derelict.opengl3.gl3;
+    import gl3n.linalg;
+}
 
 pragma(lib, "dl");
 

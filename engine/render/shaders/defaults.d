@@ -10,7 +10,7 @@ module engine.render.shaders.defaults;
 import engine.render.shaders.base;
 import engine.render.util;
 
-import engine.render.bone;
+import engine.render.transform;
 import engine.render.mesh;
 import engine.render.material;
 import engine.render.texture;
@@ -47,21 +47,21 @@ abstract class Default : Shader
     
     //-------------------------------------------------------------------------
 
-    override void render(Bone grip, VAO vao)
+    override void render(Transform transform, VAO vao)
     {
-        uniform("mModel", grip.mModel());
+        uniform("mModel", transform.mModel());
 
         vao.bind();
         vao.ibo.draw();
         vao.unbind();
     }
 
-    override void render(Bone[] grips, VAO vao)
+    override void render(Transform[] transforms, VAO vao)
     {
         vao.bind();
-        foreach(grip; grips)
+        foreach(transform; transforms)
         {
-            uniform("mModel", grip.mModel());
+            uniform("mModel", transform.mModel());
             vao.ibo.draw();
         }
         vao.unbind();
@@ -150,7 +150,8 @@ class Default3D : Default
 
     override void light(Light l)
     {
-        uniform("light.pos", l.grip.pos);
+        uniform("light.pos", l.transform.worldspace());
+
         uniform("light.radius", l.radius);
         uniform("light.ambient", l.ambient);
         uniform("light.color", l.color);
@@ -198,8 +199,6 @@ class Toon3D : Default3D
         if(!instance) instance = new Toon3D();
         return instance;
     }
-
-    //-------------------------------------------------------------------------
 
     private this()
     {

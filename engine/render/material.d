@@ -41,13 +41,11 @@ class Material
 
     //-------------------------------------------------------------------------
 
-    private static Texture whitemap = null;
-    private static Texture flatmap = null;
-
-    //-------------------------------------------------------------------------
-
     this(Texture colormap, Texture normalmap, float roughness = 1.0)
     {
+        static Texture whitemap = null;
+        static Texture flatmap = null;
+
         if(!whitemap) whitemap = new Texture(vec4(1, 1, 1, 1));
         if(!flatmap)  flatmap  = new Texture(vec4(0.5, 0.5, 1, 1));
 
@@ -58,48 +56,44 @@ class Material
 
     //-------------------------------------------------------------------------
 
-    this(vec4 color, Texture normalmap, float roughness)
+    this(string colormap, string normalmap, float roughness = 1.0)
+    {
+        this(new Texture(colormap), new Texture(normalmap), roughness);
+    }
+
+    this(vec4 color, Texture normalmap, float roughness = 1.0)
     {
         this(new Texture(color), normalmap, roughness);
     }
 
-    this(Texture colormap, float roughness)
+    this(vec4 color, string normalmap, float roughness = 1.0)
+    {
+        this(color, new Texture(normalmap), roughness);
+    }
+
+    this(Texture colormap, float roughness = 1.0)
     {
         this(colormap, null, roughness);
     }
 
-    this(SDL_Surface *colormap, float roughness)
+    this(string colormap, float roughness = 1.0)
+    {
+        this(new Texture(colormap), roughness);
+    }
+
+    this(SDL_Surface *colormap, float roughness = 1.0)
     {
         this(new Texture(colormap), null, roughness);
     }
 
-    this(vec4 color, float roughness)
+    this(vec4 color, float roughness = 1.0)
     {
         this(new Texture(color), null, roughness);
-    }
-
-    //-------------------------------------------------------------------------
-
-    this(vec4 color)
-    {
-        this(new Texture(color), null);
     }
 
     this(float r, float g, float b, float a = 1)
     {
         this(vec4(r, g, b, a));
-    }
-
-    //-------------------------------------------------------------------------
-
-    this(Texture tex)
-    {
-        this(tex, null);
-    }
-
-    this(SDL_Surface *surface)
-    {
-        this(new Texture(surface));
     }
 }
 

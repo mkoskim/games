@@ -11,8 +11,14 @@ module engine.render.view;
 public import gl3n.frustum: Frustum, OUTSIDE, INTERSECT, INSIDE;
 
 import engine.game.instance;
+
 import engine.render.util;
-import engine.render.bone;
+import engine.render.transform;
+
+//-----------------------------------------------------------------------------
+// TODO: I havent used proxy views ever. Need to check if it is needed at
+// all, and we could simplify this a bit.
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 
@@ -57,7 +63,8 @@ abstract class View
 
 class Camera : View
 {
-    Bone grip;
+    Transform transform;
+    Grip grip;
 
     mat4 projection;
     Frustum _frustum;
@@ -66,31 +73,37 @@ class Camera : View
 
     //-------------------------------------------------------------------------
 
-    this(mat4 projection, Bone grip)
+    this(mat4 projection, Transform transform)
     {
         this.projection = projection;
         this._frustum = Frustum(mProjection());
-        this.grip = grip;
+
+        this.transform = transform;
+        this.grip = transform.grip;
     }
 
+    /*
     this(mat4 projection)
     {
-        this(projection, new Bone(vec3(0, 0, 0)));
+        this(projection, new Transform());
     }
 
     this(mat4 projection, vec3 pos, vec3 rot)
     {
-        this(projection, new Bone(pos, rot));
+        this(projection, new Transform(pos, rot));
     }
+    */
 
     //-------------------------------------------------------------------------
 
-    override mat4 mView() { return grip.mModel().inverse(); }
+    override mat4 mView() { return transform.mModel().inverse(); }
     override mat4 mProjection() { return projection; }
 
     //-------------------------------------------------------------------------
-
-    static Camera basic3D(float near, float far, Bone grip = new Bone(null, vec3(0, 0, 0)))
+    // By default, we add movable cameras
+    //-------------------------------------------------------------------------
+    
+    static Camera basic3D(float near, float far, Transform transform)
     {
         return new Camera(
             mat4.perspective(
@@ -98,13 +111,13 @@ class Camera : View
                 60,
                 near, far
             ),
-            grip
+            transform
         );
     }
 
     static Camera basic3D(float near, float far, vec3 pos)
     {
-        return basic3D(near, far, new Bone(null, pos));
+        return basic3D(near, far, Grip.movable(pos));
     }
 
     //-------------------------------------------------------------------------
@@ -117,7 +130,7 @@ class Camera : View
                 screen.height/unitlength, 0,
                 -1, 1
             ),
-            new Bone(null)
+            Grip.movable()
         );
     }
 }

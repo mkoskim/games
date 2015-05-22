@@ -2,7 +2,18 @@
 
 DONE:
 
-- ...
+- DONE: Transforms are now "cached". Transform can be linked to grip
+  object, which can be used to update transforms.
+
+- DONE: Half-done: Redesign nodes: "immovable" instances having only Model
+  matrix, movable instances with pos & rot, etc. Now we have Bone, need
+  just static bone hierarchies...
+
+- DONE: Half-done: Objects without mesh & mat... Static objects... "Bones" are
+  now objects without shape. So, missing static bone (hierarchy)...
+
+- DONE: Make Node.grip a property, so that it can warn if trying to move
+  static objects.
 
 *******************************************************************************
 
@@ -21,7 +32,7 @@ WORKLIST:
 - Combine Texture and Material files, they are pretty much related to each
   other. Except that I might need texture when creating framebuffers...
   
-- Add support for "multi-textured" instances - the idea is to have sort
+- Add support for "multi-textured" nodes - the idea is to have sort
   of "stamping", textures over textures.
 
 - Start working with navigation. The first step is to create a network
@@ -35,6 +46,8 @@ WORKLIST:
 
 - Think Shader subsystem. We would like to have specialized shaders for
   particle engines, not using the regular mesh-material data structures.
+
+- Renderers in layer.d are incomplete hacks.
 
 -------------------------------------------------------------------------------
 
@@ -126,10 +139,6 @@ USER INPUT:
 
 GENERAL:
 
-- At some point, there's a need to check that destructors are called at
-  correct points. For example, when game level is changed, it would be
-  very nice if the game frees GPU resources allocated at previous level.
-
 - Static linking: examine possibilities to link needed libraries
   (SDL?) statically to remove system side dependencies.
 
@@ -150,6 +159,15 @@ GENERAL:
 - Do some debugging aids: Seeing matrices etc.
 
 - Blender file (archive) loading
+
+-------------------------------------------------------------------------------
+
+RESOURCE TRACKING: Create mechanism to track living resources (number of
+meshes, nodes etc).
+
+- At some point, there's a need to check that destructors are called at
+  correct points. For example, when game level is changed, it would be
+  very nice if the game frees GPU resources allocated at previous level.
 
 -------------------------------------------------------------------------------
 
@@ -231,6 +249,24 @@ keep these in mind so that architecture does not prevent implementing these:
 
 SCENES, LAYERS:
 
+- I'm still not entirely satisfied with the current system. It is currently
+  possible to use batch groups directly as scene graphs, which is basically
+  good for games like pacman. But:
+  
+  * We should have node sorting (front to back, ...): It is possible
+    to do at draw function, thought.
+  
+  * We could remove viewing information from scene node, and add it
+    to batch node.
+
+- How about making unbuffered batch? Currently, nodes are buffered to
+  batch, but we could send them directly to shader: basically, if
+  first batch in batch group is unordered, it could be unbuffered, too.
+  There is - of course - problem to determine when render state block
+  is applied...
+
+- Store viewing information to batch node, not to scene node.
+
 - Some simple file format to create scenes (placing objects, creating
   object hierarchies, ...) could be useful. POVRay may be too complex.
   Something that can be used together with .obj & .mtl files... Of
@@ -258,6 +294,16 @@ SCENES, LAYERS:
 -------------------------------------------------------------------------------
 
 3D OBJECTS:
+
+- Reconsider rotation, it's very unintuitive at the moment. Currently you
+  need to make parent hierarchies to keep rotations in order...
+
+- Currently, we have Grip class, that generates transform matrices from
+  position, rotation and scaling. It is possible, that we need also
+  other ways to generate transform matrices - so, be prepared for that.
+  
+- Matrix Scaling is not working, mainly because it would need updating of
+  bounding sphere.
 
 - Transparent objects: Drawn back-to-front
 
@@ -287,19 +333,6 @@ SCENES, LAYERS:
 
 - Ways to extend Mesh class. Some way to attach more vertex data to
   Mesh so that Shader understands it, for example, skeleton.
-
-- Reconsider rotation, it's very unintuitive at the moment. Currently you
-  need to make parent hierarchies to keep rotations in order...
-  
-- Matrix Scaling is not working, mainly because it would need updating of
-  bounding sphere.
-
-- Half-done: Objects without mesh & mat... Static objects... "Bones" are
-  now objects without shape. So, missing static bone (hierarchy)...
-
-- Half-done: Redesign instances: "immovable" instances having only Model
-  matrix, movable instances with pos & rot, etc. Now we have Bone, need
-  just static bone hierarchies...
 
 - LOD, Level of Detail: like textures have mipmaps, 3D objects could also have
   representations in various details. Including materials. And shaders? No
@@ -382,6 +415,9 @@ CAMERA:
 
 - Viewport settings to camera... In fact, create sort of RenderTarget
   class.
+
+- View, ViewProxy: I havent used View proxy ever. There is a need to
+  check if it has any use at all, or if we could simplify things a bit.
 
 -------------------------------------------------------------------------------
 

@@ -30,7 +30,7 @@ void main()
 
     auto scene = new render.DirectRender(
         render.Camera.topleft2D(),
-        new render.RenderState2D()
+        render.State.Default2D()
     );
 
     auto batch = scene.addbatch();
@@ -87,7 +87,7 @@ void main()
 
             // ----------------------------------------------------------------
 
-            auto sprite = scene.add(vec3(0, 0, 0), empty);
+            auto sprite = scene.add(render.Grip.movable, empty);
 
             for(;;) {
             

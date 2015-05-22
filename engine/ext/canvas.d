@@ -13,23 +13,18 @@ module engine.ext.canvas;
 
 //-----------------------------------------------------------------------------
 
+import engine.render.batch;
+import engine.render.state;
+
+//-----------------------------------------------------------------------------
+
 class Canvas
 {
+    State state;
 }
 
 //*****************************************************************************
 //*****************************************************************************
-
-//-----------------------------------------------------------------------------
-//
-// TODO: TextBox is currently Node, so that it can be added to (HUD)
-// Layer (Layer objects accept only Nodes). To render glyphs, TextBox
-// modifies its position and dimensions, and feeds itself to Shader.
-//
-// This is a bit problematic approach. It would be great to figure out
-// a better way.
-//
-//-----------------------------------------------------------------------------
 
 class TextBox
 {
@@ -172,5 +167,5 @@ static if(0)
     //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
 }
-
+}
 

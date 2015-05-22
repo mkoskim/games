@@ -20,7 +20,7 @@ import engine.render.util;
 import engine.render.shaders.gputypes;
 import engine.render.shaders.gpucompile: gpuCompileProgram;
 
-import engine.render.bone;
+import engine.render.transform;
 import engine.render.mesh;
 import engine.render.material;
 import engine.render.bound;
@@ -56,21 +56,21 @@ abstract class Shader
     // Rendering VAOs (Vertex Array Objects)
     //-------------------------------------------------------------------------
     
-    abstract void render(Bone grip, VAO vao);
-    abstract void render(Bone[] grips, VAO vao);
+    abstract void render(Transform transform, VAO vao);
+    abstract void render(Transform[] transforms, VAO vao);
 
     //-------------------------------------------------------------------------
     
-    final void render(Bone grip, Material mat, VAO vao)
+    final void render(Transform transform, Material mat, VAO vao)
     {
         loadMaterial(mat);
-        render(grip, vao);
+        render(transform, vao);
     }
 
-    final void render(Bone[] grips, Material mat, VAO vao)
+    final void render(Transform[] transforms, Material mat, VAO vao)
     {
         loadMaterial(mat);
-        render(grips, vao);
+        render(transforms, vao);
     }
 
     //*************************************************************************

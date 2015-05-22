@@ -6,22 +6,27 @@
 
 module engine.render;
 
-public import engine.render.bone;
-public import engine.render.mesh;
-public import engine.render.bound;
-public import engine.render.material;
-public import engine.render.texture;
-public import engine.render.model;
+public {
+    import engine.render.transform;
+    import engine.render.mesh;
+    import engine.render.bound;
+    import engine.render.material;
+    import engine.render.texture;
+    import engine.render.model;
+    import engine.render.node;
 
-public import engine.render.view;
-public import engine.render.light;
-public import engine.render.batch;
-public import engine.render.layer;
+    import engine.render.view;
+    import engine.render.light;
 
-public import engine.render.shaders.base;
-public import shaders = engine.render.shaders;
+    import engine.render.batch;
+    import engine.render.layer;
 
-public import gl3n.linalg;
+    import engine.render.state;
+    import engine.render.shaders.base;
+    import shaders = engine.render.shaders;
+
+    import gl3n.linalg;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -60,9 +65,6 @@ void init()
 
 void start()
 {
-    import engine.render.bone;
-    Bone.clearcache();
-
     checkgl!glViewport(0, 0, screen.width, screen.height);
     checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

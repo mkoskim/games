@@ -12,22 +12,6 @@ import game = engine.game;
 import render = engine.render;
 import engine.util;
 
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-
-/*
-render.Layer init2D(int blocksize = 1)
-{
-    game.init();
-
-    return new render.Layer(
-        render.shaders.Default2D.create(),	// Shader
-        render.Camera.topleft2D(blocksize)	// Camera
-    );
-}
-*/
-
 //*****************************************************************************
 //
 // Game loop: The conventional way is:

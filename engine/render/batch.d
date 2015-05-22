@@ -13,111 +13,18 @@ module engine.render.batch;
 import engine.render.util;
 
 import engine.render.shaders.base;
-import engine.render.shaders.defaults;
+import engine.render.state;
 
-import engine.render.bone;
+import engine.render.transform;
 import engine.render.mesh;
 import engine.render.bound;
 import engine.render.texture;
 import engine.render.material;
 import engine.render.model;
+import engine.render.node;
 import engine.render.view;
 
-//*****************************************************************************
-//
-// RenderState to hold OpenGL render settings
-//
-//*****************************************************************************
-
-class RenderState
-{
-    Shader shader;
-
-    bool[GLenum] enable;    // glEnable / glDisable
-
-    //-------------------------------------------------------------------------
-
-    this(Shader shader) { this.shader = shader; }
-    
-    //-------------------------------------------------------------------------
-    
-    private static RenderState active = null;
-        
-    final void activate()
-    {
-        if(active != this)
-        {
-            apply();
-            active = this;
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    
-    protected void apply()
-    {
-        writeln("RenderState.apply: ", this);
-
-        shader.activate();
-
-        foreach(k, v; enable)
-        {
-            if(v) checkgl!glEnable(k); else checkgl!glDisable(k);
-        }
-
-        //glPolygonMode(GL_FRONT, fill ? GL_FILL : GL_LINE);
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-class RenderState2D : RenderState
-{
-    this(Shader shader)
-    {
-        super(shader);
-        
-        enable[GL_CULL_FACE] = false;
-        enable[GL_DEPTH_TEST] = false;
-        
-        enable[GL_BLEND] = true;
-    }
-
-    this() { this(Default2D.create()); }
-    
-    //-------------------------------------------------------------------------
-
-    override void apply()
-    {
-        super.apply();
-
-        checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-class RenderState3D : RenderState
-{
-    this(Shader shader)
-    {
-        super(shader);
-
-        enable[GL_CULL_FACE] = true;
-        enable[GL_DEPTH_TEST] = true;
-        
-        enable[GL_BLEND] = false;
-    }
-
-    this() { this(Default3D.create()); }
-
-    override void apply()
-    {
-        super.apply();
-
-        checkgl!glFrontFace(GL_CCW);
-    }
-}
+import std.algorithm;
 
 //*****************************************************************************
 //
@@ -131,12 +38,26 @@ class RenderState3D : RenderState
 
 class Batch
 {
-    RenderState rs;
+    State state;
+
+    enum Mode { unsorted, front2back, back2front };
+    Mode mode;
     
-    this(RenderState rs)
+    this(State state, Mode mode = Mode.unsorted)
     {
-        this.rs = rs;
+        this.state = state;
+        this.mode = mode;
     }
+
+    this(Batch batch, Mode mode) { this(batch.state, mode); }
+    this(Batch batch) { this(batch, batch.mode); }
+
+    //-------------------------------------------------------------------------
+
+    static Batch Default2D() { return new Batch(State.Default2D()); }
+
+    static Batch Solid3D() { return new Batch(State.Solid3D(), Mode.front2back); }
+    static Batch Transparent3D() { return new Batch(State.Transparent3D(), Mode.back2front); }
 
     //-------------------------------------------------------------------------
     // TODO: Maybe VAO cache is better located in shader itself? Or some sort
@@ -149,13 +70,19 @@ class Batch
     {
         if(!(mesh in meshes))
         {
-            meshes[mesh] = rs.shader.upload(mesh);
+            meshes[mesh] = state.shader.upload(mesh);
         }
         return meshes[mesh];
     }
 
     //-------------------------------------------------------------------------
-
+    // Models managed by this batch: currently, this is mainly used to
+    // classify incoming nodes to correct batches.
+    //
+    // Loading empty model is used to create 'placeholders'
+    //
+    //-------------------------------------------------------------------------
+    
     bool[Model] models;
 
     Model upload(Model model)
@@ -171,28 +98,47 @@ class Batch
     Model upload()                             { return upload(new Model(null, null)); }    
 
     //-------------------------------------------------------------------------
+    // TODO: Create unbuffered batch: adding nodes go directly to
+    // shader.
+    //-------------------------------------------------------------------------
 
-    bool[Node] nodes;    
+    Node[] nodes;    
 
     ulong length() { return nodes.length; }
 
-    Node add(Node node) { nodes[node] = true; return node; }
-    void remove(Node node) { nodes.remove(node); }
-    void clear() { foreach(node, _; nodes) remove(node); }
-    bool has(Model model) { return (model in models) != null; }
+    Node add(Node node) { nodes ~= node; return node; }
+    void clear() { nodes.length = 0; }
+
+    void remove(Node node)
+    {
+        auto i = countUntil(nodes, node);
+        if(i != -1) nodes = std.algorithm.remove!(SwapStrategy.unstable)(nodes, i);
+    }
     
     //-------------------------------------------------------------------------
     
     void draw(View cam)
     {
-        rs.activate();
-        rs.shader.loadView(cam);
-        foreach(node, _; nodes)
+        state.activate();
+        state.shader.loadView(cam);
+
+        final switch(mode)
+        {
+            case Mode.unsorted: break;
+            case Mode.front2back:
+                sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(nodes);
+                break;
+            case Mode.back2front:
+                sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(nodes);
+                break;
+        }
+        
+        foreach(node; nodes)
         {
             if(!node.model.material) continue;
             if(!node.model.vao) continue;
 
-            rs.shader.render(node.grip, node.model.material, node.model.vao);
+            state.shader.render(node.transform, node.model.material, node.model.vao);
         }
     }
 }
@@ -215,6 +161,11 @@ class BatchGroup
         return batch;        
     }
 
+    Batch addbatch(State state)
+    {
+        return addbatch(new Batch(state));
+    }
+
     //-------------------------------------------------------------------------
 
     private Batch findModel(Model model)
@@ -226,20 +177,23 @@ class BatchGroup
         return null;
     }
 
+    Node add(Node node) { findModel(node.model).add(node); return node; }
+
+    //-------------------------------------------------------------------------
+
     private Batch findNode(Node node)
     {
         foreach(batch; batches)
         {
-            if(node in batch.nodes) return batch;
+            if(countUntil(batch.nodes, node) != -1) return batch;
         }
         return null;
     }
 
+    void remove(Node node) { findNode(node).remove(node); }
+
     //-------------------------------------------------------------------------
 
-    Node add(Node node) { findModel(node.model).add(node); return node; }
-    void remove(Node node) { findNode(node).remove(node); }
-    
     void clear()
     {
         foreach(batch; batches) batch.clear();

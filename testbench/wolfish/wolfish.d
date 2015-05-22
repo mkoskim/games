@@ -47,16 +47,29 @@ string[] grid = [
 
 //*****************************************************************************
 //
-// Create batch group, and assign models to batches
+// ...
 //
 //*****************************************************************************
 
-class MazeBatch : render.BatchGroup
+class Scene : render.CollectRender
 {
-
+    Player player;
     render.Model[] wallshapes, floorshapes, propshapes;
 
-    this()
+    this(string[] grid)
+    {
+        loadmodels();
+        loadmaze(grid);
+        
+        light = new render.Light(
+            render.Grip.fixed(0, 2, 0),
+            vec3(1, 1, 1),
+            10,
+            0.1
+        );
+    }
+
+    void loadmodels()
     {
         //---------------------------------------------------------------------
         //
@@ -66,65 +79,71 @@ class MazeBatch : render.BatchGroup
         //---------------------------------------------------------------------
 
         auto matCaveWall = new render.Material(
-            new render.Texture("engine/stock/tiles/CaveWall/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/CaveWall/NormalMap.png"),
+            "engine/stock/tiles/CaveWall/ColorMap.png",
+            "engine/stock/tiles/CaveWall/NormalMap.png",
             1.00);
 
         auto matCrackedPlaster = new render.Material(
-            new render.Texture("engine/stock/tiles/CrackedPlaster/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/CrackedPlaster/NormalMap.png"),
+            "engine/stock/tiles/CrackedPlaster/ColorMap.png",
+            "engine/stock/tiles/CrackedPlaster/NormalMap.png",
             0.95);
 
         auto matSantaFeStucco = new render.Material(
-            //new render.Texture("engine/stock/tiles/SantaFeStucco/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/CaveWall/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
+            //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
+            "engine/stock/tiles/CaveWall/ColorMap.png",
+            "engine/stock/tiles/SantaFeStucco/NormalMap.png",
             0.95);
 
         auto matTanStucco = new render.Material(
-            //new render.Texture("engine/stock/tiles/SantaFeStucco/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/TanStucco/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/TanStucco/NormalMap.png"),
+            //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
+            "engine/stock/tiles/TanStucco/ColorMap.png",
+            "engine/stock/tiles/TanStucco/NormalMap.png",
             0.95);
 
         auto matBrickWall = new render.Material(
-            new render.Texture("engine/stock/tiles/BrickWall1/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/BrickWall1/NormalMap.png"),
+            "engine/stock/tiles/BrickWall1/ColorMap.png",
+            "engine/stock/tiles/BrickWall1/NormalMap.png",
             0.95);
 
         auto matGraniteWall = new render.Material(
-            new render.Texture("engine/stock/tiles/GraniteWall/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/GraniteWall/NormalMap.png"),
+            "engine/stock/tiles/GraniteWall/ColorMap.png",
+            "engine/stock/tiles/GraniteWall/NormalMap.png",
             0.95);
 
         auto matCrustyConcrete = new render.Material(
-            new render.Texture("engine/stock/tiles/Concrete/Crusty/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/Concrete/Crusty/NormalMap.png"),
+            "engine/stock/tiles/Concrete/Crusty/ColorMap.png",
+            "engine/stock/tiles/Concrete/Crusty/NormalMap.png",
             0.95);
 
         auto matDirtyConcrete = new render.Material(
-            new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
-            new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
+            "engine/stock/tiles/Concrete/Dirty/ColorMap.png",
+            "engine/stock/tiles/Concrete/Dirty/NormalMap.png",
             0.95);
 
         auto matCarvedSandstone = new render.Material(
-            new render.Texture("engine/stock/tiles/CarvedSandstone/ColorMap.png"),
-            //new render.Texture("engine/stock/tiles/CaveWall/ColorMap.png"),
+            "engine/stock/tiles/CarvedSandstone/ColorMap.png",
+            //"engine/stock/tiles/CaveWall/ColorMap.png",
             //vec3(0.5, 0.4, 0.2),
-            new render.Texture("engine/stock/tiles/CarvedSandstone/NormalMap.png"),
+            "engine/stock/tiles/CarvedSandstone/NormalMap.png",
             0.95);
 
         auto matAlienCarving = new render.Material(
-            //new render.Texture("engine/stock/tiles/AlienCarving/ColorMap.png"),
+            //"engine/stock/tiles/AlienCarving/ColorMap.png",
             vec4(0.75, 0.5, 0.25, 1),
-            new render.Texture("engine/stock/tiles/AlienCarving/NormalMap.png"),
+            "engine/stock/tiles/AlienCarving/NormalMap.png",
             0.15);
 
         auto matMetallicAssembly = new render.Material(
-            //new render.Texture("engine/stock/tiles/MetallicAssembly/ColorMap.png"),
+            //"engine/stock/tiles/MetallicAssembly/ColorMap.png",
             vec4(0.5, 0.5, 0.5, 1),
-            new render.Texture("engine/stock/tiles/MetallicAssembly/NormalMap.png"),
+            "engine/stock/tiles/MetallicAssembly/NormalMap.png",
             0.15);
+
+        auto matGlass = new render.Material(
+            vec4(0.8, 0.8, 0.9, 0.3),
+            "engine/stock/tiles/SantaFeStucco/NormalMap.png",
+            0.50
+        );
 
         //---------------------------------------------------------------------
         // Load meshes
@@ -138,11 +157,11 @@ class MazeBatch : render.BatchGroup
         // Create batches: we create several now just for testing the system.
         //---------------------------------------------------------------------
 
-        auto rs = new render.RenderState3D();
+        auto walls  = addbatch(render.Batch.Solid3D());
+        auto props  = addbatch(new render.Batch(walls));
+        auto floors = addbatch(new render.Batch(walls));
 
-        auto walls  = addbatch(new render.Batch(rs));
-        auto props  = addbatch(new render.Batch(rs));
-        auto floors = addbatch(new render.Batch(rs));
+        auto transparent = addbatch(render.Batch.Transparent3D());
         
         //---------------------------------------------------------------------
         // Create models to batches
@@ -176,51 +195,19 @@ class MazeBatch : render.BatchGroup
         ];
 
         propshapes = [
+            /*
             props.upload(monkeymesh, new render.Material(
                 vec4(0.75, 0.5, 0.25, 1),
                 //matSantaFeStucco.normalmap,
                 0.5
             )),
+            */
+            transparent.upload(monkeymesh, matGlass),
         ];
     }
-}
 
-//-----------------------------------------------------------------------------
-
-class Maze
-{
-    Player player;
-    render.Light light;
-    MazeBatch batches;
-    render.BasicNodeGroup nodes;
-
-    void draw()
+    void loadmaze(string[] grid)
     {
-        batches.clear();
-        nodes.collect(player.cam, batches);
-        
-        // TODO: Hack! Design light subsystem
-        auto rs = batches.batches[0].rs;
-        rs.activate();
-        if(light) rs.shader.light(light);
-
-        batches.draw(player.cam);
-    }
-
-    this(string[] grid)
-    {
-        light = new render.Light(
-            vec3(0, 2, 0),
-            vec3(1, 1, 1),
-            10,
-            0.1
-        );
-
-        batches = new MazeBatch();
-        nodes = new render.BasicNodeGroup();
-
-        //---------------------------------------------------------------------
-
         foreach(y, line; grid)
         {
             foreach(x, c; line)
@@ -229,19 +216,19 @@ class Maze
                 switch(c)
                 {
                     case '1', '2', '3', '4', '5':
-                        nodes.add(pos, batches.wallshapes[c - '1']);
+                        nodes.add(pos, wallshapes[c - '1']);
                         break;
                     case '#':
-                        nodes.add(pos, batches.wallshapes[0]);
+                        nodes.add(pos, wallshapes[0]);
                         break;
                     case ' ':
-                        nodes.add(pos, batches.floorshapes[0]);
+                        nodes.add(pos, floorshapes[0]);
                         break;
                     case 'n':
-                        nodes.add(pos, batches.floorshapes[1]);
+                        nodes.add(pos, floorshapes[1]);
                         break;
                     case 'X':
-                        nodes.add(pos, batches.propshapes[0]);
+                        nodes.add(pos, propshapes[0]);
                         goto case ' ';
                     case '@':
                         player = new Player(this, pos); 
@@ -258,27 +245,30 @@ class Maze
 
 class Player : game.Fiber
 {
-    Maze maze;
+    Scene maze;
 
-    render.Bone root;
+    render.Transform root;
     render.Camera cam;
 
     game.Joystick joystick;
     render.Material* mat;
 
-    this(Maze maze, vec3 pos)
+    this(Scene maze, vec3 pos)
     {
         super();
 
         this.maze = maze;
+        
+        root = render.Grip.movable(pos);
 
-        root = new render.Bone(pos);
-
-        cam = render.Camera.basic3D(0.1, 20, new render.Bone(root));
+        cam = render.Camera.basic3D(0.1, 20, render.Grip.movable(root));
 
         joystick = game.joysticks[0];
         
-        mat = &maze.batches.propshapes[0].material;
+        mat = &maze.propshapes[0].material;
+
+        maze.cam = cam;
+        this.maze.actors.add(this);
     }
 
     override void run()
@@ -291,11 +281,11 @@ class Player : game.Fiber
             vec3 forward = (root.mModel() * vec4( 0, 0, +1, 0)).xyz;
             vec3 strafe  = (root.mModel() * vec4(+1, 0,  0, 0)).xyz;
 
-            root.pos +=
+            root.grip.pos +=
                 forward * joystick.axes[game.JOY.AXIS.LY] * maxspeed +
                 strafe  * joystick.axes[game.JOY.AXIS.LX] * maxspeed;
 
-            root.rot.y -= joystick.axes[game.JOY.AXIS.RX] * turnrate;
+            root.grip.rot.y -= joystick.axes[game.JOY.AXIS.RX] * turnrate;
             cam.grip.rot.x = clamp(
                 cam.grip.rot.x - joystick.axes[game.JOY.AXIS.RY] * turnrate,
                 -30, 30
@@ -314,15 +304,7 @@ void main()
 {
     game.init(800, 600);
 
-    auto maze = new Maze(grid);
-
-    //-------------------------------------------------------------------------
-
-    auto actors = new game.FiberQueue();
-
-    //-------------------------------------------------------------------------
-
-    actors.add(maze.player);
+    auto maze = new Scene(grid);
 
     //-------------------------------------------------------------------------
 
@@ -358,7 +340,7 @@ void main()
     //writeln(to!string(glGetString(GL_EXTENSIONS)));
     */
 
-    actors.reportperf;
+    maze.actors.reportperf;
     
     //-------------------------------------------------------------------------
 
@@ -371,9 +353,9 @@ void main()
     //-------------------------------------------------------------------------
 
     simple.gameloop(
-        50,         // FPS
-        &draw,      // draw
-        actors,     // list of actors
+        50,             // FPS
+        &draw,          // draw
+        maze.actors,    // list of actors
 
         (SDL_Event* event) {
             switch(event.type)

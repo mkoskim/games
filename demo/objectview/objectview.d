@@ -25,19 +25,19 @@ void main()
         
     auto cam = render.Camera.basic3D(
         0.1, 10,        // Near - far
-        vec3(0, 0, 5)
+        render.Grip.movable(0, 0, 5)
     );
 
     auto scene = new render.DirectRender(
         cam,
-        new render.RenderState3D()
+        render.State.Solid3D()
     );
 
     scene.light = new render.Light(
-        vec3(0, 2, 0),      // Position
-        vec3(1, 1, 1),      // Color
-        7.5,                // Range
-        0.25                // Ambient level
+        render.Grip.fixed(2, 2, 0), // Position
+        vec3(1, 1, 1),              // Color
+        7.5,                        // Range
+        0.25                        // Ambient level
     );
 
     auto nodes = scene.addbatch();
@@ -57,7 +57,7 @@ void main()
         )
     );
 
-    auto object = scene.add(new render.Node(vec3(0, 0, 0), model));
+    auto object = scene.add(render.Grip.movable, model);
 
     //-------------------------------------------------------------------------
     // Control

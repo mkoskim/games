@@ -112,7 +112,7 @@ void play(string mazename)
 
     auto scene = new render.DirectRender(
         cam,
-        new render.RenderState2D()
+        render.State.Default2D()
     );
     
     //-------------------------------------------------------------------------
@@ -282,9 +282,9 @@ void play(string mazename)
 
         void checkfood()
         {
-            foreach(food; foods.nodes.keys)
+            foreach(food; foods.nodes)
             {
-                if(distance(sprite.grip.pos, food.grip.pos) < 0.5)
+                if(sprite.distance(food) < 0.5)
                 {
                     foods.remove(food);
                     points += 10;
@@ -424,6 +424,7 @@ void play(string mazename)
 
     void add_empty(size_t x, size_t y) {
         scene.add(x - 0.33, y - 0.33, mPath);
+        grid[y][x] = ' ';
     }
 
     void add_door(size_t x, size_t y) {
@@ -434,20 +435,17 @@ void play(string mazename)
     void add_food(size_t x, size_t y) {
         add_empty(x, y);
         scene.add(x + 0.5, y + 0.5, mFood);
-        grid[y][x] = ' ';
     }
 
     void add_ghost(size_t x, size_t y) {
         add_empty(x, y);
-        auto sprite = scene.add(x + 0.5, y + 0.5, mMob);
-        grid[y][x] = ' ';
+        auto sprite = scene.add(render.Grip.movable(x + 0.5, y + 0.5), mMob);
         actors.add(new Ghost(sprite, mobs.length));
     }
 
     void add_player(size_t x, size_t y) {
         add_empty(x, y);
-        auto sprite = scene.add(x + 0.5, y + 0.5, mMob);
-        grid[y][x] = ' ';
+        auto sprite = scene.add(render.Grip.movable(x + 0.5, y + 0.5), mMob);
         player = new Player(sprite);
     }
 
@@ -508,15 +506,7 @@ void play(string mazename)
     void drawscreen()
     {
         scene.draw();
-        /*
-        background.draw();
-        doors.draw();
-        maze.draw();
-        foods.draw();
-        mobs.draw();
-
-        hud.draw();
-        */
+        //hud.draw();
     }
 
     //-------------------------------------------------------------------------
