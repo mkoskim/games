@@ -12,6 +12,18 @@ module engine.render.shaders.base;
 // primitives to set up rendering, and functions to render different
 // primitive data types.
 //
+//-----------------------------------------------------------------------------
+//
+// TODO: There is definitely need for some sort of ShaderFamily instance.
+// That is responsible for creating VBOs, IBOs and VAOs, suitable for use
+// of the shaders in that family.
+//
+// Reasoning: Currently, we use shaders itself for uploading Models to
+// GPU. As we don't know, which shaders can share the same VAOs, the
+// models are currently tightly tied to shader code itself. This needs
+// to be changed: you can (safely; supported by framework) change the shader
+// rendering the model, as long as the shader belongs to the same family.
+//
 //*****************************************************************************
 
 //-----------------------------------------------------------------------------

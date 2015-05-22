@@ -1,7 +1,6 @@
 //*****************************************************************************
 //
-// Batch: The idea here is to encapsulate OpenGL settings behind
-// a state block. Also, the idea is that when nodes are collected from
+// Batch: The idea is that when nodes are collected from
 // scene graph(s), they can be classified and thus moved to right batch.
 //
 //*****************************************************************************

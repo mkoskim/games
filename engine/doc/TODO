@@ -19,8 +19,6 @@ DONE:
 
 WORKLIST:
 
-- Sprite/particle engine for textbox
-
 - "Multi-material" meshes: It would be good to think about the
   implementation a little bit, so that it would fit to future development.
   Later, we might want to split meshes also to different instances, for
@@ -29,23 +27,13 @@ WORKLIST:
 
 - Mipmaps
 
-- Combine Texture and Material files, they are pretty much related to each
-  other. Except that I might need texture when creating framebuffers...
-  
 - Add support for "multi-textured" nodes - the idea is to have sort
-  of "stamping", textures over textures.
+  of "stamping", textures over textures. We add node-specific material
+  modifiers at some point (like color modifier, but at the same time,
+  we could add texture modifiers, too).
 
 - Start working with navigation. The first step is to create a network
   of nodes suitable for pacman-like games.
-
-- It is possible to compile GLSL library code to shader program, and then
-  link multiple of these programs together with specific main(). Investigate
-  this:
-  
-      http://stackoverflow.com/questions/9168252/attaching-multiple-shaders-of-the-same-type-in-a-single-opengl-program
-
-- Think Shader subsystem. We would like to have specialized shaders for
-  particle engines, not using the regular mesh-material data structures.
 
 - Renderers in layer.d are incomplete hacks.
 
@@ -222,6 +210,15 @@ issues have their relations to other sections in this TODO document.
 - Some sort of batch processing with shaders? See:
 
     * http://www.gamedev.net/page/resources/_/technical/opengl/opengl-batch-rendering-r3900
+
+- It is possible to compile GLSL library code to shader program, and then
+  link multiple of these programs together with specific main(). Investigate
+  this:
+  
+      http://stackoverflow.com/questions/9168252/attaching-multiple-shaders-of-the-same-type-in-a-single-opengl-program
+
+- Think Shader subsystem. We would like to have specialized shaders for
+  particle engines, not using the regular mesh-material data structures.
 
 -------------------------------------------------------------------------------
 
