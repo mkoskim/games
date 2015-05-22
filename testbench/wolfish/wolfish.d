@@ -72,6 +72,16 @@ class Scene : render.CollectRender
     void loadmodels()
     {
         //---------------------------------------------------------------------
+        // Create batches: we create several now just for testing the system.
+        //---------------------------------------------------------------------
+
+        auto walls  = addbatch(render.Batch.Solid3D());
+        auto props  = addbatch(new render.Batch(walls));
+        auto floors = addbatch(new render.Batch(walls));
+
+        auto transparent = addbatch(render.Batch.Transparent3D());
+        
+        //---------------------------------------------------------------------
         //
         // Load different materials for later use... It would be very nice
         // to have some kind of material database to ease this process...
@@ -154,16 +164,6 @@ class Scene : render.CollectRender
         auto monkeymesh = blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj").scale(0.66);
         
         //---------------------------------------------------------------------
-        // Create batches: we create several now just for testing the system.
-        //---------------------------------------------------------------------
-
-        auto walls  = addbatch(render.Batch.Solid3D());
-        auto props  = addbatch(new render.Batch(walls));
-        auto floors = addbatch(new render.Batch(walls));
-
-        auto transparent = addbatch(render.Batch.Transparent3D());
-        
-        //---------------------------------------------------------------------
         // Create models to batches
         //---------------------------------------------------------------------
         
@@ -173,23 +173,13 @@ class Scene : render.CollectRender
             walls.upload(wallmesh, matDirtyConcrete),
             walls.upload(wallmesh, matMetallicAssembly),
             walls.upload(wallmesh, matAlienCarving),
-            //matCrackedPlaster
-            //matCrustyConcrete
-            //matDirtyConcrete
-            //matCaveWall
-            //matBrickWall
-            //matCarvedSandstone
-            //matAlienCarving
-            //matMetallicAssembly
         ];
-
-        auto floormat = matGraniteWall;
 
         floorshapes = [
             floors.upload(floormesh, matGraniteWall),
             floors.upload(floormesh, new render.Material(
                 vec4(0.25, 0.25, 0.25, 1),
-                floormat.normalmap,
+                matGraniteWall.normalmap,
                 0.15
             )),
         ];
