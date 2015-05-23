@@ -103,11 +103,10 @@ abstract class Shader
     // Getting locations of parameters
     //-------------------------------------------------------------------------
 
-    private GLint[string] _namecache;
-
-    protected final GLint location(string namespace, string name)
-    {
-        if(!(name in _namecache))
+    private {
+        GLint[string] _namecache;
+        
+        void _getlocation(string namespace, string name)
         {
             extern(C) GLint function(GLuint, const(char)*) query;
 
@@ -122,6 +121,11 @@ abstract class Shader
             if(loc == -1) throw new Exception("Unknown GLSL identifier: " ~ name);
             _namecache[name] = loc;
         }
+    }
+
+    protected final GLint location(string namespace, string name)
+    {
+        if(!(name in _namecache)) _getlocation(namespace, name);
         //debug writeln("Location: ", name, " @ ", locations[name]);
         return _namecache[name];
     }

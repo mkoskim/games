@@ -7,11 +7,11 @@ DONE:
 - DONE: Transforms are now "cached". Transform can be linked to grip
   object, which can be used to update transforms.
 
-- DONE: Half-done: Redesign nodes: "immovable" instances having only Model
+- DONE: Redesign nodes: "immovable" instances having only Model
   matrix, movable instances with pos & rot, etc. Now we have Bone, need
   just static bone hierarchies...
 
-- DONE: Half-done: Objects without mesh & mat... Static objects... "Bones" are
+- DONE: Objects without mesh & mat... Static objects... "Bones" are
   now objects without shape. So, missing static bone (hierarchy)...
 
 - DONE: Make Node.grip a property, so that it can warn if trying to move
@@ -20,7 +20,7 @@ DONE:
 - DONE: Transparent objects: Drawn back-to-front - With current Batch
   implementation, this can be done.
 
-- DONE: Also, now e.g. projection matrix is written for each object, but in
+- DONE: "...Also, now e.g. projection matrix is written for each object, but in
   reality there is only need to write it again if camera perspective
   changes. As user may want to change camera without warning, a nice
   compromise would be writing things like these at the start of rendering
@@ -32,8 +32,9 @@ DONE:
     matrices are not necessarily shared between shaders, we dont take risks,
     but write them.
 
-- DONE: Current Batch processing mechanism implements this. Multi-shader
-  layers & scenes... Or should it be implemented with 'multi-shader shader'?
+- DONE: Multi-shader layers & scenes... Or should it be implemented with
+  'multi-shader shader'? (Current Batch processing mechanism now implements
+  this)
 
 - DONE: Modified comment cutting line in blob/wavefront.d, which was causing
   segfault when compiling with -release flag.
