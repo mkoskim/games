@@ -116,17 +116,22 @@ class Transform
 
     //-------------------------------------------------------------------------
     
-    int last_updated;
-    mat4 current;
-
     mat4 mModel() {
-        if(last_updated != frame) 
+        if(last_updated != frame) update();
+        return current;
+    }
+
+    private {
+        int last_updated;
+        mat4 current;
+
+        void update()
         {
             if(grip) transform = grip.matrix();
             current = transform;
             if(parent) current = parent.mModel() * current;
+            last_updated = frame;
         }
-        return current;
     }
 
     //-------------------------------------------------------------------------

@@ -11,6 +11,9 @@ bin/*
 *.zip.o
 *.o
 
+trace.def
+trace.log
+
 *.pro.user
 core.*
 vgcore.*

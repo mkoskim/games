@@ -57,7 +57,9 @@ void init(string name, int width = 640, int height = 480)
 
     screen.glcontext = SDL_GL_CreateContext(screen.window);
 
-    SDL_GL_SetSwapInterval(-1);
+    //SDL_GL_SetSwapInterval(0);    // Immediate
+    //SDL_GL_SetSwapInterval(1);    // VSync
+    SDL_GL_SetSwapInterval(-1);   // Tearing
 
     debug {
         writefln("OpenGL: %d.%d",
@@ -162,7 +164,6 @@ void startdraw()
 
 void waitframe()
 {
-    render.flush();
     SDL_GL_SwapWindow(screen.window);
 
     if(Profile.timers)

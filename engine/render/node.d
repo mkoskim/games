@@ -71,27 +71,21 @@ class Node
     //-------------------------------------------------------------------------
 
     struct VIEWSPACE {
-        vec3 pos;		// Position relative to camera
+        vec3 bsp;       // Bounding sphere position relative to camera
+        float bspdst2;  // Bouding sphere (squared) distance to camera
 
-        vec3 bsp;		// Bounding sphere position relative to camera
-        float bspdst2;	// Bouding sphere (squared) distance to camera
-
-        int infrustum;	// = INSIDE, INTERSECT or OUTSIDE
+        int infrustum;  // = INSIDE, INTERSECT or OUTSIDE
     }
 
     VIEWSPACE viewspace;
 
     void project(View cam)
     {
-        viewspace.pos = cam.viewspace(transform.mModel());
-
         viewspace.bsp = cam.viewspace(transform.mModel(), model.vao.bsp.center);
         viewspace.bspdst2 = viewspace.bsp.magnitude_squared;
 
-        Frustum frustum = cam.frustum;
-
         viewspace.infrustum = INSIDE;
-        foreach(plane; frustum.planes)
+        foreach(plane; cam.frustum.planes)
         {
             float dist = plane.distance(viewspace.bsp);
             if (dist < -model.vao.bsp.radius)

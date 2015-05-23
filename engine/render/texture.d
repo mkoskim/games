@@ -62,7 +62,7 @@ class Texture
     // Creating texture from byte buffer
     //-------------------------------------------------------------------------
 
-    this(uint w, uint h, void* buffer, GLenum format)
+    this(uint w, uint h, void* buffer, GLenum format, GLenum data_width = GL_UNSIGNED_BYTE)
     {
         const string[GLenum] _name = [
             GL_BGRA: "GL_BGRA",
@@ -77,7 +77,7 @@ class Texture
         ];
         
         GLenum internal;
-        GLenum data_width = GL_UNSIGNED_BYTE;
+        //GLenum data_width = GL_UNSIGNED_BYTE;
         GLint align_unpack;
 
         final switch(format)
@@ -173,13 +173,7 @@ class Texture
 
     this(vec4 color)
     {
-        ubyte[] buffer = [
-            cast(ubyte)(color.r*255),
-            cast(ubyte)(color.g*255),
-            cast(ubyte)(color.b*255),
-            cast(ubyte)(color.a*255)
-        ];
-        this(1, 1, buffer.ptr, GL_RGBA);
+        this(1, 1, cast(void*)color.value_ptr, GL_RGBA, GL_FLOAT);
     }
 }
 

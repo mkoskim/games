@@ -7,6 +7,47 @@ development.
 
 -------------------------------------------------------------------------------
 
+LIGHTING FRAMEWORK:
+
+BACKGROUND: This is something that I have been thinking a while. Many 3D
+engines and editors add lights to scene graph nodes. But:
+
+    * The maximum number of lights is (1) shader specific constant (2) for
+      every individual rendered object.
+
+    * The "visibility" of light is determined if objects it lights are
+      visible - not the visibility of the light source itself.
+
+So, my basic approach to lights is following:
+
+    1) Use camera to fetch visible objects
+    
+    2) Fetch lights that affect to those objects
+    
+    3) For each light found, at least for shadow casting ones,
+       render shadow map
+    
+    3) For each object, when rendering, choose the set of lights,
+       based on the limitations of the shader.
+
+In a game, we already have several "spaces": we have visible (rendered)
+space, we have physical space, we have navigation meshes ("AI space"),
+and so on. So, what about creating "light space"?
+
+What is "light space"? It determines which lights to set up for an
+*object* to be rendered.
+
+As a very crude example: For each object we render, we go through
+all lights in the current scene, and sort them by how much they
+light the object. Then we choose N strongest lights for rendering.
+
+QUESTION: This can - of course - be very heavy operation. So, the fundamental
+question here is, how we can define "light space" to decrease the
+number of possible lights when rendering an object? As with real time
+3D rendering in general, what kind of cheap tricks we can use?
+
+-------------------------------------------------------------------------------
+
 RENDERING FRAMEWORK:
 
 The current (May 11, 2015) idea is to change underlaying architecture

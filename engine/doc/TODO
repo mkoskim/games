@@ -2,6 +2,8 @@
 
 DONE:
 
+- NOTE! Text rendering not working!
+
 - DONE: Transforms are now "cached". Transform can be linked to grip
   object, which can be used to update transforms.
 
@@ -15,27 +17,178 @@ DONE:
 - DONE: Make Node.grip a property, so that it can warn if trying to move
   static objects.
 
+- DONE: Transparent objects: Drawn back-to-front - With current Batch
+  implementation, this can be done.
+
+- DONE: Also, now e.g. projection matrix is written for each object, but in
+  reality there is only need to write it again if camera perspective
+  changes. As user may want to change camera without warning, a nice
+  compromise would be writing things like these at the start of rendering
+  phase. Secondly, we need ModelView matrix, so at the moment it is
+  probably simpler just to send camera to instance rendering.
+  
+  * Comment: Projection and View matrices are written once when starting
+    to render a batch. Because batch can include shader switch, and because
+    matrices are not necessarily shared between shaders, we dont take risks,
+    but write them.
+
+- DONE: Current Batch processing mechanism implements this. Multi-shader
+  layers & scenes... Or should it be implemented with 'multi-shader shader'?
+
+- DONE: Modified comment cutting line in blob/wavefront.d, which was causing
+  segfault when compiling with -release flag.
+
+- DONE: Found bug in Transform while profiling, it was still updating the
+  matrix all the time (missing 'last_update = frame' line). Now it works.
+
+- DONE: Profiling (wolfish). Findings:
+
+  The biggest time consumer is - glClear!!! :o It takes like 5x more time
+  than drawing the scene (which is the second largest time consumer). In
+  drawing, the biggest time consumer is viewspace projection, which is done
+  for visibility check.
+  
+  BUT: I am pretty sure glClear() time consumption is only a symptom, not
+  the cause. Removing glClear() call does not affect to FPS, but if we
+  don't draw anything, glClear() takes no time. See e.g.
+  
+        https://forums.ouya.tv/discussion/491/14ms-glclear
+  
+  Also, moving glClear() behind SwapBuffers does not have effect to busy/idle
+  times. More likely it is faint hint how much time was spent on GPU side (but
+  of course, GPU has also other load than the game).
+  
+  This is how profiling info looks like (at the top, call tree time only):
+
+        1817170176     void engine.game.startdraw()
+        1816984147     void engine.render.start()
+        1816631574     nothrow @nogc void engine.render.util.checkgl!(extern (C) nothrow @nogc void function(uint)* derelict.opengl3.functions.glClear, uint).checkgl(uint)
+         498454577     void wolfish.main().draw()
+         498253902     void engine.render.layer.CollectRender.draw()
+         311839398     void engine.render.layer.BasicNodeGroup.collect(engine.render.view.View, engine.render.batch.BatchGroup)
+         307202259     _D6engine6render5layer14BasicNodeGroup7collectMFC6engine6render4view4ViewC6engine6render5batch10BatchGroupZ14__foreachbody3MFKC6engine6render4node4NodeKbZi
+         295646258     void engine.render.node.Node.project(engine.render.view.View)
+         272531709     gl3n.linalg.Vector!(float, 3).Vector engine.render.view.View.viewspace(gl3n.linalg.Matrix!(float, 4, 4).Matrix, gl3n.linalg.Vector!(float, 3).Vector)
+         268724416     gl3n.linalg.Matrix!(float, 4, 4).Matrix engine.render.view.View.mModelView(gl3n.linalg.Matrix!(float, 4, 4).Matrix)
+         247450932     gl3n.linalg.Matrix!(float, 4, 4).Matrix engine.render.view.Camera.mView()
+         212859522     gl3n.linalg.Matrix!(float, 4, 4).Matrix engine.render.transform.Transform.mModel()
+         208074024     void engine.game.init(int, int)
+         208073418     void engine.game.init(immutable(char)[], int, int)
+         183702676     void engine.render.batch.BatchGroup.draw(engine.render.view.View)
+         183605914     void engine.render.batch.Batch.draw(engine.render.view.View)
+         181722518     void engine.render.shaders.base.Shader.render(engine.render.transform.Transform, engine.render.material.Material, engine.render.shaders.base.Shader.VAO)
+         171131557     gl3n.linalg.Matrix!(float, 4, 4).Matrix engine.render.transform.Grip.matrix()
+         167943665     gl3n.linalg.Matrix!(float, 4, 4).Matrix engine.render.transform.getmatrix(gl3n.linalg.Vector!(float, 3).Vector, gl3n.linalg.Vector!(float, 3).Vector, gl3n.linalg.Vector!(float, 3).Vector)
+         154587816     void engine.render.shaders.defaults.Default.render(engine.render.transform.Transform, engine.render.shaders.base.Shader.VAO)
+         140329826     nothrow @nogc void engine.render.util.checkgl!(extern (C) nothrow @nogc void function(uint, int, uint, const(void)*)* derelict.opengl3.functions.glDrawElements, uint, uint, uint, ).checkgl(uint, uint, uint, )
+         140324482     void engine.render.shaders.base.Shader.IBO.draw()
+               ...     ...
+
+  There is still some strange things: wolfish (and cylinderium) generally run
+  at least as fast as pacman, although it uses much more complicated CPU and
+  GLSL code. I need to investigate 2D performance, as because of GUI elements
+  it will matter to 3D games, too.
+
 *******************************************************************************
 
 WORKLIST:
 
 - "Multi-material" meshes: It would be good to think about the
   implementation a little bit, so that it would fit to future development.
-  Later, we might want to split meshes also to different instances, for
-  example, when drawing a tree, we could put transparent parts (leaves)
-  to different instance, that is drawn after solid objects.
+  Quickly the current thought:
+
+        VBO + IBO   0   ... x       MeshPart 1
+                    x+1 ... y       MeshPart 2
+                    ...
+        
+  MeshPart is an IBO range. When rendering, you can keep both VBO
+  and IBO binded, while changing material between next range.
+  
+  This is just not necessarily enough, as you may want to render parts
+  in different rendering stages. As a simple example, consider a tree.
+  Trees are usually constructed so that trunk and larger branches are
+  solid meshes, while leafs and small branches are transparent textures.
+  
+  What you want, is to separate solid and transparent parts to different
+  rendering stages.
 
 - Mipmaps
 
-- Add support for "multi-textured" nodes - the idea is to have sort
-  of "stamping", textures over textures. We add node-specific material
-  modifiers at some point (like color modifier, but at the same time,
+- Node modifiers: Add support for "multi-textured" nodes - the idea is to
+  have sort of "stamping", textures over textures. We add node-specific
+  material modifiers at some point (like color modifier, but at the same time,
   we could add texture modifiers, too).
 
 - Start working with navigation. The first step is to create a network
   of nodes suitable for pacman-like games.
 
-- Renderers in layer.d are incomplete hacks.
+- Renderers in layer.d are incomplete hacks. Reorganize them, so, that
+  move simplified solutions to ext/simple.d (that's the purpose of it)
+
+- Node/Model classification. We assume, that no model (part) ever is added
+  to two batches in single stage. So, what we need, is to know to what
+  batch the part is added in different stages:
+  
+        class Model {
+            VAO vao;
+            struct Part {
+                Batch[Stage] destination;
+                material;
+                (IBO) range;
+            }
+        }
+
+  For example: We have two rendering pipelines, one for rendering view,
+  one for rendering shadow maps. We have tree, that contains several
+  materials, some of them solid, some of them transparent:
+  
+        tree.trunk.destination[viewrender] = viewrender.solid
+        tree.trunk.destination[shadowrender] = shadowrender.solid
+        
+        tree.leafs.destination[viewrender] = viewrender.transparent
+        tree.leafs.destination[shadowrender] = shadowrender.transparent
+
+  Basically, we could also use some kind of tagging to locate correct
+  batch. We would then also need information to which rendering stages
+  the model/part is included:
+
+        viewrender.tag = "visual";
+        viewrender.solidbatch.tag = "solid";
+        
+        shadowrender.tag = "shadowcaster";
+        shadowrender.solidbatch.tag = "solid";
+        
+        ...
+        ...
+
+        model.tags = ["visual", "shadowcaster"];
+        model.part.tag = "solid";
+
+- Also, it might be very good idea now to separate resource management,
+  instead of keeping references in the batches. So, even thought it
+  means more writing, we do the thing something like this:
+  
+        resources.model = shaderfamily.upload(mesh, material);
+        resources.model.destination[pipeline] = pipeline.batchX;
+        ...
+
+  There is some ways to ease writing code, but anyways, the general idea
+  is that references to uploaded models are found only from:
+
+        1) nodes in scene
+        2) resource lookup table for scene
+
+  Destroying scene destroys also resources loaded for that.
+
+- Add "persistent" flag to Batch. Even regular 3D game can have
+  rendering objects that are persistent (no need for visibility checks,
+  and always rendered), common example is skybox:
+  
+        batches.solid = batch.front2back
+        batches.transparent = batch.back2front
+        batches.skybox = batch.persistent
+        
+        batches.skybox.add(skybox);
 
 -------------------------------------------------------------------------------
 
@@ -69,6 +222,11 @@ HOTTISH TOPICS:
   third one then, at the moment it feels that it is related to creating
   rendering mechanism for GUI purposes: so, at the moment it feels
   totally worth to examine.
+
+- In fact... If we would have support for "emitters" in nodes, we
+  could feed objects like that to default shading process. Shader should
+  just understand to query the emitted objects... Would be like "poor
+  man's particle engine"...
 
 -------------------------------------------------------------------------------
 
@@ -148,6 +306,11 @@ GENERAL:
 
 - Blender file (archive) loading
 
+- COLLADA file loading. This project has some possibly interesting
+  Collada files to try out:
+
+    https://bitbucket.org/EricPoggel/yage/src/c12a0715d0a7?at=default
+
 -------------------------------------------------------------------------------
 
 RESOURCE TRACKING: Create mechanism to track living resources (number of
@@ -181,13 +344,6 @@ SHADERS: Shaders are so central part that they reserve their own section
 here. Shader is connected to at least objects, materials and scenes, so these
 issues have their relations to other sections in this TODO document.
 
-- Also, now e.g. projection matrix is written for each object, but in
-  reality there is only need to write it again if camera perspective
-  changes. As user may want to change camera without warning, a nice
-  compromise would be writing things like these at the start of rendering
-  phase. Secondly, we need ModelView matrix, so at the moment it is
-  probably simpler just to send camera to instance rendering.
-
 - I should go to version 130 with shaders. For creating compatible shader
   banks, it is mandatory to ensure that attributes are at the same location.
   Otherwise, loaded VBOs do not work.
@@ -203,9 +359,6 @@ issues have their relations to other sections in this TODO document.
 
 - Design "multi-shader" shader: A shader that has several compiled shader
   programs, that can share the same instances.
-
-- Multi-shader layers & scenes... Or should it be implemented with
-  'multi-shader shader'?
 
 - Some sort of batch processing with shaders? See:
 
@@ -284,6 +437,10 @@ SCENES, LAYERS:
 
 - Fog
 
+- Skybox: Cylinderium could use this, in addition to star field. Skybox
+  does not replace star field - star field is three dimensional, skybox
+  is basically just two dimensional background image.
+
 - Occlusion queries?
 
     * https://www.opengl.org/wiki/Query_Object#Occlusion_queries
@@ -299,10 +456,8 @@ SCENES, LAYERS:
   position, rotation and scaling. It is possible, that we need also
   other ways to generate transform matrices - so, be prepared for that.
   
-- Matrix Scaling is not working, mainly because it would need updating of
+- Scaling is not entirely working, mainly because it would need updating of
   bounding sphere.
-
-- Transparent objects: Drawn back-to-front
 
 - Points & lines: (1) in meshes, separate points, lines and triangles
   (different IBOs for each; combine somehow with material groups). Think
@@ -321,7 +476,8 @@ SCENES, LAYERS:
 - Wavefront loader & mesh-material pairs: Wavefront file format has
   groups (s[moothing group], g[group), which could be used to load
   mesh-material pairs, so that they can use same VBOs. Between each
-  batch, we change IBO and material.
+  batch, we change IBO and material - nah, no need, we can give
+  range to drawing command, and thus keep the same IBO.
 
 - Winding: In case that winding is incorrect when loading a model, we
   could have methods in Mesh class to try to fix it. At least, this
@@ -379,6 +535,9 @@ ANIMATION:
 - EasingCurve: http://qt-project.org/doc/qt-4.8/qeasingcurve.html
 
 - Blender: http://wiki.blender.org/index.php/Doc:2.6/Manual/Animation
+
+- One tough question: How to update bounding volumes on animated meshes?
+  Use coarse approximation?
 
 -------------------------------------------------------------------------------
 
@@ -451,8 +610,8 @@ FONTS:
 
 - For some reason, rendered text at plain alpha channel does not work. Investigate
 
-- Bitmap sheet loading need to be generalized, needed for both text and (at least 2D)
-  game objects 
+- Half-done: Bitmap sheet loading need to be generalized, needed for both text
+  and (at least 2D) game objects 
 
 - At some point, we need to modify text to support UTF-8 (for moe3d)
 

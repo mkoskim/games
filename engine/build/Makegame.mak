@@ -42,8 +42,12 @@ debug: BLOB.zip
 
 release: BLOB.zip
 	rm -f bin/$(EXE)
-	$(DMD) -O --build-only -LBLOB.zip.o $(MAIN)
+	$(DMD) -O -release --build-only -LBLOB.zip.o $(MAIN)
 	strip --strip-all bin/$(EXE)
+
+profile: BLOB.zip
+	rm -f bin/$(EXE)
+	$(DMD) -profile --build-only -LBLOB.zip.o $(MAIN)
 
 run:
 	bin/$(EXE)
@@ -52,7 +56,7 @@ run:
 
 BLOB.zip: FORCE
 	rm -f BLOB.zip
-	zip -r -9 BLOB.zip $(BLOBFILES)
+	zip -q -r -9 BLOB.zip $(BLOBFILES)
 	gcc -c engine/build/blob.S -o BLOB.zip.o
 
 #------------------------------------------------------------------------------

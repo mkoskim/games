@@ -46,6 +46,11 @@ First things you need are:
    * GCC
    * GNU make
 
+5) If everything is fine, you can compile and run some of the examples
+   using make:
+
+      games/testbench/pacman$ make default
+
 Sadly to Windows users, current build system utilizes common Linux side
 building tools. GCC C compiler is needed to convert BLOB.zip file to
 linkable object file. I will later investigate if DMD inline assembler can

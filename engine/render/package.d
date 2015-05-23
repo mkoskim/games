@@ -48,11 +48,11 @@ void init()
     /*
     checkgl!glEnable(GL_MULTISAMPLE);
 
-    checkgl!glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-    checkgl!glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-
     checkgl!glEnable(GL_LINE_SMOOTH);
+    checkgl!glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
+
     checkgl!glEnable(GL_POLYGON_SMOOTH);
+    checkgl!glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
     /**/
 
     //-------------------------------------------------------------------------
@@ -69,8 +69,10 @@ void start()
     checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+/*
 void flush()
 {
-    //checkgl!glFinish();
+    checkgl!glFinish();
 }
+*/
 

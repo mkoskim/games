@@ -86,11 +86,10 @@ Mesh loadmesh(string filename)
     foreach(lineno, line; [""] ~ content.splitLines())
     {
         //---------------------------------------------------------------------
-        // Cut comments and empty lines. TODO: This seems to cause segfault
-        // when compiling with -release flag.
+        // Cut comments and empty lines.
         //---------------------------------------------------------------------
 
-        try line = line.split("#")[0]; catch(RangeError e) continue;
+        if(line.indexOf('#') != -1) line.length = line.indexOf('#');
         line = line.strip();
         if(!line.length) continue;
 
