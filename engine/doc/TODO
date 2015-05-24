@@ -23,12 +23,15 @@ DONE:
 
 WORKLIST:
 
+- Preliminary dub support added. There is nothing wrong with make, but dub
+  would automatically manage dependencies to other D libraries.
+
 - BLOB "attachments": Larger games probably like to have separate resource
   files to ease updating. Without breaking existing behaviour, this could
   be done so that it is possible to include external archives/directories
   to look up for files.
   
-- Game saving: At some point, we need to add file writing to the engine.
+- BLOB: Game saving: At some point, we need to add file writing to the engine.
 
 - "Multi-material" meshes: It would be good to think about the
   implementation a little bit, so that it would fit to future development.

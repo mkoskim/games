@@ -1,0 +1,23 @@
+{
+    "name": "engine",
+    "description": "Unnamed game engine.",
+    "copyright": "Copyright © 2015, markus",
+    "authors": ["markus"],
+
+    "targetType": "sourceLibrary",
+
+    "sourcePaths": [ "." ],
+    "importPaths": [ "." ],
+    
+    "excludedSourceFiles": [
+        "obsolete/*",
+        "experimental/*"
+    ],
+
+    "dependencies": {
+        "derelict-util": "*",
+        "derelict-sdl2": "*",
+        "derelict-gl3": "*",
+        "gl3n": "*",
+    },    
+}
