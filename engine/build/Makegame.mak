@@ -12,19 +12,22 @@ endif
 
 #------------------------------------------------------------------------------
 
-SRCPATH+=~/.dub/packages/derelict-gl3-1.0.12/source/
-SRCPATH+=~/.dub/packages/derelict-sdl2-1.9.5/source/
-SRCPATH+=~/.dub/packages/derelict-util-1.9.1/source/
-SRCPATH+=~/.dub/packages/gl3n-1.1.0/
+SRCPATH += ~/.dub/packages/derelict-gl3-1.0.12/source/
+SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.5/source/
+SRCPATH += ~/.dub/packages/derelict-util-1.9.1/source/
+SRCPATH += ~/.dub/packages/gl3n-1.1.0/
 
 #------------------------------------------------------------------------------
 
-DMD=rdmd
-#DMD+=--compiler=gdmd
-#DMD+=-m32
-DMD+=-ofbin/$(EXE)
-DMD+=$(addprefix -I, $(SRCPATH))
-DMD+=$(addprefix -L-l, $(LIBS))
+DMD = rdmd
+#DMD += --compiler=gdmd
+#DMD += -m32
+DMD += -ofbin/$(EXE)
+DMD += $(addprefix -I, $(SRCPATH))
+DMD += $(addprefix -L-l, $(LIBS))
+DMD += $(addprefix -L, $(OBJS))
+
+DMD += -J.
 
 #------------------------------------------------------------------------------
 
@@ -36,18 +39,18 @@ usage:
 
 default: debug run
 
-debug: BLOB.zip
+debug: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -w -debug -gc --build-only -LBLOB.zip.o $(MAIN)
+	$(DMD) -debug -w -gc --build-only $(MAIN)
 
-release: BLOB.zip
+release: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -O -release --build-only -LBLOB.zip.o $(MAIN)
+	$(DMD) -release -O --build-only $(MAIN)
 	strip --strip-all bin/$(EXE)
 
-profile: BLOB.zip
+profile: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -profile --build-only -LBLOB.zip.o $(MAIN)
+	$(DMD) -profile --build-only $(MAIN)
 
 run:
 	bin/$(EXE)
@@ -57,7 +60,6 @@ run:
 BLOB.zip: FORCE
 	rm -f BLOB.zip
 	zip -q -r -9 BLOB.zip $(BLOBFILES)
-	gcc -c engine/build/blob.S -o BLOB.zip.o
 
 #------------------------------------------------------------------------------
 

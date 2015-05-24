@@ -42,11 +42,12 @@ void main(void)
     // Lightning
     //-------------------------------------------------------------------------
 
-    vec3 n = 
+    vec3 n =
         (useNormalMapping)
         ? (texture2D(material.normalmap, frag_uv).rgb*2.0 - 1.0)
         : vec3(0, 0, 1);
-    n = normalize(frag_TBN * n);
+    
+    n = frag_TBN * n;   //n = normalize(frag_TBN * n);
 
     vec3 v = normalize(-frag_pos);
     vec3 l = normalize(frag_light_pos); 

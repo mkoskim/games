@@ -20,12 +20,11 @@ records = []
 
 for line in open("trace.log").read().split("\n"):
     fields = line.split(None, 4)
-    if len(fields) != 5: continue
-    try:
-        for i in range(0, 4): fields[i] = int(fields[i])
-        records.append(fields)
-    except ValueError: pass
-    except IndexError: pass
+    if len(fields) == 5:
+        try:
+            for i in range(0, 4): fields[i] = int(fields[i])
+            records.append(fields)
+        except ValueError: pass
 
 #------------------------------------------------------------------------------
 # Sort
@@ -40,9 +39,12 @@ records = {
 # Print back
 #------------------------------------------------------------------------------
 
-print "%12s %12s %12s %12s" % ("Tree Time", "Func Time", "Per Call", "Num Call")
-print
+header = [
+    ["Num Call", "Tree Time", "Func Time", "Per Call", ""],
+    5 * [""],
+]
 
-for record in records:
-    print "%12d %12d %12d %12d   %s" % (record[1], record[2], record[3], record[0], record[4])
+for record in header + list(records):
+    print "%12s %12s %12s %12s   %s" % tuple(record[i] for i in [1, 2, 3, 0, 4])
+
 

@@ -18,7 +18,8 @@ LDFLAGS=
 
 #------------------------------------------------------------------------------
 
-BLOBFILES += engine/stock/
+#BLOBFILES += engine/stock/fonts/Courier\ Prime/
+BLOBFILES += engine/stock
 BLOBFILES += engine/render/shaders/glsl/
 
 include engine/build/Makegame.mak
