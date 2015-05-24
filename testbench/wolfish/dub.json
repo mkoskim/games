@@ -1,0 +1,25 @@
+{
+	"name": "wolfish",
+	"description": "Wolfenstein-style FPS shooter.",
+	"copyright": "Copyright © 2015, markus",
+	"authors": ["markus"],
+
+	"mainSourceFile": "./wolfish.d",
+	"targetType": "executable",
+	"targetPath": "bin",
+
+	"sourcePaths": [ "./engine" ],
+	"importPaths": [ "./engine" ],
+	"excludedSourceFiles": [ "engine/obsolete/*", "engine/experimental/*" ],
+
+	"stringImportPaths": [ "." ],
+	
+	"preBuildCommands": [ "zip -q -r -9 BLOB.zip data/ engine/stock/ engine/render/shaders/glsl" ],
+
+	"dependencies": {
+	    "derelict-util": "*",
+	    "derelict-sdl2": "*",
+	    "derelict-gl3": "*",
+	    "gl3n": "*",
+	}
+}

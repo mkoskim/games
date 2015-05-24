@@ -43,7 +43,6 @@ First things you need are:
 
 4) Usual Linux-side building tools:
 
-   * GCC
    * GNU make
 
 5) If everything is fine, you can compile and run some of the examples
@@ -52,11 +51,5 @@ First things you need are:
       games/testbench/pacman$ make default
 
 Sadly to Windows users, current build system utilizes common Linux side
-building tools. GCC C compiler is needed to convert BLOB.zip file to
-linkable object file. I will later investigate if DMD inline assembler can
-do the job.
-
-Another sad thing for Windows users is that the project currently uses
-symbolic links, but need for those is much easier to remove than find a nice
-way to link ZIP package to executable on Windows (without GCC).
+building tools and symbolic links. I will continue to simplify the build.
 
