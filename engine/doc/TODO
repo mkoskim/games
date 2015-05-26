@@ -4,34 +4,43 @@ DONE:
 
 - NOTE! Text rendering not working!
 
-- DONE: BLOB handling: Currently, we use mechanism described here (second
-  answer):
-
-    http://stackoverflow.com/questions/5479691/is-there-any-standard-way-of-embedding-resources-into-linux-executable-image
-
-  Everything is good and working, but I have been thinking to adopt a different
-  method, just to cat exe and ZIP together, described here:
-
-    http://stackoverflow.com/questions/4864866/c-c-with-gcc-statically-add-resource-files-to-executable-library
-
-  The reason for this is to simplify building process and its dependencies a
-  bit, to prepare for "dub'able" building.
-
-  Solution: http://stackoverflow.com/questions/30418148/ziparchive-with-embedded-zip-concated-to-exe
-
 *******************************************************************************
 
 WORKLIST:
 
-- Preliminary dub support added. There is nothing wrong with make, but dub
-  would automatically manage dependencies to other D libraries.
-
-- BLOB "attachments": Larger games probably like to have separate resource
-  files to ease updating. Without breaking existing behaviour, this could
-  be done so that it is possible to include external archives/directories
-  to look up for files.
+- Shader family: It could be time to concentrate on shader management
+  before going forward:
   
-- BLOB: Game saving: At some point, we need to add file writing to the engine.
+  * Shader family: to upload stuff to GPU w/o creating actual shader
+  
+    - Problem: for binding VBOs and VAOs, the shader program needs
+      to be active...
+  
+  * Shader compilation: for error reporting, would be good to create
+    "precompiled" libraries. I have a feeling that I can never make
+    error reporting reliable (w/ current OpenGL implementation) for
+    "preprocessed" sources, so it would be best to compile GLSL files
+    just as the programmer made them.
+
+  * Mesh to intermediate format, separate VAO buffer creation to
+    shader family upload. It can be local buffer, as it is consumed
+    during OpenGL download.
+    
+  * Move default shaders to ext/ directory... Would be better to locate
+    them to stock/ - or create a new directory for defaults...
+
+- I would need to collect some default setups to e.g. ext/ directory,
+  so that I could work at higher levels without needing to worry about
+  low level changes.
+
+*******************************************************************************
+
+MISC: Yet uncategorized "Post-It" notes...
+
+- License - as things fall under default copyright laws without license,
+  I need to think about this. Is it PD or MIT?
+  
+        Check: http://choosealicense.com/
 
 - "Multi-material" meshes: It would be good to think about the
   implementation a little bit, so that it would fit to future development.
@@ -248,12 +257,23 @@ GENERAL:
 
 - Do some debugging aids: Seeing matrices etc.
 
+-------------------------------------------------------------------------------
+
+LOADERS, FILE FORMATS:
+
 - Blender file (archive) loading
 
 - COLLADA file loading. This project has some possibly interesting
   Collada files to try out:
 
     https://bitbucket.org/EricPoggel/yage/src/c12a0715d0a7?at=default
+
+- BLOB "attachments": Larger games probably like to have separate resource
+  files to ease updating. Without breaking existing behaviour, this could
+  be done so that it is possible to include external archives/directories
+  to look up for files.
+  
+- BLOB: Game saving: At some point, we need to add file writing to the engine.
 
 -------------------------------------------------------------------------------
 
@@ -281,6 +301,8 @@ FIBERS, EVENT PROCESSING:
 
 - simple.gameloop may need a function to determine loop breaking? That
   could simplify certain things...
+
+- Check vibe.d for ideas for game actors (fibers)
 
 -------------------------------------------------------------------------------
 
@@ -482,6 +504,9 @@ ANIMATION:
 
 - One tough question: How to update bounding volumes on animated meshes?
   Use coarse approximation?
+
+- Easy curve generator to tools... Some curves are easier to generate
+  numerically with simulator...
 
 -------------------------------------------------------------------------------
 

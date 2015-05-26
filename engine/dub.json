@@ -11,7 +11,6 @@
     
     "excludedSourceFiles": [
         "obsolete/*",
-        "experimental/*"
     ],
 
     "dependencies": {

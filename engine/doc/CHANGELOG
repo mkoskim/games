@@ -6,6 +6,30 @@
 
 Version something:
 
+- DONE: BLOB handling: Currently, we use mechanism described here (second
+  answer):
+
+    http://stackoverflow.com/questions/5479691/is-there-any-standard-way-of-embedding-resources-into-linux-executable-image
+
+  Everything is good and working, but I have been thinking to adopt a different
+  method, just to cat exe and ZIP together, described here:
+
+    http://stackoverflow.com/questions/4864866/c-c-with-gcc-statically-add-resource-files-to-executable-library
+
+  The reason for this is to simplify building process and its dependencies a
+  bit, to prepare for "dub'able" building.
+
+  Solution:
+  
+    http://stackoverflow.com/questions/30418148/ziparchive-with-embedded-zip-concated-to-exe
+
+- DONE: Preliminary dub support added. There is nothing wrong with make, but
+  dub manages automatically dependencies to other D libraries.
+
+-------------------------------------------------------------------------------
+
+Version something:
+
 - DONE: Transforms are now "cached". Transform can be linked to grip
   object, which can be used to update transforms.
 

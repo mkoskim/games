@@ -1,12 +1,12 @@
 {
-    "name": "wolfish",
-    "description": "Wolfenstein-style FPS shooter.",
-    "copyright": "Copyright © 2015, markus",
-    "authors": ["markus"],
+    "name"          : "wolfish",
+    "description"   : "Wolfenstein-style FPS shooter.",
+    "copyright"     : "Copyright © 2015, markus",
+    "authors"       : ["markus"],
 
     "mainSourceFile": "./wolfish.d",
-    "targetType": "executable",
-    "targetPath": "bin",
+    "targetType"    : "executable",
+    "targetPath"    : "bin",
 
     "stringImportPaths": [ "." ],
 
@@ -15,9 +15,9 @@
     ],
 
     "dependencies": {
-        "wolfish:engine": "*",
+        "wolfish:engine" : "*",
     },
     "subPackages": [
-        "./engine/",
+        "engine/",
     ],
 }
