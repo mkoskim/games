@@ -1,7 +1,7 @@
 Game projects with common engine
 ================================
 
-"Reinventing the wheel, again..." - it is a way to learn how things work.
+"<strike>Reinventing</strike> Reconstructing the wheel, again..." - it is a way to learn how things work.
 
 **Description:** See:
 
