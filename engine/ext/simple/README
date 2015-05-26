@@ -1,0 +1,5 @@
+Misc. accelerators for creating games.
+
+These also serve as additional layer of indirection, making it possible
+to tweak engine internals without modifying games.
+
