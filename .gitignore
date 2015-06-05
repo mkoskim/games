@@ -18,7 +18,6 @@ bin/*
 *.zip
 *.zip.o
 *.o
-*.obj
 *.pyc
 
 .dub

@@ -259,7 +259,9 @@ GENERAL:
 
 -------------------------------------------------------------------------------
 
-LOADERS, FILE FORMATS:
+LOADERS, FILE FORMATS: We started to use Assimp to load model files. Some
+design, sketching and planning is needed, as well as tuning the render
+architecture more suitable for models loaded from files.
 
 - Blender file (archive) loading
 
@@ -274,6 +276,14 @@ LOADERS, FILE FORMATS:
   to look up for files.
   
 - BLOB: Game saving: At some point, we need to add file writing to the engine.
+
+- Wavefront loader: smoothed normals
+
+- Wavefront loader & mesh-material pairs: Wavefront file format has
+  groups (s[moothing group], g[group), which could be used to load
+  mesh-material pairs, so that they can use same VBOs. Between each
+  batch, we change IBO and material - nah, no need, we can give
+  range to drawing command, and thus keep the same IBO.
 
 -------------------------------------------------------------------------------
 
@@ -436,14 +446,6 @@ SCENES, LAYERS:
 - Multiple mesh-material pairs in same object: Maybe with vertex groups?
   Adding IBO-Material pairs to VAOs? No need for separate IBOs, just start
   index for each batch.
-
-- Wavefront loader: smoothed normals
-
-- Wavefront loader & mesh-material pairs: Wavefront file format has
-  groups (s[moothing group], g[group), which could be used to load
-  mesh-material pairs, so that they can use same VBOs. Between each
-  batch, we change IBO and material - nah, no need, we can give
-  range to drawing command, and thus keep the same IBO.
 
 - Winding: In case that winding is incorrect when loading a model, we
   could have methods in Mesh class to try to fix it. At least, this

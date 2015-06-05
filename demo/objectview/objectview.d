@@ -48,7 +48,13 @@ void main()
     
     auto model = nodes.upload(
         //blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj")
-        blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj"),
+        //blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj"),
+        //blob.wavefront.loadmesh("engine/stock/mesh/Chess/bishop.obj"),
+        //blob.wavefront.loadmesh("engine/stock/mesh/Chess/king.obj"),
+        //blob.wavefront.loadmesh("engine/stock/mesh/Chess/knight.obj"),
+        //blob.wavefront.loadmesh("engine/stock/mesh/Chess/pawn.obj"),
+        //blob.wavefront.loadmesh("engine/stock/mesh/Chess/queen.obj"),
+        blob.wavefront.loadmesh("engine/stock/mesh/Chess/rook.obj"),
         new render.Material(
             //new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
             new render.Texture(vec4(1, 0.8, 0, 1)),
@@ -59,7 +65,7 @@ void main()
 
     auto object = scene.add(render.Grip.movable, model);
 
-    object.grip.pos -= model.vao.bsp.center;
+    //object.grip.pos -= model.vao.bsp.center;
 
     //-------------------------------------------------------------------------
     // Control
