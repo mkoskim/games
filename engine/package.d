@@ -31,6 +31,7 @@ public {
     import derelict.sdl2.image;
     import derelict.sdl2.ttf;
     import derelict.opengl3.gl3;
+    import derelict.assimp3.assimp;
     import gl3n.linalg;
 }
 
@@ -44,6 +45,7 @@ static this()
     DerelictSDL2Image.load();
     DerelictSDL2ttf.load();
     DerelictGL3.load();
+    DerelictASSIMP3.load();
 
     //-------------------------------------------------------------------------
 

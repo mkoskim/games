@@ -11,34 +11,36 @@ First things you need are:
 1) dmd D compiler: This is easy to install to both Linux and Windows, and
    you can get it here:
 
-    http://dlang.org/download.html
+        http://dlang.org/download.html
 
 2) System side libraries: Linux users may find these from their distribution's
    repository, if not, you can install them from sources.
 
-   * OpenGL 2.1+         For graphics
-   * SDL 2               Input, CPU side graphics, ...
-   * SDL 2 TTF           For loading & rendering fonts
-   * SDL 2 Image         For loading images
-
+        * OpenGL 2.1+         For graphics
+        * SDL 2               Input, CPU side graphics, ...
+        * SDL 2 TTF           For loading & rendering fonts
+        * SDL 2 Image         For loading images
+        * Assimp 3.0+         For loading 3D models
+   
    Your system should have support at least for PNG images. I'm not sure how
    std.zip is implemented, but it may require zlib.
 
 3) D libraries:
 
-   * gl3n: 3D maths
-   * derelict: OpenGL and SDL2 bindings
+        * gl3n: 3D maths
+        * derelict: OpenGL and SDL2 bindings
 
    You can use 'dub' to get these. Install dub:
 
-   * http://code.dlang.org/about
+        * http://code.dlang.org/about
 
    Then, use dub to fetch libraries:
 
-      dub fetch derelict-util
-      dub fetch derelict-sdl2
-      dub fetch derelict-gl3
-      dub fetch gl3n
+        dub fetch derelict-util
+        dub fetch derelict-sdl2
+        dub fetch derelict-gl3
+        dub fetch derelict-assimp3
+        dub fetch gl3n
 
    On Linux, dub fetches sources to ~/.dub/packages/ directory. The paths
    to sources should be OK, but if they are not, you can find them from:
@@ -48,6 +50,8 @@ First things you need are:
 4) Usual Linux-side building tools:
 
    * GNU make
+
+   NOTE: Preliminary dub building support exists.
 
 5) If everything is fine, you can compile and run some of the examples
    using make:

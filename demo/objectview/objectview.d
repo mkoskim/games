@@ -52,12 +52,14 @@ void main()
         new render.Material(
             //new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
             new render.Texture(vec4(1, 0.8, 0, 1)),
-            new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
-            0.75
+            //new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
+            //0.75
         )
     );
 
     auto object = scene.add(render.Grip.movable, model);
+
+    object.grip.pos -= model.vao.bsp.center;
 
     //-------------------------------------------------------------------------
     // Control

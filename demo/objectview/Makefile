@@ -22,6 +22,7 @@ LDFLAGS=
 # Add stock items to BLOB if you use them
 #------------------------------------------------------------------------------
 
+BLOBFILES += local/
 BLOBFILES += engine/stock/
 BLOBFILES += engine/render/shaders/glsl/
 
