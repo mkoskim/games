@@ -82,6 +82,9 @@ abstract class NodeGroup
 }
 
 //-----------------------------------------------------------------------------
+// CollectableRenderGroup has collect() method, for using camera to pick
+// nodes to batchgroup.
+//-----------------------------------------------------------------------------
 
 abstract class CollectableNodeGroup : NodeGroup
 {
@@ -115,12 +118,12 @@ class BasicNodeGroup : CollectableNodeGroup
 
 //*****************************************************************************
 //
-// Direct storage: stores nodes directly to batches, and renders them in
-// order which batches are created.
+// Unbuffered node storage: stores nodes directly to batches, and renders
+// them in order which batches are created. No culling is applied.
 //
 //*****************************************************************************
 
-class DirectRender : NodeGroup
+class UnbufferedRender : NodeGroup
 {
     State state;
     View cam;
@@ -159,14 +162,13 @@ class DirectRender : NodeGroup
 
 //*****************************************************************************
 //
-// Collectable rendering: Models (Mesh + Material) are separated from
-// Nodes (Model + transform).
+// Buffered rendering: Models (Mesh + Material) are separated from
+// Nodes (Model + transform). Nodes are collected from node groups, and
+// added to batches depending on the model.
 //
 //*****************************************************************************
 
-//-----------------------------------------------------------------------------
-
-class CollectRender
+class BufferedRender
 {
     View cam;
     Light light;

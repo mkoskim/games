@@ -51,7 +51,7 @@ string[] grid = [
 //
 //*****************************************************************************
 
-class Scene : render.CollectRender
+class Scene : render.BufferedRender
 {
     Player player;
     render.Model[] wallshapes, floorshapes, propshapes;

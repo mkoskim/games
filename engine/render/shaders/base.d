@@ -29,7 +29,9 @@ module engine.render.shaders.base;
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
+
 import engine.render.shaders.gputypes;
+import engine.render.shaders.gpumesh;
 import engine.render.shaders.gpucompile: gpuCompileProgram;
 
 import engine.render.transform;
@@ -45,6 +47,8 @@ import std.string: toStringz;
 
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+
 abstract class Shader
 {
     //*************************************************************************
@@ -54,8 +58,6 @@ abstract class Shader
     //*************************************************************************
 
     //abstract static Shader create();
-
-    abstract protected void addVBOs(VAO vao, Mesh mesh);
 
     //-------------------------------------------------------------------------
     // Interfacing to shader uniforms
@@ -179,168 +181,56 @@ abstract class Shader
     }
 
     //-------------------------------------------------------------------------
-    // Vertex data buffers (VBO, Vertex Buffer Object)
-    //-------------------------------------------------------------------------
-
-    static void attrib(alias field)(VBO vbo, string name)
-    {
-        vbo.attrib!(typeof(field))(name, field.offsetof);
-    }
-
-    protected class VBO
-    {
-        GLuint ID;      // VBO ID
-        ulong rowsize; // Data row size
-
-        this(void* buffer, size_t length, size_t elemsize, uint mode = GL_STATIC_DRAW)
-        {
-            checkgl!glGenBuffers(1, &ID);
-            checkgl!glBindBuffer(GL_ARRAY_BUFFER, ID);
-            checkgl!glBufferData(GL_ARRAY_BUFFER, length * elemsize, buffer, mode);
-            checkgl!glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            rowsize = elemsize;
-        }
-
-        ~this()
-        {
-            checkgl!glDeleteBuffers(1, &ID);
-            //writeln("~VBO.this: ", ID);
-        }
-
-        //---------------------------------------------------------------------
-
-        void bind()   { checkgl!glBindBuffer(GL_ARRAY_BUFFER, ID); }
-        void unbind() { checkgl!glBindBuffer(GL_ARRAY_BUFFER, 0); }
-
-        //---------------------------------------------------------------------
-
-        void connect() {
-            bind();
-            foreach(attr; attribs) connect(attr);
-        }
-
-        void disconnect() {
-            foreach(attr; attribs) disconnect(attr);
-            unbind();
-        }
-
-        //---------------------------------------------------------------------
-
-        private {
-            struct ATTRIB
-            {
-                GLuint loc;         // Shader attribute location
-                GLenum type;        // GL_FLOAT, ...
-                GLint elems;        // Number of elements in this attribute (1 .. 4)
-                GLboolean normd;    // Normalized / not
-                ulong offset;       // Offset in interleaved buffers
-            }
-
-            ATTRIB[] attribs;
-
-            void setattrib(string name, GLenum type, GLint elems, bool normalized, ulong offset) {
-                attribs ~= ATTRIB(
-                    location("attrib", name),
-                    type,
-                    elems,
-                    normalized ? GL_TRUE : GL_FALSE,
-                    offset
-                );
-            }
-
-            void attrib(T: vec2)(string name, ulong offset) { setattrib(name, GL_FLOAT, 2, false, offset); }
-            void attrib(T: vec3)(string name, ulong offset) { setattrib(name, GL_FLOAT, 3, false, offset); }
-            void attrib(T: vec4)(string name, ulong offset) { setattrib(name, GL_FLOAT, 4, false, offset); }
-
-            void attrib(T: ivec4x8b)(string name, ulong offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
-            void attrib(T: ivec3x10b)(string name, ulong offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
-            void attrib(T: fvec2x16b)(string name, ulong offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
-
-            void attrib(T)(string name, ulong offset) { throw new Error("Attribute type " ~ T.stringof ~ " not implemented."); }
-
-            //-----------------------------------------------------------------
-
-            void connect(ATTRIB attr)
-            {
-                checkgl!glVertexAttribPointer(
-                    attr.loc,                   // attribute location
-                    attr.elems,                 // size
-                    attr.type,                  // type
-                    attr.normd,                 // normalized?
-                    cast(int)rowsize,           // stride
-                    cast(void*)attr.offset      // array buffer offset
-                );
-                checkgl!glEnableVertexAttribArray(attr.loc);
-            }
-
-            void disconnect(ATTRIB attr)
-            {
-                checkgl!glDisableVertexAttribArray(attr.loc);
-            }
-        }
-    }
-
-    //-------------------------------------------------------------------------
-
-    protected class IBO
-    {
-        uint ID;
-        uint length;
-        uint drawmode;
-
-        this(uint drawmode, ushort[] faces, uint mode = GL_STATIC_DRAW)
-        {
-            length = cast(uint)faces.length;
-            this.drawmode = drawmode;
-
-            checkgl!glGenBuffers(1, &ID);
-            checkgl!glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID);
-            checkgl!glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                faces.length * ushort.sizeof,
-                faces.ptr, mode
-            );
-            checkgl!glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        }
-
-        ~this()
-        {
-            checkgl!glDeleteBuffers(1, &ID);
-        }
-
-        void connect() { checkgl!glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID); }
-        void disconnect() { checkgl!glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
-
-        void draw() {
-            checkgl!glDrawElements(drawmode, length, GL_UNSIGNED_SHORT, null);
-        }
-    }
-
-    //-------------------------------------------------------------------------
     //
     // VAO (Vertex Array Object) stores information of buffer binding.
     //
     //-------------------------------------------------------------------------
 
+    protected {
+        string[] attributes;
+    }
+
     protected class VAO
     {
-        uint ID;
+        //uint ID;
 
         BoundSphere bsp;
-        VBO[] vbos;
-        IBO   ibo;
+        VBO vbo;
+        IBO ibo;
 
-        this()  { checkgl!glGenVertexArrays(1, &ID); }
-        ~this() { checkgl!glDeleteVertexArrays(1, &ID); }
+        this()  { /*checkgl!glGenVertexArrays(1, &ID);*/ }
+        ~this() { /*checkgl!glDeleteVertexArrays(1, &ID);*/ }
 
+        /*
         void bind() { checkgl!glBindVertexArray(ID); }
         void unbind() { checkgl!glBindVertexArray(0); }
+        */
 
+        void bind()
+        {
+            //foreach(vbo; vbos) vbo.connect();
+            vbo.bind();
+            foreach(name; attributes) {
+                vbo.connect(location("attrib", name), name);
+            }
+            ibo.connect();
+        }
+
+        void unbind()
+        {
+            ibo.disconnect();
+            foreach(name; attributes) {
+                vbo.disconnect(location("attrib", name));
+            }
+            vbo.unbind();
+        }
+        
         //---------------------------------------------------------------------
         // Store bindings
         //---------------------------------------------------------------------
 
         void store() {
+        /*
             bind();
             foreach(vbo; vbos) vbo.connect();
             ibo.connect();
@@ -348,6 +238,7 @@ abstract class Shader
             unbind();
             foreach(vbo; vbos) vbo.disconnect();
             ibo.disconnect();
+        */
         }
 
         //---------------------------------------------------------------------
@@ -366,13 +257,30 @@ abstract class Shader
         */
     }
 
+    private static void attrib(alias field)(VBO vbo, string name)
+    {
+        vbo.attrib!(typeof(field))(name, field.offsetof);
+    }
+
     VAO upload(Mesh mesh)
     {
         auto vao = new VAO();
 
         if(mesh.mode == GL_TRIANGLES) mesh.computeTangents();
+
+        vao.vbo = new VBO(
+            mesh.vertices.ptr,
+            mesh.vertices.length,
+            mesh.VERTEX.sizeof
+        );
+
+        attrib!(mesh.VERTEX.pos)(vao.vbo, "vert_pos");
+        attrib!(mesh.VERTEX.uv)(vao.vbo, "vert_uv");
+        attrib!(mesh.VERTEX.normal)(vao.vbo, "vert_norm");
+        attrib!(mesh.VERTEX.tangent)(vao.vbo, "vert_tangent");
+
         vao.bsp = BoundSphere.create(mesh);
-        addVBOs(vao, mesh);
+
         vao.ibo = new IBO(mesh.mode, mesh.faces);
 
         vao.store();

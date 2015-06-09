@@ -110,7 +110,7 @@ void play(string mazename)
         0
     );
 
-    auto scene = new render.DirectRender(
+    auto scene = new render.UnbufferedRender(
         cam,
         render.State.Default2D()
     );

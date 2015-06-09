@@ -10,6 +10,16 @@ import std.array;
 
 import engine;
 
+//*****************************************************************************
+//
+// Road map planning:
+//
+// - Navmesh for player & mob movement
+// - Testing AI at some simplified arena
+// - Sketching UI
+//
+//*****************************************************************************
+
 //-----------------------------------------------------------------------------
 //
 // Main focus ATM: Design the UI for fighting.

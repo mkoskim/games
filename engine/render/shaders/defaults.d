@@ -7,8 +7,10 @@
 
 module engine.render.shaders.defaults;
 
-import engine.render.shaders.base;
 import engine.render.util;
+
+import engine.render.shaders.base;
+import engine.render.shaders.gpumesh;
 
 import engine.render.transform;
 import engine.render.mesh;
@@ -88,10 +90,13 @@ class Default2D : Default
     private this()
     {
         super("engine/render/shaders/glsl/default2d.glsl");
+
+        attributes = [ "vert_pos", "vert_uv" ];
     }
 
     //-------------------------------------------------------------------------
 
+/*
     override protected void addVBOs(VAO vao, Mesh mesh)
     {
         VBO vbo = new VBO(
@@ -105,6 +110,7 @@ class Default2D : Default
 
         vao.vbos = [ vbo ];
     }
+*/
 }
 
 //*****************************************************************************
@@ -139,6 +145,11 @@ class Default3D : Default
                 "engine/render/shaders/glsl/frags.3d.glsl",
             ]
         );
+
+        attributes = [
+            "vert_pos", "vert_uv",
+            "vert_norm", "vert_tangent",
+        ];
     }
 
     private this()
@@ -159,6 +170,7 @@ class Default3D : Default
 
     //-------------------------------------------------------------------------
 
+    /*
     override protected void addVBOs(VAO vao, Mesh mesh)
     {
         VBO vbo = new VBO(
@@ -174,6 +186,7 @@ class Default3D : Default
 
         vao.vbos = [ vbo ];
     }
+    */
 
     //-------------------------------------------------------------------------
 

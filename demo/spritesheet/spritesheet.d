@@ -28,7 +28,7 @@ void main()
     // are window coords).
     //-------------------------------------------------------------------------
 
-    auto scene = new render.DirectRender(
+    auto scene = new render.UnbufferedRender(
         render.Camera.topleft2D(),
         render.State.Default2D()
     );

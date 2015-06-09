@@ -60,7 +60,13 @@ class Batch
 
     //-------------------------------------------------------------------------
     // TODO: Maybe VAO cache is better located in shader itself? Or some sort
-    // of "shader bank", shared with all compatible shaders.
+    // of "shader bank", shared with all compatible shaders. For cleaning up,
+    // it would be better that this information would be in some sort of
+    // manager object, which is destroyed when scene is destroyed.
+    //
+    // Maybe, the system works so that batch itself is destroyed, when scene
+    // is destroyed. Which ever looks the nicest solution.
+    //
     //-------------------------------------------------------------------------
     
     Shader.VAO[Mesh] meshes;
@@ -97,10 +103,9 @@ class Batch
     Model upload()                             { return upload(new Model(null, null)); }    
 
     //-------------------------------------------------------------------------
-    // TODO: Create unbuffered batch: adding nodes go directly to
-    // shader.
+    // Nodes collected for rendering
     //-------------------------------------------------------------------------
-
+    
     Node[] nodes;    
 
     ulong length() { return nodes.length; }
@@ -189,7 +194,10 @@ class BatchGroup
         return null;
     }
 
-    void remove(Node node) { findNode(node).remove(node); }
+    void remove(Node node) {
+        auto batch = findNode(node);
+        if(batch) batch.remove(node);
+    }
 
     //-------------------------------------------------------------------------
 

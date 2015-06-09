@@ -28,7 +28,7 @@ void main()
         render.Grip.movable(0, 0, 5)
     );
 
-    auto scene = new render.DirectRender(
+    auto scene = new render.UnbufferedRender(
         cam,
         render.State.Solid3D()
     );

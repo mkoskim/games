@@ -33,6 +33,10 @@ WORKLIST:
   so that I could work at higher levels without needing to worry about
   low level changes.
 
+- "CPU rendering": Rendering objects without uploading them to shader.
+  This would be good for example for debugging (rendering normally
+  invisible things).
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...
