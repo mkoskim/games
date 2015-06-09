@@ -292,6 +292,16 @@ class Player : game.Fiber
 
 void main()
 {
+    /*
+    import luad.all;
+
+    auto lua = new LuaState;
+    lua.openLibs();
+
+    auto print = lua.get!LuaFunction("print");
+    print("Hello, world!");    
+    */
+
     game.init(800, 600);
 
     auto maze = new Scene(grid);

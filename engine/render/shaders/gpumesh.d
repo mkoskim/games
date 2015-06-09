@@ -10,21 +10,9 @@ import engine.render.util;
 
 import engine.render.shaders.gputypes;
 
-/*
-import engine.render.mesh;
-import engine.render.bound;
-*/
-
 //-------------------------------------------------------------------------
 // Vertex data buffers (VBO, Vertex Buffer Object)
 //-------------------------------------------------------------------------
-
-/*
-static void attrib(alias field)(VBO vbo, string name)
-{
-    vbo.attrib!(typeof(field))(name, field.offsetof);
-}
-*/
 
 protected class VBO
 {

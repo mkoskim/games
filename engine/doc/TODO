@@ -37,6 +37,19 @@ WORKLIST:
   This would be good for example for debugging (rendering normally
   invisible things).
 
+- Move default shaders under ext/ directory (?)
+
+- "Debug channel" to rendering batches: adding a debug mesh to an object
+  will be sent there.
+  
+- It would be nice, if we could direct nodes / entire groups to
+  "Wireframe shader"
+
+- CONSIDER SERIOUSLY adding scripting support for asset loading! The idea
+  here is, that e.g. lua scripts to load specific things are stored with
+  the models, and thus they are stored to BLOB, too - no need for complex
+  building mechanism to include correct converters to compiled program.
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...

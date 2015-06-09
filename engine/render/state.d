@@ -58,6 +58,7 @@ class State
             checkgl!glCullFace(GL_BACK);
             checkgl!glFrontFace(GL_CCW);
             checkgl!glPolygonMode(GL_FRONT, GL_FILL);
+            
             checkgl!glEnable(GL_DEPTH_TEST);
             checkgl!glEnable(GL_BLEND);
             checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

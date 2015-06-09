@@ -257,6 +257,12 @@ abstract class Shader
         */
     }
 
+    //-------------------------------------------------------------------------
+    //
+    // Uploading mesh to GPU
+    //
+    //-------------------------------------------------------------------------
+
     private static void attrib(alias field)(VBO vbo, string name)
     {
         vbo.attrib!(typeof(field))(name, field.offsetof);

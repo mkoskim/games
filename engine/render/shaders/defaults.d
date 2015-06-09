@@ -94,23 +94,6 @@ class Default2D : Default
         attributes = [ "vert_pos", "vert_uv" ];
     }
 
-    //-------------------------------------------------------------------------
-
-/*
-    override protected void addVBOs(VAO vao, Mesh mesh)
-    {
-        VBO vbo = new VBO(
-            mesh.vertices.ptr,
-            mesh.vertices.length,
-            mesh.VERTEX.sizeof
-        );
-
-        attrib!(mesh.VERTEX.pos)(vbo, "vert_pos");
-        attrib!(mesh.VERTEX.uv)(vbo, "vert_uv");
-
-        vao.vbos = [ vbo ];
-    }
-*/
 }
 
 //*****************************************************************************
@@ -167,26 +150,6 @@ class Default3D : Default
         uniform("light.ambient", l.ambient);
         uniform("light.color", l.color);
     }
-
-    //-------------------------------------------------------------------------
-
-    /*
-    override protected void addVBOs(VAO vao, Mesh mesh)
-    {
-        VBO vbo = new VBO(
-            mesh.vertices.ptr,
-            mesh.vertices.length,
-            mesh.VERTEX.sizeof
-        );
-
-        attrib!(mesh.VERTEX.pos)(vbo, "vert_pos");
-        attrib!(mesh.VERTEX.uv)(vbo, "vert_uv");
-        attrib!(mesh.VERTEX.normal)(vbo, "vert_norm");
-        attrib!(mesh.VERTEX.tangent)(vbo, "vert_tangent");
-
-        vao.vbos = [ vbo ];
-    }
-    */
 
     //-------------------------------------------------------------------------
 

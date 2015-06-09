@@ -18,6 +18,9 @@ SRCPATH += ~/.dub/packages/derelict-util-2.0.0/source/
 SRCPATH += ~/.dub/packages/derelict-assimp3-1.0.1/source/
 SRCPATH += ~/.dub/packages/gl3n-1.1.0/
 
+# SRCPATH += ~/.dub/packages/luad-master/
+# LIBS += lua
+
 #------------------------------------------------------------------------------
 
 DMD = rdmd

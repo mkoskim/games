@@ -26,8 +26,6 @@ class Blanko : Shader
 
     //-------------------------------------------------------------------------
 
-    override protected void addVBOs(VAO vao, Mesh mesh) { }
-
     override void loadView(View cam) { }
     override void loadMaterial(Material mat) { }
 
