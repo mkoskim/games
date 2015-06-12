@@ -56,6 +56,10 @@ class Material
 
     //-------------------------------------------------------------------------
 
+    this() { this(cast(Texture)null, cast(Texture)null); }
+
+    //-------------------------------------------------------------------------
+
     this(string colormap, string normalmap, float roughness = 1.0)
     {
         this(new Texture(colormap), new Texture(normalmap), roughness);

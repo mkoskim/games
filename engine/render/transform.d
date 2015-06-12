@@ -14,19 +14,6 @@ import engine.game: frame;
 
 //-------------------------------------------------------------------------
 
-private mat4 getmatrix(vec3 pos, vec3 rot, vec3 scale)
-{
-    return mat4.identity()
-        .scale(scale.x, scale.y, scale.z)
-        .rotatey((2*PI/360)*rot.y)
-        .rotatez((2*PI/360)*rot.z)
-        .rotatex((2*PI/360)*rot.x)
-        .translate(pos.x, pos.y, pos.z)
-    ;
-}
-
-//-------------------------------------------------------------------------
-
 class Grip
 {
     vec3 pos, rot, scale;
@@ -42,7 +29,9 @@ class Grip
         this.scale = scale;
     }
 
-    mat4 matrix() { return getmatrix(pos, rot, scale); }
+    //-------------------------------------------------------------------------
+
+    mat4 matrix() { return Transform.matrix(pos, rot, scale); }
 
     //-------------------------------------------------------------------------
 
@@ -53,9 +42,14 @@ class Grip
         vec3 scale = vec3(1, 1, 1)
     )
     {
-        return new Transform(parent, getmatrix(pos, rot, scale));
+        return new Transform(parent, Transform.matrix(pos, rot, scale));
     }
 
+    static Transform fixed(Transform parent, float x, float y, float z = 0)
+    {
+        return fixed(parent, vec3(x, y, z));
+    }
+    
     static Transform fixed(vec3 pos, vec3 rot = vec3(0, 0, 0), vec3 scale = vec3(1, 1, 1))
     {
         return fixed(null, pos, rot, scale);
@@ -78,6 +72,11 @@ class Grip
         return new Transform(parent, new Grip(pos, rot, scale));
     }
 
+    static Transform movable(Transform parent, float x, float y, float z = 0)
+    {
+        return movable(parent, vec3(x, y, z));
+    }
+    
     static Transform movable(vec3 pos, vec3 rot = vec3(0, 0, 0), vec3 scale = vec3(1, 1, 1))
     {
         return movable(null, pos, rot, scale);
@@ -115,6 +114,24 @@ class Transform
     this(Grip grip) { this(null, grip); }
 
     //-------------------------------------------------------------------------
+
+    static mat4 matrix(vec3 pos, vec3 rot, vec3 scale)
+    {
+        return mat4.identity()
+            .scale(scale.x, scale.y, scale.z)
+            .rotatey(rot.y*2*PI/360)
+            .rotatez(rot.z*2*PI/360)
+            .rotatex(rot.x*2*PI/360)
+            .translate(pos.x, pos.y, pos.z)
+        ;
+    }
+
+    static mat4 matrix(float x, float y, float z = 0)
+    {
+        return matrix(vec3(x, y, z), vec3(0, 0, 0), vec3(1, 1, 1));
+    }
+
+    //-------------------------------------------------------------------------
     
     mat4 mModel() {
         if(last_updated != frame) update();
@@ -124,14 +141,14 @@ class Transform
     private {
         int last_updated;
         mat4 current;
+    }
 
-        void update()
-        {
-            if(grip) transform = grip.matrix();
-            current = transform;
-            if(parent) current = parent.mModel() * current;
-            last_updated = frame;
-        }
+    private void update()
+    {
+        if(grip) transform = grip.matrix();
+        current = transform;
+        if(parent) current = parent.mModel() * current;
+        last_updated = frame;
     }
 
     //-------------------------------------------------------------------------

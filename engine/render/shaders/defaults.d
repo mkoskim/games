@@ -49,9 +49,9 @@ abstract class Default : Shader
     
     //-------------------------------------------------------------------------
 
-    override void render(Transform transform, VAO vao)
+    override void render(mat4 transform, VAO vao)
     {
-        uniform("mModel", transform.mModel());
+        uniform("mModel", transform);
 
         vao.bind();
         vao.ibo.draw();

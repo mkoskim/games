@@ -70,8 +70,16 @@ abstract class Shader
     // Rendering VAOs (Vertex Array Objects)
     //-------------------------------------------------------------------------
     
-    abstract void render(Transform transform, VAO vao);
+    abstract void render(mat4 transform, VAO vao);
+
     abstract void render(Transform[] transforms, VAO vao);
+
+    //-------------------------------------------------------------------------
+    
+    void render(Transform transform, VAO vao)
+    {
+        render(transform.mModel(), vao);
+    }
 
     //-------------------------------------------------------------------------
     

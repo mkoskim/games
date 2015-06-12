@@ -7,77 +7,156 @@
 // unpredicted directions when seeing how Canvas and rest of the rendering
 // framework interferes to each other :)
 //
+// For my purposes, GUI should be usable with game controller.
+//
 //*****************************************************************************
 
 module engine.ext.canvas;
 
 //-----------------------------------------------------------------------------
 
-import engine.render.batch;
 import engine.render.state;
+import engine.render.view;
+import engine.render.shaders.base;
+import engine.render.transform;
+import engine.render.material;
+import gl3n.linalg;
+
+import engine.ext.font;
+import engine.ext.geom;
+
+static import std.string;
+import std.stdio;
 
 //-----------------------------------------------------------------------------
 
-class Canvas
+abstract class ShapeGroup
+{
+    Shape[] childs;
+
+    void add(Shape shape) { childs ~= shape; }
+}
+
+//-----------------------------------------------------------------------------
+
+class Canvas : ShapeGroup
 {
     State state;
+    View cam;
+    
+    Shader.VAO unitbox;
+    
+    //-------------------------------------------------------------------------
+
+    this(State state, View cam) {
+        this.state = state;
+        this.cam = cam;
+        
+        unitbox = state.shader.upload(rect(1, 1));
+    }
+
+    this() { this(State.Default2D(), Camera.topleft2D()); }
+
+    //-------------------------------------------------------------------------
+
+    void render(mat4 transform, Material material, Shader.VAO vao)
+    {
+        state.shader.loadMaterial(material);
+        state.shader.render(transform, vao);
+    }
+
+    void draw()
+    {
+        state.activate();
+        state.shader.loadView(cam);
+        foreach(child; childs) child.draw(this, mat4.identity());
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+abstract class Shape : ShapeGroup
+{
+    float x, y;
+
+    this(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
+    
+    void drawcontent(Canvas canvas, mat4 transform) { }
+    
+    final void draw(Canvas canvas, mat4 transform)
+    {
+        mat4 local = Transform.matrix(x, y) * transform;
+        drawcontent(canvas, local);
+        foreach(child; childs) child.draw(canvas, local);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+class Box : Shape
+{
+    float w, h;
+    Material mat;
+        
+    this(float x, float y, float w, float h, Material mat)
+    {
+        super(x, y);
+        this.w = w;
+        this.h = h;
+        this.mat = mat;
+    }
+
+    override void drawcontent(Canvas canvas, mat4 local)
+    {
+        mat4 dim = mat4.identity().scale(w, h, 1);
+        canvas.render(local * dim, mat, canvas.unitbox);
+    }
 }
 
 //*****************************************************************************
 //*****************************************************************************
 
-class TextBox
-{
-static if(0)
+class TextBox : Shape
 {
     //-------------------------------------------------------------------------
     //
     //-------------------------------------------------------------------------
 
-    this(Layer layer, float x, float y, string text, Font font_ = null)
+    this(float x, float y, string text, Font font_ = null)
     {
-        //---------------------------------------------------------------------
+        super(x, y);
 
-        if(!font_)
-        {
+        if(!font_) {
             font_ = Font.load("engine/stock/fonts/Courier Prime/Courier Prime.ttf", 12);
         }
         font = font_;
 
-        //---------------------------------------------------------------------
-
-        if(!(layer.shader in unitbox))
+        foreach(line; std.string.split(text, "\n"))
         {
-            unitbox[layer.shader] = layer.shader.upload(rect(1, 1));
-        }
-
-        super(vec3(x, y, 0), unitbox[layer.shader], new Material(null, null));
-
-        //---------------------------------------------------------------------
-
-        //tex = font.texture(text);
-
-        foreach(i, s; std.string.split(text, "%"))
-        {
-            if(i & 1)
+            foreach(i, s; std.string.split(line, "%"))
             {
-                if(s.length)
+                if(i & 1)
                 {
-                    fields[s] = new Dynamic(s);
-                    elems ~= fields[s];
+                    if(s.length)
+                    {
+                        fields[s] = new Dynamic(s);
+                        elems ~= fields[s];
+                    }
+                    else
+                    {
+                        elems ~= new Static("%");
+                    }
                 }
-                else
+                else if(s.length)
                 {
-                    elems ~= new Static("%");
+                    elems ~= new Static(s);
                 }
             }
-            else if(s.length)
-            {
-                elems ~= new Static(s);
-            }
+            elems ~= new Static("\n");
         }
-
-        layer.add(this);
     }
 
     ~this() { }
@@ -115,57 +194,42 @@ static if(0)
     Element[] elems;
     Font font;
 
-    void   opIndexAssign(string value, string name) { fields[name].value = value; }
     Dynamic opIndex(string name) { return fields[name]; }
+    void opIndexAssign(string value, string name) { fields[name].value = value; }
 
     //-------------------------------------------------------------------------
 
-    void prepare(string chars)
+    override void drawcontent(Canvas canvas, mat4 transform)
     {
-        foreach(c; chars) font.render(c);
-    }
-
-    //-------------------------------------------------------------------------
-    // TODO: Does not work
-
-    void render(Shader shader)
-    {
-        import engine.render.util;
-
-        auto cursor = new Bone(grip);
+        auto material = new Material();
+        auto cursor = vec2(0, 0);
         int max_height = 0;
         
         foreach(elem; elems) {
-            //shape.material.color = elem.color;
-            foreach(c; elem.content) {
-                if(c == '\n') {
-                    cursor.pos.x = 0;
-                    cursor.pos.y += max_height;
-                    max_height = 0;
-                }
-                else {
-                    model.material.colormap = font.render(c);
+            if(elem.content == "\n")
+            {
+                cursor.x = 0;
+                cursor.y += max_height;
+                max_height = 0;
+            }
+            else foreach(c; elem.content) {
+                material.colormap = font.render(c);
 
-                    cursor.scale = vec3(
-                        model.material.colormap.width,
-                        model.material.colormap.height,
+                auto m = Transform.matrix(
+                    vec3(cursor.x, cursor.y, 0),
+                    vec3(0, 0, 0),
+                    vec3(
+                        material.colormap.width,
+                        material.colormap.height,
                         0
-                    );
+                    )
+                );
 
-                    shader.render(cursor, model.material, model.vao);
-                    cursor.pos.x += model.material.colormap.width;
-                    max_height = max(max_height, model.material.colormap.height);
-                }
+                canvas.render(transform * m, material, canvas.unitbox);
+                cursor.x += material.colormap.width;
+                max_height = max(max_height, material.colormap.height);
             }
         }
     }
-
-    //-------------------------------------------------------------------------
-
-    private static Shader.VAO[Shader] unitbox;
-
-    //-------------------------------------------------------------------------
-    //-------------------------------------------------------------------------
-}
 }
 

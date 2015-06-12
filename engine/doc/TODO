@@ -50,6 +50,8 @@ WORKLIST:
   the models, and thus they are stored to BLOB, too - no need for complex
   building mechanism to include correct converters to compiled program.
 
+- Decals (for targeting circles)
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...

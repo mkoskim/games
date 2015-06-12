@@ -476,22 +476,18 @@ void play(string mazename)
     //
     //*************************************************************************
 
-    /*
-    auto hud = new render.Layer(shader, render.Camera.topleft2D);
+    auto hud = new Canvas();
 
     //-------------------------------------------------------------------------
 
     auto txtPoints = new TextBox(
-        hud, 2, 0, "SCORE: %points%",
+        null, 2, 0, "SCORE: %points%",
         Font.load("engine/stock/fonts/Digital-7/digital-7__mono_.ttf", 26)
     );
-
-    txtPoints.prepare("0123456789");
 
     actors.addcallback(() {
         txtPoints["points"] = format("%06d", player.points);
     });
-    */
 
     //-------------------------------------------------------------------------
 
@@ -506,7 +502,7 @@ void play(string mazename)
     void drawscreen()
     {
         scene.draw();
-        //hud.draw();
+        hud.draw(txtPoints);
     }
 
     //-------------------------------------------------------------------------

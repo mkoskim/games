@@ -1,6 +1,8 @@
 //*****************************************************************************
 //
-// Loading fonts, drawing text to various targets.
+// Loading fonts, drawing text to various targets. It's mainly used for
+// GUI purposes, but it also serves for creating floating text objects to
+// rendered scenes.
 //
 //*****************************************************************************
 
