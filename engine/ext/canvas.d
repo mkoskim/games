@@ -30,22 +30,19 @@ import std.stdio;
 
 //-----------------------------------------------------------------------------
 
-abstract class ShapeGroup
-{
-    Shape[] childs;
-
-    void add(Shape shape) { childs ~= shape; }
-}
-
-//-----------------------------------------------------------------------------
-
-class Canvas : ShapeGroup
+class Canvas
 {
     State state;
     View cam;
     
     Shader.VAO unitbox;
     
+    //-------------------------------------------------------------------------
+
+    Shape[] shapes;
+
+    void add(Shape shape) { shapes ~= shape; }
+
     //-------------------------------------------------------------------------
 
     this(State state, View cam) {
@@ -69,57 +66,121 @@ class Canvas : ShapeGroup
     {
         state.activate();
         state.shader.loadView(cam);
-        foreach(child; childs) child.draw(this, mat4.identity());
+        foreach(shape; shapes) shape.draw(this, mat4.identity());
     }
 }
 
 //-----------------------------------------------------------------------------
+// Shapes have dimensions (either innate, or calculated from content)
+//-----------------------------------------------------------------------------
 
-abstract class Shape : ShapeGroup
+abstract class Shape
 {
-    float x, y;
+    this() { }
 
-    this(float x, float y) {
-        this.x = x;
-        this.y = y;
-    }
+    abstract float width();
+    abstract float height();
+
+    final vec2 dimensions() { return vec2(width, height); }
     
-    void drawcontent(Canvas canvas, mat4 transform) { }
-    
-    final void draw(Canvas canvas, mat4 transform)
-    {
-        mat4 local = Transform.matrix(x, y) * transform;
-        drawcontent(canvas, local);
-        foreach(child; childs) child.draw(canvas, local);
-    }
+    abstract void draw(Canvas canvas, mat4 transform);
 }
 
 //-----------------------------------------------------------------------------
 
 class Box : Shape
 {
-    float w, h;
+    vec2 rect;
     Material mat;
         
-    this(float x, float y, float w, float h, Material mat)
+    this(float w, float h, vec4 color)
     {
-        super(x, y);
-        this.w = w;
-        this.h = h;
-        this.mat = mat;
+        super();
+        this.rect = vec2(w, h);
+        this.mat = new Material(color);
     }
 
-    override void drawcontent(Canvas canvas, mat4 local)
+    override float width() { return rect.x; }
+    override float height() { return rect.y; }
+
+    override void draw(Canvas canvas, mat4 local)
     {
-        mat4 dim = mat4.identity().scale(w, h, 1);
+        mat4 dim = mat4.identity().scale(width, height, 1);
         canvas.render(local * dim, mat, canvas.unitbox);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Positioning
+//-----------------------------------------------------------------------------
+
+class Position : Shape
+{
+    float x, y;
+    Shape child;
+
+    this(float x, float y, Shape child)
+    {
+        this.x = x;
+        this.y = y;
+        this.child = child;
+    }
+
+    override float width() { return child.width(); }
+    override float height() { return child.height(); }
+
+    override void draw(Canvas canvas, mat4 local)
+    {
+        mat4 m = Transform.matrix(x, y);
+        child.draw(canvas, local * m);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Layouts
+//-----------------------------------------------------------------------------
+
+class HBox : Shape
+{
+    Shape[] shapes;
+    
+    void add(Shape shape) { shapes ~= shape; }
+    
+    this(Shape[] shapes...) {
+        super();
+        foreach(shape; shapes) add(shape);
+    }
+
+    override float width()
+    {
+        float w = 0;
+        foreach(shape; shapes) w += shape.width();
+        return w;
+    }
+    
+    override float height()
+    {
+        float h = 0;
+        foreach(shape; shapes) h = max(h, shape.height());
+        return h;
+    }
+
+    override void draw(Canvas canvas, mat4 local)
+    {
+        vec2 cursor = vec2(0, 0);
+        foreach(shape; shapes)
+        {
+            mat4 m = Transform.matrix(cursor.x, cursor.y);
+            shape.draw(canvas, local * m);
+            cursor.x += shape.width();
+        }
     }
 }
 
 //*****************************************************************************
 //*****************************************************************************
 
-class TextBox : Shape
+static if(0) class TextBox : Shape
 {
     //-------------------------------------------------------------------------
     //
@@ -130,7 +191,12 @@ class TextBox : Shape
         super(x, y);
 
         if(!font_) {
+            //font_ = Font.load("engine/stock/fonts/default.ttf", 12);
             font_ = Font.load("engine/stock/fonts/Courier Prime/Courier Prime.ttf", 12);
+            //font_ = Font.load("usr/share/fonts/truetype/freefont/FreeMono.ttf", 12);
+            //font_ = Font.load("usr/share/fonts/truetype/freefont/FreeMonoBold.ttf", 12);
+            //font_ = Font.load("usr/share/fonts/truetype/freefont/FreeSans.ttf", 12);
+            //font_ = Font.load("usr/share/fonts/truetype/freefont/FreeSerif.ttf", 12);
         }
         font = font_;
 

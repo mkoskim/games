@@ -308,28 +308,26 @@ void main()
 
     //-------------------------------------------------------------------------
 
-    /*
-    auto hud = new render.Layer(
-        render.shaders.Default2D.create(),
-        render.Camera.topleft2D
-    );
+    auto hud = new Canvas();
 
-    auto txtInfo = new TextBox(hud, 2, 2,
+    auto txtInfo = new TextBox(2, 2,
         "%info%\n"
         "CAM....: (%cam.x%, %cam.z%)\n"
         "Objects: %drawn% / %total%\n"
         "GL.....: %calls%\n"
-        " \n"
+        "\n"
         "Mat....: r = %mat.r%\n"
     );
 
-    actors.addcallback(() {
+    hud.add(txtInfo);
+
+    maze.actors.addcallback(() {
         txtInfo["info"] = game.Profile.info();
-        txtInfo["cam.x"] = format("%.1f", maze.player.root.pos.x);
-        txtInfo["cam.z"] = format("%.1f", maze.player.root.pos.z);
-        txtInfo["drawn"] = format("%d", maze.perf.drawed);
-        txtInfo["total"] = format("%d", maze.nodes.length);
-        txtInfo["mat.r"] = format("%.2f", maze.mat.roughness);
+        txtInfo["cam.x"] = format("%.1f", maze.player.root.grip.pos.x);
+        txtInfo["cam.z"] = format("%.1f", maze.player.root.grip.pos.z);
+        //txtInfo["drawn"] = format("%d", maze.perf.drawed);
+        //txtInfo["total"] = format("%d", maze.nodes.length);
+        //txtInfo["mat.r"] = format("%.2f", maze.mat.roughness);
 
         import engine.render.util: glcalls;
         txtInfo["calls"] = format("%d", glcalls);
@@ -338,7 +336,6 @@ void main()
 
     //writeln("VBO row size: ", render.Mesh.VERTEX.sizeof);
     //writeln(to!string(glGetString(GL_EXTENSIONS)));
-    */
 
     maze.actors.reportperf;
     
@@ -347,7 +344,7 @@ void main()
     void draw()
     {
         maze.draw();
-        //hud.draw();
+        hud.draw();
     }
 
     //-------------------------------------------------------------------------

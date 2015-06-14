@@ -64,7 +64,7 @@ run:
 
 BLOB.zip: FORCE
 	rm -f BLOB.zip
-	zip -q -r -9 BLOB.zip $(BLOBFILES)
+	zip -q -r -9 -y BLOB.zip $(BLOBFILES)
 
 #------------------------------------------------------------------------------
 

@@ -1,10 +1,20 @@
 //*****************************************************************************
+//
+// GUI sketching
+//
 //*****************************************************************************
 
 import engine;
 
 import std.stdio;
 
+//-----------------------------------------------------------------------------
+//
+// What would we like to have...
+//
+// - Layouts: no need to set coordinates nor dimensions
+// - Simple keyboard/controller traversal
+//
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -18,13 +28,15 @@ void main()
     //-------------------------------------------------------------------------
 
     auto canvas = new Canvas();
-    auto box1 = new Box(10, 10, 50, 50, new render.Material(vec4(1, 1, 0, 1)));
-    auto box2 = new Box(10, 10, 10, 10, new render.Material(vec4(0, 1, 1, 1)));
-    auto txt  = new TextBox(10, 20, "Hello!");
 
-    canvas.add(box1);
-    box1.add(box2);
-    box2.add(txt);
+    auto box = new HBox(
+        new Box(20, 20, vec4(1, 1, 0, 1)),
+        new Box(10, 10, vec4(0, 1, 1, 1)),
+        new Box(30, 10, vec4(0, 1, 0, 1)),
+        new Box(10, 30, vec4(1, 0, 1, 1))
+    );
+    
+    canvas.add(new Position(50, 50, box));
 
     //-------------------------------------------------------------------------
 
