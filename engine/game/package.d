@@ -57,9 +57,9 @@ void init(string name, int width = 640, int height = 480)
 
     screen.glcontext = SDL_GL_CreateContext(screen.window);
 
-    //SDL_GL_SetSwapInterval(0);    // Immediate
+    SDL_GL_SetSwapInterval(0);    // Immediate
     //SDL_GL_SetSwapInterval(1);    // VSync
-    SDL_GL_SetSwapInterval(-1);   // Tearing
+    //SDL_GL_SetSwapInterval(-1);   // Tearing
 
     debug {
         writefln("OpenGL: %d.%d",
@@ -145,9 +145,9 @@ class Profile
 //*****************************************************************************
 
 uint ticks = 0;
+uint frame = 0;
 
-int frame = 0;
-static int framelength = 1000/60;
+private int framelength = 1000/50;
 
 @property void fps(int fps)
 {
@@ -172,11 +172,14 @@ void waitframe()
         Profile.timers.busy.stop();
     }
 
-    ticks = SDL_GetTicks();
-
     static uint nextframe = 0;
-    if(ticks < nextframe) SDL_Delay(nextframe - ticks);	
-    nextframe = SDL_GetTicks() + framelength;
+    ticks = SDL_GetTicks();
+    if(nextframe > ticks)
+    {
+        SDL_Delay(nextframe - ticks);
+        ticks = nextframe;
+    }
+    nextframe = ticks + framelength;
 
     if(Profile.timers)
     {

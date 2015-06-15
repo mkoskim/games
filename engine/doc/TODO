@@ -54,6 +54,12 @@ WORKLIST:
 
 - Examine, if BLOB could support symbolic links
 
+- Color for text
+
+- Maybe we use SDL rendering for GUI? Just to get rid of artifacts?
+
+- Maybe own dedicated 2D shader for GUI?
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...

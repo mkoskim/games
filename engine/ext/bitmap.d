@@ -52,6 +52,20 @@ class Bitmap
         this(blob.loadimage(filename));
     }
 
+    this(string[] grid, vec4[char] colorchart)
+    {
+        this(
+            cast(int)grid[0].length,
+            cast(int)grid.length
+        );
+        
+        foreach(y; 0 .. height) {
+            foreach(x; 0 .. width) {
+                putpixel(x, y, colorchart[grid[y][x]]);
+            }
+        }
+    }
+
     ~this()
     {
         SDL_DestroyRenderer(renderer);
@@ -79,48 +93,95 @@ class Bitmap
     //-------------------------------------------------------------------------
 
     static Bitmap[][] splitSheet(
-        string filename,
+        Bitmap sheet,
         int texw, int texh,
         int padx = 0, int pady = 0
     )
     {
-        SDL_Surface* sheet = blob.loadimage(filename);
         //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
         //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
 
-        int cols = sheet.w / (texw+padx);
-        int rows = sheet.h / (texh+pady);
+        int cols = sheet.surface.w / (texw+padx);
+        int rows = sheet.surface.h / (texh+pady);
 
         Bitmap[][] grid = new Bitmap[][](rows, cols);
 
+        /*
         SDL_Surface *temp = SDL_CreateRGBSurface(0, texw, texh, 32, 0, 0, 0, 0);
         SDL_Surface *sprite = SDL_ConvertSurface(temp, sheet.format, 0);
         SDL_FreeSurface(temp);
+        */
 
         SDL_Rect srcrect = {x: 0, y: 0, w: texw, h: texh};
         SDL_Rect dstrect = {x: 0, y: 0, w: texw, h: texh};
 
         foreach(y; 0 .. rows) foreach(x; 0 .. cols)
         {
+            auto sprite = new Bitmap(texw, texh);
+
             srcrect.y = y*(texh + pady);
             srcrect.x = x*(texw + padx);
 
-            SDL_FillRect(sprite, &dstrect, 0);
+            //SDL_FillRect(sprite.surface, &dstrect, 0);
             SDL_BlitSurface(
-                sheet, &srcrect,
-                sprite, &dstrect
+                sheet.surface, &srcrect,
+                sprite.surface, &dstrect
             );
-
+            grid[y][x] = sprite;
+            
             //SDL_SaveBMP(sprite, "test.bmp");
             //throw new Exception();
-
-            grid[y][x] = new Bitmap(sprite);
         }
 
+        /*
         SDL_FreeSurface(sheet);
         SDL_FreeSurface(sprite);
+        */
 
         return grid;
     }
+
+    static Bitmap[][] splitSheet(
+        string filename,
+        int texw, int texh,
+        int padx = 0, int pady = 0
+    )
+    {
+        return splitSheet(
+            blob.loadimage(filename),
+            texw, texh,
+            padx, pady
+        );
+    }
+
+    static Bitmap[][] splitSheet(
+        SDL_Surface *sheet,
+        int texw, int texh,
+        int padx = 0, int pady = 0
+    )
+    {
+        return splitSheet(
+            new Bitmap(sheet),
+            texw, texh,
+            padx, pady
+        );
+    }
+
+    static Bitmap[][] splitSheet(
+        string[] grid, vec4[char] colorchart,
+        int texw, int texh,
+        int padx = 0, int pady = 0
+    )
+    {
+        return splitSheet(
+            new Bitmap(grid, colorchart),
+            texw, texh,
+            padx, pady
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    // Simple bitmaps from strings
+    //-------------------------------------------------------------------------    
 }
 

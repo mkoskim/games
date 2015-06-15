@@ -14,6 +14,7 @@ module engine.render.texture;
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
+import engine.ext.bitmap;
 import blob = engine.blob;
 
 import derelict.sdl2.sdl;
@@ -59,12 +60,12 @@ class Texture
     uint width, height;
 
     //-------------------------------------------------------------------------
-    // Creating texture from byte buffer
+    // Creating texture from pixel data buffer
     //-------------------------------------------------------------------------
 
     this(uint w, uint h, void* buffer, GLenum format, GLenum data_width = GL_UNSIGNED_BYTE)
     {
-        const string[GLenum] _name = [
+        debug const string[GLenum] _name = [
             GL_BGRA: "GL_BGRA",
             GL_RGBA: "GL_RGBA",
             GL_BGR: "GL_BGR",
@@ -76,9 +77,10 @@ class Texture
             GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
         ];
         
-        GLenum internal;
-        //GLenum data_width = GL_UNSIGNED_BYTE;
-        GLint align_unpack;
+        checkgl!glGenTextures(1, &ID);
+
+        width = w;
+        height = h;
 
         final switch(format)
         {
@@ -89,29 +91,21 @@ class Texture
             case GL_RGB8: format = GL_RGB; goto case GL_RGB;
             
             case GL_RGBA:
-                internal = GL_COMPRESSED_RGBA;
-                align_unpack = 4;
+                unpack_align(4);
                 break;
             
-            case GL_RGB:
-                internal = GL_COMPRESSED_RGB;
-                align_unpack = 1;
-                break;
+            case GL_RGB: switch(data_width)
+            {
+                case GL_UNSIGNED_BYTE: unpack_align(1); break;
+                default: unpack_align(4); break;
+            } break;
         }
 
         //debug writeln("Format: ", _name[format], " internal: ", _name[internal]);
 
         //TODO("Alpha maps not working");
 
-        checkgl!glGenTextures(1, &ID);
-        checkgl!glBindTexture(GL_TEXTURE_2D, ID);
-
-        width = w;
-        height = h;
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, align_unpack);
-        //glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
+        bind();
         checkgl!glTexImage2D(GL_TEXTURE_2D,
             0,                  // Mipmap level
             format,             // Internal format
@@ -121,16 +115,31 @@ class Texture
             data_width,         // Data width
             buffer              // Actual data
         );
+        unbind();
 
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        filtering(GL_LINEAR, GL_LINEAR);
+        //filtering(GL_NEAREST, GL_NEAREST);
+        //filtering(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
+    }
 
-        //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //-------------------------------------------------------------------------
 
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    void bind()   { checkgl!glBindTexture(GL_TEXTURE_2D, ID); }
+    void unbind() { checkgl!glBindTexture(GL_TEXTURE_2D, 0); }
+    
+    void filtering(GLenum min, GLenum mag)
+    {
+        bind();
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
+        unbind();
+    }
 
-        checkgl!glBindTexture(GL_TEXTURE_2D, 0);
+    void unpack_align(GLint alignment)
+    {
+        bind();
+        checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+        unbind();
     }
 
     //-------------------------------------------------------------------------
@@ -153,6 +162,8 @@ class Texture
         );
     }
 
+    this(Bitmap bitmap) { this(bitmap.surface); }
+
     //-------------------------------------------------------------------------
     // Loading texture from blob file
     //-------------------------------------------------------------------------
@@ -174,6 +185,24 @@ class Texture
     this(vec4 color)
     {
         this(1, 1, cast(void*)color.value_ptr, GL_RGBA, GL_FLOAT);
+    }
+
+    //-------------------------------------------------------------------------
+    // Texture sheets
+    //-------------------------------------------------------------------------
+
+    static Texture[][] upload(Bitmap[][] bitmaps)
+    {
+        Texture[][] grid;
+        
+        foreach(row; bitmaps) {
+            Texture[] line;
+            foreach(bitmap; row) {
+                line ~= new Texture(bitmap);
+            }
+            grid ~= line;
+        }
+        return grid;
     }
 }
 

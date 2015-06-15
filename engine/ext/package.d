@@ -10,7 +10,7 @@ module engine.ext;
 
 public {
     import engine.ext.bitmap: Bitmap;
-    import engine.ext.canvas;
+    import engine.ext.gui.canvas;
     import engine.ext.font;
 
     import geom = engine.ext.geom;

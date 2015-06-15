@@ -11,7 +11,7 @@
 //
 //*****************************************************************************
 
-module engine.ext.canvas;
+module engine.ext.gui.canvas;
 
 //-----------------------------------------------------------------------------
 
@@ -20,7 +20,14 @@ import engine.render.view;
 import engine.render.shaders.base;
 import engine.render.transform;
 import engine.render.material;
+
 import gl3n.linalg;
+import derelict.opengl3.gl3;
+
+public import engine.render.texture: Texture;
+public import engine.ext.bitmap: Bitmap;
+
+import engine.game.instance;
 
 import engine.ext.font;
 import engine.ext.geom;
@@ -56,11 +63,30 @@ class Canvas
 
     //-------------------------------------------------------------------------
 
-    void render(mat4 transform, Material material, Shader.VAO vao)
+    private void render(mat4 transform)
+    {
+        state.shader.render(transform, unitbox);
+    }
+
+    void render(mat4 transform, Material material)
     {
         state.shader.loadMaterial(material);
-        state.shader.render(transform, vao);
+        render(transform);
     }
+
+    void render(mat4 transform, vec4 color)
+    {
+        state.shader.loadMaterial(new Material(color));
+        render(transform);
+    }
+
+    void render(mat4 transform, Texture texture)
+    {
+        state.shader.loadMaterial(new Material(texture));
+        render(transform);
+    }
+
+    //-------------------------------------------------------------------------
 
     void draw()
     {
@@ -87,26 +113,213 @@ abstract class Shape
 }
 
 //-----------------------------------------------------------------------------
+// TODO: "Box" is pretty static thing, we should separate "leafs" from
+// groups, so that we can use these kind of classes to draw different things.
+//-----------------------------------------------------------------------------
 
 class Box : Shape
 {
-    vec2 rect;
-    Material mat;
+    vec2 dim;
+    Texture tex;
         
-    this(float w, float h, vec4 color)
+    //-------------------------------------------------------------------------
+
+    this(vec4 color, float w, float h)
     {
         super();
-        this.rect = vec2(w, h);
-        this.mat = new Material(color);
+        this.dim = vec2(w, h);
+        this.tex = new Texture(color);
     }
 
-    override float width() { return rect.x; }
-    override float height() { return rect.y; }
+    this(Texture texture, float w, float h)
+    {
+        this.dim = vec2(w, h);
+        this.tex = texture;
+        texture.filtering(GL_NEAREST, GL_NEAREST);
+    }
+    
+    this(Texture texture)
+    {
+        this(texture, texture.width, texture.height);
+    }
+
+    this(Bitmap bitmap, float w, float h)
+    {
+        this(new Texture(bitmap), w, h);
+    }
+    
+    this(Bitmap bitmap)
+    {
+        this(new Texture(bitmap));
+    }
+
+    //-------------------------------------------------------------------------
+
+    override float width() { return dim.x; }
+    override float height() { return dim.y; }
+
+    void stretch(float w, float h)
+    {
+        dim.x = w;
+        dim.y = h;
+    }
 
     override void draw(Canvas canvas, mat4 local)
     {
-        mat4 dim = mat4.identity().scale(width, height, 1);
-        canvas.render(local * dim, mat, canvas.unitbox);
+        canvas.render(local * mat4.identity().scale(width, height, 1), tex);
+    }
+
+    //-------------------------------------------------------------------------
+
+    static Box[][] create(Texture[][] textures)
+    {
+        Box[][] grid;
+        
+        foreach(row; textures) {
+            Box[] line;
+            foreach(col; row) {
+                line ~= new Box(col);
+            }
+            grid ~= line;
+        }
+        return grid;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+abstract class GridContainer : Shape
+{
+    struct COLUMN {
+        float x; float width;
+        this(float x = 0, float w = 0)
+        {
+            this.x = x;
+            this.width = w;
+        }
+    }
+    
+    struct ROW {
+        float y; float height;
+        this(float y = 0, float h = 0)
+        {
+            this.y = y;
+            this.height = h;
+        }
+    }
+
+    COLUMN[] cols;
+    ROW[] rows;
+
+    class Bin : Shape
+    {
+        GridContainer parent;
+        int col, row;
+        Shape child;
+
+        this(GridContainer parent, int col, int row, Shape child) {
+            this.parent = parent;
+            this.col = col;
+            this.row = row;
+            this.child = child;
+            
+            parent.cols[col].width = max(parent.cols[col].width, child.width);
+            parent.rows[row].height = max(parent.rows[row].height, child.height);
+        }
+
+        vec2 pos() { return vec2(parent.cols[col].x, parent.rows[row].y); }
+        
+        override float width() { return parent.cols[col].width; }
+        override float height() { return parent.rows[row].height; }
+
+        override void draw(Canvas canvas, mat4 local)
+        {
+            mat4 m = Transform.matrix(pos().x, pos().y);
+            child.draw(canvas, local * m);
+        }
+    }
+
+    Bin[] childs;
+
+    void add(int col, int row, Shape shape)
+    {
+        if(cols.length <= col) cols ~= COLUMN(0, 0);
+        if(rows.length <= row) rows ~= ROW(0, 0);
+        childs ~= new Bin(this, col, row, shape);        
+    }
+
+    protected void calcdim()
+    {
+        cols[0].x = 0;
+        foreach(i; 1 .. cols.length) cols[i].x = cols[i-1].x + cols[i-1].width;
+        rows[0].y = 0;
+        foreach(i; 1 .. rows.length) rows[i].y = rows[i-1].y + rows[i-1].height;
+    }
+
+    override float width() {
+        ulong last = cols.length - 1;
+        return cols[last].x + cols[last].width;
+    }
+
+    override float height() {
+        ulong last = rows.length - 1;
+        return rows[last].y + rows[last].height;
+    }
+    
+    override void draw(Canvas canvas, mat4 local)
+    {
+        foreach(bin; childs) bin.draw(canvas, local);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+class Grid : GridContainer
+{
+    this(Shape[] shapes...) {
+        super();
+
+        int col = 0, row = 0;
+        foreach(shape; shapes) {
+            if(shape is null) {
+                col = 0;
+                row++;
+            }
+            else {
+                add(col, row, shape);
+                col++;
+            }
+        }
+        calcdim();
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+class Frame : GridContainer
+{
+    Shape child;
+    
+    this(Texture[][] textures, Shape child)
+    {
+        super();
+    
+        this.child = child;
+
+        auto boxes = Box.create(textures);
+
+        foreach(row; 0 .. 3) foreach(col; 0 .. 3)
+        {
+            add(col, row, boxes[row][col]);
+        }
+
+        add(1, 1, child);
+
+        foreach(row; 0 .. 3) foreach(col; 0 .. 3)
+        {
+            boxes[row][col].stretch(cols[col].width, rows[row].height);
+        }
+        calcdim();
     }
 }
 
@@ -131,6 +344,32 @@ class Position : Shape
 
     override void draw(Canvas canvas, mat4 local)
     {
+        mat4 m = Transform.matrix(x, y);
+        child.draw(canvas, local * m);
+    }
+}
+
+class Anchor : Shape
+{
+    vec2 anchor;
+    Shape child;
+
+    this(vec2 anchor, Shape child)
+    {
+        this.anchor = anchor;
+        this.child = child;
+    }
+    
+    override float width() { return child.width(); }
+    override float height() { return child.height(); }
+
+    override void draw(Canvas canvas, mat4 local)
+    {
+        float x, y;
+
+        x = anchor.x * (screen.width - child.width);
+        y = anchor.y * (screen.height - child.height);
+
         mat4 m = Transform.matrix(x, y);
         child.draw(canvas, local * m);
     }

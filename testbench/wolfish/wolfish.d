@@ -310,6 +310,7 @@ void main()
 
     auto hud = new Canvas();
 
+    /*
     auto txtInfo = new TextBox(2, 2,
         "%info%\n"
         "CAM....: (%cam.x%, %cam.z%)\n"
@@ -333,6 +334,7 @@ void main()
         txtInfo["calls"] = format("%d", glcalls);
         glcalls = 0;
     });
+    */
 
     //writeln("VBO row size: ", render.Mesh.VERTEX.sizeof);
     //writeln(to!string(glGetString(GL_EXTENSIONS)));

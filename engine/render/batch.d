@@ -123,6 +123,8 @@ class Batch
     
     void draw(View cam)
     {
+        if(!nodes.length) return;
+
         state.activate();
         state.shader.loadView(cam);
 
