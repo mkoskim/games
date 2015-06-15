@@ -29,6 +29,13 @@ import engine.render.texture;
 
 class Material
 {
+    static class Modifier
+    {
+        vec4 color;
+
+        this(vec4 color) { this.color = color; }
+    }
+    
     Texture colormap;
     Texture normalmap;
 

@@ -60,6 +60,8 @@ WORKLIST:
 
 - Maybe own dedicated 2D shader for GUI?
 
+- Replace ulong with size_t
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...

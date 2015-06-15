@@ -38,14 +38,14 @@ void main()
         "xxxx" "xxxx" "xxxx",
         "xxxx" "xxxx" "xxx#",
         "xxxx" "xxxx" "xx##",
-        "xxxx" "xxxx" "x###",
+        "xxx." "...." ".###",
 
-        "xxxx" "    " "####",
-        "xxxx" "    " "####",
-        "xxxx" "    " "####",
-        "xxxx" "    " "####",
+        "xxx." "...." ".###",
+        "xxx." "...." ".###",
+        "xxx." "...." ".###",
+        "xxx." "...." ".###",
 
-        "xxxx" "####" "####",
+        "xxx." "...." ".###",
         "xxx#" "####" "####",
         "xx##" "####" "####",
         "x###" "####" "####",
@@ -71,38 +71,68 @@ void main()
     //-------------------------------------------------------------------------
 
     auto textures = [
-        Texture.upload(Bitmap.splitSheet(btnframe, colorchart, 4, 4)),
-        Texture.upload(Bitmap.splitSheet(grpframe, colorchart, 4, 4)),
+        gui.Texture.upload(Bitmap.splitSheet(btnframe, colorchart, 4, 4)),
+        gui.Texture.upload(Bitmap.splitSheet(grpframe, colorchart, 4, 4)),
     ];
 
     //auto box = new Frame(textures, new Box(vec4(1, 1, 0, 1), 32, 32));
 
-    class IconBox : Frame
+    /*
+    class IconBox : gui.Widget
     {
         this(vec4 color) {
-            super(textures[1], new Box(color, 32, 32));
+            super(textures[1], new gui.Box(color, 32, 32));
         }
     }
 
-    auto canvas = new Canvas();
+    class Button : gui.Widget
+    {
+        gui.Label label;
+        
+        this(string text) {
+            this.label = new gui.Label(text, vec4(0, 0, 0, 1));
+            super(textures[0], new gui.Anchor(0.5, 0.5, label));
+        }        
+    }
+    */
 
-    auto row = new Grid(
+    /*
+    auto row = new gui.Grid(
         new IconBox(vec4(1, 1, 0, 1)),
         new IconBox(vec4(0, 1, 1, 1)),
         null,
         new IconBox(vec4(0, 1, 0, 1)),
-        new IconBox(vec4(0, 0, 1, 1)),
-        
-        /*
-        new Box(vec4(1, 1, 0, 1), 32, 32),
-        new Box(vec4(0, 1, 1, 1), 32, 32),
-        null,
-        new Box(vec4(0, 1, 0, 1), 32, 32),
-        new Box(vec4(1, 0, 1, 1), 32, 32)
-        */
+        new IconBox(vec4(0, 0, 1, 1)),        
+    );
+    */
+    
+    /*
+    auto row = new gui.Grid(
+        new Button("Continue"), null,
+        new Button("New game"), null,
+        new Button("Options"), null,
+        new Button("Quit")
+    );
+    */
+
+    auto row = new gui.Grid(
+        new gui.Label("Continue", vec4(1, 0, 0, 1)), null,
+        new gui.Label("New game", vec4(1, 0, 0, 1)), null,
+        new gui.Label("Options", vec4(1, 0, 0, 1)), null,
+        new gui.Label("Quit", vec4(1, 0, 0, 1))
     );
     
-    canvas.add(new Anchor(vec2(0.95, 0.95), new Frame(textures[0], row)));
+    auto canvas = new gui.Canvas();
+
+    canvas.add(
+        new gui.Anchor(
+            vec2(0.50, 0.50),
+            //new gui.Frame(textures[0], row)
+            row
+        )
+    );
+
+    //btn.label.text = "Yeah!";
 
     //-------------------------------------------------------------------------
 

@@ -64,7 +64,7 @@ abstract class Shader
     //-------------------------------------------------------------------------
     
     abstract void loadView(View cam);
-    abstract void loadMaterial(Material mat);
+    abstract void loadMaterial(Material mat, Material.Modifier modifier = null);
 
     //-------------------------------------------------------------------------
     // Rendering VAOs (Vertex Array Objects)

@@ -108,7 +108,7 @@ class Batch
     
     Node[] nodes;    
 
-    ulong length() { return nodes.length; }
+    size_t length() { return nodes.length; }
 
     Node add(Node node) { nodes ~= node; return node; }
     void clear() { nodes.length = 0; }
@@ -208,9 +208,9 @@ class BatchGroup
         foreach(batch; batches) batch.clear();
     }
     
-    ulong length()
+    size_t length()
     {
-        ulong l = 0;
+        size_t l = 0;
         foreach(batch; batches) l += batch.length();
         return l;
     }
