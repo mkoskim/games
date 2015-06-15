@@ -24,6 +24,7 @@ LDFLAGS=
 
 BLOBFILES += engine/stock/
 BLOBFILES += engine/render/shaders/glsl/
+# BLOBFILES += /usr/share/fonts/truetype/ttf-dejavu/
 
 include engine/build/Makegame.mak
 

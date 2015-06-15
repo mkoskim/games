@@ -118,6 +118,7 @@ class Texture
         unbind();
 
         filtering(GL_LINEAR, GL_LINEAR);
+        wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         //filtering(GL_NEAREST, GL_NEAREST);
         //filtering(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
     }
@@ -139,6 +140,14 @@ class Texture
     {
         bind();
         checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+        unbind();
+    }
+
+    void wrapping(GLenum s, GLenum t)
+    {
+        bind();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
         unbind();
     }
 

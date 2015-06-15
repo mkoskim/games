@@ -42,9 +42,15 @@ abstract class Default : Shader
         uniform("mView", cam.mView());
     }
 
-    override void loadMaterial(Material mat)
+    override void loadMaterial(Material mat, Material.Modifier mod)
     {
         texture("material.colormap", 0, mat.colormap);
+        if(!(mod is null)) {
+            uniform("material.modifier.color", mod.color);
+        }
+        else {
+            uniform("material.modifier.color", vec4(1, 1, 1, 1));
+        }
     }
     
     //-------------------------------------------------------------------------
@@ -153,9 +159,9 @@ class Default3D : Default
 
     //-------------------------------------------------------------------------
 
-    override void loadMaterial(Material mat)
+    override void loadMaterial(Material mat, Material.Modifier mod)
     {
-        super.loadMaterial(mat);
+        super.loadMaterial(mat, mod);
         texture("material.normalmap", 1, mat.normalmap);
         uniform("material.roughness", mat.roughness);
     }

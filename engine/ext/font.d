@@ -13,8 +13,14 @@ module engine.ext.font;
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 
+public import derelict.sdl2.ttf:
+    TTF_STYLE_NORMAL,
+    TTF_STYLE_BOLD,
+    TTF_STYLE_ITALIC,
+    TTF_STYLE_UNDERLINE,
+    TTF_STYLE_STRIKETHROUGH;
+
 import engine.ext.util;
-//import std.conv: to;
 
 import engine.render.texture;
 

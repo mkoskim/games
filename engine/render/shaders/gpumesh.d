@@ -17,9 +17,9 @@ import engine.render.shaders.gputypes;
 protected class VBO
 {
     GLuint ID;      // VBO ID
-    ulong rowsize; // Data row size
+    size_t rowsize; // Data row size
 
-    this(void* buffer, size_t length, size_t elemsize, uint mode = GL_STATIC_DRAW)
+    this(void* buffer, size_t length, size_t elemsize, GLenum mode = GL_STATIC_DRAW)
     {
         checkgl!glGenBuffers(1, &ID);
         checkgl!glBindBuffer(GL_ARRAY_BUFFER, ID);
@@ -47,12 +47,12 @@ protected class VBO
         GLenum type;        // GL_FLOAT, ...
         GLint elems;        // Number of elements in this attribute (1 .. 4)
         GLboolean normd;    // Normalized / not
-        ulong offset;       // Offset in interleaved buffers
+        size_t offset;       // Offset in interleaved buffers
     }
 
     ATTRIB[string] attribs;
 
-    void setattrib(string name, GLenum type, GLint elems, bool normalized, ulong offset) {
+    void setattrib(string name, GLenum type, GLint elems, bool normalized, size_t offset) {
         attribs[name] = ATTRIB(
             //location("attrib", name),
             type,
@@ -62,15 +62,15 @@ protected class VBO
         );
     }
 
-    void attrib(T: vec2)(string name, ulong offset) { setattrib(name, GL_FLOAT, 2, false, offset); }
-    void attrib(T: vec3)(string name, ulong offset) { setattrib(name, GL_FLOAT, 3, false, offset); }
-    void attrib(T: vec4)(string name, ulong offset) { setattrib(name, GL_FLOAT, 4, false, offset); }
+    void attrib(T: vec2)(string name, size_t offset) { setattrib(name, GL_FLOAT, 2, false, offset); }
+    void attrib(T: vec3)(string name, size_t offset) { setattrib(name, GL_FLOAT, 3, false, offset); }
+    void attrib(T: vec4)(string name, size_t offset) { setattrib(name, GL_FLOAT, 4, false, offset); }
 
-    void attrib(T: ivec4x8b)(string name, ulong offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
-    void attrib(T: ivec3x10b)(string name, ulong offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
-    void attrib(T: fvec2x16b)(string name, ulong offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
+    void attrib(T: ivec4x8b)(string name, size_t offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
+    void attrib(T: ivec3x10b)(string name, size_t offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
+    void attrib(T: fvec2x16b)(string name, size_t offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
 
-    void attrib(T)(string name, ulong offset) { throw new Error("Attribute type " ~ T.stringof ~ " not implemented."); }
+    void attrib(T)(string name, size_t offset) { throw new Error("Attribute type " ~ T.stringof ~ " not implemented."); }
 
     //-----------------------------------------------------------------
 
@@ -83,7 +83,7 @@ protected class VBO
             attr.elems,                 // size
             attr.type,                  // type
             attr.normd,                 // normalized?
-            cast(int)rowsize,           // stride
+            cast(GLint)rowsize,           // stride
             cast(void*)attr.offset      // array buffer offset
         );
         checkgl!glEnableVertexAttribArray(loc);
@@ -113,11 +113,11 @@ protected class VBO
 
 protected class IBO
 {
-    uint ID;
-    uint length;
-    uint drawmode;
+    GLuint ID;
+    GLuint length;
+    GLuint drawmode;
 
-    this(uint drawmode, ushort[] faces, uint mode = GL_STATIC_DRAW)
+    this(GLint drawmode, ushort[] faces, GLenum mode = GL_STATIC_DRAW)
     {
         length = cast(uint)faces.length;
         this.drawmode = drawmode;
@@ -126,7 +126,8 @@ protected class IBO
         checkgl!glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID);
         checkgl!glBufferData(GL_ELEMENT_ARRAY_BUFFER,
             faces.length * ushort.sizeof,
-            faces.ptr, mode
+            faces.ptr,
+            mode
         );
         checkgl!glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }

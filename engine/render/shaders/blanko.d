@@ -27,7 +27,7 @@ class Blanko : Shader
     //-------------------------------------------------------------------------
 
     override void loadView(View cam) { }
-    override void loadMaterial(Material mat) { }
+    override void loadMaterial(Material, Material.Modifier) { }
 
     override void render(mat4 grip, VAO vao) { }
     override void render(Transform[] grips, VAO vao) { }

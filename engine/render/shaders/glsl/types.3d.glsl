@@ -2,12 +2,19 @@
 // Material
 //-----------------------------------------------------------------------------
 
+struct MAT_MODIFIER
+{
+    vec4 color;
+};
+
 struct MATERIAL
 {
     sampler2D colormap;
     sampler2D normalmap;
 
     float roughness;
+
+    MAT_MODIFIER modifier;
 };
 
 //-----------------------------------------------------------------------------

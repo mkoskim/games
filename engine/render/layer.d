@@ -97,7 +97,7 @@ class BasicNodeGroup : CollectableNodeGroup
 {
     bool[Node] nodes;
 
-    ulong length() { return nodes.length; }
+    size_t length() { return nodes.length; }
 
     this() { }
     
