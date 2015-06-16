@@ -106,5 +106,14 @@ class Material
     {
         this(vec4(r, g, b, a));
     }
+
+    //-------------------------------------------------------------------------
+
+    static Material[] upload(Bitmap[] bitmaps)
+    {
+        Material[] list;
+        foreach(texture; Texture.upload(bitmaps)) list ~= new Material(texture);
+        return list;
+    }
 }
 

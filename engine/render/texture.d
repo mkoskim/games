@@ -10,11 +10,10 @@
 module engine.render.texture;
 
 //-----------------------------------------------------------------------------
-// Try to determine suitable texture format
-//-----------------------------------------------------------------------------
+
+public import engine.ext.bitmap;
 
 import engine.render.util;
-import engine.ext.bitmap;
 import blob = engine.blob;
 
 import derelict.sdl2.sdl;
@@ -207,18 +206,21 @@ class Texture
     // Texture sheets
     //-------------------------------------------------------------------------
 
+    static Texture[] upload(Bitmap[] bitmaps)
+    {
+        Texture[] row;
+        foreach(bitmap; bitmaps) row ~= new Texture(bitmap);
+        return row;
+    }
+
     static Texture[][] upload(Bitmap[][] bitmaps)
     {
         Texture[][] grid;
         
-        foreach(row; bitmaps) {
-            Texture[] line;
-            foreach(bitmap; row) {
-                line ~= new Texture(bitmap);
-            }
-            grid ~= line;
-        }
+        foreach(row; bitmaps) grid ~= upload(row);
+
         return grid;
     }
+    
 }
 

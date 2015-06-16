@@ -28,7 +28,7 @@ class Track
         {
             import core.memory: GC;
             GC.collect();
-            report();
+            debug report();
         }
 
         void report()
