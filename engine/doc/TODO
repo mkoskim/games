@@ -2,9 +2,7 @@
 
 DONE:
 
-- SDL resources (SDL_Surface, Fonts, ...) cause segfault at exit, if
-  they are not freed (as destructors try to call SDL_FreeXXXX and SDL
-  is already shut down).
+- ...
 
 *******************************************************************************
 
@@ -56,18 +54,19 @@ WORKLIST:
 
 - Examine, if BLOB could support symbolic links
 
-- Color for text
-
 - Maybe we use SDL rendering for GUI? Just to get rid of artifacts?
 
 - Maybe own dedicated 2D shader for GUI?
 
-- Replace ulong with size_t
+- CONTINUE: Replace ulong with size_t
 
 - Bitmap.splitSheet: Scaling splitted sprites does not work.
 
 - Model.sheet: This is using atlas for rendering. It would be
   probably best to implement dedicated atlas sprite blitter...
+
+- Bitmap manipulation: when loading BW bitmaps, convert them suitable
+  for colorizing.
 
 *******************************************************************************
 
@@ -99,8 +98,8 @@ MISC: Yet uncategorized "Post-It" notes...
 
 - Mipmaps
 
-- Node modifiers: Add support for "multi-textured" nodes - the idea is to
-  have sort of "stamping", textures over textures. We add node-specific
+- CONTINUE: Node modifiers: Add support for "multi-textured" nodes - the idea
+  is to have sort of "stamping", textures over textures. We add node-specific
   material modifiers at some point (like color modifier, but at the same time,
   we could add texture modifiers, too).
 
@@ -179,40 +178,6 @@ MISC: Yet uncategorized "Post-It" notes...
 
 HOTTISH TOPICS:
 
-- TEXT OUTPUT: This has troubled me a long time, is there anything I can
-  do for it? Let's think about it.
-  
-  There is definitely many ways to get text in to screen. What method to use
-  depends on the purpose.
-  
-  The first and most obvious two ways to render text are:
-  
-  1) Create a bitmap from given text, and add it to game world as a textured
-     rectangle.
-
-  2) Create bitmaps from letters, and add letters to game world as textured
-     rectangles.
-
-  These two ways create text that can be manipulated in the same ways as
-  any other game world object. You can move them around, animate them and
-  so on.
-  
-  Then, there is third way, which I have used so far. It works more like
-  drawing letters to canvas-like object: you don't have 'handles' to
-  separate letters, instead they are emitted by the text object.
-
-  So: maybe I (need to) create all these methods? Well, at least two
-  first ones are eventually mandatory, for example, for floating
-  points and other written information in the game world itself. The
-  third one then, at the moment it feels that it is related to creating
-  rendering mechanism for GUI purposes: so, at the moment it feels
-  totally worth to examine.
-
-- In fact... If we would have support for "emitters" in nodes, we
-  could feed objects like that to default shading process. Shader should
-  just understand to query the emitted objects... Would be like "poor
-  man's particle engine"...
-
 -------------------------------------------------------------------------------
 
 FIX/INVESTIGATE: Crashes, flaws etc.
@@ -223,9 +188,6 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 
 - On 32-bit Ubuntu, SDL FillRect segfaults (code that cuts textures from
   sprite sheet).
-
-- Freeing fonts cause segfault (most probably, TTF is already closed when
-  calling font destructor)
 
 - Shader compiler (see gpucompiler.d) can only report error location for
   noveau driver. Needs (1) driver detection, and (2) custom reporting for
@@ -243,9 +205,6 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 
 - Current Bone implementation has a transformation cache. It is unclear to me,
   how it works with games loading levels (that is, does it cause memory leak).
-
-- TextBox currently has no color: it is waiting color to be added to
-  instance specific modifier.
 
 - wolfish (and cylinderium) generally run at least as fast as pacman, although
   they use much more complicated CPU and GLSL code. I need to investigate 2D
@@ -313,6 +272,8 @@ architecture more suitable for models loaded from files.
   
 - BLOB: Game saving: At some point, we need to add file writing to the engine.
 
+- Wavefront loader: change it to use ASSIMP
+
 - Wavefront loader: smoothed normals
 
 - Wavefront loader & mesh-material pairs: Wavefront file format has
@@ -321,14 +282,21 @@ architecture more suitable for models loaded from files.
   batch, we change IBO and material - nah, no need, we can give
   range to drawing command, and thus keep the same IBO.
 
+- Some simple file format to create scenes (placing objects, creating
+  object hierarchies, ...) could be useful. POVRay may be too complex.
+  Something that can be used together with .obj & .mtl files... Of
+  course, we need support to other mesh data formats, too, but .obj is
+  quite common & useful anyways.
+
+- Winding: In case that winding is incorrect when loading a model, we
+  could have methods in Mesh class to try to fix it. At least, this
+  would be better than changing winding parameter (CW / CCW) when
+  rendering.
+
 -------------------------------------------------------------------------------
 
 RESOURCE TRACKING: Create mechanism to track living resources (number of
 meshes, nodes etc).
-
-- At some point, there's a need to check that destructors are called at
-  correct points. For example, when game level is changed, it would be
-  very nice if the game frees GPU resources allocated at previous level.
 
 -------------------------------------------------------------------------------
 
@@ -356,9 +324,17 @@ SHADERS: Shaders are so central part that they reserve their own section
 here. Shader is connected to at least objects, materials and scenes, so these
 issues have their relations to other sections in this TODO document.
 
+- glamour: 3D shader, 2D GUI shader, and postprocessing effect shaders, they
+  all have very different interface. Because of that, I probably need to drop
+  Shader implementation even lower level, and create intermediate structures
+  between render, canvas and such.
+  
+  Because of this, I might consider taking glamour there.
+
 - I should go to version 130 with shaders. For creating compatible shader
   banks, it is mandatory to ensure that attributes are at the same location.
-  Otherwise, loaded VBOs do not work.
+  Otherwise, loaded VBOs (via VAO) do not work: not a problem at the moment, as
+  attributes are bind by hand.
 
 - We could accept reading/writing inexisting uniforms in some cases, that is,
   store -1 to namecache. Certain uniforms are optional as their nature, it
@@ -429,12 +405,6 @@ SCENES, LAYERS:
 
 - Store viewing information to batch node, not to scene node.
 
-- Some simple file format to create scenes (placing objects, creating
-  object hierarchies, ...) could be useful. POVRay may be too complex.
-  Something that can be used together with .obj & .mtl files... Of
-  course, we need support to other mesh data formats, too, but .obj is
-  quite common & useful anyways.
-
 - Probably it is better to classify objects at Layer/Scene level already...
   Keeping objects in one single list helps lookups, but (1) I assume that
   they are more rare operations than rendering calls, and (2) that can
@@ -467,6 +437,9 @@ SCENES, LAYERS:
 - Currently, we have Grip class, that generates transform matrices from
   position, rotation and scaling. It is possible, that we need also
   other ways to generate transform matrices - so, be prepared for that.
+
+    * We might want to get Grips from game logic/physics layer (e.g.
+      portal, or navmesh)
   
 - Scaling is not entirely working, mainly because it would need updating of
   bounding sphere.
@@ -482,11 +455,6 @@ SCENES, LAYERS:
 - Multiple mesh-material pairs in same object: Maybe with vertex groups?
   Adding IBO-Material pairs to VAOs? No need for separate IBOs, just start
   index for each batch.
-
-- Winding: In case that winding is incorrect when loading a model, we
-  could have methods in Mesh class to try to fix it. At least, this
-  would be better than changing winding parameter (CW / CCW) when
-  rendering.
 
 - Ways to extend Mesh class. Some way to attach more vertex data to
   Mesh so that Shader understands it, for example, skeleton.
@@ -600,36 +568,30 @@ TEXTURES:
 
 -------------------------------------------------------------------------------
 
-TEXTBOX, GUI:
-
-- The way TextBox is implemented prevents us to implement shaders as
-  instance batch processors. We may reconsider that implementation.
-
-  * In fact, currently TextBox is more like special "Layer", not instance
-  
-  * I feel that the way TextBox works might be suitable for e.g. particle
-    engines. So, instead of changing the TextBox implementation, we might
-    improve architecture to deal with these kinds of things.
+GUI, HUD: GUI sketching/planning/designing is ongoing. Sure, the focus is on
+game rendering engine (render/ directory structure), but also sure, GUI/HUD
+is pretty damn important to play a game.
 
 -------------------------------------------------------------------------------
 
 FONTS:
 
-- For some reason, rendered text at plain alpha channel does not work. Investigate
+- For some reason, rendered text at plain alpha channel does not work.
+  Investigate.
 
 - Half-done: Bitmap sheet loading need to be generalized, needed for both text
   and (at least 2D) game objects 
 
 - At some point, we need to modify text to support UTF-8 (for moe3d)
 
-- Investigate possible alternative solutions for rendering (HUD) text. Maybe rendering
-  at CPU, and using subtextures?
+- Investigate possible alternative solutions for rendering (HUD) text. Maybe
+  rendering at CPU, and using subtextures?
   
-- Also, we could use GPU to scale letters, no need to create font for all sizes. Check
-  the result.
+- Also, we could use GPU to scale letters, no need to create font for all
+  sizes. Check the result.
 
-- Also, current system is made for HUD (screen coordinates), design a way to use it
-  for 3D objects
+- Also, current system is made for HUD (screen coordinates), design a way to
+  use it for 3D objects
 
 -------------------------------------------------------------------------------
 
