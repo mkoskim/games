@@ -476,18 +476,31 @@ void play(string mazename)
     //
     //*************************************************************************
 
-    auto hud = new Canvas();
+    auto hud = new gui.Canvas();
 
     //-------------------------------------------------------------------------
 
-    auto txtPoints = new TextBox(
-        null, 2, 0, "SCORE: %points%",
-        Font.load("engine/stock/fonts/Digital-7/digital-7__mono_.ttf", 26)
+    gui.Label.Style.add(null,
+        Font.load("engine/stock/fonts/liberation/LiberationMono-Regular.ttf", 12),
+        vec4(0.9, 0.9, 0.9, 1)
     );
 
-    actors.addcallback(() {
-        txtPoints["points"] = format("%06d", player.points);
-    });
+    gui.Label.Style.add("score", 
+        Font.load("engine/stock/fonts/Digital-7/digital-7__mono_.ttf", 26),
+        vec4(1, 1, 1, 1)
+    );
+
+    hud.add(
+        new gui.Position(2, 2,
+            new gui.Grid(
+                gui.Label["score"]("SCORE: "),
+                gui.Label["score"]((){ return format("%06d", player.points); }),
+            )
+        ),
+        new gui.Anchor(0, 1,
+            gui.Label[null](() { return game.Profile.info(); })
+        ),
+    );
 
     //-------------------------------------------------------------------------
 
@@ -502,7 +515,7 @@ void play(string mazename)
     void drawscreen()
     {
         scene.draw();
-        hud.draw(txtPoints);
+        hud.draw();
     }
 
     //-------------------------------------------------------------------------

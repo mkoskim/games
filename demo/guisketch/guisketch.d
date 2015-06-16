@@ -77,14 +77,14 @@ void main()
 
     //auto box = new Frame(textures, new Box(vec4(1, 1, 0, 1), 32, 32));
 
-    /*
-    class IconBox : gui.Widget
+    class IconBox : gui.Box
     {
         this(vec4 color) {
-            super(textures[1], new gui.Box(color, 32, 32));
+            super(color, 32, 32);
         }
     }
 
+    /*
     class Button : gui.Widget
     {
         gui.Label label;
@@ -96,15 +96,17 @@ void main()
     }
     */
 
-    /*
+    //*
     auto row = new gui.Grid(
-        new IconBox(vec4(1, 1, 0, 1)),
-        new IconBox(vec4(0, 1, 1, 1)),
-        null,
-        new IconBox(vec4(0, 1, 0, 1)),
-        new IconBox(vec4(0, 0, 1, 1)),        
+        gui.Padding.wrap(2, 2,
+            new IconBox(vec4(1, 1, 0, 1)),
+            new IconBox(vec4(0, 1, 1, 1)),
+            null,
+            new IconBox(vec4(0, 1, 0, 1)),
+            new IconBox(vec4(0, 0, 1, 1)),        
+        )
     );
-    */
+    /**/
     
     /*
     auto row = new gui.Grid(
@@ -115,13 +117,23 @@ void main()
     );
     */
 
-    auto row = new gui.Grid(
-        new gui.Label("Continue", vec4(1, 0, 0, 1)), null,
-        new gui.Label("New game", vec4(1, 0, 0, 1)), null,
-        new gui.Label("Options", vec4(1, 0, 0, 1)), null,
-        new gui.Label("Quit", vec4(1, 0, 0, 1))
+    /*
+    gui.Label.Style.add("style1",
+        Font.load("engine/stock/fonts/liberation/LiberationSans-Regular.ttf", 28),
+        //Font.load("engine/stock/fonts/Futura/Futura-MdCn-BT-Medium_19022.ttf", 28).setstyle(TTF_STYLE_NORMAL),
+        vec4(1, 0, 0, 1)
     );
-    
+
+    auto style = gui.Label["style1"];
+
+    auto row = new gui.Grid(
+        style("Continue"), null,
+        style("New game"), null,
+        style("Options"), null,
+        style("Quit")
+    );
+    */
+
     auto canvas = new gui.Canvas();
 
     canvas.add(
@@ -136,7 +148,7 @@ void main()
 
     //-------------------------------------------------------------------------
 
-    actors.reportperf;
+    //actors.reportperf;
 
     //-------------------------------------------------------------------------
 

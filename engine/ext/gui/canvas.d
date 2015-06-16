@@ -22,6 +22,8 @@ import engine.render.view;
 import engine.render.shaders.base;
 import engine.ext.geom;
 
+import engine.game.instance;
+
 //-----------------------------------------------------------------------------
 
 class Canvas
@@ -38,8 +40,10 @@ class Canvas
 
     Widget[] widgets;
 
-    void add(Widget widget) { widgets ~= widget; }
-
+    void add(Widget widget)         { widgets ~= widget; }
+    void add(Widget[] widgets)      { foreach(widget; widgets) add(widget); }
+    void add(Widget[] widgets...)   { foreach(widget; widgets) add(widget); }
+    
     //-------------------------------------------------------------------------
 
     this() { this(State.Default2D(), Camera.topleft2D()); }
@@ -53,33 +57,34 @@ class Canvas
 
     //-------------------------------------------------------------------------
 
-    private void render(mat4 transform)
+    private void render(vec2 offset, vec2 size)
     {
+        mat4 transform = mat4.identity().scale(size.x, size.y, 1).translate(offset.x, offset.y, 0);
         state.shader.render(transform, unitbox);
     }
 
-    void render(mat4 transform, Material material)
+    void render(vec2 offset, vec2 size, Material material)
     {
         state.shader.loadMaterial(material);
-        render(transform);
+        render(offset, size);
     }
 
-    void render(mat4 transform, vec4 color)
+    void render(vec2 offset, vec2 size, vec4 color)
     {
         state.shader.loadMaterial(new Material(color));
-        render(transform);
+        render(offset, size);
     }
 
-    void render(mat4 transform, Texture texture)
+    void render(vec2 offset, vec2 size, Texture texture)
     {
         state.shader.loadMaterial(new Material(texture));
-        render(transform);
+        render(offset, size);
     }
 
-    void render(mat4 transform, Texture texture, vec4 color)
+    void render(vec2 offset, vec2 size, Texture texture, vec4 color)
     {
         state.shader.loadMaterial(new Material(texture), new Material.Modifier(color));
-        render(transform);
+        render(offset, size);
     }
 
     //-------------------------------------------------------------------------
@@ -88,7 +93,13 @@ class Canvas
     {
         state.activate();
         state.shader.loadView(cam);
-        foreach(widget; widgets) widget.draw(this, mat4.identity());
+        foreach(widget; widgets) {
+            widget.draw(
+                this,
+                vec2(0, 0),
+                vec2(screen.width, screen.height)
+            );
+        }
     }
 }
 

@@ -24,7 +24,7 @@ static this()
 //-----------------------------------------------------------------------------
 
 import std.zip;
-import std.file: FileException;
+import std.file: FileException, read;
 import core.exception: RangeError;
 
 ubyte[] extract(string filename)
@@ -36,7 +36,12 @@ ubyte[] extract(string filename)
         archive.expand(file);
     }
     catch(RangeError e) {
+        /*
+        // For testing: Fall back to filesystem
+        return cast(ubyte[])read(filename);
+        /*/
         throw new FileException(filename, "File not found");
+        /**/
     }
     return file.expandedData;
 }
