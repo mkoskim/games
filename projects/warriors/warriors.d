@@ -39,7 +39,8 @@ void main()
 
     auto sheet = render.Texture.upload(
         Bitmap.splitSheet(
-            "data/spritesheets/KBQkz/1 - 4cpmn.png",
+            //"data/spritesheets/KBQkz/1 - 4cpmn.png",
+            "data/spritesheets/KBQkz/2 - 8HG5T.png",
             vec2i(46, 46),
             vec2i(46, 46),
             vec2i(2, 2),

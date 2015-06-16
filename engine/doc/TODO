@@ -2,7 +2,10 @@
 
 DONE:
 
-- ...
+- INITIALLY DONE: Mipmaps
+
+- INITIALLY DONE: Texture mipmaps: In 3D scenes, this could make them prettier.
+
 
 *******************************************************************************
 
@@ -95,8 +98,6 @@ MISC: Yet uncategorized "Post-It" notes...
   
   What you want, is to separate solid and transparent parts to different
   rendering stages.
-
-- Mipmaps
 
 - CONTINUE: Node modifiers: Add support for "multi-textured" nodes - the idea
   is to have sort of "stamping", textures over textures. We add node-specific
@@ -561,8 +562,6 @@ BITMAPS:
 -------------------------------------------------------------------------------
 
 TEXTURES:
-
-- Texture mipmaps: In 3D scenes, this could make them prettier.
 
 - Texture update
 

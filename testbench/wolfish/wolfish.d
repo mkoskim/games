@@ -194,6 +194,11 @@ class Scene : render.BufferedRender
             */
             transparent.upload(monkeymesh, matGlass),
         ];
+    
+        foreach(model; wallshapes ~ floorshapes ~ propshapes) {
+            if(model.material.colormap) model.material.colormap.mipmap();
+            if(model.material.normalmap) model.material.normalmap.mipmap();
+        }
     }
 
     void loadmaze(string[] grid)
