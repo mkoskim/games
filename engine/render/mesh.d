@@ -66,8 +66,11 @@ class Mesh
 
     this(uint mode)
     {
+        Track.add(this);
         this.mode = mode;
     }
+
+    ~this() { Track.remove(this); }
 
     //-------------------------------------------------------------------------
 

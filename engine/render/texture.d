@@ -69,6 +69,8 @@ class Texture
 
     this(uint w, uint h, void* buffer, GLenum format, GLenum data_width = GL_UNSIGNED_BYTE)
     {
+        Track.add(this);
+
         debug const string[GLenum] _name = [
             GL_BGRA: "GL_BGRA",
             GL_RGBA: "GL_RGBA",
@@ -159,6 +161,7 @@ class Texture
 
     ~this()
     {
+        Track.remove(this);
         glDeleteTextures(1, &ID);
     }
 

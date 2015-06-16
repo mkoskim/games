@@ -4,13 +4,11 @@
 //
 //*****************************************************************************
 
+import engine;
+
 import std.stdio;
 import std.string;
 import std.array;
-
-import engine;
-
-import src.skill;
 
 //*****************************************************************************
 //
@@ -28,172 +26,6 @@ import src.skill;
 //
 //-----------------------------------------------------------------------------
 
-class Player : game.Fiber
-{
-
-    this(game.FiberQueue queue) { super(queue); }
-
-    //-------------------------------------------------------------------------
-    // Events dispatched to player
-    //-------------------------------------------------------------------------
-
-    private SDL_Event*[] events;
-
-    private SDL_Event* getevent() {
-        while(events.empty()) nextframe();
-        auto event = events.back();
-        events.popBack();
-        return event;
-    }
-
-    void addevent(SDL_Event *event) {
-        events ~= event;
-    }
-
-    //-------------------------------------------------------------------------
-    //
-    // Exec choosing from quick slot associated to a button. Releasing a
-    // button fires the chosen skill. 'X' cancels action. Opposite trigger
-    // moves in the menu.
-    //
-    // Holding key a moment initiates skill charging.
-    //
-    //-------------------------------------------------------------------------
-
-    void execslot(uint button)
-    {
-        writeln("Slot: ", button);
-
-        for(;;)
-        {
-            SDL_Event* event = getevent();
-
-            switch(event.type)
-            {
-                default: break;
-
-                //-------------------------------------------------------------
-                // Pressing a button
-                //-------------------------------------------------------------
-
-                case SDL_JOYBUTTONDOWN:
-                    switch(event.jbutton.button)
-                    {
-                        //-----------------------------------------------------
-                        // By default, button presses cancel the selection,
-                        // and the press is reprocessed in the main state,
-                        // except 'X' which is plain cancel.
-                        //-----------------------------------------------------
-
-                        default:
-                            addevent(event);
-                            goto case game.JOY.BTN.X;
-
-                        case game.JOY.BTN.X:
-                            writeln("Cancel: ", button);
-                            return;
-
-                        //-----------------------------------------------------
-                        // Keys to choose and use skills
-                        //-----------------------------------------------------
-
-                        case game.JOY.BTN.LT:
-                        case game.JOY.BTN.RT:
-                            writeln("Next: ", button);
-                            break;
-
-                        //-----------------------------------------------------
-                        // Triggers' up 'presses' are silently ignored
-                        //-----------------------------------------------------
-
-                        case game.JOY.BTN.LT_FREE:
-                        case game.JOY.BTN.RT_FREE:
-                            break;
-                    }
-                    break;
-
-                //-------------------------------------------------------------
-                // Releasing a button
-                //-------------------------------------------------------------
-
-                case SDL_JOYBUTTONUP:
-                    if(event.jbutton.button == button)
-                    {
-                        writeln("Fire: ", button);
-                        return;
-                    }
-                    break;
-            }
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    // Main combat state.
-    //-------------------------------------------------------------------------
-
-    override void run() {
-        for(;;) {
-            SDL_Event* event = getevent();
-
-            switch(event.type)
-            {
-                default: break;
-
-                //-------------------------------------------------------------
-                // Pressing a button
-                //-------------------------------------------------------------
-
-                case SDL_JOYBUTTONDOWN: switch(event.jbutton.button)
-                {
-                    default: break;
-
-                    //---------------------------------------------------------
-                    // Choosing from quickslots
-                    //---------------------------------------------------------					
-
-                    case game.JOY.BTN.LT:
-                    case game.JOY.BTN.LB:
-                    case game.JOY.BTN.RT:
-                    case game.JOY.BTN.RB:
-                        execslot(event.jbutton.button);
-                        break;
-
-                    //---------------------------------------------------------
-                    // Other buttons
-                    //---------------------------------------------------------					
-
-                    case game.JOY.BTN.A:
-                    case game.JOY.BTN.B:
-                    case game.JOY.BTN.X:
-                    case game.JOY.BTN.Y:
-                        writeln("Pressed: ", event.jbutton.button);
-                        break;
-
-                    case game.JOY.BTN.LS:
-                        writeln("Panic!");
-                        break;
-
-                    case game.JOY.BTN.DPAD_UP:
-                        writeln("Prev setup");
-                        break;
-                    case game.JOY.BTN.DPAD_DOWN:
-                        writeln("Next setup");
-                        break;
-
-                } break;
-
-                //-------------------------------------------------------------
-                // Releasing button
-                //-------------------------------------------------------------
-
-                case SDL_JOYBUTTONUP:
-                    break;
-
-            }
-        }
-    }
-}
-
 //*****************************************************************************
 //*****************************************************************************
 
@@ -205,22 +37,40 @@ void main()
 
     auto actors = new game.FiberQueue();
 
+    auto sheet = render.Texture.upload(
+        Bitmap.splitSheet(
+            "data/spritesheets/KBQkz/1 - 4cpmn.png",
+            vec2i(46, 46),
+            vec2i(46, 46),
+            vec2i(2, 2),
+            vec2i(2, 2)
+        )
+    );
+
+    auto canvas = new gui.Canvas();
+    
+    auto grid = new gui.Grid();
+
+    foreach(y, row; sheet) foreach(x, tex; row) {
+        grid.add(x, y, new gui.Padding(2, 2, new gui.Box(tex, 32, 32)));
+    }
+
+    canvas.add(new gui.Anchor(0.5, 0.5, grid));
+
     //-------------------------------------------------------------------------
 
-    auto player = new Player(actors);
+    game.Track.report();
+    game.Track.rungc();
+    game.Track.report();
 
     //-------------------------------------------------------------------------
 
-    CooldownTimer timer = new CooldownTimer();
+    simple.gameloop(
+        &canvas.draw,
+        actors
+    );
 
-    //-------------------------------------------------------------------------
-
-    gameloop: for(;;)
-    {
-        //---------------------------------------------------------------------
-
-        //---------------------------------------------------------------------
-
+    static if(0) {
         foreach(event; game.getevents()) switch(event.type)
         {
             case SDL_JOYBUTTONDOWN:

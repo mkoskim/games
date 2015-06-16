@@ -23,6 +23,7 @@ class Bitmap
 
     this(SDL_Surface* s)
     {
+        Track.add(this);
         surface = s;
         renderer = SDL_CreateSoftwareRenderer(surface);
         if(!renderer) throw new Exception(
@@ -68,6 +69,7 @@ class Bitmap
 
     ~this()
     {
+        Track.remove(this);
         SDL_DestroyRenderer(renderer);
         SDL_FreeSurface(surface);
     }
@@ -89,20 +91,22 @@ class Bitmap
     }
 
     //-------------------------------------------------------------------------
-    // Spritesheet splitter
+    // Spritesheet splitter. TODO: Bitmap scaling does not work
     //-------------------------------------------------------------------------
 
     static Bitmap[][] splitSheet(
         Bitmap sheet,
-        int texw, int texh,
-        int padx = 0, int pady = 0
+        vec2i srcsize,
+        vec2i dstsize,
+        vec2i top = vec2i(0, 0),
+        vec2i bottom = vec2i(0, 0),
     )
     {
         //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
         //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
 
-        int cols = sheet.surface.w / (texw+padx);
-        int rows = sheet.surface.h / (texh+pady);
+        int cols = sheet.surface.w / (srcsize.x + top.x + bottom.x);
+        int rows = sheet.surface.h / (srcsize.y + top.y + bottom.y); 
 
         Bitmap[][] grid = new Bitmap[][](rows, cols);
 
@@ -112,15 +116,15 @@ class Bitmap
         SDL_FreeSurface(temp);
         */
 
-        SDL_Rect srcrect = {x: 0, y: 0, w: texw, h: texh};
-        SDL_Rect dstrect = {x: 0, y: 0, w: texw, h: texh};
+        SDL_Rect srcrect = {x: 0, y: 0, w: srcsize.x, h: srcsize.y};
+        SDL_Rect dstrect = {x: 0, y: 0, w: dstsize.x, h: dstsize.y};
 
         foreach(y; 0 .. rows) foreach(x; 0 .. cols)
         {
-            auto sprite = new Bitmap(texw, texh);
+            auto sprite = new Bitmap(dstsize.x, dstsize.y);
 
-            srcrect.y = y*(texh + pady);
-            srcrect.x = x*(texw + padx);
+            srcrect.x = top.x + x*(srcsize.x + top.x + bottom.x);
+            srcrect.y = top.y + y*(srcsize.y + top.y + bottom.y);
 
             //SDL_FillRect(sprite.surface, &dstrect, 0);
             SDL_BlitSurface(
@@ -143,45 +147,49 @@ class Bitmap
 
     static Bitmap[][] splitSheet(
         string filename,
-        int texw, int texh,
-        int padx = 0, int pady = 0
+        vec2i srcsize,
+        vec2i dstsize,
+        vec2i top = vec2i(0, 0),
+        vec2i bottom = vec2i(0, 0)
     )
     {
         return splitSheet(
-            blob.loadimage(filename),
-            texw, texh,
-            padx, pady
+            new Bitmap(filename),
+            srcsize, dstsize,
+            top, bottom
         );
     }
 
+    /*
     static Bitmap[][] splitSheet(
         SDL_Surface *sheet,
-        int texw, int texh,
-        int padx = 0, int pady = 0
+        vec2i srcsize,
+        vec2i dstsize,
+        vec2i top = vec2i(0, 0),
+        vec2i bottom = vec2i(0, 0)        
     )
     {
         return splitSheet(
             new Bitmap(sheet),
-            texw, texh,
-            padx, pady
+            srcsize, dstsize,
+            top, bottom
         );
     }
+    */
 
     static Bitmap[][] splitSheet(
         string[] grid, vec4[char] colorchart,
-        int texw, int texh,
-        int padx = 0, int pady = 0
+        vec2i srcsize,
+        vec2i dstsize,
+        vec2i top = vec2i(0, 0),
+        vec2i bottom = vec2i(0, 0)
     )
     {
         return splitSheet(
             new Bitmap(grid, colorchart),
-            texw, texh,
-            padx, pady
+            srcsize, dstsize,
+            top, bottom
         );
     }
-
-    //-------------------------------------------------------------------------
-    // Simple bitmaps from strings
-    //-------------------------------------------------------------------------    
 }
 

@@ -23,7 +23,7 @@ private abstract class GridContainer : Widget
 
     //-------------------------------------------------------------------------
     
-    struct KEY { int row, col; }
+    struct KEY { size_t row, col; }
     
     class Cell : Widget
     {
@@ -31,7 +31,7 @@ private abstract class GridContainer : Widget
         KEY key;
         Widget child;
 
-        this(GridContainer parent, int col, int row, Widget child) {
+        this(GridContainer parent, size_t col, size_t row, Widget child) {
             this.parent = parent;
             this.key = KEY(row, col);
             this.child = child;
@@ -53,36 +53,46 @@ private abstract class GridContainer : Widget
 
     Cell[KEY] cells;
 
+    bool dirty = false;
+    
     //-------------------------------------------------------------------------
     
-    void add(int col, int row, Widget shape)
+    void add(size_t col, size_t row, Widget shape)
     {
         if(cols.length <= col) cols ~= COLUMN(0, 0);
         if(rows.length <= row) rows ~= ROW(0, 0);
         auto cell = new Cell(this, col, row, shape);
         cells[cell.key] = cell;
+        dirty = true;
     }
 
     protected void calcdim()
     {
+        if(!dirty) return ;
+
         cols[0].x = 0;
         foreach(i; 1 .. cols.length) cols[i].x = cols[i-1].x + cols[i-1].width;
         rows[0].y = 0;
         foreach(i; 1 .. rows.length) rows[i].y = rows[i-1].y + rows[i-1].height;
+        
+        dirty = false;
     }
 
     override float width() {
+        calcdim();
         size_t last = cols.length - 1;
         return cols[last].x + cols[last].width;
     }
 
     override float height() {
+        calcdim();
         size_t last = rows.length - 1;
         return rows[last].y + rows[last].height;
     }
     
     override void draw(Canvas canvas, vec2 offset, vec2 size)
     {
+        calcdim();
         foreach(key, cell; cells) cell.draw(canvas, offset, size);
     }
 }
@@ -105,7 +115,6 @@ class Grid : GridContainer
                 col++;
             }
         }
-        calcdim();
     }
 
     this(Widget[] shapes...) { this(shapes); }    

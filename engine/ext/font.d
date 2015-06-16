@@ -60,12 +60,14 @@ class Font
 
         this(TTF_Font *font, string ID)
         {
+            Track.add(this);
             this.font = font;
             this.ID = ID;
         }
 
         ~this()
         {
+            Track.remove(this);
             TODO("Segfaults");
             //TTF_CloseFont(font); font = null;
         }

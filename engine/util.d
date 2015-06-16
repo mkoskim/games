@@ -17,6 +17,7 @@ public import std.string: format;
 public import std.conv: to;
 
 public import std.math: abs;
+public import engine.game: Track;
 
 //-----------------------------------------------------------------------------
 
