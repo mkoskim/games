@@ -21,6 +21,7 @@ protected class VBO
 
     this(void* buffer, size_t length, size_t elemsize, GLenum mode = GL_STATIC_DRAW)
     {
+        Track.add(this);
         checkgl!glGenBuffers(1, &ID);
         checkgl!glBindBuffer(GL_ARRAY_BUFFER, ID);
         checkgl!glBufferData(GL_ARRAY_BUFFER, length * elemsize, buffer, mode);
@@ -31,6 +32,7 @@ protected class VBO
 
     ~this()
     {
+        Track.remove(this);
         checkgl!glDeleteBuffers(1, &ID);
         //writeln("~VBO.this: ", ID);
     }
@@ -119,6 +121,7 @@ protected class IBO
 
     this(GLint drawmode, ushort[] faces, GLenum mode = GL_STATIC_DRAW)
     {
+        Track.add(this);
         length = cast(uint)faces.length;
         this.drawmode = drawmode;
 
@@ -134,6 +137,7 @@ protected class IBO
 
     ~this()
     {
+        Track.remove(this);
         checkgl!glDeleteBuffers(1, &ID);
     }
 

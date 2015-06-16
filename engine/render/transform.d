@@ -98,15 +98,20 @@ class Transform
 
     //-------------------------------------------------------------------------
 
+    private this(Transform parent) { Track.add(this); this.parent = parent; }
+    private ~this() { Track.remove(this); }
+
+    //-------------------------------------------------------------------------
+
     this(Transform parent, mat4 transform)
     {
-        this.parent = parent;
+        this(parent);
         this.transform = transform;
     }
     
     this(Transform parent, Grip grip)
     {
-        this.parent = parent;
+        this(parent);
         this.grip = grip;
     }
     

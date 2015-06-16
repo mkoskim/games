@@ -62,6 +62,8 @@ WORKLIST:
 
 - Replace ulong with size_t
 
+- Bitmap.splitSheet: Scaling splitted sprites does not work.
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...
