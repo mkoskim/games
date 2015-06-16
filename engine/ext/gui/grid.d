@@ -23,36 +23,35 @@ private abstract class GridContainer : Widget
 
     //-------------------------------------------------------------------------
     
+    struct KEY { int row, col; }
+    
     class Cell : Widget
     {
         GridContainer parent;
-        int col, row;
+        KEY key;
         Widget child;
 
         this(GridContainer parent, int col, int row, Widget child) {
             this.parent = parent;
-            this.col = col;
-            this.row = row;
+            this.key = KEY(row, col);
             this.child = child;
-            child.parent = this;
 
             parent.cols[col].width = max(parent.cols[col].width, child.width);
             parent.rows[row].height = max(parent.rows[row].height, child.height);
         }
 
-        vec2 pos() { return vec2(parent.cols[col].x, parent.rows[row].y); }
+        vec2 pos() { return vec2(parent.cols[key.col].x, parent.rows[key.row].y); }
         
-        override float width() { return parent.cols[col].width; }
-        override float height() { return parent.rows[row].height; }
+        override float width() { return parent.cols[key.col].width; }
+        override float height() { return parent.rows[key.row].height; }
 
-        override void draw(Canvas canvas, mat4 local)
+        override void draw(Canvas canvas, vec2 offset, vec2 size)
         {
-            mat4 m = Transform.matrix(pos().x, pos().y);
-            child.draw(canvas, local * m);
+            child.draw(canvas, offset + pos, vec2(width, height));
         }
     }
 
-    Cell[] childs;
+    Cell[KEY] cells;
 
     //-------------------------------------------------------------------------
     
@@ -60,7 +59,8 @@ private abstract class GridContainer : Widget
     {
         if(cols.length <= col) cols ~= COLUMN(0, 0);
         if(rows.length <= row) rows ~= ROW(0, 0);
-        childs ~= new Cell(this, col, row, shape);        
+        auto cell = new Cell(this, col, row, shape);
+        cells[cell.key] = cell;
     }
 
     protected void calcdim()
@@ -81,9 +81,9 @@ private abstract class GridContainer : Widget
         return rows[last].y + rows[last].height;
     }
     
-    override void draw(Canvas canvas, mat4 local)
+    override void draw(Canvas canvas, vec2 offset, vec2 size)
     {
-        foreach(bin; childs) bin.draw(canvas, local);
+        foreach(key, cell; cells) cell.draw(canvas, offset, size);
     }
 }
 
@@ -91,7 +91,7 @@ private abstract class GridContainer : Widget
 
 class Grid : GridContainer
 {
-    this(Widget[] shapes...) {
+    this(Widget[] shapes) {
         super();
 
         int col = 0, row = 0;
@@ -107,6 +107,8 @@ class Grid : GridContainer
         }
         calcdim();
     }
+
+    this(Widget[] shapes...) { this(shapes); }    
 }
 
 //-----------------------------------------------------------------------------

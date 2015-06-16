@@ -90,8 +90,9 @@ class Font
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
-    // Rendering text to Textures. TODO: render cache could store also
-    // rendered strings.
+    // Rendering text to Textures.
+    // TODO: render cache could store also rendered strings.
+    // TODO: We should have separate cache for different styles.
     //-------------------------------------------------------------------------
 
     private Texture[char] rendered;

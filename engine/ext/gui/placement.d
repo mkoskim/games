@@ -20,10 +20,9 @@ class Position : Wrapping
         this.pos = vec2(x, y);
     }
 
-    override void draw(Canvas canvas, mat4 local)
+    override void draw(Canvas canvas, vec2 offset, vec2 size)
     {
-        mat4 m = Transform.matrix(pos.x, pos.y);
-        child.draw(canvas, local * m);
+        child.draw(canvas, offset + pos, vec2(0, 0));
     }
 }
 
@@ -31,9 +30,9 @@ class Position : Wrapping
 
 class Anchor : Wrapping
 {
-    import engine.game.instance;
-
     vec2 anchor;
+
+    //-------------------------------------------------------------------------
 
     this(vec2 anchor, Widget child)
     {
@@ -46,17 +45,22 @@ class Anchor : Wrapping
         this(vec2(ax, ay), child);
     }
     
-    override void draw(Canvas canvas, mat4 local)
+    //-------------------------------------------------------------------------
+
+    static Widget[] wrap(float ax, float ay, Widget[] widgets...)
     {
-        float x, y;
+        Anchor[] wrapped;
+        foreach(widget; widgets) {
+            wrapped ~= widget ? new Anchor(ax, ay, widget) : null;
+        }
+        return cast(Widget[])wrapped;
+    }
 
-        vec2 dim = (parent) ? vec2(parent.width, parent.height) : vec2(screen.width, screen.height);
+    //-------------------------------------------------------------------------
 
-        x = anchor.x * (dim.x - child.width);
-        y = anchor.y * (dim.y - child.height);
-
-        mat4 m = Transform.matrix(x, y);
-        child.draw(canvas, local * m);
+    override void draw(Canvas canvas, vec2 offset, vec2 area)
+    {
+        child.draw(canvas, anchorpoint(offset, area, anchor), child.size);
     }
 }
 
@@ -66,6 +70,8 @@ class Padding : Wrapping
 {
     vec2 topleft;
     vec2 bottomright;
+
+    //-------------------------------------------------------------------------
 
     this(vec2 topleft, vec2 bottomright, Widget child)
     {
@@ -84,13 +90,25 @@ class Padding : Wrapping
         this(vec2(px, py), child);
     }
     
+    //-------------------------------------------------------------------------
+
+    static Widget[] wrap(float px, float py, Widget[] widgets...)
+    {
+        Padding[] wrapped;
+        foreach(widget; widgets) {
+            wrapped ~= widget ? new Padding(px, py, widget) : null;
+        }
+        return cast(Widget[])wrapped;
+    }
+
+    //-------------------------------------------------------------------------
+
     override float width() { return child.width + topleft.x + bottomright.x; }
     override float height() { return child.height + topleft.y + bottomright.y; }
     
-    override void draw(Canvas canvas, mat4 local)
+    override void draw(Canvas canvas, vec2 offset, vec2 size)
     {
-        mat4 m = Transform.matrix(topleft.x, topleft.y);
-        child.draw(canvas, local * m);
+        child.draw(canvas, offset + topleft, size - topleft - bottomright);
     }
 }
 

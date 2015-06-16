@@ -12,14 +12,6 @@ import engine.ext.gui.util;
 
 abstract class Widget
 {
-    Widget parent;
-
-    //-------------------------------------------------------------------------
-
-    this(Widget parent) {
-        this.parent = parent;
-    }
-
     this() {
     }
 
@@ -28,9 +20,20 @@ abstract class Widget
     abstract float width();
     abstract float height();
 
+    vec2 size() { return vec2(width, height); }
+
     //-------------------------------------------------------------------------
 
-    abstract void draw(Canvas canvas, mat4 local);
+    vec2 anchorpoint(vec2 offset, vec2 area, vec2 anchor) {
+        return vec2(
+            offset.x + anchor.x * (area.x - width),
+            offset.y + anchor.y * (area.y - height)
+        );
+    }
+
+    //-------------------------------------------------------------------------
+
+    abstract void draw(Canvas canvas, vec2 offset, vec2 size);
 }
 
 //-----------------------------------------------------------------------------

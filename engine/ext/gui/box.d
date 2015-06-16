@@ -9,32 +9,52 @@ module engine.ext.gui.box;
 import engine.ext.gui.util;
 import engine.ext.gui.widget;
 
-import engine.ext.font;
-
 //-----------------------------------------------------------------------------
 // TODO: "Box" is pretty static thing, we should separate "leafs" from
 // groups, so that we can use these kind of classes to draw different things.
 //-----------------------------------------------------------------------------
 
-class Box : Widget
+class Space : Widget
 {
     vec2 dim;
+
+    this(vec2 dim) { this.dim = dim; }
+    this(float w, float h) { this(vec2(w, h)); }
+
+    override float width() { return dim.x; }
+    override float height() { return dim.y; }
+
+    void stretch(float w, float h)
+    {
+        dim.x = w;
+        dim.y = h;
+    }
+
+    override void draw(Canvas, vec2, vec2) { }
+
+    static Space H(float s) { return new Space(s, 0); }
+    static Space V(float s) { return new Space(0, s); }
+}
+
+class Box : Space
+{
     Texture tex;
 
     //-------------------------------------------------------------------------
 
+    this(float w, float h) { super(w, h); }
+    
     this(vec4 color, float w, float h)
     {
-        super();
-        this.dim = vec2(w, h);
+        this(w, h);
         this.tex = new Texture(color);
     }
 
     this(Texture texture, float w, float h)
     {
-        this.dim = vec2(w, h);
+        this(w, h);
         this.tex = texture;
-        texture.filtering(GL_NEAREST, GL_NEAREST);
+        //texture.filtering(GL_NEAREST, GL_NEAREST);
     }
     
     this(Texture texture)
@@ -54,18 +74,9 @@ class Box : Widget
 
     //-------------------------------------------------------------------------
 
-    override float width() { return dim.x; }
-    override float height() { return dim.y; }
-
-    void stretch(float w, float h)
+    override void draw(Canvas canvas, vec2 offset, vec2)
     {
-        dim.x = w;
-        dim.y = h;
-    }
-
-    override void draw(Canvas canvas, mat4 local)
-    {
-        canvas.render(local * mat4.identity().scale(width, height, 1), tex);
+        canvas.render(offset, size(), tex);
     }
 
     //-------------------------------------------------------------------------
@@ -82,61 +93,6 @@ class Box : Widget
             grid ~= line;
         }
         return grid;
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-class Label : Widget
-{
-    string text;
-    vec4 color;
-    Font font;
-    
-    this(string text, vec4 color, Font font = null)
-    {
-        if(!font) {
-            //font = Font.load("engine/stock/fonts/default.ttf", 12);
-            //font = Font.load("engine/stock/fonts/dejavu/ttf/DejaVuSansMono.ttf", 12);
-            font = Font.load("engine/stock/fonts/dejavu/ttf/DejaVuSans.ttf", 24);
-            //font = Font.load("engine/stock/fonts/dejavu/ttf/DejaVuSerif.ttf", 12);
-        }
-        this.font = font;
-        this.text = text;
-        this.color = color;
-    }
-
-    //-------------------------------------------------------------------------
-    
-    override float width()
-    {
-        float w = 0;
-        foreach(c; text) w = w + font.render(c).width;
-        return w;
-    }
-    
-    override float height()
-    {
-        float h = 0;
-        foreach(c; text) h = max(h, font.render(c).height);
-        return h;
-    }
-
-    override void draw(Canvas canvas, mat4 local)
-    {
-        vec2 cursor = vec2(0, 0);
-        
-        foreach(c; text) {
-            Texture tex = font.render(c);
-
-            auto m = mat4.identity()
-                .scale(tex.width, tex.height, 1)
-                .translate(cursor.x, cursor.y, 0)
-            ;
-
-            canvas.render(local * m, tex, color);
-            cursor.x += tex.width;
-        }
     }
 }
 

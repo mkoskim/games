@@ -57,7 +57,11 @@ class Texture
 {
     GLuint ID;
 
+    //-------------------------------------------------------------------------
+
     uint width, height;
+
+    vec2 size() { return vec2(width, height); }
 
     //-------------------------------------------------------------------------
     // Creating texture from pixel data buffer
