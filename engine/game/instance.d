@@ -22,3 +22,5 @@ struct SCREEN
 
 SCREEN screen;
 
+bool SDL_up = false;
+

@@ -2,7 +2,9 @@
 
 DONE:
 
-- NOTE! Text rendering not working!
+- SDL resources (SDL_Surface, Fonts, ...) cause segfault at exit, if
+  they are not freed (as destructors try to call SDL_FreeXXXX and SDL
+  is already shut down).
 
 *******************************************************************************
 
@@ -33,11 +35,11 @@ WORKLIST:
   so that I could work at higher levels without needing to worry about
   low level changes.
 
+- Move default shaders under ext/ directory (?)
+
 - "CPU rendering": Rendering objects without uploading them to shader.
   This would be good for example for debugging (rendering normally
   invisible things).
-
-- Move default shaders under ext/ directory (?)
 
 - "Debug channel" to rendering batches: adding a debug mesh to an object
   will be sent there.

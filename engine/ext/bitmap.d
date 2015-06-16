@@ -70,8 +70,10 @@ class Bitmap
     ~this()
     {
         Track.remove(this);
-        SDL_DestroyRenderer(renderer);
-        SDL_FreeSurface(surface);
+        if(SDL_up) {
+            SDL_DestroyRenderer(renderer);
+            SDL_FreeSurface(surface);
+        }
     }
 
     //-------------------------------------------------------------------------

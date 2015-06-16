@@ -102,14 +102,22 @@ class Batch
 
     Model upload()                             { return upload(new Model(null, null)); }    
 
-    Model[] upload(Mesh mesh, Bitmap[] colormaps)
+    //-------------------------------------------------------------------------
+    // Bulk uploads
+    //-------------------------------------------------------------------------
+
+    Model[] upload(Shader.VAO vao, Bitmap[] colormaps)
     {
         Model[] list;
-        auto vao = upload(mesh);
-        foreach(colormap; colormaps) {
-            list ~= upload(new Model(vao, new Material(new Texture(colormap))));
+        foreach(colormap; Texture.upload(colormaps)) {
+            list ~= upload(new Model(vao, new Material(colormap)));
         }
         return list;
+    }
+
+    Model[] upload(Mesh mesh, Bitmap[] colormaps)
+    {
+        return upload(upload(mesh), colormaps);
     }
 
     //-------------------------------------------------------------------------
