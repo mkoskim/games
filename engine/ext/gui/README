@@ -1,0 +1,18 @@
+
+
+                            GAME GUI
+                            --------
+                            
+For implementing a game, I will need a simple GUI/HUD for that. Here are
+some initial thoughts:
+
+* Low performance: no need to squeeze everything out of that
+
+* Simple usage: simple and clean interface from code, no need for GUI builders,
+  XML files etc.
+  
+* Limited capabilities: For creating fancier GUI (animations, effects, ...),
+  you consider making it using 2D game objects and rendering. That is a
+  different story.
+
+
