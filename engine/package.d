@@ -39,6 +39,8 @@ pragma(lib, "dl");
 
 //-----------------------------------------------------------------------------
 
+import engine.game.instance: SDL_up;
+
 static this()
 {
     DerelictSDL2.load();
@@ -59,6 +61,8 @@ static this()
     //-------------------------------------------------------------------------
 
     TTF_Init();
+
+    SDL_up = true;
 }
 
 static ~this()
@@ -66,5 +70,7 @@ static ~this()
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
+
+    SDL_up = false;
 }
 

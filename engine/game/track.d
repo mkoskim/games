@@ -28,12 +28,12 @@ class Track
         {
             import core.memory: GC;
             GC.collect();
-            debug report();
+            debug report("Garbage collected:");
         }
 
-        void report()
+        void report(string title)
         {
-            writeln("Objects tracked:");
+            writeln(title);
             foreach(key, value; count)
             {
                 writefln("%8d %s", value, key.name);

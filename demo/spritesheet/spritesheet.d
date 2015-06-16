@@ -136,7 +136,7 @@ void main()
 
     auto actors = new game.FiberQueue();
 
-    foreach(_;0 .. 10) actors.add(new Explosion());
+    foreach(_;0 .. 20) actors.add(new Explosion());
 
     //-------------------------------------------------------------------------
 
@@ -144,6 +144,6 @@ void main()
 
     game.Track.rungc();
 
-    simple.gameloop(25, &scene.draw, actors, null);
+    simple.gameloop(20, &scene.draw, actors, null);
 }
 

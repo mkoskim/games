@@ -18,6 +18,7 @@ public import std.conv: to;
 
 public import std.math: abs;
 public import engine.game.track: Track;
+public import engine.game.instance: SDL_up;
 
 //-----------------------------------------------------------------------------
 

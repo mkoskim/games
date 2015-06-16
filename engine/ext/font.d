@@ -68,8 +68,7 @@ class Font
         ~this()
         {
             Track.remove(this);
-            TODO("Segfaults");
-            //TTF_CloseFont(font); font = null;
+            if(SDL_up) TTF_CloseFont(font);
         }
     }
 

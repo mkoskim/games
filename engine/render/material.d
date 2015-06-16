@@ -108,6 +108,9 @@ class Material
     }
 
     //-------------------------------------------------------------------------
+    // Creating materials from list of bitmaps, for example, to create
+    // icons etc.
+    //-------------------------------------------------------------------------
 
     static Material[] upload(Bitmap[] bitmaps)
     {
