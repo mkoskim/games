@@ -42,8 +42,8 @@ class Model
     }
 
     //-------------------------------------------------------------------------
-    // "ShapeSheet" from "SpriteSheet": This is better than the old one,
-    // but could be improved by moving it to somewhere else.
+    // "ShapeSheet" from "SpriteSheet": TODO - this sort of mechanism
+    // is used for instanced (sprite) blitting from texture atlas.
     //-------------------------------------------------------------------------
 
     static Model[][] sheet(

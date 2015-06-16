@@ -64,6 +64,9 @@ WORKLIST:
 
 - Bitmap.splitSheet: Scaling splitted sprites does not work.
 
+- Model.sheet: This is using atlas for rendering. It would be
+  probably best to implement dedicated atlas sprite blitter...
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...
