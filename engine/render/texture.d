@@ -59,6 +59,7 @@ class Texture
     //-------------------------------------------------------------------------
 
     uint width, height;
+    bool mipmapped;
 
     vec2 size() { return vec2(width, height); }
 
@@ -126,6 +127,15 @@ class Texture
         wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         //filtering(GL_NEAREST, GL_NEAREST);
         //filtering(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
+        mipmapped = false;
+    }
+
+    //-------------------------------------------------------------------------
+
+    ~this()
+    {
+        Track.remove(this);
+        glDeleteTextures(1, &ID);
     }
 
     //-------------------------------------------------------------------------
@@ -151,17 +161,22 @@ class Texture
     void wrapping(GLenum s, GLenum t)
     {
         bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
         unbind();
     }
 
-    //-------------------------------------------------------------------------
-
-    ~this()
+    Texture mipmap()
     {
-        Track.remove(this);
-        glDeleteTextures(1, &ID);
+        if(!mipmapped) {
+            bind();
+            checkgl!glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16);
+            checkgl!glGenerateMipmap(GL_TEXTURE_2D);
+            filtering(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+            unbind();
+            mipmapped = true;
+        }
+        return this;
     }
 
     //-------------------------------------------------------------------------
