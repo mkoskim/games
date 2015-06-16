@@ -6,6 +6,76 @@
 
 Version something:
 
+- FIXED: SDL resources (SDL_Surface, Fonts, ...) cause segfault at exit, if
+  they are not freed (as destructors try to call SDL_FreeXXXX and SDL
+  is already shut down).
+
+- FIXED: Freeing fonts cause segfault (most probably, TTF is already closed when
+  calling font destructor)
+
+- DONE: Color for text
+
+- DONE: Initial implementation of Node-specific material modifier added.
+
+- DONE: Text rendering is now done by Canvas Widgets. TextBox currently has
+  no color: it is waiting color to be added to instance specific modifier.
+
+- DONE: At some point, there's a need to check that destructors are called at
+  correct points. For example, when game level is changed, it would be
+  very nice if the game frees GPU resources allocated at previous level.
+
+- TEXT OUTPUT: Now there is another mechanism to feed drawing instructions
+  to shader - Canvas. Canvas stores Widget type objects, which - when
+  drawed - send drawing commands to shader. In scenes, Nodes are more or
+  less passive data carriers.
+
+  DESCRIPTION: This has troubled me a long time, is there anything I can
+  do for it? Let's think about it.
+  
+  There is definitely many ways to get text in to screen. What method to use
+  depends on the purpose.
+  
+  The first and most obvious two ways to render text are:
+  
+  1) Create a bitmap from given text, and add it to game world as a textured
+     rectangle.
+
+  2) Create bitmaps from letters, and add letters to game world as textured
+     rectangles.
+
+  These two ways create text that can be manipulated in the same ways as
+  any other game world object. You can move them around, animate them and
+  so on.
+  
+  Then, there is third way, which I have used so far. It works more like
+  drawing letters to canvas-like object: you don't have 'handles' to
+  separate letters, instead they are emitted by the text object.
+
+  So: maybe I (need to) create all these methods? Well, at least two
+  first ones are eventually mandatory, for example, for floating
+  points and other written information in the game world itself. The
+  third one then, at the moment it feels that it is related to creating
+  rendering mechanism for GUI purposes: so, at the moment it feels
+  totally worth to examine.
+
+- In fact... If we would have support for "emitters" in nodes, we
+  could feed objects like that to default shading process. Shader should
+  just understand to query the emitted objects... Would be like "poor
+  man's particle engine"...
+
+- DONE: The way TextBox is implemented prevents us to implement shaders as
+  instance batch processors. We may reconsider that implementation.
+
+  * In fact, currently TextBox is more like special "Layer", not instance
+  
+  * I feel that the way TextBox works might be suitable for e.g. particle
+    engines. So, instead of changing the TextBox implementation, we might
+    improve architecture to deal with these kinds of things.
+
+-------------------------------------------------------------------------------
+
+Version something:
+
 - DONE: BLOB handling: Currently, we use mechanism described here (second
   answer):
 
