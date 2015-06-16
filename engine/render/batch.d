@@ -102,6 +102,16 @@ class Batch
 
     Model upload()                             { return upload(new Model(null, null)); }    
 
+    Model[] upload(Mesh mesh, Bitmap[] colormaps)
+    {
+        Model[] list;
+        auto vao = upload(mesh);
+        foreach(colormap; colormaps) {
+            list ~= upload(new Model(vao, new Material(new Texture(colormap))));
+        }
+        return list;
+    }
+
     //-------------------------------------------------------------------------
     // Nodes collected for rendering
     //-------------------------------------------------------------------------
