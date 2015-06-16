@@ -40,10 +40,12 @@ void main()
 
     for(;;)
     {
+        game.Track.rungc();
         string maze = choosemaze();
         if(!maze) break;
+
+        game.Track.rungc();
         play(maze);
-        game.cleantrash();
     }
 }
 
@@ -523,6 +525,8 @@ void play(string mazename)
     // processing function returns false. We create anonymous function to
     // process incoming events.
     //-------------------------------------------------------------------------
+
+    game.Track.rungc();
 
     simple.gameloop(
         &drawscreen,

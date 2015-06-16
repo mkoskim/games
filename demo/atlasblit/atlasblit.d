@@ -5,6 +5,12 @@
 // as is. The new function generates separate rectangular meshes with
 // correct UV coordinates to use individual sprites from sheet.
 //
+// TODO: Creating "shapesheet" would be best used with instanced
+// rendering (as "texture atlas" allows us to keep the same material
+// during blitting different sprites). So: this is renamed as
+// atlasblitter, and we write another demo for demonstrating spritesheet
+// splitting.
+//
 //*****************************************************************************
 
 import engine;

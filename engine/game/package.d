@@ -12,6 +12,7 @@ public import engine.game.instance;
 public import engine.game.fiber;
 public import engine.game.perfmeter;
 public import engine.game.events;
+public import engine.game.track: Track;
 
 //-----------------------------------------------------------------------------
 
@@ -75,44 +76,6 @@ void init(string name, int width = 640, int height = 480)
     render.init();
 
     Joystick.init();
-}
-
-//*****************************************************************************
-//
-// Resource tracking
-//
-//*****************************************************************************
-
-class Track
-{
-    static {
-        int[ClassInfo] count;
-
-        void add(Object what) {
-            ClassInfo info = what.classinfo;
-            if(!(info in count)) count[info] = 0;
-            count[info]++;
-        }
-        
-        void remove(Object what) {
-            count[what.classinfo]--;
-        }
-
-        void rungc()
-        {
-            import core.memory: GC;
-            GC.collect();
-        }
-
-        void report()
-        {
-            writeln("Objects tracked:");
-            foreach(key, value; count)
-            {
-                writefln("%8d %s", value, key.name);
-            }
-        }
-    }
 }
 
 //*****************************************************************************
