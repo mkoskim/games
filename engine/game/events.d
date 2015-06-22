@@ -97,6 +97,11 @@ class Joystick
     //
     //-------------------------------------------------------------------------
 
+	protected float axisvalue(int axis) {
+        float value = (axis + 0.5) / 32768.0;
+        return (abs(value) < AXIS_TRESHOLD) ? 0.0 : value;
+	}
+
     protected void update(SDL_Event *event)
     {
         void emulate(ubyte btn, uint type)
@@ -128,8 +133,7 @@ class Joystick
             //-----------------------------------------------------------------
 
             case SDL_JOYAXISMOTION: {
-                float value = (event.jaxis.value + 0.5) / 32768.0;
-                if(abs(value) < AXIS_TRESHOLD) value = 0.0;
+                float value = axisvalue(event.jaxis.value);
                 axes[event.jaxis.axis] = value;
 
                 //-------------------------------------------------------------
@@ -230,9 +234,9 @@ class Joystick
 
         SDL_JoystickUpdate();
 
-        foreach(i; 0 .. axes.length)    axes[i] = SDL_JoystickGetAxis(stick, cast(int)i);
         foreach(i; 0 .. buttons.length) buttons[i] = SDL_JoystickGetButton(stick, cast(int)i);
         foreach(i; 0 .. hats.length)    hats[i] = SDL_JoystickGetHat(stick, cast(int)i);
+        foreach(i; 0 .. axes.length)    axes[i] = axisvalue(SDL_JoystickGetAxis(stick, cast(int)i));
 
         SDL_JoystickEventState(SDL_ENABLE);
 

@@ -70,10 +70,12 @@ void main()
 
     //-------------------------------------------------------------------------
 
+	/*
     auto textures = [
         gui.Texture.upload(Bitmap.splitSheet(btnframe, colorchart, 4, 4)),
         gui.Texture.upload(Bitmap.splitSheet(grpframe, colorchart, 4, 4)),
     ];
+	*/
 
     //auto box = new Frame(textures, new Box(vec4(1, 1, 0, 1), 32, 32));
 
