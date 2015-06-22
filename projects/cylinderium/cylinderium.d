@@ -27,7 +27,7 @@ const float CAM_HEIGHT = 3.5 * RADIUS;
 //
 //*****************************************************************************
 
-class Scene : render.CollectRender
+class Scene : render.BufferedRender
 {
     render.Model floor, wall, tower, playership;
     
