@@ -98,8 +98,7 @@ class Bitmap
 
     static Bitmap[][] splitSheet(
         Bitmap sheet,
-        vec2i srcsize,
-        vec2i dstsize,
+        vec2i size,
         vec2i top = vec2i(0, 0),
         vec2i bottom = vec2i(0, 0),
     )
@@ -107,32 +106,26 @@ class Bitmap
         //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
         //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
 
-        int cols = sheet.surface.w / (srcsize.x + top.x + bottom.x);
-        int rows = sheet.surface.h / (srcsize.y + top.y + bottom.y); 
+        int cols = sheet.surface.w / (size.x + top.x + bottom.x);
+        int rows = sheet.surface.h / (size.y + top.y + bottom.y); 
 
         Bitmap[][] grid = new Bitmap[][](rows, cols);
 
-        /*
-        SDL_Surface *temp = SDL_CreateRGBSurface(0, texw, texh, 32, 0, 0, 0, 0);
-        SDL_Surface *sprite = SDL_ConvertSurface(temp, sheet.format, 0);
-        SDL_FreeSurface(temp);
-        */
-
-        SDL_Rect srcrect = {x: 0, y: 0, w: srcsize.x, h: srcsize.y};
-        SDL_Rect dstrect = {x: 0, y: 0, w: dstsize.x, h: dstsize.y};
+        SDL_Rect srcrect = {x: 0, y: 0, w: size.x, h: size.y};
+        SDL_Rect dstrect = {x: 0, y: 0, w: size.x, h: size.y};
 
         foreach(y; 0 .. rows) foreach(x; 0 .. cols)
         {
-            auto sprite = new Bitmap(dstsize.x, dstsize.y);
+            auto sprite = new Bitmap(size.x, size.y);
 
-            srcrect.x = top.x + x*(srcsize.x + top.x + bottom.x);
-            srcrect.y = top.y + y*(srcsize.y + top.y + bottom.y);
+            srcrect.x = top.x + x*(size.x + top.x + bottom.x);
+            srcrect.y = top.y + y*(size.y + top.y + bottom.y);
 
-            //SDL_FillRect(sprite.surface, &dstrect, 0);
             SDL_BlitSurface(
                 sheet.surface, &srcrect,
                 sprite.surface, &dstrect
             );
+            
             grid[y][x] = sprite;
             
             //SDL_SaveBMP(sprite, "test.bmp");
@@ -149,15 +142,14 @@ class Bitmap
 
     static Bitmap[][] splitSheet(
         string filename,
-        vec2i srcsize,
-        vec2i dstsize,
+        vec2i size,
         vec2i top = vec2i(0, 0),
         vec2i bottom = vec2i(0, 0)
     )
     {
         return splitSheet(
             new Bitmap(filename),
-            srcsize, dstsize,
+            size,
             top, bottom
         );
     }
@@ -181,15 +173,14 @@ class Bitmap
 
     static Bitmap[][] splitSheet(
         string[] grid, vec4[char] colorchart,
-        vec2i srcsize,
-        vec2i dstsize,
+        vec2i size,
         vec2i top = vec2i(0, 0),
         vec2i bottom = vec2i(0, 0)
     )
     {
         return splitSheet(
             new Bitmap(grid, colorchart),
-            srcsize, dstsize,
+            size,
             top, bottom
         );
     }

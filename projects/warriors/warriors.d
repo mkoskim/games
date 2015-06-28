@@ -37,11 +37,16 @@ void main()
 
     auto actors = new game.FiberQueue();
 
-    auto sheet = render.Texture.upload(
+    auto sheet = render.Texture.Loader.Default(
         Bitmap.splitSheet(
             //"data/spritesheets/KBQkz/1 - 4cpmn.png",
-            "data/spritesheets/KBQkz/2 - 8HG5T.png",
-            vec2i(46, 46),
+            //"data/spritesheets/KBQkz/2 - 8HG5T.png",
+            //"data/spritesheets/KBQkz/4 - AMVGj.png",
+            //"data/spritesheets/KBQkz/5 - BEcZL.png",
+            //"data/spritesheets/KBQkz/6 - FtpXZ.png",
+            //"data/spritesheets/KBQkz/7 - f6KKG.png",
+            //"data/spritesheets/KBQkz/8 - GGTiF.png",
+            "data/spritesheets/KBQkz/9 - YWv3L.png",
             vec2i(46, 46),
             vec2i(2, 2),
             vec2i(2, 2)

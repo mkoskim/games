@@ -82,6 +82,19 @@ class Scene : render.BufferedRender
         auto transparent = addbatch(render.Batch.Transparent3D());
         
         //---------------------------------------------------------------------
+        // Texture loader(s)
+        //---------------------------------------------------------------------
+
+        auto colormap = new render.Texture.Loader();
+        colormap.mipmap = true;
+        colormap.filtering.min = GL_LINEAR_MIPMAP_LINEAR;
+        colormap.compress = true;
+        
+        auto normalmap = new render.Texture.Loader();
+        normalmap.mipmap = true;
+        normalmap.filtering.min = GL_LINEAR_MIPMAP_LINEAR;
+
+        //---------------------------------------------------------------------
         //
         // Load different materials for later use... It would be very nice
         // to have some kind of material database to ease this process...
@@ -89,69 +102,69 @@ class Scene : render.BufferedRender
         //---------------------------------------------------------------------
 
         auto matCaveWall = new render.Material(
-            "engine/stock/tiles/CaveWall/ColorMap.png",
-            "engine/stock/tiles/CaveWall/NormalMap.png",
+            colormap("engine/stock/tiles/CaveWall/ColorMap.png"),
+            normalmap("engine/stock/tiles/CaveWall/NormalMap.png"),
             1.00);
 
         auto matCrackedPlaster = new render.Material(
-            "engine/stock/tiles/CrackedPlaster/ColorMap.png",
-            "engine/stock/tiles/CrackedPlaster/NormalMap.png",
+            colormap("engine/stock/tiles/CrackedPlaster/ColorMap.png"),
+            normalmap("engine/stock/tiles/CrackedPlaster/NormalMap.png"),
             0.95);
 
         auto matSantaFeStucco = new render.Material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
-            "engine/stock/tiles/CaveWall/ColorMap.png",
-            "engine/stock/tiles/SantaFeStucco/NormalMap.png",
+            colormap("engine/stock/tiles/CaveWall/ColorMap.png"),
+            normalmap("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
             0.95);
 
         auto matTanStucco = new render.Material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
-            "engine/stock/tiles/TanStucco/ColorMap.png",
-            "engine/stock/tiles/TanStucco/NormalMap.png",
+            colormap("engine/stock/tiles/TanStucco/ColorMap.png"),
+            normalmap("engine/stock/tiles/TanStucco/NormalMap.png"),
             0.95);
 
         auto matBrickWall = new render.Material(
-            "engine/stock/tiles/BrickWall1/ColorMap.png",
-            "engine/stock/tiles/BrickWall1/NormalMap.png",
+            colormap("engine/stock/tiles/BrickWall1/ColorMap.png"),
+            normalmap("engine/stock/tiles/BrickWall1/NormalMap.png"),
             0.95);
 
         auto matGraniteWall = new render.Material(
-            "engine/stock/tiles/GraniteWall/ColorMap.png",
-            "engine/stock/tiles/GraniteWall/NormalMap.png",
+            colormap("engine/stock/tiles/GraniteWall/ColorMap.png"),
+            normalmap("engine/stock/tiles/GraniteWall/NormalMap.png"),
             0.95);
 
         auto matCrustyConcrete = new render.Material(
-            "engine/stock/tiles/Concrete/Crusty/ColorMap.png",
-            "engine/stock/tiles/Concrete/Crusty/NormalMap.png",
+            colormap("engine/stock/tiles/Concrete/Crusty/ColorMap.png"),
+            normalmap("engine/stock/tiles/Concrete/Crusty/NormalMap.png"),
             0.95);
 
         auto matDirtyConcrete = new render.Material(
-            "engine/stock/tiles/Concrete/Dirty/ColorMap.png",
-            "engine/stock/tiles/Concrete/Dirty/NormalMap.png",
+            colormap("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
+            normalmap("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
             0.95);
 
         auto matCarvedSandstone = new render.Material(
-            "engine/stock/tiles/CarvedSandstone/ColorMap.png",
+            colormap("engine/stock/tiles/CarvedSandstone/ColorMap.png"),
             //"engine/stock/tiles/CaveWall/ColorMap.png",
             //vec3(0.5, 0.4, 0.2),
-            "engine/stock/tiles/CarvedSandstone/NormalMap.png",
+            normalmap("engine/stock/tiles/CarvedSandstone/NormalMap.png"),
             0.95);
 
         auto matAlienCarving = new render.Material(
             //"engine/stock/tiles/AlienCarving/ColorMap.png",
-            vec4(0.75, 0.5, 0.25, 1),
-            "engine/stock/tiles/AlienCarving/NormalMap.png",
+            colormap(vec4(0.75, 0.5, 0.25, 1)),
+            normalmap("engine/stock/tiles/AlienCarving/NormalMap.png"),
             0.15);
 
         auto matMetallicAssembly = new render.Material(
             //"engine/stock/tiles/MetallicAssembly/ColorMap.png",
-            vec4(0.5, 0.5, 0.5, 1),
-            "engine/stock/tiles/MetallicAssembly/NormalMap.png",
+            colormap(vec4(0.5, 0.5, 0.5, 1)),
+            normalmap("engine/stock/tiles/MetallicAssembly/NormalMap.png"),
             0.15);
 
         auto matGlass = new render.Material(
-            vec4(0.8, 0.8, 0.9, 0.3),
-            "engine/stock/tiles/SantaFeStucco/NormalMap.png",
+            colormap(vec4(0.8, 0.8, 0.9, 0.3)),
+            normalmap("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
             0.50
         );
 
@@ -178,7 +191,7 @@ class Scene : render.BufferedRender
         floorshapes = [
             floors.upload(floormesh, matGraniteWall),
             floors.upload(floormesh, new render.Material(
-                vec4(0.25, 0.25, 0.25, 1),
+                colormap(vec4(0.25, 0.25, 0.25, 1)),
                 matGraniteWall.normalmap,
                 0.15
             )),
@@ -194,11 +207,6 @@ class Scene : render.BufferedRender
             */
             transparent.upload(monkeymesh, matGlass),
         ];
-    
-        foreach(model; wallshapes ~ floorshapes ~ propshapes) {
-            if(model.material.colormap) model.material.colormap.mipmap();
-            if(model.material.normalmap) model.material.normalmap.mipmap();
-        }
     }
 
     void loadmaze(string[] grid)

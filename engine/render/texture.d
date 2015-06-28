@@ -59,75 +59,164 @@ class Texture
     //-------------------------------------------------------------------------
 
     uint width, height;
-    bool mipmapped;
 
     vec2 size() { return vec2(width, height); }
+
+    //-------------------------------------------------------------------------
+    // Texture loader / sampling parameters
+    //-------------------------------------------------------------------------
+    
+    static class Loader
+    {
+        static Loader Default;
+
+        static this() { Default = new Loader(); }
+
+        //----------------------------------------------------------------------
+
+        struct FILTERING { GLenum min, mag; }
+        struct WRAPPING { GLenum s, t; }
+        
+        FILTERING filtering;
+        WRAPPING wrapping;
+
+        bool mipmap;
+        bool compress;
+
+        //----------------------------------------------------------------------
+
+        this() {
+            filtering = FILTERING(GL_LINEAR, GL_LINEAR);
+            wrapping  = WRAPPING(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+            mipmap = false;
+            compress = false;
+        }
+
+        //---------------------------------------------------------------------
+        // SDL surface to texture
+        //---------------------------------------------------------------------
+
+        Texture opCall(SDL_Surface *surface)
+        {
+            return new Texture(
+                this,
+                surface.w, surface.h,
+                surface.pixels,
+                _GLformat(surface)
+            );
+        }
+
+        Texture opCall(Bitmap bitmap) { return opCall(bitmap.surface); }
+
+        //-------------------------------------------------------------------------
+        // Loading texture from blob file
+        //-------------------------------------------------------------------------
+
+        Texture opCall(string filename)
+        {
+            return opCall(new Bitmap(filename));
+        }
+
+        //-------------------------------------------------------------------------
+        // Creating single pixel "dummy" textures
+        //-------------------------------------------------------------------------
+
+        Texture opCall(vec4 color)
+        {
+            return new Texture(this, 1, 1, cast(void*)color.value_ptr, GL_RGBA, GL_FLOAT);
+        }
+
+        //-------------------------------------------------------------------------
+        // Texture sheets
+        //-------------------------------------------------------------------------
+
+        Texture[] opCall(Bitmap[] bitmaps)
+        {
+            Texture[] row;
+            foreach(bitmap; bitmaps) row ~= opCall(bitmap);
+            return row;
+        }
+
+        Texture[][] opCall(Bitmap[][] bitmaps)
+        {
+            Texture[][] grid;
+            
+            foreach(row; bitmaps) grid ~= opCall(row);
+
+            return grid;
+        }
+    }
 
     //-------------------------------------------------------------------------
     // Creating texture from pixel data buffer
     //-------------------------------------------------------------------------
 
-    this(uint w, uint h, void* buffer, GLenum format, GLenum data_width = GL_UNSIGNED_BYTE)
+    this(Loader loader, uint w, uint h, void* buffer, GLenum format, GLenum type = GL_UNSIGNED_BYTE)
     {
         Track.add(this);
-
-        debug const string[GLenum] _name = [
-            GL_BGRA: "GL_BGRA",
-            GL_RGBA: "GL_RGBA",
-            GL_BGR: "GL_BGR",
-            GL_RGB: "GL_RGB",
-            
-            GL_RGB8: "GL_RGB8",
-
-            GL_COMPRESSED_RGB: "GL_COMPRESSED_RGB",
-            GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
-        ];
-        
-        checkgl!glGenTextures(1, &ID);
 
         width = w;
         height = h;
 
-        final switch(format)
-        {
-            // TODO: BGR(A) formats seem not to work
-            case GL_BGRA: format = GL_RGBA; goto case GL_RGBA;
-            case GL_BGR: format = GL_RGB; goto case GL_RGB;
-                
-            case GL_RGB8: format = GL_RGB; goto case GL_RGB;
-            
-            case GL_RGBA:
-                unpack_align(4);
-                break;
-            
-            case GL_RGB: switch(data_width)
-            {
-                case GL_UNSIGNED_BYTE: unpack_align(1); break;
-                default: unpack_align(4); break;
-            } break;
-        }
-
-        //debug writeln("Format: ", _name[format], " internal: ", _name[internal]);
+        //---------------------------------------------------------------------
 
         //TODO("Alpha maps not working");
 
-        bind();
+        GLenum intformat;
+
+        final switch(format)
+        {
+            
+            case GL_BGRA:
+            case GL_RGBA:
+                format = GL_RGBA;
+                intformat = loader.compress ? GL_COMPRESSED_RGBA : format;
+                break;
+            
+            case GL_RGB8:
+            case GL_RGB:
+                format = GL_RGB;
+                intformat = loader.compress ? GL_COMPRESSED_RGB : format;
+                break;
+        }
+
+        //---------------------------------------------------------------------
+
+        //debug writeln("Format: ", _name[format], " internal: ", _name[intformat]);
+
+        checkgl!glGenTextures(1, &ID);
+
+        checkgl!glBindTexture(GL_TEXTURE_2D, ID);
+
         checkgl!glTexImage2D(GL_TEXTURE_2D,
             0,                  // Mipmap level
-            format,             // Internal format
+            intformat,          // Internal format
             w, h,
             0,                  // Border
             format,             // Format of data
-            data_width,         // Data width
+            type,               // Data type/width
             buffer              // Actual data
         );
-        unbind();
 
-        filtering(GL_LINEAR, GL_LINEAR);
-        wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-        //filtering(GL_NEAREST, GL_NEAREST);
-        //filtering(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
-        mipmapped = false;
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, loader.filtering.mag);
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, loader.filtering.min);
+
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, loader.wrapping.s);
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, loader.wrapping.t);
+
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
+        if(loader.mipmap) {
+            import std.math: log2, fmax;
+            int levels = cast(int)log2(fmax(width, height)) - 4;
+            if(levels > 0) {
+                checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
+                checkgl!glGenerateMipmap(GL_TEXTURE_2D);
+            }
+        }
+
+        checkgl!glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     //-------------------------------------------------------------------------
@@ -140,102 +229,67 @@ class Texture
 
     //-------------------------------------------------------------------------
 
-    void bind()   { checkgl!glBindTexture(GL_TEXTURE_2D, ID); }
-    void unbind() { checkgl!glBindTexture(GL_TEXTURE_2D, 0); }
+    debug private static const string[GLenum] formatname;
     
-    void filtering(GLenum min, GLenum mag)
-    {
-        bind();
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
-        unbind();
+    static this() {
+        formatname = [
+            GL_BGRA: "GL_BGRA",
+            GL_RGBA: "GL_RGBA",
+            GL_BGR: "GL_BGR",
+            GL_RGB: "GL_RGB",
+            
+            GL_RGB8: "GL_RGB8",
+
+            GL_COMPRESSED_RGB: "GL_COMPRESSED_RGB",
+            GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
+            
+            GL_COMPRESSED_RGB_S3TC_DXT1_EXT: "GL_COMPRESSED_RGB_S3TC_DXT1",
+            GL_COMPRESSED_RGBA_S3TC_DXT1_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT1",
+            GL_COMPRESSED_RGBA_S3TC_DXT3_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT3",
+            GL_COMPRESSED_RGBA_S3TC_DXT5_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT5",
+            
+            0x86B0: "GL_COMPRESSED_RGB_FXT1_3DFX",
+            0x86B1: "GL_COMPRESSED_RGBA_FXT1_3DFX",
+        ];
     }
 
-    void unpack_align(GLint alignment)
-    {
-        bind();
-        checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
-        unbind();
-    }
+    //-------------------------------------------------------------------------
 
-    void wrapping(GLenum s, GLenum t)
+    void info()
     {
-        bind();
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
-        unbind();
-    }
-
-    Texture mipmap()
-    {
-        if(!mipmapped) {
-            bind();
-            checkgl!glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16);
-            checkgl!glGenerateMipmap(GL_TEXTURE_2D);
-            filtering(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-            unbind();
-            mipmapped = true;
+        GLint getparam(GLenum param) {
+            GLint value;
+            checkgl!glGetTexParameteriv(GL_TEXTURE_2D, param, &value);
+            return value;
         }
-        return this;
-    }
-
-    //-------------------------------------------------------------------------
-    // SDL surface to texture
-    //-------------------------------------------------------------------------
-
-    this(SDL_Surface *surface)
-    {
-        this(
-            surface.w, surface.h,
-            surface.pixels,
-            _GLformat(surface)
-        );
-    }
-
-    this(Bitmap bitmap) { this(bitmap.surface); }
-
-    //-------------------------------------------------------------------------
-    // Loading texture from blob file
-    //-------------------------------------------------------------------------
-
-    this(string filename)
-    {
-        SDL_Surface* img = blob.loadimage(filename);
-        this(img);
-        //debug writeln("Texture.: ", filename, ": ", img.w, " x ", img.h);
-        //debug writeln("- Pixels: ", img.pixels[0 .. 5]);
-
-        SDL_FreeSurface(img);
-    }
-
-    //-------------------------------------------------------------------------
-    // Creating single pixel "dummy" textures
-    //-------------------------------------------------------------------------
-
-    this(vec4 color)
-    {
-        this(1, 1, cast(void*)color.value_ptr, GL_RGBA, GL_FLOAT);
-    }
-
-    //-------------------------------------------------------------------------
-    // Texture sheets
-    //-------------------------------------------------------------------------
-
-    static Texture[] upload(Bitmap[] bitmaps)
-    {
-        Texture[] row;
-        foreach(bitmap; bitmaps) row ~= new Texture(bitmap);
-        return row;
-    }
-
-    static Texture[][] upload(Bitmap[][] bitmaps)
-    {
-        Texture[][] grid;
         
-        foreach(row; bitmaps) grid ~= upload(row);
+        GLint getlvlparam(GLenum param, int lvl = 0) {
+            GLint value;
+            checkgl!glGetTexLevelParameteriv(GL_TEXTURE_2D, lvl, param, &value);
+            return value;
+        }
+        
+        string getformatname() {
+            import core.exception: RangeError;
+            try {
+                return formatname[getlvlparam(GL_TEXTURE_INTERNAL_FORMAT)];
+            }
+            catch(RangeError e) {
+                return to!string(getlvlparam(GL_TEXTURE_INTERNAL_FORMAT));
+            }
+        }
+        
+        checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
-        return grid;
+        writeln("ID...........: ", ID);
+        writeln("- Dimensions.: ", getlvlparam(GL_TEXTURE_WIDTH), " x ", getlvlparam(GL_TEXTURE_HEIGHT));
+        writeln("- Levels.....: ", getparam(GL_TEXTURE_MAX_LEVEL));
+        writeln("- Format.....: ", getformatname());
+        if(getlvlparam(GL_TEXTURE_COMPRESSED)) {
+            writeln("- Size.......: ", getlvlparam(GL_TEXTURE_COMPRESSED_IMAGE_SIZE));
+        }
+
+        checkgl!glBindTexture(GL_TEXTURE_2D, 0);
     }
-    
 }
 

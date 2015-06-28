@@ -19,7 +19,7 @@ class Track
             if(!(info in count)) count[info] = 0;
             count[info]++;
         }
-        
+
         void remove(Object what) {
             count[what.classinfo]--;
         }

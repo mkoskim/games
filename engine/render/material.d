@@ -53,8 +53,8 @@ class Material
         static Texture whitemap = null;
         static Texture flatmap = null;
 
-        if(!whitemap) whitemap = new Texture(vec4(1, 1, 1, 1));
-        if(!flatmap)  flatmap  = new Texture(vec4(0.5, 0.5, 1, 1));
+        if(whitemap is null) whitemap = Texture.Loader.Default(vec4(1, 1, 1, 1));
+        if(flatmap is null)  flatmap  = Texture.Loader.Default(vec4(0.5, 0.5, 1, 1));
 
         this.colormap = colormap ? colormap : whitemap;
         this.normalmap = normalmap ? normalmap : flatmap;
@@ -67,39 +67,41 @@ class Material
 
     //-------------------------------------------------------------------------
 
-    this(string colormap, string normalmap, float roughness = 1.0)
-    {
-        this(new Texture(colormap), new Texture(normalmap), roughness);
-    }
-
-    this(vec4 color, Texture normalmap, float roughness = 1.0)
-    {
-        this(new Texture(color), normalmap, roughness);
-    }
-
-    this(vec4 color, string normalmap, float roughness = 1.0)
-    {
-        this(color, new Texture(normalmap), roughness);
-    }
-
     this(Texture colormap, float roughness = 1.0)
     {
         this(colormap, null, roughness);
     }
 
+    //-------------------------------------------------------------------------
+
+    this(string colormap, string normalmap, float roughness = 1.0)
+    {
+        this(Texture.Loader.Default(colormap), Texture.Loader.Default(normalmap), roughness);
+    }
+
+    this(vec4 color, Texture normalmap, float roughness = 1.0)
+    {
+        this(Texture.Loader.Default(color), normalmap, roughness);
+    }
+
+    this(vec4 color, string normalmap, float roughness = 1.0)
+    {
+        this(Texture.Loader.Default(color), Texture.Loader.Default(normalmap), roughness);
+    }
+
     this(string colormap, float roughness = 1.0)
     {
-        this(new Texture(colormap), roughness);
+        this(Texture.Loader.Default(colormap), roughness);
     }
 
     this(SDL_Surface *colormap, float roughness = 1.0)
     {
-        this(new Texture(colormap), null, roughness);
+        this(Texture.Loader.Default(colormap), null, roughness);
     }
 
     this(vec4 color, float roughness = 1.0)
     {
-        this(new Texture(color), null, roughness);
+        this(Texture.Loader.Default(color), null, roughness);
     }
 
     this(float r, float g, float b, float a = 1)
@@ -112,10 +114,10 @@ class Material
     // icons etc.
     //-------------------------------------------------------------------------
 
-    static Material[] upload(Bitmap[] bitmaps)
+    static Material[] upload(Texture.Loader upload, Bitmap[] bitmaps)
     {
         Material[] list;
-        foreach(texture; Texture.upload(bitmaps)) list ~= new Material(texture);
+        foreach(texture; upload(bitmaps)) list ~= new Material(texture);
         return list;
     }
 }

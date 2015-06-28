@@ -47,7 +47,7 @@ class Box : Space
     this(vec4 color, float w, float h)
     {
         this(w, h);
-        this.tex = new Texture(color);
+        this.tex = Texture.Loader.Default(color);
     }
 
     this(Texture texture, float w, float h)
@@ -64,12 +64,12 @@ class Box : Space
 
     this(Bitmap bitmap, float w, float h)
     {
-        this(new Texture(bitmap), w, h);
+        this(Texture.Loader.Default(bitmap), w, h);
     }
     
     this(Bitmap bitmap)
     {
-        this(new Texture(bitmap));
+        this(Texture.Loader.Default(bitmap));
     }
 
     //-------------------------------------------------------------------------
