@@ -9,6 +9,7 @@ uniform mat4 mView;
 uniform mat4 mModel;
 
 uniform LIGHT light;
+
 uniform MATERIAL material;
 
 //-----------------------------------------------------------------------------

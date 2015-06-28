@@ -59,6 +59,11 @@ void init()
 
     checkgl!glClearColor(0, 0, 0, 1);
     checkgl!glClearDepth(1);
+
+    //-------------------------------------------------------------------------
+
+    checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    checkgl!glPixelStorei(GL_PACK_ALIGNMENT, 1);
 }
 
 //-----------------------------------------------------------------------------

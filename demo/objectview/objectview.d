@@ -57,7 +57,7 @@ void main()
         blob.wavefront.loadmesh("engine/stock/mesh/Chess/rook.obj"),
         new render.Material(
             //new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
-            new render.Texture(vec4(1, 0.8, 0, 1)),
+            render.Texture.Loader.Default(vec4(1, 0.8, 0, 1)),
             //new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
             //0.75
         )

@@ -177,7 +177,7 @@ void play(string mazename)
     {
         auto sheet = render.Model.sheet(
             batch,
-            new render.Texture("data/images/ChomperSprites.png"),
+            render.Texture.Loader.Default("data/images/ChomperSprites.png"),
             32, 32,
             1.66, 1.66
         );

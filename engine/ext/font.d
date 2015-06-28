@@ -116,7 +116,7 @@ class Font
                 text
             )
         );
-        auto texture = new Texture(bitmap);
+        auto texture = Texture.Loader.Default(bitmap);
         SDL_FreeSurface(bitmap);
         return texture;
     }

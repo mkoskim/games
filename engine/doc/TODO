@@ -6,10 +6,25 @@ DONE:
 
 - INITIALLY DONE: Texture mipmaps: In 3D scenes, this could make them prettier.
 
+- DONE: Texture loader class, holding texture sampling parameters
+
+- DONE: Now there is Texture.Loader class to hold upload/sampling parameters.
+  DESCRIPTION: Texture compression, mipmapping etc: there should be easy way
+  to tell to rendering framework, for which purpose the texture is loaded
+  and thus, how it can be postprocessed:
+  
+    - GUI elements and such: no compression, no mipmaps
+    - 3D textures: compression and mipmapping
+
+
 
 *******************************************************************************
 
 WORKLIST:
+
+- I would need to collect some default setups to e.g. ext/ directory,
+  so that I could work at higher levels without needing to worry about
+  low level changes.
 
 - Shader family: It could be time to concentrate on shader management
   before going forward:
@@ -32,14 +47,10 @@ WORKLIST:
   * Move default shaders to ext/ directory... Would be better to locate
     them to stock/ - or create a new directory for defaults...
 
-- I would need to collect some default setups to e.g. ext/ directory,
-  so that I could work at higher levels without needing to worry about
-  low level changes.
-
 - Move default shaders under ext/ directory (?)
 
 - "CPU rendering": Rendering objects without uploading them to shader.
-  This would be good for example for debugging (rendering normally
+  This could be good for example for debugging (rendering normally
   invisible things).
 
 - "Debug channel" to rendering batches: adding a debug mesh to an object
@@ -53,7 +64,7 @@ WORKLIST:
   the models, and thus they are stored to BLOB, too - no need for complex
   building mechanism to include correct converters to compiled program.
 
-- Decals (for targeting circles)
+- Decals (e.g. for targeting circles)
 
 - Examine, if BLOB could support symbolic links
 
@@ -63,13 +74,19 @@ WORKLIST:
 
 - CONTINUE: Replace ulong with size_t
 
-- Bitmap.splitSheet: Scaling splitted sprites does not work.
-
 - Model.sheet: This is using atlas for rendering. It would be
   probably best to implement dedicated atlas sprite blitter...
 
 - Bitmap manipulation: when loading BW bitmaps, convert them suitable
   for colorizing.
+
+- Shader Uniform buffers? Any use?
+
+    https://www.opengl.org/wiki/Uniform_Buffer_Object
+    https://www.opengl.org/wiki/Interface_Block_(GLSL)
+
+- Fonts & Texture loader: Fonts may need specific texture loader, for example,
+  if the glyphs are zoomed considerably (e.g. text in 3D graphics).
 
 *******************************************************************************
 
@@ -553,17 +570,24 @@ CAMERA:
 
 -------------------------------------------------------------------------------
 
-BITMAPS:
-
-- Some sort of "tile toolkit" to create tiles
-
-- Also, some sort of normal map toolkit to create normal maps
-
--------------------------------------------------------------------------------
-
 TEXTURES:
 
 - Texture update
+
+-------------------------------------------------------------------------------
+
+BITMAPS:
+
+- Some sort of "tile toolkit" to create tiles?
+
+- Also, some sort of normal map toolkit to create normal maps
+
+- Atlas creation
+
+- Load-time scaling of bitmaps (some kind of image manipulation
+  library)
+
+- Bitmap.splitSheet: Scaling splitted sprites does not work.
 
 -------------------------------------------------------------------------------
 

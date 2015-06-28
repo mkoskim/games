@@ -87,7 +87,7 @@ class Batch
     // Loading empty model is used to create 'placeholders'
     //
     //-------------------------------------------------------------------------
-    
+
     bool[Model] models;
 
     Model upload(Model model)
@@ -109,7 +109,7 @@ class Batch
     Model[] upload(Shader.VAO vao, Bitmap[] colormaps)
     {
         Model[] list;
-        foreach(colormap; Texture.upload(colormaps)) {
+        foreach(colormap; Texture.Loader.Default(colormaps)) {
             list ~= upload(new Model(vao, new Material(colormap)));
         }
         return list;
