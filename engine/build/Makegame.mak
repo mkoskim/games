@@ -12,9 +12,9 @@ endif
 
 #------------------------------------------------------------------------------
 
-SRCPATH += ~/.dub/packages/derelict-gl3-1.0.13/source/
-SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.5/source/
-SRCPATH += ~/.dub/packages/derelict-util-2.0.0/source/
+SRCPATH += ~/.dub/packages/derelict-gl3-1.0.14/source/
+SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.6/source/
+SRCPATH += ~/.dub/packages/derelict-util-2.0.1/source/
 SRCPATH += ~/.dub/packages/derelict-assimp3-1.0.1/source/
 SRCPATH += ~/.dub/packages/gl3n-1.1.0/
 
