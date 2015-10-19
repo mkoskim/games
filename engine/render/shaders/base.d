@@ -24,15 +24,23 @@ module engine.render.shaders.base;
 // to be changed: you can (safely; supported by framework) change the shader
 // rendering the model, as long as the shader belongs to the same family.
 //
+// Also: We can't have common shader render method. Shaders can render
+// different kinds of objects: some render 3D meshes, some render particles,
+// some render HUD objects.
+//
 //*****************************************************************************
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
 
-import engine.render.shaders.gputypes;
-import engine.render.shaders.gpumesh;
-import engine.render.shaders.gpucompile: gpuCompileProgram;
+import gpu = engine.render.gpu;
+
+/*
+import engine.render.gpu.types;
+import engine.render.gpu.mesh;
+import engine.render.gpu.compile: gpuCompileProgram;
+*/
 
 import engine.render.transform;
 import engine.render.mesh;
@@ -115,7 +123,7 @@ abstract class Shader
 
     private {
         GLint[string] _namecache;
-        
+
         void _getlocation(string namespace, string name)
         {
             extern(C) GLint function(GLuint, const(char)*) query;
@@ -203,8 +211,8 @@ abstract class Shader
         //uint ID;
 
         BoundSphere bsp;
-        VBO vbo;
-        IBO ibo;
+        gpu.VBO vbo;
+        gpu.IBO ibo;
 
         this()  { /*checkgl!glGenVertexArrays(1, &ID);*/ }
         ~this() { /*checkgl!glDeleteVertexArrays(1, &ID);*/ }
@@ -271,7 +279,7 @@ abstract class Shader
     //
     //-------------------------------------------------------------------------
 
-    private static void attrib(alias field)(VBO vbo, string name)
+    private static void attrib(alias field)(gpu.VBO vbo, string name)
     {
         vbo.attrib!(typeof(field))(name, field.offsetof);
     }
@@ -282,7 +290,7 @@ abstract class Shader
 
         if(mesh.mode == GL_TRIANGLES) mesh.computeTangents();
 
-        vao.vbo = new VBO(
+        vao.vbo = new gpu.VBO(
             mesh.vertices.ptr,
             mesh.vertices.length,
             mesh.VERTEX.sizeof
@@ -295,7 +303,7 @@ abstract class Shader
 
         vao.bsp = BoundSphere.create(mesh);
 
-        vao.ibo = new IBO(mesh.mode, mesh.faces);
+        vao.ibo = new gpu.IBO(mesh.mode, mesh.faces);
 
         vao.store();
 
@@ -316,7 +324,7 @@ abstract class Shader
 
     protected this(string[] common, string[] vsfiles, string[] fsfiles)
     {
-        programID = gpuCompileProgram(common, vsfiles, fsfiles);
+        programID = gpu.CompileProgram(common, vsfiles, fsfiles);
     }
 
     protected this(string filename) { this([], [filename], [filename]); }

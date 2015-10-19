@@ -2,10 +2,16 @@
 
                             RENDERING FRAMEWORK
                             -------------------
-                            
-                            
-(To be written) This directory contains modules for rendering the game using
-OpenGL.
+
+
+This part of the game engine is under heavy restructuring. We can't have
+one simple 'One Size Fit All' solution. Instead, we need to split rendering
+framework components, to be gathered together to form an engine to suit the
+need of the game.
+
+For quick development, we would have ready-made solutions for some common
+purposes, for example, generic 2D and 3D game rendering, and generic HUD
+rendering.
 
 Some thoughts...
 

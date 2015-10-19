@@ -10,7 +10,7 @@ module engine.render.shaders.defaults;
 import engine.render.util;
 
 import engine.render.shaders.base;
-import engine.render.shaders.gpumesh;
+import engine.render.gpu.mesh;
 
 import engine.render.transform;
 import engine.render.mesh;
@@ -45,11 +45,11 @@ abstract class Default : Shader
     override void loadMaterial(Material mat, Material.Modifier mod)
     {
         texture("material.colormap", 0, mat.colormap);
-        if(!(mod is null)) {
-            uniform("material.modifier.color", mod.color);
+        if(mod is null) {
+            uniform("material.modifier.color", vec4(1, 1, 1, 1));
         }
         else {
-            uniform("material.modifier.color", vec4(1, 1, 1, 1));
+            uniform("material.modifier.color", mod.color);
         }
     }
     

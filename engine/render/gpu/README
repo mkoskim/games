@@ -1,0 +1,10 @@
+
+
+                            LOW LEVEL GPU ACCESS
+                            --------------------
+
+
+This directory contains classes for low level GPU access. In longer run, it
+is intended that you can have several different rendering engines, for example,
+one for 3D scene and one for HUD.
+

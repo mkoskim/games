@@ -4,7 +4,7 @@
 //
 //*****************************************************************************
 
-module engine.render.shaders.gpucompile;
+module engine.render.gpu.compile;
 
 //-----------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ class ShaderCompileError : Exception
 //
 //*****************************************************************************
 
-GLuint gpuCompileProgram(string[] common, string[] vsfiles, string[] fsfiles)
+GLuint CompileProgram(string[] common, string[] vsfiles, string[] fsfiles)
 {
     //-------------------------------------------------------------------------
 
@@ -149,6 +149,9 @@ private GLuint compileShader(GLenum shadertype, string[] files)
 
     //debug writeln(getShaderSource(shaderID));
 
+//*
+    throw new ShaderCompileError(format("%s", getShaderInfoLog(shaderID)));
+/*/
     string msg = getShaderInfoLog(shaderID);
     auto errorat = new Location(msg);
 
@@ -174,6 +177,7 @@ private GLuint compileShader(GLenum shadertype, string[] files)
         errorat.line,
         errorat.msg)
     );
+/**/
 }
 
 //*****************************************************************************
