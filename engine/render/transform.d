@@ -10,8 +10,9 @@ module engine.render.transform;
 
 import engine.render.util;
 
-import engine.game: frame;
-
+//-------------------------------------------------------------------------
+// Grip is (basically) any kind of object that can output a 4x4 transform
+// matrix. Grip is used for various movable objects.
 //-------------------------------------------------------------------------
 
 class Grip
@@ -34,7 +35,9 @@ class Grip
     mat4 matrix() { return Transform.matrix(pos, rot, scale); }
 
     //-------------------------------------------------------------------------
-
+    // Creating fixed transforms
+    //-------------------------------------------------------------------------
+    
     static Transform fixed(
         Transform parent = null,
         vec3 pos = vec3(0, 0, 0),
@@ -60,6 +63,8 @@ class Grip
         return fixed(vec3(x, y, z));
     }
 
+    //-------------------------------------------------------------------------
+    // Creating movable transforms
     //-------------------------------------------------------------------------
 
     static Transform movable(
@@ -89,6 +94,16 @@ class Grip
 }
 
 //-------------------------------------------------------------------------
+//
+// Transform is base class for 4x4 transformation matrix. It has
+// reference to a grip object to update the transformation. Transformations
+// form a tree that is generally formed by scene graph. Currently,
+// transformation tree is separated from nodes to allow higher degree of
+// freedom to decide how to store objects.
+//
+//-------------------------------------------------------------------------
+
+private import engine.game: frame;
 
 class Transform
 {
@@ -138,23 +153,26 @@ class Transform
 
     //-------------------------------------------------------------------------
     
+    private {
+        int last_updated;
+        mat4 current;
+
+        void update()
+        {
+            if(grip) transform = grip.matrix();
+            current = transform;
+            if(parent) current = parent.mModel() * current;
+            last_updated = frame;
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    
     mat4 mModel() {
         if(last_updated != frame) update();
         return current;
     }
 
-    private {
-        int last_updated;
-        mat4 current;
-    }
-
-    private void update()
-    {
-        if(grip) transform = grip.matrix();
-        current = transform;
-        if(parent) current = parent.mModel() * current;
-        last_updated = frame;
-    }
 
     //-------------------------------------------------------------------------
 

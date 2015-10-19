@@ -2,9 +2,6 @@
 //
 // Textures
 //
-// TODO: Implement mipmapping
-// TODO: Experiment texture compression
-//
 //*****************************************************************************
 
 module engine.render.texture;
@@ -76,7 +73,7 @@ class Texture
 
         struct FILTERING { GLenum min, mag; }
         struct WRAPPING { GLenum s, t; }
-        
+
         FILTERING filtering;
         WRAPPING wrapping;
 
@@ -230,29 +227,31 @@ class Texture
     //-------------------------------------------------------------------------
 
     debug private static const string[GLenum] formatname;
-    
+
     static this() {
-        formatname = [
+        debug formatname = [
             GL_BGRA: "GL_BGRA",
             GL_RGBA: "GL_RGBA",
             GL_BGR: "GL_BGR",
             GL_RGB: "GL_RGB",
-            
+
             GL_RGB8: "GL_RGB8",
 
             GL_COMPRESSED_RGB: "GL_COMPRESSED_RGB",
             GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
-            
+
             GL_COMPRESSED_RGB_S3TC_DXT1_EXT: "GL_COMPRESSED_RGB_S3TC_DXT1",
             GL_COMPRESSED_RGBA_S3TC_DXT1_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT1",
             GL_COMPRESSED_RGBA_S3TC_DXT3_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT3",
             GL_COMPRESSED_RGBA_S3TC_DXT5_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT5",
-            
+
             0x86B0: "GL_COMPRESSED_RGB_FXT1_3DFX",
             0x86B1: "GL_COMPRESSED_RGBA_FXT1_3DFX",
         ];
     }
 
+    //-------------------------------------------------------------------------
+    // Print out information (for e.g. debugging purposes)
     //-------------------------------------------------------------------------
 
     void info()
@@ -262,13 +261,13 @@ class Texture
             checkgl!glGetTexParameteriv(GL_TEXTURE_2D, param, &value);
             return value;
         }
-        
+
         GLint getlvlparam(GLenum param, int lvl = 0) {
             GLint value;
             checkgl!glGetTexLevelParameteriv(GL_TEXTURE_2D, lvl, param, &value);
             return value;
         }
-        
+
         string getformatname() {
             import core.exception: RangeError;
             try {
@@ -278,7 +277,7 @@ class Texture
                 return to!string(getlvlparam(GL_TEXTURE_INTERNAL_FORMAT));
             }
         }
-        
+
         checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
         writeln("ID...........: ", ID);
