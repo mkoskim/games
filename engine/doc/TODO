@@ -41,7 +41,7 @@ WORKLIST:
     just as the programmer made them.
 
   * Mesh to intermediate format, separate VAO buffer creation to
-    shader family upload. It can be local buffer, as it is consumed
+    shader family upload. It can also be local buffer, as it is consumed
     during OpenGL download.
     
   * Move default shaders to ext/ directory... Would be better to locate
@@ -104,10 +104,10 @@ MISC: Yet uncategorized "Post-It" notes...
         VBO + IBO   0   ... x       MeshPart 1
                     x+1 ... y       MeshPart 2
                     ...
-        
+
   MeshPart is an IBO range. When rendering, you can keep both VBO
   and IBO binded, while changing material between next range.
-  
+
   This is just not necessarily enough, as you may want to render parts
   in different rendering stages. As a simple example, consider a tree.
   Trees are usually constructed so that trunk and larger branches are
