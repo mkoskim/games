@@ -88,6 +88,11 @@ WORKLIST:
 - Fonts & Texture loader: Fonts may need specific texture loader, for example,
   if the glyphs are zoomed considerably (e.g. text in 3D graphics).
 
+- One thing to think about some times: we would like to activate GPU
+  processing as soon as possible, to make it work parallel to CPU. But there
+  are things that restrict this. For example, CPU needs to fetch all
+  nodes before they can be sorted.
+
 *******************************************************************************
 
 MISC: Yet uncategorized "Post-It" notes...

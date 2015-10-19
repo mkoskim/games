@@ -8,7 +8,7 @@
 
     "sourcePaths": [ "." ],
     "importPaths": [ "." ],
-    
+
     "excludedSourceFiles": [
         "obsolete/*",
     ],
@@ -19,5 +19,5 @@
         "derelict-gl3": "*",
         "derelict-assimp3": "*",
         "gl3n": "*",
-    },    
+    },
 }

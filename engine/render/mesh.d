@@ -4,7 +4,7 @@
 //
 // Mesh is an intermediate object between model sources (files, geometry
 // generators) and shaders. At the moment, Mesh data buffers can directly be
-// used as VBO data buffers (that is, Mesh is close to VAO), but this can be
+// used as VBO data buffers (that is, Mesh is close to VAO), but this is
 // changed in future.
 //
 // It is intended that you can modify (move, rotate, scale) Mesh data before
@@ -32,7 +32,7 @@ class Mesh
     // Shader.upload().
     //
     //-------------------------------------------------------------------------
-    
+
     struct VERTEX
     {
         vec3 pos;

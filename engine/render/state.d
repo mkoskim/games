@@ -1,6 +1,8 @@
 //*****************************************************************************
 //
-// (Render) State: Holds OpenGL settings for rendering.
+// (Render) State: Holds OpenGL settings for rendering. This is very
+// preliminary implementation which needs some serious development once
+// shader subsystem is in better condition.
 //
 //*****************************************************************************
 
@@ -17,8 +19,8 @@ import shaders = engine.render.shaders.defaults;
 
 class State
 {
-    Shader shader;
-    void delegate() apply;
+    Shader shader;          // Shader to use
+    void delegate() apply;  // Function to execute on switch
 
     //-------------------------------------------------------------------------
 
@@ -26,9 +28,9 @@ class State
         this.apply = apply;
         this.shader = shader;
     }
-    
+
     //-------------------------------------------------------------------------
-    
+
     static State Default2D(Shader shader = shaders.Default2D.create())
     {
         return new State(shader, (){
@@ -58,17 +60,17 @@ class State
             checkgl!glCullFace(GL_BACK);
             checkgl!glFrontFace(GL_CCW);
             checkgl!glPolygonMode(GL_FRONT, GL_FILL);
-            
+
             checkgl!glEnable(GL_DEPTH_TEST);
             checkgl!glEnable(GL_BLEND);
             checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         });
     }
-    
+
     //-------------------------------------------------------------------------
-    
+
     private static State active = null;
-        
+
     final void activate()
     {
         if(active != this)
