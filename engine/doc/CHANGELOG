@@ -6,6 +6,24 @@
 
 Version something:
 
+- INITIALLY DONE: Mipmaps
+
+- INITIALLY DONE: Texture mipmaps: In 3D scenes, this could make them prettier.
+
+- DONE: Texture loader class, holding texture sampling parameters
+
+- DONE: Now there is Texture.Loader class to hold upload/sampling parameters.
+  DESCRIPTION: Texture compression, mipmapping etc: there should be easy way
+  to tell to rendering framework, for which purpose the texture is loaded
+  and thus, how it can be postprocessed:
+  
+    - GUI elements and such: no compression, no mipmaps
+    - 3D textures: compression and mipmapping
+
+-------------------------------------------------------------------------------
+
+Version something:
+
 - FIXED: SDL resources (SDL_Surface, Fonts, ...) cause segfault at exit, if
   they are not freed (as destructors try to call SDL_FreeXXXX and SDL
   is already shut down).

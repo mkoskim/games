@@ -4,11 +4,11 @@
 //
 //*****************************************************************************
 
-module engine.render.shaders.gpumesh;
+module engine.render.gpu.mesh;
 
 import engine.render.util;
 
-import engine.render.shaders.gputypes;
+import engine.render.gpu.types;
 
 //-------------------------------------------------------------------------
 // Vertex data buffers (VBO, Vertex Buffer Object)

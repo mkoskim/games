@@ -31,7 +31,7 @@ There are many small things:
   responsibilty of processing input? Should I write a package that translates
   mouse, keyboard and joystick inputs to something usable for a game, or
   should game itself implement interpretation of input devices?
-  
+
 - Player object: in many ways, everything is inside player object. Player
   may have "avatar" on a screen, but player actions dominate what happens
   in the game - opening menus, quitting, etc.

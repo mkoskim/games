@@ -17,7 +17,7 @@ module engine.render.mesh;
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.shaders.gputypes;
+import engine.render.gpu.types;
 
 //-----------------------------------------------------------------------------
 //

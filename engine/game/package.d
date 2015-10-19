@@ -63,14 +63,15 @@ void init(string name, int width = 640, int height = 480)
     SDL_GL_SetSwapInterval(-1);   // Tearing
 
     debug {
-        writefln("OpenGL: %d.%d",
+        writeln("OpenGL:");
+        writefln("- Context..: %d.%d",
             _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION),
             _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION)
         );
+        writeln("- GLSL.....: ", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+        writeln("- Version..: ", to!string(glGetString(GL_VERSION)));
         writeln("- Vendor...: ", to!string(glGetString(GL_VENDOR)));
         writeln("- Renderer.: ", to!string(glGetString(GL_RENDERER)));
-        writeln("- Version..: ", to!string(glGetString(GL_VERSION)));
-        writeln("- GLSL.....: ", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
     }
 
     render.init();

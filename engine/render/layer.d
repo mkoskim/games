@@ -171,7 +171,7 @@ class UnbufferedRender : NodeGroup
 class BufferedRender
 {
     View cam;
-    Light light;
+    Light light; // HACK!
 
     BatchGroup batches;             // Rendering batches
     CollectableNodeGroup[] groups;  // Scene node groups
