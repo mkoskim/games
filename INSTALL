@@ -13,6 +13,9 @@ First things you need are:
 
         http://dlang.org/download.html
 
+   Previous version I was using was 2.067.1. I installed new version (2.068.2)
+   recently, and it seems to work.
+
 2) System side libraries: Linux users may find these from their distribution's
    repository, if not, you can install them from sources.
 
