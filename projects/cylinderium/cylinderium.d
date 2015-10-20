@@ -23,25 +23,34 @@ const float CAM_HEIGHT = 3.5 * RADIUS;
 
 //*****************************************************************************
 //
+// Star field: This does not work currently - points are not colored.
+//
+//*****************************************************************************
+
+//*****************************************************************************
+//
 // Create game assets
 //
 //*****************************************************************************
 
-class Scene : render.BufferedRender
+class Scene : scene3d.Pipeline3D
 {
-    render.Model floor, wall, tower, playership;
-    
+    scene3d.Model floor, wall, tower, playership, star;
+    scene3d.Batch solid, flat;
+
     MotherShip mothership;
-    
+
     this()
     {
         super();
 
         //---------------------------------------------------------------------
 
-        auto solid = render.Batch.Solid3D();
+        flat  = scene3d.Batch.Solid3D(scene3d.shaders.Flat3D.create());
+        solid = scene3d.Batch.Solid3D();
 
         addbatch(solid);
+        addbatch(flat);
 
         //---------------------------------------------------------------------
         // Black-yellow stripes texture
@@ -58,30 +67,37 @@ class Scene : render.BufferedRender
 
         floor = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Floor.obj").move(0, RADIUS, 0),
-            new render.Material(vec4(0.5, 0.5, 0.5, 1), 0.85)
+            new scene3d.Material(vec4(0.5, 0.5, 0.5, 1), 0.85)
         );
 
         wall = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Wall.obj").move(0, RADIUS, 0),
-            new render.Material(warnbmp.surface, 0.75)
+            new scene3d.Material(warnbmp.surface, 0.75)
         );
 
         tower = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Guntower.obj").move(0, RADIUS, 0),
-            new render.Material(vec4(1, 0, 0, 1), 0.75)
+            new scene3d.Material(vec4(1, 0, 0, 1), 0.75)
+        );
+
+        //---------------------------------------------------------------------
+
+        star = flat.upload(
+            blob.wavefront.loadmesh("engine/stock/mesh/Cube/Cube.obj").scale(0.1),
+            new scene3d.Material(vec4(1, 1, 0.75, 1), 0.75)
         );
 
         //---------------------------------------------------------------------
 
         playership = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Ship.obj"), //.scale(1.25)
-            new render.Material(vec4(0.4, 0.4, 0.7, 1))
+            new scene3d.Material(vec4(0.4, 0.4, 0.7, 1))
         );
 
         //---------------------------------------------------------------------
 
-        light = new render.Light(
-            render.Grip.fixed(0, 10, 0),
+        light = new scene3d.Light(
+            scene3d.Grip.fixed(0, 10, 0),
             vec3(1, 1, 1),
             40,
             0.2
@@ -140,12 +156,28 @@ static class grid
 //
 //*****************************************************************************
 
-class MotherShip : render.BasicNodeGroup
+class MotherShip : scene3d.BasicNodeGroup
 {
     float length = 0;
 
     this() { super(); }
     
+    void createStars(Scene scene, int count, float minx, float maxx, float minz, float maxz)
+    {
+        foreach(i; 0 .. count)
+        {
+            float angle = random.uniform(0, 360)*(2*PI/360);
+            float dist  = random.uniform(minz, maxz);
+
+            vec3 pos = vec3(
+                random.uniform(minx, maxx),
+                dist*cos(angle),
+                dist*sin(angle)
+            );
+            add(pos, scene.star);
+        }
+    }
+
     void load(Scene scene, string[] grid)
     {
         clear();
@@ -157,7 +189,7 @@ class MotherShip : render.BasicNodeGroup
                 vec3 pos = vec3(2*x, 0, 0);
                 vec3 rot = vec3(360.0/GRID_H*y, 0, 0);
 
-                auto grip = render.Grip.fixed(pos, rot);
+                auto grip = scene3d.Grip.fixed(pos, rot);
 
                 length = max(length, pos.x);
 
@@ -174,6 +206,13 @@ class MotherShip : render.BasicNodeGroup
                 }
             }
         }
+
+        createStars(
+            scene,
+            500,
+            -75, length + 75,
+            MAX_HEIGHT + 0.5, 8*MAX_HEIGHT
+        );
     }
 }
 
@@ -185,9 +224,9 @@ class MotherShip : render.BasicNodeGroup
 
 class Player : game.Fiber
 {
-    render.Transform root, shipframe;
-    render.Node ship;
-    render.Camera cam;
+    scene3d.Transform root, shipframe;
+    scene3d.Node ship;
+    scene3d.Camera cam;
 
     game.Joystick joystick;
     float MINX, MAXX;
@@ -207,17 +246,17 @@ class Player : game.Fiber
 
         //---------------------------------------------------------------------
 
-        root = render.Grip.movable(-40, 0, 0);
-        shipframe = render.Grip.movable(root, vec3(0, RADIUS + 0.4, 0));
+        root = scene3d.Grip.movable(-40, 0, 0);
+        shipframe = scene3d.Grip.movable(root, vec3(0, RADIUS + 0.4, 0));
 
-        ship = scene.nodes.add(render.Grip.movable(shipframe), scene.playership);
+        ship = scene.nodes.add(scene3d.Grip.movable(shipframe), scene.playership);
         ship.grip.rot.x = 360;
 
         //---------------------------------------------------------------------
 
-        cam = render.Camera.basic3D(
+        cam = scene3d.Camera.basic3D(
             CAM_HEIGHT - MAX_HEIGHT, 100,
-            render.Grip.movable(
+            scene3d.Grip.movable(
                 root,
                 vec3(7.5, CAM_HEIGHT, 0),
                 vec3(-90, 0, 0)
@@ -311,14 +350,6 @@ void main()
 
     scene.mothership.load(scene, grid.greeting);
 
-    /*
-    auto starfield = new StarField(
-        500,
-        -50, ship.length + 50,
-        MAX_HEIGHT + 0.1, 2*MAX_HEIGHT
-    );
-    */
-
     //-------------------------------------------------------------------------
     // Player
     //-------------------------------------------------------------------------
@@ -358,9 +389,25 @@ void main()
     
     //-------------------------------------------------------------------------
 
+    auto skybox = new postprocess.SkyBox(
+        new render.Cubemap([
+            "engine/stock/cubemaps/skybox2/universe_right.png",
+            "engine/stock/cubemaps/skybox2/universe_left.png",
+            "engine/stock/cubemaps/skybox2/universe_top.png",
+            "engine/stock/cubemaps/skybox2/universe_bottom.png",
+            "engine/stock/cubemaps/skybox2/universe_back.png",
+            "engine/stock/cubemaps/skybox2/universe_front.png",
+            ]
+        ),
+        game.screen.fb
+    );
+
+    //-------------------------------------------------------------------------
+
     void draw()
     {
         scene.draw();
+        skybox.draw(scene.cam.mView(), scene.cam.mProjection());
         /*
         ship.draw(player.cam);
         starfield.draw(player.cam);
@@ -390,44 +437,4 @@ void main()
         }
     );
 }
-
-//*****************************************************************************
-//
-// Star field: This version creates single instance containing the stars as
-// points. This disables frustum culling for single stars, but on the other
-// hand it decreases CPU load feeding stars to GPU.
-//
-//*****************************************************************************
-
-/*
-class StarField : render.Batch
-{
-    this(int count, float minx, float maxx, float minz, float maxz)
-    {
-        super(new RenderState3D(render.shaders.Lightless3D.create()));
-
-        auto mesh = new render.Mesh(GL_POINTS);
-
-        foreach(i; 0 .. count)
-        {
-            float angle = random.uniform(0, 360)*(2*PI/360);
-            float dist  = random.uniform(minz, maxz);
-
-            vec3 pos = vec3(
-                random.uniform(minx, maxx),
-                dist*cos(angle),
-                dist*sin(angle)
-            );
-            mesh.addface(mesh.addvertex(pos));
-        }
-
-        add(
-            vec3(0, 0, 0),
-            shader.upload(mesh),
-            new render.Material(0.75, 0.75, 0.75)
-        );
-    }
-}
-*/
-
 

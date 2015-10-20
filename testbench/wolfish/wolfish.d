@@ -76,12 +76,23 @@ class Scene : scene3d.Pipeline3D
         
         skybox = new postprocess.SkyBox(
             new render.Cubemap([
+                /*
                 "engine/stock/cubemaps/skybox1/right.png",
                 "engine/stock/cubemaps/skybox1/left.png",
                 "engine/stock/cubemaps/skybox1/top.png",
                 "engine/stock/cubemaps/skybox1/bottom.png",
                 "engine/stock/cubemaps/skybox1/back.png",
-                "engine/stock/cubemaps/skybox1/front.png"]
+                "engine/stock/cubemaps/skybox1/front.png"
+                /*/
+                "engine/stock/cubemaps/skybox2/universe_right.png",
+                "engine/stock/cubemaps/skybox2/universe_left.png",
+                "engine/stock/cubemaps/skybox2/universe_top.png",
+                "engine/stock/cubemaps/skybox2/universe_bottom.png",
+                "engine/stock/cubemaps/skybox2/universe_back.png",
+                "engine/stock/cubemaps/skybox2/universe_front.png",
+                
+                /**/
+                ]
             ),
             game.screen.fb
         );
@@ -98,8 +109,9 @@ class Scene : scene3d.Pipeline3D
         solidshader.options["fog.enabled"] = true;
         solidshader.options["fog.start"] = 10.0;
         solidshader.options["fog.end"]   = 20.0;
-        //solidshader.options["fog.color"] = vec4(0.0, 0.0, 0.0, 0);
-        solidshader.options["fog.color"] = vec4(0.45, 0.45, 0.75, 1);
+        solidshader.options["fog.color"] = vec4(0.0, 0.0, 0.0, 1);
+        //solidshader.options["fog.color"] = vec4(0.45, 0.45, 0.75, 1);
+        //solidshader.options["fog.color"] = vec4(0.45, 0.45, 0.45, 1);
         //solidshader.options["fog.color"] = vec4(1.0, 1.0, 1.0, 1);
 
         auto solidstate = scene3d.State.Solid3D(solidshader);
