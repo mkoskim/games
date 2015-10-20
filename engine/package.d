@@ -14,6 +14,7 @@ public {
     import game = engine.game;
     import render = engine.render;
     import scene3d = engine.render.scene3d;
+    import postprocess = engine.render.postprocess;
     import blob = engine.blob;
 }
 

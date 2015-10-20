@@ -84,8 +84,8 @@ class Framebuffer
     void clear()
     {
         //checkgl!glClearColor(1, 1, 1, 1);
-        checkgl!glClearColor(0.5, 0.5, 0.5, 1);
-        //checkgl!glClearColor(0, 0, 0, 1);
+        //checkgl!glClearColor(0.5, 0.5, 0.5, 1);
+        checkgl!glClearColor(0, 0, 0, 1);
         checkgl!glClearDepth(1);
         checkgl!glDisable(GL_BLEND);
         checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

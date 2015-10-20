@@ -72,7 +72,7 @@ class Shader
     //
     //*************************************************************************
 
-    protected final void uniform(string name, Variant value, bool optional = false)
+    final void uniform(string name, Variant value, bool optional = false)
     {
         GLint loc = location("uniform", name, optional);
         if(loc == -1) return ;
@@ -86,12 +86,12 @@ class Shader
         else throw new Exception(format("Unknown type '%s' for uniform '%s'", to!string(value.type), name));
     }
 
-    protected final void uniform(string n, mat4 v, bool opt = false) { uniform(n, Variant(v), opt); }
-    protected final void uniform(string n, vec4 v, bool opt = false) { uniform(n, Variant(v), opt); }
-    protected final void uniform(string n, vec3 v, bool opt = false) { uniform(n, Variant(v), opt); }
-    protected final void uniform(string n, float v, bool opt = false) { uniform(n, Variant(v), opt); }
-    protected final void uniform(string n, int v, bool opt) { uniform(n, Variant(v), opt); }
-    protected final void uniform(string n, bool v, bool opt) { uniform(n, Variant(v), opt); }
+    final void uniform(string n, mat4 v, bool opt = false) { uniform(n, Variant(v), opt); }
+    final void uniform(string n, vec4 v, bool opt = false) { uniform(n, Variant(v), opt); }
+    final void uniform(string n, vec3 v, bool opt = false) { uniform(n, Variant(v), opt); }
+    final void uniform(string n, float v, bool opt = false) { uniform(n, Variant(v), opt); }
+    final void uniform(string n, int v, bool opt) { uniform(n, Variant(v), opt); }
+    final void uniform(string n, bool v, bool opt) { uniform(n, Variant(v), opt); }
 
     Variant[string] options;
 
@@ -99,12 +99,22 @@ class Shader
     // Texture sampler. TODO: Maybe we change this to uniform.
     //-------------------------------------------------------------------------
 
-    protected final void texture(string name, GLenum unit, Texture texture, bool optional = false)
+    final void texture(string name, GLenum unit, Texture texture, bool optional = false)
     {
         GLint loc = location("uniform", name, optional);
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_2D, texture.ID);
+            checkgl!glUniform1i(loc, unit);
+        }
+    }
+
+    final void texture(string name, GLenum unit, Cubemap cubemap, bool optional = false)
+    {
+        GLint loc = location("uniform", name, optional);
+        if(loc != -1) {
+            checkgl!glActiveTexture(GL_TEXTURE0 + unit);
+            checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.ID);
             checkgl!glUniform1i(loc, unit);
         }
     }
@@ -220,17 +230,17 @@ class Shader
 
     GLuint programID;
 
-    protected this() { programID = 0; }
+    this() { programID = 0; }
 
     //-------------------------------------------------------------------------
 
-    protected this(string[] common, string[] vsfiles, string[] fsfiles)
+    this(string[] common, string[] vsfiles, string[] fsfiles)
     {
         programID = CompileProgram(common, vsfiles, fsfiles);
     }
 
-    protected this(string filename) { this([], [filename], [filename]); }
-    protected this(string vsfile, string fsfile) { this([], [vsfile], [fsfile]); }
+    this(string filename) { this([], [filename], [filename]); }
+    this(string vsfile, string fsfile) { this([], [vsfile], [fsfile]); }
 
     //-------------------------------------------------------------------------
 
