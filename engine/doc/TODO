@@ -8,9 +8,16 @@ DONE:
 
 WORKLIST:
 
+- After dividing shader implementation, there's problem with VAO as data
+  packet. Somehow we need to be able to create class to keep data... It
+  might require storing VAOs and such to shader itself.
+
 - I would need to collect some default setups to e.g. ext/ directory,
   so that I could work at higher levels without needing to worry about
   low level changes.
+
+- "Active nodes" - combine Fiber and Node to ease making actively working
+  nodes.
 
 - Shader family: It could be time to concentrate on shader management
   before going forward:

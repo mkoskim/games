@@ -47,11 +47,15 @@ string[] grid = [
 
 //*****************************************************************************
 //
-// ...
+// Sketching render pipelining:
+//
+// 1) We need shaders, or at least their interfaces.
+// 2) Then we load assets
+// 3) And place them to node groups
 //
 //*****************************************************************************
 
-class Scene : render.BufferedRender
+class Scene : render.Pipeline3D
 {
     Player player;
     render.Model[] wallshapes, floorshapes, propshapes;
@@ -60,7 +64,7 @@ class Scene : render.BufferedRender
     {
         loadmodels();
         loadmaze(grid);
-        
+
         light = new render.Light(
             render.Grip.fixed(0, 2, 0),
             vec3(1, 1, 1),
@@ -76,11 +80,11 @@ class Scene : render.BufferedRender
         //---------------------------------------------------------------------
 
         auto walls  = addbatch(render.Batch.Solid3D());
-        auto props  = addbatch(new render.Batch(walls));
-        auto floors = addbatch(new render.Batch(walls));
+        auto props  = addbatch(walls);
+        auto floors = addbatch(walls, render.Batch.Mode.unsorted);
 
         auto transparent = addbatch(render.Batch.Transparent3D());
-        
+
         //---------------------------------------------------------------------
         // Texture loader(s)
         //---------------------------------------------------------------------
@@ -89,7 +93,7 @@ class Scene : render.BufferedRender
         colormap.mipmap = true;
         colormap.filtering.min = GL_LINEAR_MIPMAP_LINEAR;
         colormap.compress = true;
-        
+
         auto normalmap = new render.Texture.Loader();
         normalmap.mipmap = true;
         normalmap.filtering.min = GL_LINEAR_MIPMAP_LINEAR;
@@ -305,16 +309,6 @@ class Player : game.Fiber
 
 void main()
 {
-    /*
-    import luad.all;
-
-    auto lua = new LuaState;
-    lua.openLibs();
-
-    auto print = lua.get!LuaFunction("print");
-    print("Hello, world!");    
-    */
-
     game.init(800, 600);
 
     auto maze = new Scene(grid);

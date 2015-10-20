@@ -22,7 +22,7 @@ public import derelict.sdl2.ttf:
 
 import engine.ext.util;
 
-import engine.render.texture;
+import engine.render.gpu.texture;
 
 //-----------------------------------------------------------------------------
 
@@ -94,6 +94,11 @@ class Font
     // Rendering text to Textures.
     // TODO: render cache could store also rendered strings.
     // TODO: We should have separate cache for different styles.
+    // TODO: Maybe this helps us to create alpha bitmaps:
+    //
+    //      GLint swizzleMask[] = {GL_ZERO, GL_ZERO, GL_ZERO, GL_RED};
+    //      glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+    //
     //-------------------------------------------------------------------------
 
     private Texture[char] rendered;

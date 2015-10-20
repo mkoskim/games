@@ -1,6 +1,6 @@
-This project has been made with 64-bit Linux Mint (Maya) and it is far from
-easy to be compiled on other platforms at the moment. I try later simplify the
-process in the future.
+This project has been made with 64-bit Linux Mint (Currently 17.2 Rafaela) and
+it is far from easy to be compiled on other platforms at the moment. I try
+later simplify the process in the future.
 
     NOTE! Except for testbench/pacman, all the game prototypes require game
     controller (XBox) to work. I will add support for keyboard and mouse

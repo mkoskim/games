@@ -15,7 +15,7 @@ public {
     import engine.ext.gui.box;
     import engine.ext.gui.label;
 
-    import engine.render.texture: Texture;
+    import engine.render.gpu.texture: Texture;
     import engine.ext.bitmap: Bitmap;
 }
 

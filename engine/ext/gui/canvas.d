@@ -17,9 +17,9 @@ module engine.ext.gui.canvas;
 
 import engine.ext.gui.util;
 
-import engine.render.state;
-import engine.render.view;
-import engine.render.shaders.base;
+import engine.render.pipeline.shader;
+import engine.render.pipeline.state;
+import engine.render.types.view;
 import engine.ext.geom;
 
 import engine.game.instance;
@@ -46,7 +46,7 @@ class Canvas
     
     //-------------------------------------------------------------------------
 
-    this() { this(State.Default2D(), Camera.topleft2D()); }
+    this() { /*this(State.Default2D(), Camera.topleft2D()); */ }
 
     this(State state, View cam) {
         this.state = state;
@@ -65,25 +65,25 @@ class Canvas
 
     void render(vec2 offset, vec2 size, Material material)
     {
-        state.shader.loadMaterial(material);
+        //state.shader.loadMaterial(material);
         render(offset, size);
     }
 
     void render(vec2 offset, vec2 size, vec4 color)
     {
-        state.shader.loadMaterial(new Material(color));
+        //state.shader.loadMaterial(new Material(color));
         render(offset, size);
     }
 
     void render(vec2 offset, vec2 size, Texture texture)
     {
-        state.shader.loadMaterial(new Material(texture));
+        //state.shader.loadMaterial(new Material(texture));
         render(offset, size);
     }
 
     void render(vec2 offset, vec2 size, Texture texture, vec4 color)
     {
-        state.shader.loadMaterial(new Material(texture), new Material.Modifier(color));
+        //state.shader.loadMaterial(new Material(texture), new Material.Modifier(color));
         render(offset, size);
     }
 
@@ -91,6 +91,7 @@ class Canvas
 
     void draw()
     {
+        /*
         state.activate();
         state.shader.loadView(cam);
         foreach(widget; widgets) {
@@ -100,6 +101,7 @@ class Canvas
                 vec2(screen.width, screen.height)
             );
         }
+        */
     }
 }
 

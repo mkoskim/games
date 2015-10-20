@@ -4,7 +4,7 @@
 //
 //*****************************************************************************
 
-module engine.render.view;
+module engine.render.types.view;
 
 //-----------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@ public import gl3n.frustum: Frustum, OUTSIDE, INTERSECT, INSIDE;
 import engine.game.instance;
 
 import engine.render.util;
-import engine.render.transform;
+import engine.render.types.transform;
 
 //-----------------------------------------------------------------------------
 // TODO: I havent used proxy views ever. Need to check if it is needed at

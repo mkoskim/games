@@ -7,12 +7,12 @@
 //
 //*****************************************************************************
 
-module engine.render.material;
+module engine.render.types.material;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.texture;
+import engine.render.gpu.texture;
 
 //-----------------------------------------------------------------------------
 //

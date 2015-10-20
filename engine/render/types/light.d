@@ -4,12 +4,12 @@
 //
 //*****************************************************************************
 
-module engine.render.light;
+module engine.render.types.light;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.transform;
+import engine.render.types.transform;
 
 //-----------------------------------------------------------------------------
 

@@ -1,15 +1,15 @@
 //*****************************************************************************
 //
-// Bound volumes
+// Bounding volumes
 //
 //*****************************************************************************
 
-module engine.render.bound;
+module engine.render.types.bounds;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.mesh;
+import engine.render.types.mesh;
 
 //-----------------------------------------------------------------------------
 // Bounding sphere

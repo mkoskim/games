@@ -110,10 +110,11 @@ struct fvec2x16b
 }
 
 //-----------------------------------------------------------------------------
-// TODO: For some reason, glVertexAttribPointer returns invalid enum
-// when using GL_INT_2_10_10_10_REV, so this is untested.
+// 3x10b + 1b vec4 disabled by default: For most purposes, 4x8b vec seems
+// to be enough.
 //-----------------------------------------------------------------------------
 
+/*
 struct ivec3x10b
 {
     static immutable GLenum gltype = GL_INT_2_10_10_10_REV;
@@ -124,7 +125,8 @@ struct ivec3x10b
         int, "x", 10,
         int, "y", 10,
         int, "z", 10,
-        int, "w", 2)
+        int, "w", 2
+        )
     );
 
     static assert(ivec3x10b.sizeof == 4);
@@ -149,4 +151,5 @@ struct ivec3x10b
         );
     }
 }
+*/
 

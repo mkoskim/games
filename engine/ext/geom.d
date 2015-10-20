@@ -9,7 +9,7 @@ module engine.ext.geom;
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.mesh;
+import engine.render.types.mesh;
 
 const vec2 center = vec2(0.5, 0.5);
 

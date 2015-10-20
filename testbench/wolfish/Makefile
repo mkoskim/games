@@ -21,7 +21,7 @@ LDFLAGS=
 #------------------------------------------------------------------------------
 
 BLOBFILES += engine/stock/
-BLOBFILES += engine/render/shaders/glsl/
+BLOBFILES += engine/render/pipeline/glsl/
 # BLOBFILES += /usr/share/fonts/truetype/freefont/
 
 include engine/build/Makegame.mak

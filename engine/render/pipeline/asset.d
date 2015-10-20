@@ -1,13 +1,8 @@
 //*****************************************************************************
 //
-// 
+// Asset loading: What we try to achieve is easy load & unload asset sets,
+// for example game levels.
 //
 //*****************************************************************************
 
-module engine.render.shaders;
-
-public import engine.render.shaders.defaults:
-    Default2D,
-    Default3D,
-    Toon3D;
 
