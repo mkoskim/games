@@ -31,6 +31,18 @@ meshes, nodes etc).
 
 WORKLIST:
 
+- Model loading (and other nice tutorials):
+
+    http://www.learnopengl.com/#!Model-Loading/Model
+
+- Better integration of SkyBox (and forthcoming postprocessing effects)
+  to 3D scene rendering.
+
+- Cubemap needs all faces to be: same size, same internal format, same
+  mipmap level. Ensure this in loader.
+
+- GLSL files may need some common libraries?
+
 - Framebuffers: It is possible to share depth buffer between multiple
   framebuffers, when we are only interested in color map.
 
@@ -579,6 +591,10 @@ shaders.
 - It might be wise to move normal maps from material to "mesh": it is more
   like added geometry than a material parameter... Although it can be
   that, too...
+
+- Environment mapping (reflections):
+
+    http://learnopengl.com/#!Advanced-OpenGL/Cubemaps
 
 -------------------------------------------------------------------------------
 

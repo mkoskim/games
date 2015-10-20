@@ -14,6 +14,7 @@ import engine.render.util;
 import blob = engine.blob;
 
 import derelict.sdl2.sdl;
+import std.algorithm;
 
 //-----------------------------------------------------------------------------
 // Try to determine suitable texture format
@@ -342,6 +343,8 @@ class Cubemap
 
     this(SDL_Surface*[] surfaces)
     {
+        Track.add(this);
+
         checkgl!glGenTextures(1, &ID);
         checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 
@@ -363,15 +366,21 @@ class Cubemap
     this(Bitmap[] bitmaps)
     {
         SDL_Surface*[] surfaces;
-        foreach(i; 0 .. 6) surfaces ~= bitmaps[i].surface;
+        foreach(bitmap; bitmaps) surfaces ~= bitmap.surface;
         this(surfaces);
     }
 
     this(string[] filenames)
     {
         Bitmap[] bitmaps;
-        foreach(i; 0 .. 6) bitmaps ~= new Bitmap(filenames[i]);
+        foreach(filename; filenames) bitmaps ~= new Bitmap(filename);
         this(bitmaps);
+    }
+    
+    ~this()
+    {
+        Track.remove(this);
+        glDeleteTextures(1, &ID);
     }
 }
 

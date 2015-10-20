@@ -18,8 +18,9 @@ LDFLAGS=
 
 #------------------------------------------------------------------------------
 
+BLOBFILES += engine/render/scene3d/glsl/
+BLOBFILES += engine/render/postprocess/glsl/
 BLOBFILES += engine/stock/
-BLOBFILES += engine/render/shaders/glsl/
 
 include engine/build/Makegame.mak
 
