@@ -13,6 +13,23 @@ For quick development, we would have ready-made solutions for some common
 purposes, for example, generic 2D and 3D game rendering, and generic HUD
 rendering.
 
+- - -
+
+So, how do we want this to work?
+
+Shaders have data types they can handle. For each different object we
+may want to blit to screen, we need to have dedicated shader. Shaders have:
+
+- Uniforms: these are values which can be set before rendering an object
+- Attributes: Each shader have their own dedicated vertex attribute format
+
+We design shaders based on the inputs we have.
+
+On the other side, we have scene graphics. To make it work, we need to plug
+correct type of a shader to batch management.
+
+- - -
+
 Some thoughts...
 
 - Game programmer knows it best. We should offer means to build up rendering

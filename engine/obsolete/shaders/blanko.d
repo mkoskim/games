@@ -10,10 +10,10 @@ module engine.render.shaders.blanko;
 
 import engine.render.util;
 import engine.render.shaders.base;
-import engine.render.transform;
-import engine.render.mesh;
-import engine.render.material;
-import engine.render.view;
+import engine.render.types.transform;
+import engine.render.types.mesh;
+import engine.render.types.material;
+import engine.render.types.view;
 
 class Blanko : Shader
 {

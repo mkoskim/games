@@ -20,15 +20,15 @@
 //
 //*****************************************************************************
 
-module engine.render.node;
+module engine.render.types.node;
 
 //-------------------------------------------------------------------------
 
 import engine.render.util;
 
-import engine.render.transform;
-import engine.render.model;
-import engine.render.view;
+import engine.render.types.transform;
+import engine.render.types.model;
+import engine.render.types.view;
 
 //-------------------------------------------------------------------------
 // Nodes are drawable objects that combine transform with shape

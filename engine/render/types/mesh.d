@@ -12,49 +12,31 @@
 //
 //*****************************************************************************
 
-module engine.render.mesh;
+module engine.render.types.mesh;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.gpu.types;
 
-//-----------------------------------------------------------------------------
+//*****************************************************************************
 //
-//-----------------------------------------------------------------------------
+//*****************************************************************************
 
 class Mesh
 {
-    //-------------------------------------------------------------------------
-    //
-    // 'Shader-compatible' packed & interleaved vertex data. Using these makes
-    // processing a bit harder, but saves us from creating the buffer inside
-    // Shader.upload().
-    //
-    //-------------------------------------------------------------------------
+    //*************************************************************************
 
     struct VERTEX
     {
         vec3 pos;
+        vec2 uv;
+        vec3 normal;
+        vec4 tangent;
 
-        fvec2x16b uv;
-        ivec4x8b normal;    // TODO: GL_INT_2_10_10_10_REV
-        ivec4x8b tangent;   // TODO: GL_INT_2_10_10_10_REV
-
-        uint[2] padding;
-
-        //---------------------------------------------------------------------
-
-        static assert(VERTEX.sizeof == 32);
-
-        //---------------------------------------------------------------------
-
-        this(vec3 pos, vec3 norm, vec2 uv)
-        {
+        this(vec3 pos, vec2 uv, vec3 normal) {
             this.pos = pos;
             this.uv = uv;
-            this.normal = vec4(norm, 0).normalized();
-            this.tangent = vec4(0, 0, 0, 0);
+            this.normal = normal;
         }
     }
 
@@ -62,9 +44,15 @@ class Mesh
     VERTEX[] vertices;
     ushort[] faces;
 
-    //-------------------------------------------------------------------------
+    //*************************************************************************
+    //
+    // In practise, we currently support only GL_TRIANGLES. Groups of lines
+    // or points are anyways worth of having separate implementation, but
+    // GL_TRIANGLE_STRIP is definitely an additional mode to consider.
+    //
+    //*************************************************************************
 
-    this(uint mode)
+    this(uint mode = GL_TRIANGLES)
     {
         Track.add(this);
         this.mode = mode;
@@ -72,11 +60,11 @@ class Mesh
 
     ~this() { Track.remove(this); }
 
-    //-------------------------------------------------------------------------
+    //*************************************************************************
 
     ushort addvertex(vec3 pos, vec2 uv, vec3 normal)
     {
-        vertices ~= VERTEX(pos, normal, uv);
+        vertices ~= VERTEX(pos, uv, normal);
         return cast(ushort)(vertices.length - 1);
     }
 
@@ -95,16 +83,18 @@ class Mesh
     void addface(ushort p1, ushort p2) { faces ~= [ p1, p2 ]; }
     void addface(ushort p1, ushort p2, ushort p3) { faces ~= [ p1, p2, p3 ]; }
 
-    //-------------------------------------------------------------------------
-    // Raw transforms
-    //-------------------------------------------------------------------------
+    //*************************************************************************
+    //
+    // Mesh post-processing
+    //
+    //*************************************************************************
 
     Mesh transform(mat4 M)
     {
         foreach(i; 0 .. vertices.length)
         {
             vertices[i].pos = (M * vec4(vertices[i].pos, 1)).xyz;
-            vertices[i].normal.pack(M * vertices[i].normal.unpack());
+            vertices[i].normal = (M * vec4(vertices[i].normal, 1)).xyz;
         }
         return this;
     }
@@ -134,10 +124,10 @@ class Mesh
     {
         foreach(i; 0 .. vertices.length)
         {
-            vec2 uv = vertices[i].uv.unpack();
+            vec2 uv = vertices[i].uv;
             uv.x *= factor.x;
             uv.y *= factor.y;
-            vertices[i].uv.pack(uv);
+            vertices[i].uv = uv;
         }
         return this;
     }
@@ -151,9 +141,9 @@ class Mesh
     {
         foreach(i; 0 .. vertices.length)
         {
-            vec2 uv = vertices[i].uv.unpack();
+            vec2 uv = vertices[i].uv;
             uv += delta;
-            vertices[i].uv.pack(uv);
+            vertices[i].uv = uv;
         }
         return this;
     }
@@ -194,8 +184,8 @@ class Mesh
 
             //vec2 st1 = v2.uv - v1.uv;
             //vec2 st2 = v3.uv - v1.uv;
-            vec2 st1 = v2.uv.unpack() - v1.uv.unpack();
-            vec2 st2 = v3.uv.unpack() - v1.uv.unpack();
+            vec2 st1 = v2.uv - v1.uv;
+            vec2 st2 = v3.uv - v1.uv;
 
             if(!st1.magnitude() || !st2.magnitude()) continue;
 
@@ -218,15 +208,15 @@ class Mesh
 
         foreach(i; 0 .. vertices.length)
         {
-            vec3 n = vertices[i].normal.unpack().xyz;
+            vec3 n = vertices[i].normal;
             vec3 t = tan1[i];
             
             // Gram-Schmidt orthogonalize
             // Calculate handedness
-            vertices[i].tangent.pack(vec4(
+            vertices[i].tangent = vec4(
                 (t - n * n.dot(t)).normalized(),
                 ((n.cross(t).dot(tan2[i]) < 0.0F) ? -1.0F : 1.0F)
-            ));
+            );
         }
     }
 }

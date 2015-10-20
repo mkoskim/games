@@ -17,21 +17,22 @@
 //
 //*****************************************************************************
 
-module engine.render.layer;
+module engine.render.pipeline.layer;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.transform;
-import engine.render.mesh;
-import engine.render.texture;
-import engine.render.material;
-import engine.render.model;
-import engine.render.node;
-import engine.render.view;
-import engine.render.light;
-import engine.render.batch;
-import engine.render.state;
+import engine.render.types.transform;
+import engine.render.types.mesh;
+//import engine.render.types.texture;
+import engine.render.types.material;
+import engine.render.types.model;
+import engine.render.types.node;
+import engine.render.types.view;
+import engine.render.types.light;
+
+import engine.render.pipeline.state;
+import engine.render.pipeline.batch;
 
 import engine.game.fiber;
 
@@ -54,7 +55,7 @@ abstract class NodeGroup
     // contain skeleton - which can, in addition to deform mesh, also move
     // the mesh around...
     //-------------------------------------------------------------------------
-    
+
     Node add(Node node) { return _add(node); }
 
     Node add(Transform transform, Model model) { return _add(new Node(transform, model)); }
@@ -118,6 +119,62 @@ class BasicNodeGroup : CollectableNodeGroup
 
 //*****************************************************************************
 //
+// Buffered rendering: Models (Mesh + Material) are separated from
+// Nodes (Model + transform). Nodes are collected from node groups, and
+// added to batches depending on the model.
+//
+//*****************************************************************************
+
+class BufferedRender
+{
+    View cam;
+    Light light; // HACK!
+
+    BatchGroup batches;             // Rendering batches
+    CollectableNodeGroup[] groups;  // Scene node groups
+    
+    NodeGroup nodes;
+
+    FiberQueue actors;
+    
+    //-------------------------------------------------------------------------
+
+    this()
+    {
+        batches = new BatchGroup();
+        nodes = addgroup();
+        actors = new FiberQueue();
+    }
+
+    //-------------------------------------------------------------------------
+
+    Batch addbatch(Batch batch) { return batches.addbatch(batch); }
+    Batch addbatch(State state) { return batches.addbatch(state); }
+    Batch addbatch(State state, Batch.Mode mode) { return batches.addbatch(state, mode); }
+    Batch addbatch(Batch batch, Batch.Mode mode) { return batches.addbatch(batch, mode); }
+
+    CollectableNodeGroup addgroup(CollectableNodeGroup group) { groups ~= group; return group; }
+    CollectableNodeGroup addgroup() { return addgroup(new BasicNodeGroup()); }
+
+    //-------------------------------------------------------------------------
+
+    void draw()
+    {
+        batches.clear();
+        foreach(group; groups) group.collect(cam, batches);
+
+        // TODO: Hack! Design light subsystem
+        if(light) {
+            batches.batches[0].state.activate();    
+            batches.batches[0].state.shader.light(light);
+        }
+
+        batches.draw(cam);
+    }
+}
+
+//*****************************************************************************
+//
 // Unbuffered node storage: stores nodes directly to batches, and renders
 // them in order which batches are created. No culling is applied.
 //
@@ -156,60 +213,6 @@ class UnbufferedRender : NodeGroup
         state.activate();    
         if(light) state.shader.light(light);
         
-        batches.draw(cam);
-    }
-}
-
-//*****************************************************************************
-//
-// Buffered rendering: Models (Mesh + Material) are separated from
-// Nodes (Model + transform). Nodes are collected from node groups, and
-// added to batches depending on the model.
-//
-//*****************************************************************************
-
-class BufferedRender
-{
-    View cam;
-    Light light; // HACK!
-
-    BatchGroup batches;             // Rendering batches
-    CollectableNodeGroup[] groups;  // Scene node groups
-    
-    NodeGroup nodes;
-
-    FiberQueue actors;
-    
-    //-------------------------------------------------------------------------
-
-    this()
-    {
-        batches = new BatchGroup();
-        nodes = addgroup();
-        actors = new FiberQueue();
-    }
-
-    //-------------------------------------------------------------------------
-
-    Batch addbatch(Batch batch) { return batches.addbatch(batch); }
-    Batch addbatch(State state) { return batches.addbatch(state); }
-
-    CollectableNodeGroup addgroup(CollectableNodeGroup group) { groups ~= group; return group; }
-    CollectableNodeGroup addgroup() { return addgroup(new BasicNodeGroup()); }
-
-    //-------------------------------------------------------------------------
-
-    void draw()
-    {
-        batches.clear();
-        foreach(group; groups) group.collect(cam, batches);
-
-        // TODO: Hack! Design light subsystem
-        if(light) {
-            batches.batches[0].state.activate();    
-            batches.batches[0].state.shader.light(light);
-        }
-
         batches.draw(cam);
     }
 }

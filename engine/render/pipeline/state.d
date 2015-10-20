@@ -6,14 +6,14 @@
 //
 //*****************************************************************************
 
-module engine.render.state;
+module engine.render.pipeline.state;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
 
-import engine.render.shaders.base;
-import shaders = engine.render.shaders.defaults;
+import engine.render.pipeline.shader;
+import shaders = engine.render.pipeline.shader: Default3D;
 
 //*****************************************************************************
 
@@ -31,6 +31,7 @@ class State
 
     //-------------------------------------------------------------------------
 
+    /*
     static State Default2D(Shader shader = shaders.Default2D.create())
     {
         return new State(shader, (){
@@ -40,7 +41,8 @@ class State
             checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         });
     }
-    
+    */
+
     static State Solid3D(Shader shader = shaders.Default3D.create())
     {
         return new State(shader, (){

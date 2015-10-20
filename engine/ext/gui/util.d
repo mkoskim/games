@@ -15,10 +15,10 @@ public {
    import gl3n.linalg;
    import derelict.opengl3.gl3;
 
-   import engine.render.transform;
-   import engine.render.material;
+   import engine.render.types.transform;
+   import engine.render.types.material;
 
-   import engine.render.texture: Texture;
+   import engine.render.gpu.texture: Texture;
    import engine.ext.bitmap: Bitmap;
 }
 

@@ -5,23 +5,24 @@
 //
 //*****************************************************************************
 
-module engine.render.batch;
+module engine.render.pipeline.batch;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
 
-import engine.render.shaders.base;
-import engine.render.state;
+import engine.render.types.transform;
+import engine.render.types.mesh;
+import engine.render.types.bounds;
+import engine.render.types.material;
+import engine.render.types.model;
+import engine.render.types.node;
+import engine.render.types.view;
 
-import engine.render.transform;
-import engine.render.mesh;
-import engine.render.bound;
-import engine.render.texture;
-import engine.render.material;
-import engine.render.model;
-import engine.render.node;
-import engine.render.view;
+import engine.render.pipeline.shader;
+import engine.render.pipeline.state;
+
+import engine.render.gpu.texture;
 
 import std.algorithm;
 
@@ -38,39 +39,29 @@ import std.algorithm;
 class Batch
 {
     State state;
-
     enum Mode { unsorted, front2back, back2front };
     Mode mode;
-    
-    this(State state, Mode mode = Mode.unsorted)
-    {
+
+    this(State state, Mode mode = Mode.unsorted) {
         this.state = state;
         this.mode = mode;
     }
 
     this(Batch batch, Mode mode) { this(batch.state, mode); }
-    this(Batch batch) { this(batch, batch.mode); }
+    this(Batch batch) { this(batch.state, batch.mode); }
 
     //-------------------------------------------------------------------------
 
-    static Batch Default2D() { return new Batch(State.Default2D()); }
-
+    //static Batch Default2D() { return new Batch(State.Default2D()); }
     static Batch Solid3D() { return new Batch(State.Solid3D(), Mode.front2back); }
     static Batch Transparent3D() { return new Batch(State.Transparent3D(), Mode.back2front); }
 
     //-------------------------------------------------------------------------
-    // TODO: Maybe VAO cache is better located in shader itself? Or some sort
-    // of "shader bank", shared with all compatible shaders. For cleaning up,
-    // it would be better that this information would be in some sort of
-    // manager object, which is destroyed when scene is destroyed.
-    //
-    // Maybe, the system works so that batch itself is destroyed, when scene
-    // is destroyed. Which ever looks the nicest solution.
-    //
+    // Asset management
     //-------------------------------------------------------------------------
-    
+
     Shader.VAO[Mesh] meshes;
-    
+
     Shader.VAO upload(Mesh mesh)
     {
         if(!(mesh in meshes))
@@ -96,9 +87,13 @@ class Batch
         return model;
     }
 
-    Model upload(Mesh mesh, Material material) { return upload(new Model(upload(mesh), material)); }
-    Model upload(Mesh mesh, Texture colormap)  { return upload(new Model(upload(mesh), new Material(colormap))); }
-    Model upload(Mesh mesh, vec4 color)        { return upload(new Model(upload(mesh), new Material(color))); }    
+    Model upload(Shader.VAO vao, Material material) { return upload(new Model(vao, material)); }
+    Model upload(Shader.VAO vao, Texture colormap)  { return upload(vao, new Material(colormap)); }
+    Model upload(Shader.VAO vao, vec4 color)        { return upload(vao, new Material(color)); }    
+    
+    Model upload(Mesh mesh, Material material) { return upload(upload(mesh), material); }
+    Model upload(Mesh mesh, Texture colormap)  { return upload(mesh, new Material(colormap)); }
+    Model upload(Mesh mesh, vec4 color)        { return upload(mesh, new Material(color)); }    
 
     Model upload()                             { return upload(new Model(null, null)); }    
 
@@ -106,11 +101,20 @@ class Batch
     // Bulk uploads
     //-------------------------------------------------------------------------
 
+    Model[] upload(Mesh mesh, Material[] materials)
+    {
+        Model[] list;
+        foreach(material; materials) {
+            list ~= upload(upload(mesh), material);
+        }
+        return list;
+    }
+
     Model[] upload(Shader.VAO vao, Bitmap[] colormaps)
     {
         Model[] list;
         foreach(colormap; Texture.Loader.Default(colormaps)) {
-            list ~= upload(new Model(vao, new Material(colormap)));
+            list ~= upload(vao, colormap);
         }
         return list;
     }
@@ -121,10 +125,10 @@ class Batch
     }
 
     //-------------------------------------------------------------------------
-    // Nodes collected for rendering
+    // Node buffer
     //-------------------------------------------------------------------------
     
-    Node[] nodes;    
+    Node[] nodes;
 
     size_t length() { return nodes.length; }
 
@@ -136,12 +140,12 @@ class Batch
         auto i = countUntil(nodes, node);
         if(i != -1) nodes = std.algorithm.remove!(SwapStrategy.unstable)(nodes, i);
     }
-    
+
     //-------------------------------------------------------------------------
-    
+
     void draw(View cam)
     {
-        if(!nodes.length) return;
+        if(!length) return;
 
         state.activate();
         state.shader.loadView(cam);
@@ -156,7 +160,7 @@ class Batch
                 sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(nodes);
                 break;
         }
-        
+
         foreach(node; nodes)
         {
             if(!node.model.material) continue;
@@ -182,10 +186,16 @@ class BatchGroup
     Batch addbatch(Batch batch)
     {
         batches ~= batch;
-        return batch;        
+        return batch;
     }
 
-    Batch addbatch(State state)
+    Batch addbatch(Batch batch, Batch.Mode mode)
+    {
+        batches ~= new Batch(batch, mode);
+        return batch;
+    }
+
+    Batch addbatch(State state, Batch.Mode = Batch.Mode.unsorted)
     {
         return addbatch(new Batch(state));
     }

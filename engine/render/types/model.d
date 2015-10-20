@@ -4,20 +4,21 @@
 //
 //*****************************************************************************
 
-module engine.render.model;
+module engine.render.types.model;
 
 //-------------------------------------------------------------------------
 
 import engine.render.util;
 
-import engine.render.shaders.base;
-import engine.render.transform;
-import engine.render.mesh;
-import engine.render.bound;
-import engine.render.texture;
-import engine.render.material;
-import engine.render.view;
-import engine.render.batch;
+import engine.render.pipeline.shader;
+import engine.render.types.transform;
+import engine.render.types.mesh;
+//import engine.render.types.bound;
+//import engine.render.types.texture;
+import engine.render.types.material;
+
+//import engine.render.types.view;
+//import engine.render.batch;
 
 //*****************************************************************************
 //
@@ -46,6 +47,7 @@ class Model
     // is used for instanced (sprite) blitting from texture atlas.
     //-------------------------------------------------------------------------
 
+/*
     static Model[][] sheet(
         Batch batch,
         Texture sheet,
@@ -77,5 +79,6 @@ class Model
 
         return grid;
     }
+*/
 }
 

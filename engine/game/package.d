@@ -58,24 +58,28 @@ void init(string name, int width = 640, int height = 480)
 
     screen.glcontext = SDL_GL_CreateContext(screen.window);
 
+    auto glv = DerelictGL3.reload();
+
     //SDL_GL_SetSwapInterval(0);    // Immediate
     //SDL_GL_SetSwapInterval(1);    // VSync
     SDL_GL_SetSwapInterval(-1);   // Tearing
 
     debug {
         writeln("OpenGL:");
-        writefln("- Context..: %d.%d",
+        writefln("- Context..: Version %d.%d",
             _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION),
             _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION)
         );
+        writefln("- Derelict.: Version %s", glv);
         writeln("- GLSL.....: ", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
         writeln("- Version..: ", to!string(glGetString(GL_VERSION)));
         writeln("- Vendor...: ", to!string(glGetString(GL_VENDOR)));
         writeln("- Renderer.: ", to!string(glGetString(GL_RENDERER)));
+
+        //writeln("Extensions: ", to!string(glGetString(GL_EXTENSIONS)));
     }
 
     render.init();
-
     Joystick.init();
 }
 

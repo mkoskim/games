@@ -11,7 +11,7 @@
     "stringImportPaths": [ "." ],
 
     "preBuildCommands": [
-        "zip -q -r -9 BLOB.zip data/ engine/stock/ engine/render/shaders/glsl"
+        "zip -q -r -9 BLOB.zip data/ engine/stock/ engine/render/pipeline/glsl"
     ],
 
     "dependencies": {
