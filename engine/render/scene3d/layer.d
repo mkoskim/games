@@ -17,22 +17,23 @@
 //
 //*****************************************************************************
 
-module engine.render.pipeline.layer;
+module engine.render.scene3d.layer;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.types.transform;
-import engine.render.types.mesh;
-//import engine.render.types.texture;
-import engine.render.types.material;
-import engine.render.types.model;
-import engine.render.types.node;
-import engine.render.types.view;
-import engine.render.types.light;
+import engine.render.loader.mesh;
 
-import engine.render.pipeline.state;
-import engine.render.pipeline.batch;
+import engine.render.scene3d.types.transform;
+import engine.render.scene3d.types.material;
+import engine.render.scene3d.types.model;
+import engine.render.scene3d.types.node;
+import engine.render.scene3d.types.view;
+import engine.render.scene3d.types.light;
+
+import engine.render.scene3d.shader;
+import engine.render.scene3d.state;
+import engine.render.scene3d.batch;
 
 import engine.game.fiber;
 
@@ -166,7 +167,7 @@ class BufferedRender
         // TODO: Hack! Design light subsystem
         if(light) {
             batches.batches[0].state.activate();    
-            batches.batches[0].state.shader.light(light);
+            (cast(Shader)batches.batches[0].state.shader).light(light);
         }
 
         batches.draw(cam);
@@ -211,7 +212,7 @@ class UnbufferedRender : NodeGroup
     {
         // TODO: Hack! Design light subsystem
         state.activate();    
-        if(light) state.shader.light(light);
+        if(light) (cast(Shader)state.shader).light(light);
         
         batches.draw(cam);
     }

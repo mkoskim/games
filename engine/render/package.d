@@ -6,28 +6,10 @@
 
 module engine.render;
 
-public {
-    import engine.render.gpu.texture;
-
-    import engine.render.types.transform;
-    import engine.render.types.mesh;
-    import engine.render.types.bounds;
-    import engine.render.types.material;
-    import engine.render.types.model;
-    import engine.render.types.node;
-    import engine.render.types.view;
-    import engine.render.types.light;
-
-    import engine.render.pipeline.shader;
-    import engine.render.pipeline.state;
-    import engine.render.pipeline.batch;
-    import engine.render.pipeline.layer;
-    import engine.render.pipeline.pipeline;
-
-    import gl3n.linalg;
-}
-
 //-----------------------------------------------------------------------------
+
+public import engine.render.gpu;
+public import engine.render.loader.mesh;
 
 import engine.game.instance;
 import engine.render.util;
@@ -93,21 +75,22 @@ void init()
 
     //-------------------------------------------------------------------------
 
-    checkgl!glClearColor(0, 0, 0, 1);
-    checkgl!glClearDepth(1);
+    checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    checkgl!glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
     //-------------------------------------------------------------------------
 
-    checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    checkgl!glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    screen.fb.bind();
+    screen.fb.clear();
 }
 
 //-----------------------------------------------------------------------------
 
 void start()
 {
-    checkgl!glViewport(0, 0, screen.width, screen.height);
-    checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    screen.fb.bind();
+    //checkgl!glViewport(0, 0, screen.width, screen.height);
+    //checkgl!glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 /*

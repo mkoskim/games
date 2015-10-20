@@ -19,6 +19,7 @@ import engine.render.gpu.compile;
 //import engine.render.types.mesh;
 
 import std.string: toStringz;
+import std.variant: Variant;
 
 //-----------------------------------------------------------------------------
 
@@ -26,7 +27,7 @@ class Shader
 {
     //*************************************************************************
     //
-    // Getting locations of parameters
+    // Getting locations of shader parameters (uniforms and attributes)
     //
     //*************************************************************************
 
@@ -65,45 +66,34 @@ class Shader
         }
     }
 
-    //-------------------------------------------------------------------------
-    // Uniform parameters
-    //-------------------------------------------------------------------------
+    //*************************************************************************
+    //
+    // Shader uniforms and options
+    //
+    //*************************************************************************
 
-    protected final void uniform(string name, mat4 value, bool optional = false)
+    protected final void uniform(string name, Variant value, bool optional = false)
     {
         GLint loc = location("uniform", name, optional);
-        if(loc != -1) checkgl!glUniformMatrix4fv(loc, 1, GL_TRUE, value.value_ptr);
+        if(loc == -1) return ;
+        if     (value.type == typeid(bool))   checkgl!glUniform1i(loc, value.get!(bool));
+        else if(value.type == typeid(int))    checkgl!glUniform1i(loc, value.get!(int));
+        else if(value.type == typeid(float))  checkgl!glUniform1f(loc, value.get!(float));
+        else if(value.type == typeid(double)) checkgl!glUniform1f(loc, cast(float)value.get!(double));
+        else if(value.type == typeid(mat4))   checkgl!glUniformMatrix4fv(loc, 1, GL_TRUE, value.get!(mat4).value_ptr);
+        else if(value.type == typeid(vec4))   checkgl!glUniform4fv(loc, 1, value.get!(vec4).value_ptr);
+        else if(value.type == typeid(vec3))   checkgl!glUniform3fv(loc, 1, value.get!(vec3).value_ptr);
+        else throw new Exception(format("Unknown type '%s' for uniform '%s'", to!string(value.type), name));
     }
 
-    protected final void uniform(string name, vec4 value, bool optional = false)
-    {
-        GLint loc = location("uniform", name, optional);
-        if(loc != -1) checkgl!glUniform4fv(loc, 1, value.value_ptr);
-    }
+    protected final void uniform(string n, mat4 v, bool opt = false) { uniform(n, Variant(v), opt); }
+    protected final void uniform(string n, vec4 v, bool opt = false) { uniform(n, Variant(v), opt); }
+    protected final void uniform(string n, vec3 v, bool opt = false) { uniform(n, Variant(v), opt); }
+    protected final void uniform(string n, float v, bool opt = false) { uniform(n, Variant(v), opt); }
+    protected final void uniform(string n, int v, bool opt) { uniform(n, Variant(v), opt); }
+    protected final void uniform(string n, bool v, bool opt) { uniform(n, Variant(v), opt); }
 
-    protected final void uniform(string name, vec3 value, bool optional = false)
-    {
-        GLint loc = location("uniform", name, optional);
-        if(loc != -1) checkgl!glUniform3fv(loc, 1, value.value_ptr);
-    }
-
-    protected final void uniform(string name, float value, bool optional = false)
-    {
-        GLint loc = location("uniform", name, optional);
-        if(loc != -1) checkgl!glUniform1f(loc, value);
-    }
-
-    protected final void uniform(string name, int value, bool optional)
-    {
-        GLint loc = location("uniform", name, optional);
-        if(loc != -1) checkgl!glUniform1i(loc, value);
-    }
-
-    protected final void uniform(string name, bool value, bool optional)
-    {
-        GLint loc = location("uniform", name, optional);
-        if(loc != -1) checkgl!glUniform1ui(loc, value);
-    }
+    Variant[string] options;
 
     //-------------------------------------------------------------------------
     // Texture sampler. TODO: Maybe we change this to uniform.
@@ -205,14 +195,19 @@ class Shader
     //
     //*************************************************************************
 
+    void setOptions(Variant[string] options)
+    {
+        foreach(name, value; options) uniform(name, value);
+    }
+
     private static currentProgramID = 0;
 
     final void activate()
     {
-
         if(currentProgramID != programID)
         {
             checkgl!glUseProgram(programID);
+            setOptions(options);
             currentProgramID = programID;
         }
     }

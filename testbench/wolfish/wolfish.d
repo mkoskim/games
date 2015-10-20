@@ -55,18 +55,18 @@ string[] grid = [
 //
 //*****************************************************************************
 
-class Scene : render.Pipeline3D
+class Scene : scene3d.Pipeline3D
 {
     Player player;
-    render.Model[] wallshapes, floorshapes, propshapes;
+    scene3d.Model[] wallshapes, floorshapes, propshapes;
 
     this(string[] grid)
     {
         loadmodels();
         loadmaze(grid);
 
-        light = new render.Light(
-            render.Grip.fixed(0, 2, 0),
+        light = new scene3d.Light(
+            scene3d.Grip.fixed(0, 2, 0),
             vec3(1, 1, 1),
             10,
             0.1
@@ -79,11 +79,26 @@ class Scene : render.Pipeline3D
         // Create batches: we create several now just for testing the system.
         //---------------------------------------------------------------------
 
-        auto walls  = addbatch(render.Batch.Solid3D());
-        auto props  = addbatch(walls);
-        auto floors = addbatch(walls, render.Batch.Mode.unsorted);
+        auto solidshader = scene3d.shaders.Default3D.create();
 
-        auto transparent = addbatch(render.Batch.Transparent3D());
+        solidshader.options["fog.enabled"] = true;
+        solidshader.options["fog.start"] = 10.0;
+        solidshader.options["fog.end"]   = 20.0;
+        solidshader.options["fog.color"] = vec4(0.5, 0.5, 0.5, 0);
+        //solidshader.options["fog.color"] = vec4(1.0, 1.0, 1.0, 1);
+
+        auto solidstate = scene3d.State.Solid3D(solidshader);
+
+        auto walls  = addbatch(scene3d.Batch.Solid3D(solidstate));
+        auto props  = addbatch(scene3d.Batch.Solid3D(solidstate));
+        auto floors = addbatch(solidstate, scene3d.Batch.Mode.unsorted);
+
+        //props.state.target = new render.Framebuffer();
+
+        //props.state.options["useQuants"] = 8;
+        //floors.state.options["useQuants"] = false;
+
+        auto transparent = addbatch(scene3d.Batch.Transparent3D(solidshader));
 
         //---------------------------------------------------------------------
         // Texture loader(s)
@@ -105,68 +120,68 @@ class Scene : render.Pipeline3D
         //
         //---------------------------------------------------------------------
 
-        auto matCaveWall = new render.Material(
+        auto matCaveWall = new scene3d.Material(
             colormap("engine/stock/tiles/CaveWall/ColorMap.png"),
             normalmap("engine/stock/tiles/CaveWall/NormalMap.png"),
             1.00);
 
-        auto matCrackedPlaster = new render.Material(
+        auto matCrackedPlaster = new scene3d.Material(
             colormap("engine/stock/tiles/CrackedPlaster/ColorMap.png"),
             normalmap("engine/stock/tiles/CrackedPlaster/NormalMap.png"),
             0.95);
 
-        auto matSantaFeStucco = new render.Material(
+        auto matSantaFeStucco = new scene3d.Material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
             colormap("engine/stock/tiles/CaveWall/ColorMap.png"),
             normalmap("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
             0.95);
 
-        auto matTanStucco = new render.Material(
+        auto matTanStucco = new scene3d.Material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
             colormap("engine/stock/tiles/TanStucco/ColorMap.png"),
             normalmap("engine/stock/tiles/TanStucco/NormalMap.png"),
             0.95);
 
-        auto matBrickWall = new render.Material(
+        auto matBrickWall = new scene3d.Material(
             colormap("engine/stock/tiles/BrickWall1/ColorMap.png"),
             normalmap("engine/stock/tiles/BrickWall1/NormalMap.png"),
             0.95);
 
-        auto matGraniteWall = new render.Material(
+        auto matGraniteWall = new scene3d.Material(
             colormap("engine/stock/tiles/GraniteWall/ColorMap.png"),
             normalmap("engine/stock/tiles/GraniteWall/NormalMap.png"),
             0.95);
 
-        auto matCrustyConcrete = new render.Material(
+        auto matCrustyConcrete = new scene3d.Material(
             colormap("engine/stock/tiles/Concrete/Crusty/ColorMap.png"),
             normalmap("engine/stock/tiles/Concrete/Crusty/NormalMap.png"),
             0.95);
 
-        auto matDirtyConcrete = new render.Material(
+        auto matDirtyConcrete = new scene3d.Material(
             colormap("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
             normalmap("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
             0.95);
 
-        auto matCarvedSandstone = new render.Material(
+        auto matCarvedSandstone = new scene3d.Material(
             colormap("engine/stock/tiles/CarvedSandstone/ColorMap.png"),
             //"engine/stock/tiles/CaveWall/ColorMap.png",
             //vec3(0.5, 0.4, 0.2),
             normalmap("engine/stock/tiles/CarvedSandstone/NormalMap.png"),
             0.95);
 
-        auto matAlienCarving = new render.Material(
+        auto matAlienCarving = new scene3d.Material(
             //"engine/stock/tiles/AlienCarving/ColorMap.png",
             colormap(vec4(0.75, 0.5, 0.25, 1)),
             normalmap("engine/stock/tiles/AlienCarving/NormalMap.png"),
             0.15);
 
-        auto matMetallicAssembly = new render.Material(
+        auto matMetallicAssembly = new scene3d.Material(
             //"engine/stock/tiles/MetallicAssembly/ColorMap.png",
             colormap(vec4(0.5, 0.5, 0.5, 1)),
             normalmap("engine/stock/tiles/MetallicAssembly/NormalMap.png"),
             0.15);
 
-        auto matGlass = new render.Material(
+        auto matGlass = new scene3d.Material(
             colormap(vec4(0.8, 0.8, 0.9, 0.3)),
             normalmap("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
             0.50
@@ -194,7 +209,7 @@ class Scene : render.Pipeline3D
 
         floorshapes = [
             floors.upload(floormesh, matGraniteWall),
-            floors.upload(floormesh, new render.Material(
+            floors.upload(floormesh, new scene3d.Material(
                 colormap(vec4(0.25, 0.25, 0.25, 1)),
                 matGraniteWall.normalmap,
                 0.15
@@ -203,13 +218,14 @@ class Scene : render.Pipeline3D
 
         propshapes = [
             /*
-            props.upload(monkeymesh, new render.Material(
+            props.upload(monkeymesh, new scene3d.Material(
                 vec4(0.75, 0.5, 0.25, 1),
                 //matSantaFeStucco.normalmap,
                 0.5
             )),
-            */
+            /*/
             transparent.upload(monkeymesh, matGlass),
+            /**/
         ];
     }
 
@@ -254,11 +270,11 @@ class Player : game.Fiber
 {
     Scene maze;
 
-    render.Transform root;
-    render.Camera cam;
+    scene3d.Transform root;
+    scene3d.Camera cam;
 
     game.Joystick joystick;
-    render.Material* mat;
+    scene3d.Material* mat;
 
     this(Scene maze, vec3 pos)
     {
@@ -266,9 +282,9 @@ class Player : game.Fiber
 
         this.maze = maze;
         
-        root = render.Grip.movable(pos);
+        root = scene3d.Grip.movable(pos);
 
-        cam = render.Camera.basic3D(0.1, 20, render.Grip.movable(root));
+        cam = scene3d.Camera.basic3D(0.1, 20, scene3d.Grip.movable(root));
 
         joystick = game.joysticks[0];
         
@@ -315,7 +331,7 @@ void main()
 
     //-------------------------------------------------------------------------
 
-    auto hud = new Canvas();
+    //auto hud = new Canvas();
 
     /*
     auto txtInfo = new TextBox(2, 2,
@@ -353,7 +369,7 @@ void main()
     void draw()
     {
         maze.draw();
-        hud.draw();
+        //hud.draw();
     }
 
     //-------------------------------------------------------------------------

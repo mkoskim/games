@@ -77,13 +77,13 @@ void main()
     actors.addcallback(() {
         const float moverate = 0.25;
         const float turnrate = 5;
-        
+
         object.grip.pos += vec3(
             joystick.axes[game.JOY.AXIS.LX],
             0,
             -joystick.axes[game.JOY.AXIS.LY]
         ) * moverate;
-        
+
         object.grip.rot += vec3(
             joystick.axes[game.JOY.AXIS.RY],
             joystick.axes[game.JOY.AXIS.RX],
@@ -97,10 +97,16 @@ void main()
 
     //-------------------------------------------------------------------------
 
+    void draw() {
+        scene.draw();
+    }
+
+    //-------------------------------------------------------------------------
+
     simple.gameloop(
-        50,             // FPS (limit)
-        &scene.draw,    // Drawing
-        actors,         // list of actors
+        50,       // FPS (limit)
+        &draw,    // Drawing
+        actors,   // list of actors
 
         //---------------------------------------------------------------------
 

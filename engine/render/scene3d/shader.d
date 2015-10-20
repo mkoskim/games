@@ -4,7 +4,7 @@
 //
 //*****************************************************************************
 
-module engine.render.pipeline.shader;
+module engine.render.scene3d.shader;
 
 //-----------------------------------------------------------------------------
 //
@@ -13,16 +13,16 @@ module engine.render.pipeline.shader;
 import engine.render.util;
 
 import gpu = engine.render.gpu;
+import engine.render.loader.mesh;
 
-import engine.render.types.transform;
-import engine.render.types.mesh;
-import engine.render.types.material;
-import engine.render.types.bounds;
-import engine.render.types.view;
-import engine.render.types.light;
+import engine.render.scene3d.types.transform;
+import engine.render.scene3d.types.material;
+import engine.render.scene3d.types.bounds;
+import engine.render.scene3d.types.view;
+import engine.render.scene3d.types.light;
 
-import blob = engine.blob;
-import std.string: toStringz;
+//import blob = engine.blob;
+//import std.string: toStringz;
 
 //-----------------------------------------------------------------------------
 // TODO: Shader needs to be renamed
@@ -232,7 +232,7 @@ abstract class Shader : gpu.Shader
 
 //*****************************************************************************
 //
-// Simple 3D shader
+// Some 3D shaders
 //
 //*****************************************************************************
 
@@ -252,14 +252,59 @@ class Default3D : Shader
         super(
             [
                 conffile,
-                "engine/render/pipeline/glsl/types.3d.glsl",
-                "engine/render/pipeline/glsl/default3d.in.glsl",
+                "engine/render/scene3d/glsl/types.3d.glsl",
+                "engine/render/scene3d/glsl/default3d.in.glsl",
             ], [
-                "engine/render/pipeline/glsl/verts.lib.glsl",
-                "engine/render/pipeline/glsl/verts.3d.glsl",
+                "engine/render/scene3d/glsl/verts.lib.glsl",
+                "engine/render/scene3d/glsl/verts.3d.glsl",
             ], [
-                "engine/render/pipeline/glsl/frags.lib.glsl",
-                "engine/render/pipeline/glsl/frags.3d.glsl",
+                "engine/render/scene3d/glsl/frags.lib.glsl",
+                "engine/render/scene3d/glsl/frags.3d.glsl",
+            ]
+        );
+    }
+
+    private this()
+    {
+        this(null);
+    }
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+class Flat3D : Shader
+{
+    static Shader create()
+    {
+        static Shader instance = null;
+        if(!instance) instance = new Flat3D();
+        return instance;
+    }
+
+    //-------------------------------------------------------------------------
+
+    override void light(Light l) { }
+    override void loadMaterial(Material mat, Material.Modifier mod)
+    {
+        texture("material.colormap", 0, mat.colormap);
+    }
+
+    //-------------------------------------------------------------------------
+
+    protected this(string conffile)
+    {
+        super(
+            [
+                conffile,
+                "engine/render/scene3d/glsl/types.3d.glsl",
+                "engine/render/scene3d/glsl/default3d.in.glsl",
+            ], [
+                "engine/render/scene3d/glsl/verts.lib.glsl",
+                "engine/render/scene3d/glsl/flat3d.glsl",
+            ], [
+                "engine/render/scene3d/glsl/frags.lib.glsl",
+                "engine/render/scene3d/glsl/flat3d.glsl",
             ]
         );
     }

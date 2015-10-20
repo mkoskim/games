@@ -2,7 +2,12 @@
 
 DONE:
 
+- REJECTED: Picking objects by comparing depth at certain position after
+  drawing that object is wonderfully slow. Amazingly slow. We reject this
+  method for picking objects from 3D space.
 
+- POSTPONED: Don't happen anymore, and no plans to use it -glVertexAttribPointer
+  returns invalid enum when trying to use GL_INT_2_10_10_10_REV for normals & tangents.
 
 *******************************************************************************
 
@@ -11,6 +16,17 @@ WORKLIST:
 - After dividing shader implementation, there's problem with VAO as data
   packet. Somehow we need to be able to create class to keep data... It
   might require storing VAOs and such to shader itself.
+
+- Also, one architectural problem is that now - as it is right - 3D scene
+  rendering state inherits from GPU rendering state, we loose the shader
+  rendering interface. Currently I am casting state shader to correct type,
+  but something better should be figured out.
+
+- Study: Do we find any use for uniform buffers? See:
+
+        https://www.opengl.org/wiki/Uniform_Buffer_Object
+
+- Implement shader options somehow... State object, maybe?
 
 - I would need to collect some default setups to e.g. ext/ directory,
   so that I could work at higher levels without needing to worry about
@@ -21,12 +37,12 @@ WORKLIST:
 
 - Shader family: It could be time to concentrate on shader management
   before going forward:
-  
+
   * Shader family: to upload stuff to GPU w/o creating actual shader
-  
+
     - Problem: for binding VBOs and VAOs, the shader program needs
       to be active...
-  
+
   * Shader compilation: for error reporting, would be good to create
     "precompiled" libraries. I have a feeling that I can never make
     error reporting reliable (w/ current OpenGL implementation) for
@@ -208,9 +224,6 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 - Shader compiler (see gpucompiler.d) can only report error location for
   noveau driver. Needs (1) driver detection, and (2) custom reporting for
   each driver.
-
-- glVertexAttribPointer returns invalid enum when trying to use
-  GL_INT_2_10_10_10_REV for normals & tangents.
 
 - With normalized integer vectors (see gputypes.d), we use scaling, but
   in reality (for 8-bit) -1 -> -128, +1 -> +127.

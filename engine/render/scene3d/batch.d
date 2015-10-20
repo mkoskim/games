@@ -5,22 +5,22 @@
 //
 //*****************************************************************************
 
-module engine.render.pipeline.batch;
+module engine.render.scene3d.batch;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
+import engine.render.loader.mesh;
 
-import engine.render.types.transform;
-import engine.render.types.mesh;
-import engine.render.types.bounds;
-import engine.render.types.material;
-import engine.render.types.model;
-import engine.render.types.node;
-import engine.render.types.view;
+import engine.render.scene3d.types.transform;
+import engine.render.scene3d.types.bounds;
+import engine.render.scene3d.types.material;
+import engine.render.scene3d.types.model;
+import engine.render.scene3d.types.node;
+import engine.render.scene3d.types.view;
 
-import engine.render.pipeline.shader;
-import engine.render.pipeline.state;
+import engine.render.scene3d.shader;
+import engine.render.scene3d.state;
 
 import engine.render.gpu.texture;
 
@@ -54,7 +54,12 @@ class Batch
 
     //static Batch Default2D() { return new Batch(State.Default2D()); }
     static Batch Solid3D() { return new Batch(State.Solid3D(), Mode.front2back); }
+    static Batch Solid3D(Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
+    static Batch Solid3D(State state) { return new Batch(state, Mode.front2back); }
+
     static Batch Transparent3D() { return new Batch(State.Transparent3D(), Mode.back2front); }
+    static Batch Transparent3D(Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
+    static Batch Transparent3D(State state) { return new Batch(state, Mode.back2front); }
 
     //-------------------------------------------------------------------------
     // Asset management
@@ -66,7 +71,7 @@ class Batch
     {
         if(!(mesh in meshes))
         {
-            meshes[mesh] = state.shader.upload(mesh);
+            meshes[mesh] = (cast(Shader)state.shader).upload(mesh);
         }
         return meshes[mesh];
     }
@@ -148,7 +153,7 @@ class Batch
         if(!length) return;
 
         state.activate();
-        state.shader.loadView(cam);
+        (cast(Shader)state.shader).loadView(cam);
 
         final switch(mode)
         {
@@ -166,7 +171,7 @@ class Batch
             if(!node.model.material) continue;
             if(!node.model.vao) continue;
 
-            state.shader.render(node.transform, node.model.material, node.model.vao);
+            (cast(Shader)state.shader).render(node.transform, node.model.material, node.model.vao);
         }
     }
 }

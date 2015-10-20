@@ -13,6 +13,7 @@ module engine;
 public {
     import game = engine.game;
     import render = engine.render;
+    import scene3d = engine.render.scene3d;
     import blob = engine.blob;
 }
 

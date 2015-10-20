@@ -8,6 +8,8 @@ uniform mat4 mProjection;
 uniform mat4 mView;
 uniform mat4 mModel;
 
+uniform FOG fog;
+
 uniform LIGHT light;
 
 uniform MATERIAL material;
