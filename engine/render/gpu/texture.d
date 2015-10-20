@@ -46,7 +46,51 @@ private GLuint _GLformat(SDL_Surface *surface)
 }
 
 //-----------------------------------------------------------------------------
-//
+// Normal 2D texture
+//-----------------------------------------------------------------------------
+
+private void uploadTextureData(
+    GLenum target,
+    GLint level,
+    GLint w, GLint h,
+    GLenum format,
+    GLenum type,
+    void* buffer,
+    bool compress
+)
+{
+    GLenum intformat;
+
+    final switch(format)
+    {
+        
+        case GL_BGRA:
+        case GL_RGBA:
+            format = GL_RGBA;
+            intformat = compress ? GL_COMPRESSED_RGBA : format;
+            break;
+        
+        case GL_RGB8:
+        case GL_RGB:
+            format = GL_RGB;
+            intformat = compress ? GL_COMPRESSED_RGB : format;
+            break;
+    }
+
+    checkgl!glTexImage2D(
+        target,
+        level,              // Mipmap level
+        intformat,          // Internal format
+        w, h,
+        0,                  // Border
+        format,             // Format of data
+        type,               // Data type/width
+        buffer              // Actual data
+    );
+}
+
+//-----------------------------------------------------------------------------
+// Normal 2D texture
 //-----------------------------------------------------------------------------
 
 class Texture
@@ -159,24 +203,6 @@ class Texture
 
         //TODO("Alpha maps not working");
 
-        GLenum intformat;
-
-        final switch(format)
-        {
-            
-            case GL_BGRA:
-            case GL_RGBA:
-                format = GL_RGBA;
-                intformat = loader.compress ? GL_COMPRESSED_RGBA : format;
-                break;
-            
-            case GL_RGB8:
-            case GL_RGB:
-                format = GL_RGB;
-                intformat = loader.compress ? GL_COMPRESSED_RGB : format;
-                break;
-        }
-
         //---------------------------------------------------------------------
 
         //debug writeln("Format: ", _name[format], " internal: ", _name[intformat]);
@@ -185,14 +211,14 @@ class Texture
 
         checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
-        checkgl!glTexImage2D(GL_TEXTURE_2D,
+        uploadTextureData(
+            GL_TEXTURE_2D,
             0,                  // Mipmap level
-            intformat,          // Internal format
             w, h,
-            0,                  // Border
             format,             // Format of data
             type,               // Data type/width
-            buffer              // Actual data
+            buffer,             // Actual data
+            loader.compress
         );
 
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, loader.filtering.mag);
@@ -200,6 +226,7 @@ class Texture
 
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, loader.wrapping.s);
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, loader.wrapping.t);
+        //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, loader.wrapping.r);
 
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
@@ -291,4 +318,61 @@ class Texture
         checkgl!glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
+
+//-----------------------------------------------------------------------------
+// Cubemap
+//-----------------------------------------------------------------------------
+
+class Cubemap
+{
+    GLuint ID;
+
+    private void uploadFace(GLenum face, SDL_Surface* surface)
+    {
+        uploadTextureData(
+            face,
+            0,
+            surface.w, surface.h,
+            _GLformat(surface),
+            GL_UNSIGNED_BYTE,
+            surface.pixels,
+            true
+        );
+    }
+
+    this(SDL_Surface*[] surfaces)
+    {
+        checkgl!glGenTextures(1, &ID);
+        checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+
+        foreach(i; 0 .. 6) uploadFace(
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            surfaces[i]
+        );
+
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+
+    this(Bitmap[] bitmaps)
+    {
+        SDL_Surface*[] surfaces;
+        foreach(i; 0 .. 6) surfaces ~= bitmaps[i].surface;
+        this(surfaces);
+    }
+
+    this(string[] filenames)
+    {
+        Bitmap[] bitmaps;
+        foreach(i; 0 .. 6) bitmaps ~= new Bitmap(filenames[i]);
+        this(bitmaps);
+    }
+}
+
 

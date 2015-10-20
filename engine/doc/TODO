@@ -7,11 +7,32 @@ DONE:
   method for picking objects from 3D space.
 
 - POSTPONED: Don't happen anymore, and no plans to use it -glVertexAttribPointer
-  returns invalid enum when trying to use GL_INT_2_10_10_10_REV for normals & tangents.
+  returns invalid enum when trying to use GL_INT_2_10_10_10_REV for normals &
+  tangents.
+
+- DONE: uniform() now has optional boolean for this - We could accept
+  reading/writing inexisting uniforms in some cases, that is, store -1 to
+  namecache. Certain uniforms are optional as their nature, it
+  would not hurt if they do not exist in shader. This might not be a good idea
+  in general - I want to catch errors early, and this could hide them, causing
+  lots of time wasted in debugging.
+
+- DONE: Fog
+
+- DONE: RESOURCE TRACKING: Create mechanism to track living resources (number of
+meshes, nodes etc).
+
+- DONE: Most probably not - Display lists are still useful??? Find it out.
+
+- DONE: SkyBox - this was also nice practising about creating custom
+  shaders on the fly.
 
 *******************************************************************************
 
 WORKLIST:
+
+- Framebuffers: It is possible to share depth buffer between multiple
+  framebuffers, when we are only interested in color map.
 
 - After dividing shader implementation, there's problem with VAO as data
   packet. Somehow we need to be able to create class to keep data... It
@@ -324,11 +345,6 @@ architecture more suitable for models loaded from files.
 
 -------------------------------------------------------------------------------
 
-RESOURCE TRACKING: Create mechanism to track living resources (number of
-meshes, nodes etc).
-
--------------------------------------------------------------------------------
-
 FIBERS, EVENT PROCESSING:
 
 - It would be good to be able to send events to be processed by a Fiber.
@@ -347,29 +363,25 @@ FIBERS, EVENT PROCESSING:
 
 - Check vibe.d for ideas for game actors (fibers)
 
+- It would be good to create active nodes (nodes that are both nodes
+  and fibers).
+
 -------------------------------------------------------------------------------
 
 SHADERS: Shaders are so central part that they reserve their own section
 here. Shader is connected to at least objects, materials and scenes, so these
 issues have their relations to other sections in this TODO document.
 
-- glamour: 3D shader, 2D GUI shader, and postprocessing effect shaders, they
+- ONGOING: 3D shader, 2D GUI shader, and postprocessing effect shaders, they
   all have very different interface. Because of that, I probably need to drop
   Shader implementation even lower level, and create intermediate structures
-  between render, canvas and such.
-  
-  Because of this, I might consider taking glamour there.
+  between render, canvas and such --> Because of this, I might consider taking
+  glamour there.
 
 - I should go to version 130 with shaders. For creating compatible shader
   banks, it is mandatory to ensure that attributes are at the same location.
   Otherwise, loaded VBOs (via VAO) do not work: not a problem at the moment, as
   attributes are bind by hand.
-
-- We could accept reading/writing inexisting uniforms in some cases, that is,
-  store -1 to namecache. Certain uniforms are optional as their nature, it
-  would not hurt if they do not exist in shader. This might not be a good idea
-  in general - I want to catch errors early, and this could hide them, causing
-  lots of time wasted in debugging.
 
 - Half-done: Improve introspection: dumping uniforms etc at compilation module, to
   help improving & debugging shaders.
@@ -432,7 +444,8 @@ SCENES, LAYERS:
   There is - of course - problem to determine when render state block
   is applied...
 
-- Store viewing information to batch node, not to scene node.
+- Store viewing information to batch node, not to scene node. Same node
+  may be retrieved multiple times from different angles.
 
 - Probably it is better to classify objects at Layer/Scene level already...
   Keeping objects in one single list helps lookups, but (1) I assume that
@@ -445,8 +458,6 @@ SCENES, LAYERS:
 - Because of this, it might make some sense to bind lights, visibility
   checks and such to camera. The same information could then be used
   by all scene layers. Need thinking...
-
-- Fog
 
 - Skybox: Cylinderium could use this, in addition to star field. Skybox
   does not replace star field - star field is three dimensional, skybox
@@ -644,8 +655,6 @@ ARCHITECTURE:
 -------------------------------------------------------------------------------
 
 LOW PRIORITY:
-
-- Display lists are still useful??? Find it out.
 
 - Study Manhattan distance to be used as quick way to filter nearby elements
 
