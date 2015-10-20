@@ -30,13 +30,12 @@ void main(void)
     //-------------------------------------------------------------------------
 
     vec4  texel = texture2D(material.colormap, frag_uv);
-    float alpha = texel.a;
 
     //-------------------------------------------------------------------------
     // Discarding fully transparent pixels leaves depth value intact
     //-------------------------------------------------------------------------
 
-    if(alpha < 1.0/255) discard;
+    if(texel.a < 1.0/255) discard;
 
     //-------------------------------------------------------------------------
     // Lightning
@@ -58,11 +57,28 @@ void main(void)
         lighting = quantify(lighting, useQuants);
     }
 
+    texel.rgb = lighting * texel.rgb * light.color;
+
+    //-------------------------------------------------------------------------
+    // Fog
+    //-------------------------------------------------------------------------
+
+    if(fog.enabled)
+    {
+        texel = mix(
+            fog.color, texel,
+            fogify(fog.start, fog.end, length(frag_pos))
+            //fogify(fog.start, fog.end, abs(frag_pos.z))
+        );
+    }
+
     //-------------------------------------------------------------------------
     // Fragment output
     //-------------------------------------------------------------------------
 
-    gl_FragColor = vec4(lighting * texel.rgb * light.color, alpha);
+    gl_FragColor = texel;
+
+    //gl_FragColor = vec4(lighting * texel.rgb * light.color, alpha);
     //gl_FragColor = vec4(lighting * light.color, alpha);
     //gl_FragColor = vec4((n + 1)/2, alpha);
     //gl_FragColor = vec4((frag_tangent.xyz + 1)/2, alpha);

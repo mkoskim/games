@@ -22,7 +22,7 @@ LDFLAGS=
 # Add stock items to BLOB if you use them
 #------------------------------------------------------------------------------
 
-BLOBFILES += engine/render/pipeline/glsl/
+BLOBFILES += engine/render/scene3d/glsl/
 BLOBFILES += engine/stock/
 
 include engine/build/Makegame.mak

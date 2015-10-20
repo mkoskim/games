@@ -29,3 +29,15 @@ struct LIGHT
     float ambient;          // Ambient lightning factor
 };
 
+//-----------------------------------------------------------------------------
+// Fog
+//-----------------------------------------------------------------------------
+
+struct FOG
+{
+    bool enabled;
+    float start;
+    float end;
+    vec4 color;
+};
+

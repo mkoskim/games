@@ -4,12 +4,12 @@
 //
 //*****************************************************************************
 
-module engine.render.types.bounds;
+module engine.render.scene3d.types.bounds;
 
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.types.mesh;
+import engine.render.loader.mesh;
 
 //-----------------------------------------------------------------------------
 // Bounding sphere

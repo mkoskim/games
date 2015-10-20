@@ -149,7 +149,7 @@ private GLuint compileShader(GLenum shadertype, string[] files)
 
     //debug writeln(getShaderSource(shaderID));
 
-//*
+/*
     throw new ShaderCompileError(format("%s", getShaderInfoLog(shaderID)));
 /*/
     string msg = getShaderInfoLog(shaderID);

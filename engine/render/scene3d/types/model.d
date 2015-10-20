@@ -4,18 +4,19 @@
 //
 //*****************************************************************************
 
-module engine.render.types.model;
+module engine.render.scene3d.types.model;
 
 //-------------------------------------------------------------------------
 
 import engine.render.util;
 
-import engine.render.pipeline.shader;
-import engine.render.types.transform;
-import engine.render.types.mesh;
+import engine.render.loader.mesh;
+
+import engine.render.scene3d.shader;
+import engine.render.scene3d.types.transform;
 //import engine.render.types.bound;
 //import engine.render.types.texture;
-import engine.render.types.material;
+import engine.render.scene3d.types.material;
 
 //import engine.render.types.view;
 //import engine.render.batch;

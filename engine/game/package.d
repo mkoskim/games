@@ -57,6 +57,8 @@ void init(string name, int width = 640, int height = 480)
     );
 
     screen.glcontext = SDL_GL_CreateContext(screen.window);
+    screen.fb = new render.Framebuffer(0, width, height);
+    screen.fb.clear();
 
     auto glv = DerelictGL3.reload();
 
@@ -143,7 +145,6 @@ class Profile
 //*****************************************************************************
 
 uint ticks = 0;
-uint frame = 0;
 
 private int framelength = 1000/50;
 

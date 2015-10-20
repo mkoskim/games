@@ -1,0 +1,9 @@
+
+
+                        COMPOSITIONS
+                        ------------
+
+
+This directory contains shaders that compose framebuffer from other
+framebuffers.
+
