@@ -1,0 +1,18 @@
+
+
+                            STATIC LIBRARIES
+                            ----------------
+
+
+In general, I try to use system side libraries, but there are exceptions to
+this rule:
+
+- LUA: I really want to use scripts for various purposes, at the moment
+  desperately for loading assets. LUA can be answer to this. But LUA is not
+  usually installed to systems, and requiring people to install yet another
+  library does not sound a good solution. So, we have LUA binary stored
+  here for linking.
+  
+In future, I might move more libraries here. SDL could be a good canditate to
+move here for static linking.
+

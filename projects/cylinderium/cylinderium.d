@@ -23,12 +23,6 @@ const float CAM_HEIGHT = 3.5 * RADIUS;
 
 //*****************************************************************************
 //
-// Star field: This does not work currently - points are not colored.
-//
-//*****************************************************************************
-
-//*****************************************************************************
-//
 // Create game assets
 //
 //*****************************************************************************
@@ -357,7 +351,7 @@ void main()
     auto player = new Player(scene);
 
     //-------------------------------------------------------------------------
-    // HUD
+    // HUD (2D graphics not working atm)
     //-------------------------------------------------------------------------
 
     /*
@@ -384,9 +378,12 @@ void main()
 
     actors.addcallback(&updateHUD);
     */
-    
+
     scene.actors.reportperf;
-    
+
+    //-------------------------------------------------------------------------
+    // Things like this, these would be great to be encapsuled as loader
+    // scripts written in some scripting language like lua.
     //-------------------------------------------------------------------------
 
     auto skybox = new postprocess.SkyBox(
@@ -408,11 +405,6 @@ void main()
     {
         scene.draw();
         skybox.draw(scene.cam.mView(), scene.cam.mProjection());
-        /*
-        ship.draw(player.cam);
-        starfield.draw(player.cam);
-        hud.draw();
-        */
     }
 
     //-------------------------------------------------------------------------

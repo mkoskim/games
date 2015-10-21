@@ -11,6 +11,9 @@ ifeq ("$(EXE)","")
 endif
 
 #------------------------------------------------------------------------------
+# Manual insertion of dub packages to source paths. Use dub to fetch the
+# packages.
+#------------------------------------------------------------------------------
 
 SRCPATH += ~/.dub/packages/derelict-gl3-1.0.15/source/
 SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.7/source/
