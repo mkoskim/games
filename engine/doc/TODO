@@ -31,6 +31,13 @@ meshes, nodes etc).
 
 WORKLIST:
 
+- IMPORTANT: Querying shader uniform and attribute locations will not work
+  correctly if the shader is not activated (the functions will return the
+  locations of the active shader). So, during uploading, we should ensure
+  that the shader (or at least its family) is active. Another way to
+  do this is to use fixed locations, but it sounds very laborous and
+  inflexible solution.
+
 - Model loading (and other nice tutorials):
 
     http://www.learnopengl.com/#!Model-Loading/Model
@@ -229,15 +236,13 @@ MISC: Yet uncategorized "Post-It" notes...
 
   Destroying scene destroys also resources loaded for that.
 
-- Add "persistent" flag to Batch. Even regular 3D game can have
+- Add "persistent" flag to Batch. Even regular 3D game may have
   rendering objects that are persistent (no need for visibility checks,
-  and always rendered), common example is skybox:
-  
-        batches.solid = batch.front2back
-        batches.transparent = batch.back2front
-        batches.skybox = batch.persistent
-        
-        batches.skybox.add(skybox);
+  and always rendered).
+
+- Skybox as an example of persistent objects in batches. Are they? Currently
+  I am using own dedicated shader for skybox, so, they are not objects in
+  batches, but own dedicated "batch".
 
 -------------------------------------------------------------------------------
 
@@ -246,6 +251,11 @@ HOTTISH TOPICS:
 -------------------------------------------------------------------------------
 
 FIX/INVESTIGATE: Crashes, flaws etc.
+
+- There are segfaults when closing games. I am pretty sure they are caused by
+  calling destructors, and some parts have already shutted down (like SDL).
+  Needs investigation at some point, in case there is something more serious
+  issues underlaying.
 
 - Font rendering fails randomly:
 
@@ -647,7 +657,7 @@ FONTS:
 
 - Investigate possible alternative solutions for rendering (HUD) text. Maybe
   rendering at CPU, and using subtextures?
-  
+
 - Also, we could use GPU to scale letters, no need to create font for all
   sizes. Check the result.
 
