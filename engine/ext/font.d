@@ -60,15 +60,15 @@ class Font
 
         this(TTF_Font *font, string ID)
         {
-            Track.add(this);
+            debug Track.add(this);
             this.font = font;
             this.ID = ID;
         }
 
         ~this()
         {
-            Track.remove(this);
-            if(SDL_up) TTF_CloseFont(font);
+            debug Track.remove(this);
+            TTF_CloseFont(font);
         }
     }
 

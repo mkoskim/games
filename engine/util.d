@@ -8,17 +8,20 @@ module engine.util;
 
 //-----------------------------------------------------------------------------
 
-public import derelict.sdl2.sdl;
-public import derelict.opengl3.gl3;
-public import gl3n.linalg;
+//public import derelict.opengl3.gl3;
+//public import derelict.sdl2.sdl;
 
 public import std.stdio: writeln, writefln, write, writef;
 public import std.string: format;
 public import std.conv: to;
 
+public import gl3n.linalg;
 public import std.math: abs;
-public import engine.game.track: Track;
-public import engine.game.instance: SDL_up;
+
+debug public import engine.game.track: Track;
+
+public import std.exception: enforce;
+public import engine.game.util: quit, quitif, ERRORIF;
 
 //-----------------------------------------------------------------------------
 

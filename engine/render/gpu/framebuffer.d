@@ -25,6 +25,8 @@ class Framebuffer
 
     this(GLuint ID, int width, int height)
     {
+        debug Track.add(this);
+
         this.ID = ID;
         this.width = width;
         this.height = height;
@@ -39,6 +41,9 @@ class Framebuffer
         this(ID, width, height);
 
         checkgl!glBindFramebuffer(GL_FRAMEBUFFER, ID);
+
+        TODO("Use our fine Texture class here.");
+        TODO("Does this (texture as color buffer) really work?!?");
 
         checkgl!glGenTextures(1, &colorbuffer);
         checkgl!glBindTexture(GL_TEXTURE_2D, colorbuffer);
@@ -63,7 +68,14 @@ class Framebuffer
     }
 
     ~this() {
-        TODO("To be done.");
+        debug Track.remove(this);
+
+        // Don't try to delete wrapped default framebuffer
+        if(!ID) return ;
+            
+        checkgl!glDeleteFramebuffers(1, &ID);
+        checkgl!glDeleteTextures(1, &colorbuffer);
+        checkgl!glDeleteRenderbuffers(1, &depthbuffer);
     }
 
     //-------------------------------------------------------------------------

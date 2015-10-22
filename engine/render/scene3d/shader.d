@@ -25,21 +25,18 @@ import engine.render.scene3d.types.light;
 //import std.string: toStringz;
 
 //-----------------------------------------------------------------------------
-// TODO: Shader needs to be renamed
+// TODO: Look at the code. This is not implementation of a shader. No,
+// the gpu.Shader we have is just fine. This is an implementation to
+// interface resources (camera, meshes, materials) to a specific type
+// of shaders, using the shader interface (uniforms, buffers).
+//
+// So, we need to rethink this whole mechanism. Take a look to the shader
+// implementation in engine/postprocess/skybox.d to get some ideas.
+//
 //-----------------------------------------------------------------------------
 
 abstract class Shader : gpu.Shader
 {
-    //*************************************************************************
-    //
-    // Methods that custom shaders need implement.
-    //
-    //*************************************************************************
-
-    //abstract static Shader create();
-
-    //-------------------------------------------------------------------------
-
     //*************************************************************************
     //
     // Camera

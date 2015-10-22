@@ -19,13 +19,13 @@ struct SCREEN
 {
     int width, height;
     SDL_Window* window = null;
+
     SDL_GLContext glcontext = null;
+    int glversion;
 
     Framebuffer fb;
 }
 
 SCREEN screen;
 uint frame = 0;
-
-bool SDL_up = false;
 

@@ -102,7 +102,7 @@ class Joystick
         return (abs(value) < AXIS_TRESHOLD) ? 0.0 : value;
 	}
 
-    protected void update(SDL_Event *event)
+    protected void update(SDL_Event event)
     {
         void emulate(ubyte btn, uint type)
         {
@@ -212,6 +212,8 @@ class Joystick
 
     private this(int num)
     {
+        debug Track.add(this);
+
         stick = SDL_JoystickOpen(num);
 
         if(SDL_JoystickIsHaptic(stick) == 1) {
@@ -249,6 +251,7 @@ class Joystick
 
     ~this()
     {
+        debug Track.remove(this);
         SDL_JoystickClose(stick);
         if(ffb) SDL_HapticClose(ffb);
     }
@@ -277,16 +280,17 @@ Joystick[] joysticks;
 //-----------------------------------------------------------------------------
 
 int quitkey = SDLK_ESCAPE;
+int quitmod = KMOD_SHIFT;
 
-SDL_Event*[] getevents()
+SDL_Event[] getevents()
 {
-    SDL_Event*[] eventbuf;
+    SDL_Event[] eventbuf;
 
     for(;;)
     {
-        SDL_Event *event = new SDL_Event();
+        SDL_Event event;
 
-        if(!SDL_PollEvent(event)) break;
+        if(!SDL_PollEvent(&event)) break;
 
         switch(event.type)
         {
@@ -308,8 +312,10 @@ SDL_Event*[] getevents()
                 break;
 
             case SDL_KEYDOWN:
+                if(event.key.keysym.sym == quitkey && (event.key.keysym.mod & quitmod)) {
+                    goto case SDL_QUIT;
+                }
                 keystatus[event.key.keysym.sym] = true;
-                if(event.key.keysym.sym == quitkey) goto case SDL_QUIT;
                 break;
 
             case SDL_QUIT:

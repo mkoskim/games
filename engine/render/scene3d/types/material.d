@@ -94,7 +94,7 @@ class Material
         this(Texture.Loader.Default(colormap), roughness);
     }
 
-    this(SDL_Surface *colormap, float roughness = 1.0)
+    this(Bitmap colormap, float roughness = 1.0)
     {
         this(Texture.Loader.Default(colormap), null, roughness);
     }

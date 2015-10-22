@@ -12,7 +12,9 @@ public import engine.game.instance;
 public import engine.game.fiber;
 public import engine.game.perfmeter;
 public import engine.game.events;
-public import engine.game.track: Track;
+public import engine.game.util: quit;
+
+debug public import engine.game.track: Track;
 
 //-----------------------------------------------------------------------------
 
@@ -37,9 +39,9 @@ void init(string name, int width = 640, int height = 480)
 
     SDL_InitSubSystem(SDL_INIT_VIDEO);
 
-    // Ask for OpenGL 2.1+ for GLSL version 1.20
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    //-------------------------------------------------------------------------
+    // OpenGL context parameters
+    //-------------------------------------------------------------------------
 
     // Ask for standard 24-bit colors
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -49,6 +51,33 @@ void init(string name, int width = 640, int height = 480)
     // No need for destination (framebuffer) alpha layer
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
 
+    //-------------------------------------------------------------------------
+    // Asking specific versions, and seeing what we got. It would be good
+    // to move this part to render side.
+    //-------------------------------------------------------------------------
+
+    int asked;
+    
+    void askfor(int major, int minor) {
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
+        asked = major*10 + minor;
+    }
+
+    void got(SDL_GLContext context) {
+        screen.glcontext = ERRORIF(
+            context,
+            format("OpenGL context creation failed. Do you have OpenGL %.1f or higher?", asked / 10.0)
+        );
+        screen.glversion = 
+            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION)*10 +
+            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION);
+    }
+
+    //askfor(2, 1); // OpenGL 2.1+ for GLSL version 1.20
+    //askfor(3, 3);   // OpenGL 3.3, GLSL 330 - many nice features!
+    //askfor(4, 0);
+
     screen.window = SDL_CreateWindow(
         toStringz(name),
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -56,11 +85,12 @@ void init(string name, int width = 640, int height = 480)
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
     );
 
-    screen.glcontext = SDL_GL_CreateContext(screen.window);
-    screen.fb = new render.Framebuffer(0, width, height);
-    screen.fb.clear();
+    got(SDL_GL_CreateContext(screen.window));
 
     auto glv = DerelictGL3.reload();
+
+    screen.fb = new render.Framebuffer(0, width, height);
+    screen.fb.clear();
 
     //SDL_GL_SetSwapInterval(0);    // Immediate
     //SDL_GL_SetSwapInterval(1);    // VSync
@@ -68,10 +98,7 @@ void init(string name, int width = 640, int height = 480)
 
     debug {
         writeln("OpenGL:");
-        writefln("- Context..: Version %d.%d",
-            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION),
-            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION)
-        );
+        writefln("- Context..: Version %.1f", screen.glversion / 10.0);
         writefln("- Derelict.: Version %s", glv);
         writeln("- GLSL.....: ", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
         writeln("- Version..: ", to!string(glGetString(GL_VERSION)));

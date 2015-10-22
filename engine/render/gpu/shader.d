@@ -230,12 +230,16 @@ class Shader
 
     GLuint programID;
 
-    this() { programID = 0; }
+    this() {
+        debug Track.add(this);
+        programID = 0;
+    }
 
     //-------------------------------------------------------------------------
 
     this(string[] common, string[] vsfiles, string[] fsfiles)
     {
+        debug Track.add(this);
         programID = CompileProgram(common, vsfiles, fsfiles);
     }
 
@@ -245,6 +249,7 @@ class Shader
     //-------------------------------------------------------------------------
 
     ~this() {
+        debug Track.remove(this);
         if(programID) glDeleteProgram(programID);
     }
 }

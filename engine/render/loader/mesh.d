@@ -54,11 +54,11 @@ class Mesh
 
     this(uint mode = GL_TRIANGLES)
     {
-        Track.add(this);
+        debug Track.add(this);
         this.mode = mode;
     }
 
-    ~this() { Track.remove(this); }
+    ~this() { debug Track.remove(this); }
 
     //*************************************************************************
 

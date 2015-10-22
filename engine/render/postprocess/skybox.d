@@ -13,10 +13,35 @@ import engine.render.gpu.shader;
 import engine.render.gpu.state;
 import engine.render.gpu.framebuffer;
 
+//-----------------------------------------------------------------------------
+//
+// SkyBox is (currently) a special object in rendering path. It is currently
+// manually inserted to drawing phase, but in future we probably want to have
+// a framework to support these kinds of objects.
+//
+//-----------------------------------------------------------------------------
+
 class SkyBox
 {
-    static State state;
+    //-------------------------------------------------------------------------
+
+    Cubemap cubemap;
+
+    this(Cubemap cubemap, Framebuffer target)
+    {
+        this.cubemap = cubemap;
+
+        if(!shader) create(target);
+    }
+
+    //-------------------------------------------------------------------------
+    // Dedicated SkyMap Shader (Singleton). For feeding Vertex Shader,
+    // we create a unit cube by hand.
+    //-------------------------------------------------------------------------
+
     static Shader shader;
+    static State state;
+
     static VAO vao;
     static VBO vbo;
 
@@ -64,15 +89,6 @@ class SkyBox
          1.0f, -1.0f,  1.0f
     ];
 
-    Cubemap cubemap;
-
-    this(Cubemap cubemap, Framebuffer target)
-    {
-        this.cubemap = cubemap;
-
-        if(!shader) create(target);
-    }
-
     void create(Framebuffer target)
     {
         shader = new Shader("engine/render/postprocess/glsl/skybox.glsl");
@@ -105,7 +121,7 @@ class SkyBox
             checkgl!glEnable(GL_CULL_FACE);
             checkgl!glCullFace(GL_BACK);
             checkgl!glFrontFace(GL_CCW);
-            checkgl!glPolygonMode(GL_FRONT, GL_FILL);
+            checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             checkgl!glEnable(GL_DEPTH_TEST);
             checkgl!glDepthFunc(GL_LEQUAL);
             checkgl!glDisable(GL_BLEND);

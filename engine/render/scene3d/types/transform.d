@@ -25,9 +25,16 @@ class Grip
         vec3 scale = vec3(1, 1, 1)
     )
     {
+        debug Track.add(this);
+
         this.pos = pos;
         this.rot = rot;
         this.scale = scale;
+    }
+
+    ~this()
+    {
+        debug Track.remove(this);
     }
 
     //-------------------------------------------------------------------------
@@ -113,8 +120,14 @@ class Transform
 
     //-------------------------------------------------------------------------
 
-    private this(Transform parent) { Track.add(this); this.parent = parent; }
-    private ~this() { Track.remove(this); }
+    private this(Transform parent) {
+        debug Track.add(this);
+        this.parent = parent;
+    }
+    private ~this()
+    {
+        debug Track.remove(this);
+    }
 
     //-------------------------------------------------------------------------
 

@@ -30,8 +30,6 @@ public import engine.ext;
 
 public {
     import derelict.sdl2.sdl;
-    import derelict.sdl2.image;
-    import derelict.sdl2.ttf;
     import derelict.opengl3.gl3;
     import derelict.assimp3.assimp;
     import gl3n.linalg;
@@ -43,12 +41,15 @@ pragma(lib, "dl");
 
 import engine.util;
 
-//-----------------------------------------------------------------------------
+import derelict.sdl2.image;
+import derelict.sdl2.ttf;
 
-import engine.game.instance: SDL_up;
+//-----------------------------------------------------------------------------
 
 static this()
 {
+    debug Track.add(__FILE__);
+
     DerelictSDL2.load();
     DerelictSDL2Image.load();
     DerelictSDL2ttf.load();
@@ -67,16 +68,25 @@ static this()
     //-------------------------------------------------------------------------
 
     TTF_Init();
-
-    SDL_up = true;
 }
 
 static ~this()
 {
-    TTF_Quit();
-    IMG_Quit();
-    SDL_Quit();
+    debug Track.remove(__FILE__);
 
-    SDL_up = false;
+    /**************************************************************************
+    **
+    ** NOTE: Shutting down SDL at exit may sound a good idea. BUT there is
+    ** no guarantee in what order DMD calls destructors, causing attempts to
+    ** destroy SDL resources to produce random segfaults, glibc memory
+    ** allocation errors etc.
+    **
+    ** So, better keep the interface up to the bitter end.
+    **
+    **************************************************************************/
+
+    // TTF_Quit();
+    // IMG_Quit();
+    // SDL_Quit();
 }
 

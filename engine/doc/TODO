@@ -19,13 +19,28 @@ DONE:
 
 - DONE: Fog
 
-- DONE: RESOURCE TRACKING: Create mechanism to track living resources (number of
-meshes, nodes etc).
+- DONE: RESOURCE TRACKING: Create mechanism to track living resources (number
+  of meshes, nodes etc).
 
 - DONE: Most probably not - Display lists are still useful??? Find it out.
 
 - DONE: SkyBox - this was also nice practising about creating custom
   shaders on the fly.
+
+- DONE: See comment below - There are segfaults when closing games. I am pretty
+  sure they are caused by calling destructors, and some parts have already
+  shutted down (like SDL). Needs investigation at some point, in case there is
+  something more serious issues underlaying.
+  
+        COMMENT: It was caused by SDL, sort of. Earlier I implemented SDL_up
+        flag when having problems with SDL_Surface deletion. I just never
+        noticed that there is also joystick that calls SDL destroy. Hooking
+        more destructors clearly showed out that static destructor - shutting
+        down SDL - was called before Joystick destructor.
+        
+        FIX: I removed SDL shutdown from package destructor. That has now
+        caused two hard-to-find bugs. It is much better to have more robust
+        resource deallocation than having complete Init-Quit call pairs.
 
 *******************************************************************************
 
@@ -38,6 +53,20 @@ WORKLIST:
   do this is to use fixed locations, but it sounds very laborous and
   inflexible solution.
 
+- Found enforce from D documentation. It is like my old ERRORIF. Go through
+  code to find good places for it!
+
+- Found OpenGL Array Textures. Can these be used instead of atlases?
+
+    https://www.opengl.org/wiki/Array_Texture
+
+- Rename Texture.Loader to Texture.Sampler?
+
+    https://www.opengl.org/wiki/Sampler_Object
+
+- glGenerateMipmaps() seems not to work when using OpenGL 3.3 - with GL2.1
+  it works.
+
 - Model loading (and other nice tutorials):
 
     http://www.learnopengl.com/#!Model-Loading/Model
@@ -48,7 +77,8 @@ WORKLIST:
 - Cubemap needs all faces to be: same size, same internal format, same
   mipmap level. Ensure this in loader.
 
-- GLSL files may need some common libraries?
+- GLSL files may need some common libraries? In any case, think about
+  how to organize GLSL source files.
 
 - Framebuffers: It is possible to share depth buffer between multiple
   framebuffers, when we are only interested in color map.
@@ -251,11 +281,6 @@ HOTTISH TOPICS:
 -------------------------------------------------------------------------------
 
 FIX/INVESTIGATE: Crashes, flaws etc.
-
-- There are segfaults when closing games. I am pretty sure they are caused by
-  calling destructors, and some parts have already shutted down (like SDL).
-  Needs investigation at some point, in case there is something more serious
-  issues underlaying.
 
 - Font rendering fails randomly:
 

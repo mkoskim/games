@@ -23,21 +23,21 @@ void main()
     // Scene! Lights! Camera!
     //-------------------------------------------------------------------------
 
-    auto cam = render.Camera.basic3D(
+    auto cam = scene3d.Camera.basic3D(
         0.1, 10,        // Near - far
-        render.Grip.movable(0, 0, 5)
+        scene3d.Grip.movable(0, 0, 5)
     );
 
-    auto scene = new render.UnbufferedRender(
+    auto scene = new scene3d.UnbufferedRender(
         cam,
-        render.State.Solid3D()
+        scene3d.State.Solid3D()
     );
 
-    scene.light = new render.Light(
-        render.Grip.fixed(2, 2, 0), // Position
-        vec3(1, 1, 1),              // Color
-        7.5,                        // Range
-        0.25                        // Ambient level
+    scene.light = new scene3d.Light(
+        scene3d.Grip.fixed(2, 2, 0),    // Position
+        vec3(1, 1, 1),                  // Color
+        7.5,                            // Range
+        0.25                            // Ambient level
     );
 
     auto nodes = scene.addbatch();
@@ -55,7 +55,7 @@ void main()
         //blob.wavefront.loadmesh("engine/stock/mesh/Chess/pawn.obj"),
         //blob.wavefront.loadmesh("engine/stock/mesh/Chess/queen.obj"),
         blob.wavefront.loadmesh("engine/stock/mesh/Chess/rook.obj"),
-        new render.Material(
+        new scene3d.Material(
             //new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
             render.Texture.Loader.Default(vec4(1, 0.8, 0, 1)),
             //new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
@@ -63,7 +63,7 @@ void main()
         )
     );
 
-    auto object = scene.add(render.Grip.movable, model);
+    auto object = scene.add(scene3d.Grip.movable, model);
 
     //object.grip.pos -= model.vao.bsp.center;
 
@@ -110,7 +110,7 @@ void main()
 
         //---------------------------------------------------------------------
 
-        (SDL_Event* event) {
+        (SDL_Event event) {
             switch(event.type)
             {
                 default: break;

@@ -6,24 +6,27 @@
 
 MAIN=objectview.d
 
-BLOBFILES=data/
-
 #------------------------------------------------------------------------------
 
 EXE=
 
-#------------------------------------------------------------------------------
-
+LDFLAGS=
 LIBDIRS=
 LIBS=
-LDFLAGS=
+OBJS=
+
+BLOBFILES=data/
+
+#------------------------------------------------------------------------------
+
+BLOBFILES += local/
 
 #------------------------------------------------------------------------------
 # Add stock items to BLOB if you use them
 #------------------------------------------------------------------------------
 
-BLOBFILES += local/
-BLOBFILES += engine/render/pipeline/glsl/
+BLOBFILES += engine/render/scene3d/glsl/
+BLOBFILES += engine/render/postprocess/glsl/
 BLOBFILES += engine/stock/
 
 include engine/build/Makegame.mak
