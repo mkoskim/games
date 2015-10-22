@@ -2,71 +2,25 @@
 
 DONE:
 
-- REJECTED: Picking objects by comparing depth at certain position after
-  drawing that object is wonderfully slow. Amazingly slow. We reject this
-  method for picking objects from 3D space.
+- DONE: Implement shader options somehow... State object, maybe? There is now
+  options[] for both shader and state. Shader specific options are applied to
+  all stages where shader is used. State specific options are only for the 
+  specific state.
 
-- POSTPONED: Don't happen anymore, and no plans to use it -glVertexAttribPointer
-  returns invalid enum when trying to use GL_INT_2_10_10_10_REV for normals &
-  tangents.
-
-- DONE: uniform() now has optional boolean for this - We could accept
-  reading/writing inexisting uniforms in some cases, that is, store -1 to
-  namecache. Certain uniforms are optional as their nature, it
-  would not hurt if they do not exist in shader. This might not be a good idea
-  in general - I want to catch errors early, and this could hide them, causing
-  lots of time wasted in debugging.
-
-- DONE: Fog
-
-- DONE: RESOURCE TRACKING: Create mechanism to track living resources (number
-  of meshes, nodes etc).
-
-- DONE: Most probably not - Display lists are still useful??? Find it out.
-
-- DONE: SkyBox - this was also nice practising about creating custom
-  shaders on the fly.
-
-- DONE: See comment below - There are segfaults when closing games. I am pretty
-  sure they are caused by calling destructors, and some parts have already
-  shutted down (like SDL). Needs investigation at some point, in case there is
-  something more serious issues underlaying.
-  
-        COMMENT: It was caused by SDL, sort of. Earlier I implemented SDL_up
-        flag when having problems with SDL_Surface deletion. I just never
-        noticed that there is also joystick that calls SDL destroy. Hooking
-        more destructors clearly showed out that static destructor - shutting
-        down SDL - was called before Joystick destructor.
-        
-        FIX: I removed SDL shutdown from package destructor. That has now
-        caused two hard-to-find bugs. It is much better to have more robust
-        resource deallocation than having complete Init-Quit call pairs.
+- DONE: (step forward shader family implementation) Mesh to intermediate format,
+  separate VAO buffer creation to shader family upload. It can also be local
+  buffer, as it is consumed during OpenGL download.  
 
 *******************************************************************************
 
 WORKLIST:
 
-- IMPORTANT: Querying shader uniform and attribute locations will not work
-  correctly if the shader is not activated (the functions will return the
-  locations of the active shader). So, during uploading, we should ensure
-  that the shader (or at least its family) is active. Another way to
-  do this is to use fixed locations, but it sounds very laborous and
-  inflexible solution.
+- ...Gosh, my CV has nothing about my hobby projects and their goals... Got to
+  change that...
 
-- Found enforce from D documentation. It is like my old ERRORIF. Go through
-  code to find good places for it!
-
-- Found OpenGL Array Textures. Can these be used instead of atlases?
-
-    https://www.opengl.org/wiki/Array_Texture
-
-- Rename Texture.Loader to Texture.Sampler?
-
-    https://www.opengl.org/wiki/Sampler_Object
-
-- glGenerateMipmaps() seems not to work when using OpenGL 3.3 - with GL2.1
-  it works.
-
+- I should port my java applet ShootEmUp to this platform (Linux, D, OpenGL).
+  There are ready-made graphics (not too high quality, though) and game logic.
+  
 - Model loading (and other nice tutorials):
 
     http://www.learnopengl.com/#!Model-Loading/Model
@@ -92,56 +46,12 @@ WORKLIST:
   rendering interface. Currently I am casting state shader to correct type,
   but something better should be figured out.
 
-- Study: Do we find any use for uniform buffers? See:
-
-        https://www.opengl.org/wiki/Uniform_Buffer_Object
-
-- Implement shader options somehow... State object, maybe?
-
 - I would need to collect some default setups to e.g. ext/ directory,
   so that I could work at higher levels without needing to worry about
   low level changes.
 
 - "Active nodes" - combine Fiber and Node to ease making actively working
   nodes.
-
-- Shader family: It could be time to concentrate on shader management
-  before going forward:
-
-  * Shader family: to upload stuff to GPU w/o creating actual shader
-
-    - Problem: for binding VBOs and VAOs, the shader program needs
-      to be active...
-
-  * Shader compilation: for error reporting, would be good to create
-    "precompiled" libraries. I have a feeling that I can never make
-    error reporting reliable (w/ current OpenGL implementation) for
-    "preprocessed" sources, so it would be best to compile GLSL files
-    just as the programmer made them.
-
-  * Mesh to intermediate format, separate VAO buffer creation to
-    shader family upload. It can also be local buffer, as it is consumed
-    during OpenGL download.
-    
-  * Move default shaders to ext/ directory... Would be better to locate
-    them to stock/ - or create a new directory for defaults...
-
-- Move default shaders under ext/ directory (?)
-
-- "CPU rendering": Rendering objects without uploading them to shader.
-  This could be good for example for debugging (rendering normally
-  invisible things).
-
-- "Debug channel" to rendering batches: adding a debug mesh to an object
-  will be sent there.
-  
-- It would be nice, if we could direct nodes / entire groups to
-  "Wireframe shader"
-
-- CONSIDER SERIOUSLY adding scripting support for asset loading! The idea
-  here is, that e.g. lua scripts to load specific things are stored with
-  the models, and thus they are stored to BLOB, too - no need for complex
-  building mechanism to include correct converters to compiled program.
 
 - Decals (e.g. for targeting circles)
 
@@ -282,11 +192,20 @@ HOTTISH TOPICS:
 
 FIX/INVESTIGATE: Crashes, flaws etc.
 
-- Font rendering fails randomly:
+- IMPORTANT: Querying shader uniform and attribute locations will not work
+  correctly if the shader is not activated (the functions will return the
+  locations of the active shader). So, during uploading, we should ensure that the
+  shader (or at least its family) is active. Another way to do this is to use
+  fixed locations, but it sounds very laborous and inflexible solution.
+
+- FIX: glGenerateMipmaps() seems not to work when using OpenGL 3.3 - with GL2.1
+  it works.
+
+- FIX: Font rendering fails randomly:
 
     http://stackoverflow.com/questions/26956658/sdl-ttf-rendertext-blended-fails-randomly
 
-- On 32-bit Ubuntu, SDL FillRect segfaults (code that cuts textures from
+- FIX: On 32-bit Ubuntu, SDL FillRect segfaults (code that cuts textures from
   sprite sheet).
 
 - Shader compiler (see gpucompiler.d) can only report error location for
@@ -306,6 +225,34 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 - wolfish (and cylinderium) generally run at least as fast as pacman, although
   they use much more complicated CPU and GLSL code. I need to investigate 2D
   performance, as because of GUI elements it will matter to 3D games, too.
+
+- Study: Do we find any use for uniform buffers? See:
+
+        https://www.opengl.org/wiki/Uniform_Buffer_Object
+
+-------------------------------------------------------------------------------
+
+DEBUG FEATURES, PROGRAMMING HELPERS: Features for helping to debug and develop
+things:
+
+- "Debug channel" to rendering batches: adding a debug mesh to an object
+  will be sent there. Geometry shaders could be excellent for this purpose?
+  To create debugging primitives (lines for normals, ...) automatically?
+  
+- It would be nice, if we could direct nodes / entire groups to
+  "Wireframe shader"
+
+- Found enforce from D documentation. It is like my old ERRORIF, a bit more
+  advanced, though, because using template to allow it to return the value if
+  it was OK. Go through code to find good places for it! Also, I implemented
+  ERRORIF using same principle - this is good to give simple error message,
+  instead of getting Exception dumping call tree.
+
+- "CPU rendering": Rendering objects without uploading them to shader
+  (as VAOs, VBOs), like simulated immediate mode. This might be good for
+  example for debugging (rendering normally invisible things). Low priority,
+  thought, at least initially.
+
 
 -------------------------------------------------------------------------------
 
@@ -354,6 +301,11 @@ GENERAL:
 LOADERS, FILE FORMATS: We started to use Assimp to load model files. Some
 design, sketching and planning is needed, as well as tuning the render
 architecture more suitable for models loaded from files.
+
+- CONSIDER SERIOUSLY adding scripting support for asset loading! The idea
+  here is, that e.g. lua scripts to load specific things are stored with
+  the models, and thus they are stored to BLOB, too - no need for complex
+  building mechanism to include correct converters to compiled program.
 
 - Blender file (archive) loading
 
@@ -449,6 +401,25 @@ issues have their relations to other sections in this TODO document.
 - Think Shader subsystem. We would like to have specialized shaders for
   particle engines, not using the regular mesh-material data structures.
 
+- Shader family: It could be time to concentrate on shader management
+  before going forward:
+
+  * Shader family: to upload stuff to GPU w/o creating actual shader
+
+    - Problem: for binding VBOs and VAOs, the shader program needs
+      to be active...
+
+  * Shader compilation: for error reporting, would be good to create
+    "precompiled" libraries. I have a feeling that I can never make
+    error reporting reliable (w/ current OpenGL implementation) for
+    "preprocessed" sources, so it would be best to compile GLSL files
+    just as the programmer made them.
+
+  * Move default shaders to ext/ directory... Would be better to locate
+    them to stock/ - or create a new directory for defaults...
+
+- Move default shaders under ext/ directory (?)
+
 -------------------------------------------------------------------------------
 
 OPTIMIZATIONS: While optimizations are not that important, here is some list
@@ -529,7 +500,8 @@ SCENES, LAYERS:
       portal, or navmesh)
   
 - Scaling is not entirely working, mainly because it would need updating of
-  bounding sphere.
+  bounding sphere. Non-uniform scaling is anyways pretty hard to make
+  to work correctly (affects to normals etc).
 
 - Points & lines: (1) in meshes, separate points, lines and triangles
   (different IBOs for each; combine somehow with material groups). Think
@@ -569,6 +541,11 @@ SCENES, LAYERS:
 
 PARTICLE & SPRITE ENGINE: It might be nice to have specialized
 classes to blit lots of things into 2D/3D space.
+
+- Found OpenGL Array Textures. Can these be used instead of atlases? For
+  sprite sheet blitters?
+
+    https://www.opengl.org/wiki/Array_Texture
 
 - Particle engine can (most probably) have only 1 texture. So, the solution
   is to create sprite sheets?
@@ -645,20 +622,26 @@ CAMERA:
 
 TEXTURES:
 
-- Texture update
+- Texture update (updating Texture pixel information from CPU side)
+
+- Texture download (downloading e.g. rendered Texture to CPU side)
+
+- Rename Texture.Loader to Texture.Sampler?
+
+    https://www.opengl.org/wiki/Sampler_Object
 
 -------------------------------------------------------------------------------
 
 BITMAPS:
+
+- Load-time scaling of bitmaps (some kind of image manipulation
+  library)
 
 - Some sort of "tile toolkit" to create tiles?
 
 - Also, some sort of normal map toolkit to create normal maps
 
 - Atlas creation
-
-- Load-time scaling of bitmaps (some kind of image manipulation
-  library)
 
 - Bitmap.splitSheet: Scaling splitted sprites does not work.
 
