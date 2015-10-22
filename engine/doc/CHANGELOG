@@ -6,6 +6,50 @@
 
 Version something:
 
+- REJECTED: Picking objects by comparing depth at certain position after
+  drawing that object is wonderfully slow. Amazingly slow. We reject this
+  method for picking objects from 3D space.
+
+- POSTPONED: Don't happen anymore, and no plans to use it -glVertexAttribPointer
+  returns invalid enum when trying to use GL_INT_2_10_10_10_REV for normals &
+  tangents.
+
+- DONE: uniform() now has optional boolean for this - We could accept
+  reading/writing inexisting uniforms in some cases, that is, store -1 to
+  namecache. Certain uniforms are optional as their nature, it
+  would not hurt if they do not exist in shader. This might not be a good idea
+  in general - I want to catch errors early, and this could hide them, causing
+  lots of time wasted in debugging.
+
+- DONE: Fog
+
+- DONE: RESOURCE TRACKING: Create mechanism to track living resources (number
+  of meshes, nodes etc).
+
+- DONE: Most probably not - Display lists are still useful??? Find it out.
+
+- DONE: SkyBox - this was also nice practising about creating custom
+  shaders on the fly.
+
+- DONE: See comment below - There are segfaults when closing games. I am pretty
+  sure they are caused by calling destructors, and some parts have already
+  shutted down (like SDL). Needs investigation at some point, in case there is
+  something more serious issues underlaying.
+  
+        COMMENT: It was caused by SDL, sort of. Earlier I implemented SDL_up
+        flag when having problems with SDL_Surface deletion. I just never
+        noticed that there is also joystick that calls SDL destroy. Hooking
+        more destructors clearly showed out that static destructor - shutting
+        down SDL - was called before Joystick destructor.
+        
+        FIX: I removed SDL shutdown from package destructor. That has now
+        caused two hard-to-find bugs. It is much better to have more robust
+        resource deallocation than having complete Init-Quit call pairs.
+
+-------------------------------------------------------------------------------
+
+Version something:
+
 - INITIALLY DONE: Mipmaps
 
 - INITIALLY DONE: Texture mipmaps: In 3D scenes, this could make them prettier.
