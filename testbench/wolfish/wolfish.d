@@ -104,12 +104,15 @@ class Scene : scene3d.Pipeline3D
         // Create batches: we create several now just for testing the system.
         //---------------------------------------------------------------------
 
+        //auto solidshader = scene3d.shaders.Flat3D.create();
         auto solidshader = scene3d.shaders.Default3D.create();
 
-        solidshader.options["fog.enabled"] = true;
+        //*
+        solidshader.options["fog.enabled"] = false;
         solidshader.options["fog.start"] = 10.0;
         solidshader.options["fog.end"]   = 20.0;
         solidshader.options["fog.color"] = vec4(0.0, 0.0, 0.0, 1);
+        /**/
         //solidshader.options["fog.color"] = vec4(0.45, 0.45, 0.75, 1);
         //solidshader.options["fog.color"] = vec4(0.45, 0.45, 0.45, 1);
         //solidshader.options["fog.color"] = vec4(1.0, 1.0, 1.0, 1);
@@ -390,7 +393,7 @@ void main()
     //writeln(to!string(glGetString(GL_EXTENSIONS)));
 
     maze.actors.reportperf;
-    
+
     //-------------------------------------------------------------------------
 
     void draw()
@@ -407,7 +410,7 @@ void main()
         &draw,          // draw
         maze.actors,    // list of actors
 
-        (SDL_Event* event) {
+        (SDL_Event event) {
             switch(event.type)
             {
                 default: break;

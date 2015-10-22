@@ -23,7 +23,7 @@ class Bitmap
 
     this(SDL_Surface* s)
     {
-        Track.add(this);
+        debug Track.add(this);
         surface = s;
         renderer = SDL_CreateSoftwareRenderer(surface);
         if(!renderer) throw new Exception(
@@ -69,11 +69,9 @@ class Bitmap
 
     ~this()
     {
-        Track.remove(this);
-        if(SDL_up) {
-            SDL_DestroyRenderer(renderer);
-            SDL_FreeSurface(surface);
-        }
+        debug Track.remove(this);
+        SDL_DestroyRenderer(renderer);
+        SDL_FreeSurface(surface);
     }
 
     //-------------------------------------------------------------------------
@@ -132,11 +130,6 @@ class Bitmap
             //throw new Exception();
         }
 
-        /*
-        SDL_FreeSurface(sheet);
-        SDL_FreeSurface(sprite);
-        */
-
         return grid;
     }
 
@@ -153,23 +146,6 @@ class Bitmap
             top, bottom
         );
     }
-
-    /*
-    static Bitmap[][] splitSheet(
-        SDL_Surface *sheet,
-        vec2i srcsize,
-        vec2i dstsize,
-        vec2i top = vec2i(0, 0),
-        vec2i bottom = vec2i(0, 0)        
-    )
-    {
-        return splitSheet(
-            new Bitmap(sheet),
-            srcsize, dstsize,
-            top, bottom
-        );
-    }
-    */
 
     static Bitmap[][] splitSheet(
         string[] grid, vec4[char] colorchart,

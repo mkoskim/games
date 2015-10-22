@@ -24,6 +24,7 @@ class State
     //-------------------------------------------------------------------------
 
     this(Framebuffer fb, Shader shader, void delegate() apply) {
+        debug Track.add(this);
         this.target = fb;
         this.shader = shader;
         this.apply = apply;
@@ -32,6 +33,8 @@ class State
     this(Shader shader, void delegate() apply) {
         this(screen.fb, shader, apply);
     }
+
+    ~this() { debug Track.remove(this); }
 
     //-------------------------------------------------------------------------
 

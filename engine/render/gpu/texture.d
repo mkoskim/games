@@ -14,6 +14,7 @@ import engine.render.util;
 import blob = engine.blob;
 
 import derelict.sdl2.sdl;
+import derelict.sdl2.image;
 import std.algorithm;
 
 //-----------------------------------------------------------------------------
@@ -135,8 +136,6 @@ class Texture
         }
 
         //---------------------------------------------------------------------
-        // SDL surface to texture
-        //---------------------------------------------------------------------
 
         Texture opCall(SDL_Surface *surface)
         {
@@ -147,6 +146,10 @@ class Texture
                 _GLformat(surface)
             );
         }
+
+        //---------------------------------------------------------------------
+        // CPU-side bitmap to texture
+        //---------------------------------------------------------------------
 
         Texture opCall(Bitmap bitmap) { return opCall(bitmap.surface); }
 
@@ -195,7 +198,7 @@ class Texture
 
     this(Loader loader, uint w, uint h, void* buffer, GLenum format, GLenum type = GL_UNSIGNED_BYTE)
     {
-        Track.add(this);
+        debug Track.add(this);
 
         width = w;
         height = h;
@@ -212,6 +215,17 @@ class Texture
 
         checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
+        int num_mipmaps = 0;
+        if(loader.mipmap) {
+            import std.math: log2, fmax;
+            num_mipmaps = cast(int)log2(fmax(width, height)) - 4;
+            if(num_mipmaps < 0) num_mipmaps = 0;
+
+            import engine.game.instance: screen;
+            if(screen.glversion > 30) num_mipmaps = 0;
+            //TODO("Mipmap generation not working on GL30+");
+        }
+
         uploadTextureData(
             GL_TEXTURE_2D,
             0,                  // Mipmap level
@@ -222,6 +236,11 @@ class Texture
             loader.compress
         );
 
+        if(num_mipmaps)
+        {
+            checkgl!glGenerateMipmap(GL_TEXTURE_2D);
+        }
+
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, loader.filtering.mag);
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, loader.filtering.min);
 
@@ -230,16 +249,7 @@ class Texture
         //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, loader.wrapping.r);
 
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-
-        if(loader.mipmap) {
-            import std.math: log2, fmax;
-            int levels = cast(int)log2(fmax(width, height)) - 4;
-            if(levels > 0) {
-                checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
-                checkgl!glGenerateMipmap(GL_TEXTURE_2D);
-            }
-        }
+        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, num_mipmaps);
 
         checkgl!glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -248,16 +258,16 @@ class Texture
 
     ~this()
     {
-        Track.remove(this);
+        debug Track.remove(this);
         glDeleteTextures(1, &ID);
     }
 
     //-------------------------------------------------------------------------
 
-    debug private static const string[GLenum] formatname;
+    private static const string[GLenum] formatname;
 
     static this() {
-        debug formatname = [
+        formatname = [
             GL_BGRA: "GL_BGRA",
             GL_RGBA: "GL_RGBA",
             GL_BGR: "GL_BGR",
@@ -328,41 +338,6 @@ class Cubemap
 {
     GLuint ID;
 
-    private void uploadFace(GLenum face, SDL_Surface* surface)
-    {
-        uploadTextureData(
-            face,
-            0,
-            surface.w, surface.h,
-            _GLformat(surface),
-            GL_UNSIGNED_BYTE,
-            surface.pixels,
-            true
-        );
-    }
-
-    this(SDL_Surface*[] surfaces)
-    {
-        Track.add(this);
-
-        checkgl!glGenTextures(1, &ID);
-        checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
-
-        foreach(i; 0 .. 6) uploadFace(
-            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-            surfaces[i]
-        );
-
-        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-        checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    }
-
     this(Bitmap[] bitmaps)
     {
         SDL_Surface*[] surfaces;
@@ -376,10 +351,37 @@ class Cubemap
         foreach(filename; filenames) bitmaps ~= new Bitmap(filename);
         this(bitmaps);
     }
-    
+
+    private this(SDL_Surface*[] surfaces)
+    {
+        debug Track.add(this);
+
+        checkgl!glGenTextures(1, &ID);
+        checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+
+        foreach(i; 0 .. 6) uploadTextureData(
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            0,
+            surfaces[i].w, surfaces[i].h,
+            _GLformat(surfaces[i]),
+            GL_UNSIGNED_BYTE,
+            surfaces[i].pixels,
+            true
+        );
+
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        checkgl!glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+
     ~this()
     {
-        Track.remove(this);
+        debug Track.remove(this);
         glDeleteTextures(1, &ID);
     }
 }

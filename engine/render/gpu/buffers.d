@@ -20,7 +20,7 @@ protected class VBO
 
     this(void* buffer, size_t length, size_t elemsize, GLenum mode = GL_STATIC_DRAW)
     {
-        Track.add(this);
+        debug Track.add(this);
 
         checkgl!glGenBuffers(1, &ID);
 
@@ -31,7 +31,7 @@ protected class VBO
 
     ~this()
     {
-        Track.remove(this);
+        debug Track.remove(this);
         checkgl!glDeleteBuffers(1, &ID);
         //writeln("~VBO.this: ", ID);
     }
@@ -55,7 +55,7 @@ protected class IBO
 
     this(GLint drawmode, ushort[] faces, GLenum mode = GL_STATIC_DRAW)
     {
-        Track.add(this);
+        debug Track.add(this);
         length = cast(uint)faces.length;
         this.drawmode = drawmode;
 
@@ -71,7 +71,7 @@ protected class IBO
 
     ~this()
     {
-        Track.remove(this);
+        debug Track.remove(this);
         checkgl!glDeleteBuffers(1, &ID);
     }
 
@@ -91,8 +91,15 @@ protected class VAO
 {
     uint ID;
 
-    this()  { checkgl!glGenVertexArrays(1, &ID); }
-    ~this() { checkgl!glDeleteVertexArrays(1, &ID); }
+    this() {
+        debug Track.add(this);
+        checkgl!glGenVertexArrays(1, &ID);
+    }
+    
+    ~this() {
+        debug Track.remove(this);
+        checkgl!glDeleteVertexArrays(1, &ID);
+    }
 
     void bind() { checkgl!glBindVertexArray(ID); }
     void unbind() { checkgl!glBindVertexArray(0); }

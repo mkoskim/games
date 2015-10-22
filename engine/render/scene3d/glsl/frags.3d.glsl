@@ -15,8 +15,8 @@ float Lighting(vec3 n, vec3 v, vec3 l)
         (0.75 + 0.25*diff) * Lambert_diffuse(n, v, l) +
         //(0.5 + 0.5*diff) * OrenNayar_diffuse(n, v, l) +
 
-        //(0.5*spec + 0.5) * CookTorrance_specular(n, v, l) +
-        clamp((3*spec + 0.2*diff) * BlinnPhong_specular(n, v, l), 0, 1) +
+        (0.5*spec + 0.5) * CookTorrance_specular(n, v, l) +
+        //clamp((3*spec + 0.2*diff) * BlinnPhong_specular(n, v, l), 0, 1) +
 
         0.0;
 }
@@ -51,7 +51,7 @@ void main(void)
     vec3 v = normalize(-frag_pos);
     vec3 l = normalize(frag_light_pos); 
 
-    float lighting = clamp(frag_light_strength, 0, 1) * Lighting(n, v, l) + light.ambient;
+    float lighting = Lighting(n, v, l) * clamp(frag_light_strength, 0, 1) + light.ambient;
 
     if(useQuants != 0) {
         lighting = quantify(lighting, useQuants);

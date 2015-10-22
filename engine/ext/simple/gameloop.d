@@ -10,6 +10,7 @@ module engine.ext.simple.gameloop;
 
 import game = engine.game;
 import engine.util;
+import derelict.sdl2.sdl: SDL_Event;
 
 //*****************************************************************************
 //
@@ -37,7 +38,7 @@ import engine.util;
 void gameloop(
     void delegate() draw,
     game.FiberQueue actors,
-    bool delegate(SDL_Event *) process = null
+    bool delegate(SDL_Event) process = null
 )
 {
     loop: for(;;)
@@ -46,10 +47,15 @@ void gameloop(
         if(draw) draw();
         game.waitframe();
 
+        /*
+        static int count = 50;
+        if(!count--) game.quit();
+        /*/
         foreach(event; game.getevents())
         {
             if(process) if(!process(event)) break loop;
         }
+        /**/
 
         if(actors) actors.update();
     }
@@ -61,7 +67,7 @@ void gameloop(
     int FPS,
     void delegate() draw,
     game.FiberQueue actors,
-    bool delegate(SDL_Event *) process = null
+    bool delegate(SDL_Event) process = null
 )
 {
     game.fps = FPS;

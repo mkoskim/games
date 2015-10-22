@@ -66,7 +66,7 @@ class Scene : scene3d.Pipeline3D
 
         wall = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Wall.obj").move(0, RADIUS, 0),
-            new scene3d.Material(warnbmp.surface, 0.75)
+            new scene3d.Material(warnbmp, 0.75)
         );
 
         tower = solid.upload(
@@ -414,13 +414,15 @@ void main()
         &draw,          // draw
         scene.actors,   // list of actors
 
-        (SDL_Event *event) {
+        (SDL_Event event) {
             switch(event.type)
             {
                 case SDL_KEYDOWN: switch(event.key.keysym.sym)
                 {
                     //case SDLK_w: ship.shader.fill = !ship.shader.fill; break;
                     //case SDLK_e: ship.shader.enabled = !ship.shader.enabled; break;
+
+                    case SDLK_ESCAPE: return false;
                     default: break;
                 } break;
                 default: break;
@@ -428,5 +430,7 @@ void main()
             return true;
         }
     );
+
+    //-------------------------------------------------------------------------
 }
 

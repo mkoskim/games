@@ -49,13 +49,15 @@ ReturnType!func checkgl(alias func, Args...)(Args args)
         GLenum glerror = glGetError();
         if(glerror != GL_NO_ERROR)
         {
-            throw new GLError(
+            string msg = gl_format_error(
                 glerror,
                 func.stringof,
                 format("%s".repeat(Args.length).join(", "), args)
             );
+            throw new Exception(msg);
         }
     }
+
     debug if(func is null)
     {
         throw new Error("%s is null! OpenGL loaded? Required OpenGL version not supported?".format(func.stringof));
@@ -65,41 +67,29 @@ ReturnType!func checkgl(alias func, Args...)(Args args)
     return func(args);
 }
 
-//-----------------------------------------------------------------------------
-
-class GLError : Exception
+private string gl_error_string(GLenum error)
 {
-    string gl_error_string(GLenum error)
+    switch(error)
     {
-        switch(error)
-        {
-            case GL_NO_ERROR: return "no error";
-            case GL_INVALID_ENUM: return "invalid enum";
-            case GL_INVALID_VALUE: return "invalid value";
-            case GL_INVALID_OPERATION: return "invalid operation";
-            //case GL_STACK_OVERFLOW: return "stack overflow";
-            //case GL_STACK_UNDERFLOW: return "stack underflow";
-            case GL_INVALID_FRAMEBUFFER_OPERATION: return "invalid framebuffer operation";
-            case GL_OUT_OF_MEMORY: return "out of memory";
-            default: return "unknown error";
-        }
-        //assert(false, "invalid enum");
+        case GL_NO_ERROR: return "no error";
+        case GL_INVALID_ENUM: return "invalid enum";
+        case GL_INVALID_VALUE: return "invalid value";
+        case GL_INVALID_OPERATION: return "invalid operation";
+        //case GL_STACK_OVERFLOW: return "stack overflow";
+        //case GL_STACK_UNDERFLOW: return "stack underflow";
+        case GL_INVALID_FRAMEBUFFER_OPERATION: return "invalid framebuffer operation";
+        case GL_OUT_OF_MEMORY: return "out of memory";
+        default: return "unknown error";
     }
+    //assert(false, "invalid enum");
+}
 
-    this(GLenum error_code, string function_name, string args)
-    {
-        super(
-            format(`OpenGL function "%s(%s)" failed: "%s."`,
-                function_name,
-                args,
-                gl_error_string(error_code)
-            )
-        );
-    }
-
-    this(GLenum error_code)
-    {
-        super(format(`OpenGL error: "%s."`,gl_error_string(error_code)));
-    }
+private string gl_format_error(GLenum error_code, string func, string args)
+{
+    return format(`OpenGL function "%s(%s)" failed: "%s."`,
+        func,
+        args,
+        gl_error_string(error_code)
+    );
 }
 

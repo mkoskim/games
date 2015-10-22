@@ -10,6 +10,8 @@ module engine.blob.wavefront;
 
 import engine.blob.util;
 import engine.blob.extract;
+
+import engine.render.util;
 import engine.render.loader.mesh;
 
 import std.string;
