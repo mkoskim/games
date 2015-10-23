@@ -1,6 +1,6 @@
 //*****************************************************************************
 //
-// CPU side bitmap manipulation
+// CPU side bitmaps
 //
 //*****************************************************************************
 
@@ -16,37 +16,48 @@ import blob = engine.blob;
 
 class Bitmap
 {
-    SDL_Surface* surface;
-    SDL_Renderer* renderer;
+    SDL_Surface* surface = null;
+    private SDL_Renderer* _renderer = null;
 
     //-------------------------------------------------------------------------
 
-    this(SDL_Surface* s)
+    this(SDL_Surface* s) in { assert(s); } body
     {
         debug Track.add(this);
         surface = s;
-        renderer = SDL_CreateSoftwareRenderer(surface);
-        if(!renderer) throw new Exception(
-            format("CreateSoftwareRenderer failed: %s", SDL_GetError())
-        );
     }
+
+    ~this()
+    {
+        debug Track.remove(this);
+        if(_renderer) SDL_DestroyRenderer(_renderer);
+        SDL_FreeSurface(surface);
+    }
+
+    //-------------------------------------------------------------------------
+    // Creating empty bitmap: We could assume here that forthcoming calls
+    // are going to draw something on bitmap, so basically - basically -
+    // we could create renderer already.
+    //-------------------------------------------------------------------------
 
     this(int width, int height)
     {
-        SDL_Surface* s = SDL_CreateRGBSurface(
-            0,
-            width,height,
-            32,
-            0x000000ff,
-            0x0000ff00,
-            0x00ff0000,
-            0xff000000
-        );
-        if(!s) throw new Exception(
-            format("CreateRGBSurface failed: %s", SDL_GetError())
+        SDL_Surface* s = ERRORIF(
+            SDL_CreateRGBSurface(
+                0,
+                width, height,
+                32,
+                0x000000ff,
+                0x0000ff00,
+                0x00ff0000,
+                0xff000000
+            ),
+            to!string(SDL_GetError())
         );
         this(s);
     }
+
+    //-------------------------------------------------------------------------
 
     this(string filename)
     {
@@ -59,7 +70,7 @@ class Bitmap
             cast(int)grid[0].length,
             cast(int)grid.length
         );
-        
+
         foreach(y; 0 .. height) {
             foreach(x; 0 .. width) {
                 putpixel(x, y, colorchart[grid[y][x]]);
@@ -67,17 +78,39 @@ class Bitmap
         }
     }
 
-    ~this()
-    {
-        debug Track.remove(this);
-        SDL_DestroyRenderer(renderer);
-        SDL_FreeSurface(surface);
-    }
-
     //-------------------------------------------------------------------------
 
     int width()  { return surface.w; }
     int height() { return surface.h; }
+
+    //*************************************************************************
+    //
+    // CPU side bitmap manipulation
+    //
+    //*************************************************************************
+
+    //-------------------------------------------------------------------------
+    // Possibly useful operations:
+    //
+    // 1) Scaling, definitely!
+    // 2) Adding and removing alpha layer, or use another bitmap as alpha
+    //    layer (and extracting alpha to bitmap)
+    // 3) Related to that, red <-> alpha conversions for texture upload
+    // 4) "Stamping", combining bitmaps (e.g. stonewall with graffiti,
+    //    face with skin color) at load time (we most probably has this kind
+    //    of feature at shader side, too)
+    //
+    //-------------------------------------------------------------------------
+
+    SDL_Renderer* renderer() {
+        if(!_renderer) _renderer = ERRORIF(
+            SDL_CreateSoftwareRenderer(surface),
+            to!string(SDL_GetError())
+        );
+        return _renderer;
+    }
+
+    //-------------------------------------------------------------------------
 
     void putpixel(int x, int y, vec4 color)
     {
