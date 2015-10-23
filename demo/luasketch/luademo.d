@@ -41,17 +41,48 @@ import engine;
 //*****************************************************************************
 
 import luad.all;
+import std.stdio;
+
+//-----------------------------------------------------------------------------
+// We need to limit the access of the scripts, and redirect the functions...
+// For example, LUA dofile(filename) needs to be go through BLOB management.
+// We don't want scripts to have direct access to filesystem.
+//-----------------------------------------------------------------------------
+
+class LuaBox : LuaState
+{
+    //-------------------------------------------------------------------------
+
+    this() {
+        super();
+        openLibs();
+
+        {
+            auto blob = newTable();
+            this["blob"] = blob;
+
+            blob["loadtext"] = (string filename) {
+                return cast(string)(.blob.extract(filename));
+            };
+        }
+    }
+
+    //-------------------------------------------------------------------------
+
+    auto run(string filename, string func = null)
+    {
+        return doString(blob.loadtext("data/test.lua"));
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Creating interface for LUA to access D functions
+//-----------------------------------------------------------------------------
 
 void main()
 {
-    // 1) Create interface for lua to call engine
-    
-    // 2) Call lua function using engine interface
+    auto lua = new LuaBox;
 
-    auto lua = new LuaState;
-    lua.openLibs();
-
-    auto print = lua.get!LuaFunction("print");
-    print("hello, world!");
+    writeln(lua.run("data/test.lua"));
 }
 
