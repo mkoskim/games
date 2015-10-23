@@ -35,20 +35,22 @@ void quit(string msg = null)
     exit(0);                // ...and exit.
 }
 
-void ERROR(string msg)
-{
-    quit("ERROR: " ~ msg);
-}
-
 T quitif(T)(T value, string msg = null)
 {
     if(!value) quit(msg);
     return value;
 }
 
-T ERRORIF(T)(T value, string msg)
+//-----------------------------------------------------------------------------
+
+void ERROR(string msg, string file = __FILE__, int line = __LINE__, string func = __FUNCTION__)
 {
-    if(!value) quit("ERROR: " ~ msg);
+    quit(format("ERROR: %s@%s:%d: %s", func, file, line, msg));
+}
+
+T ERRORIF(T)(T value, string msg, string file = __FILE__, int line = __LINE__, string func = __FUNCTION__)
+{
+    if(!value) ERROR(msg, file, line, func);
     return value;
 }
 

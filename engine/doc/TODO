@@ -11,16 +11,28 @@ DONE:
   separate VAO buffer creation to shader family upload. It can also be local
   buffer, as it is consumed during OpenGL download.  
 
+- DONE: Bitmap: create renderer only if it is needed (user wants to tweak
+  bitmap), as it is not that common that user wants to tweak loaded/created
+  bitmaps.
+
+- REJECTED: Bitmaps... In fact, if user creates empty bitmap, we can assume
+  that s/he's going to draw something on that. But it's probably just too
+  advanced and don't fix any problem or affect to performance in any way.
+  Added complexity for nothing, or that how it feels now.
+
 *******************************************************************************
 
 WORKLIST:
 
-- ...Gosh, my CV has nothing about my hobby projects and their goals... Got to
-  change that...
+- I need more freedom. What I should do is to create now a high (game) level
+  interface to rendering. Then, while working with internals, that does note
+  (necessarily) affect to the game functionality. It - no, they do not need
+  to be perfect. I can create high level interface for specific subset of
+  games.
 
 - I should port my java applet ShootEmUp to this platform (Linux, D, OpenGL).
   There are ready-made graphics (not too high quality, though) and game logic.
-  
+
 - Model loading (and other nice tutorials):
 
     http://www.learnopengl.com/#!Model-Loading/Model
@@ -633,6 +645,11 @@ TEXTURES:
 -------------------------------------------------------------------------------
 
 BITMAPS:
+
+- CPU-side bitmap operations that could be useful: (1) scaling, (2) adding/
+  removing alpha layer. Maybe (3) "loadtime" "stamping" (blitting bitmaps over
+  bitmaps): we most probably need the feature in shader, but we could also
+  support combining bitmaps at loadtime.
 
 - Load-time scaling of bitmaps (some kind of image manipulation
   library)

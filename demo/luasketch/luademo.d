@@ -24,10 +24,30 @@ import engine;
 //
 //*****************************************************************************
 
+//*****************************************************************************
+//
+// How I want it to work (sketch):
+//
+//      main.d:
+//
+//          ...
+//          auto skybox = SkyBox("path/to/skybox1.lua");
+//
+//      skybox1.lua:
+//
+//          Cubemap cubemap = Cubemap("img1", "img2", ...);
+//          return SkyBox(cubemap);
+//
+//*****************************************************************************
+
 import luad.all;
 
 void main()
 {
+    // 1) Create interface for lua to call engine
+    
+    // 2) Call lua function using engine interface
+
     auto lua = new LuaState;
     lua.openLibs();
 

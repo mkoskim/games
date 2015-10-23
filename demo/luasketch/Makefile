@@ -20,7 +20,7 @@ BLOBFILES=data/
 #------------------------------------------------------------------------------
 
 SRCPATH += ~/.dub/packages/luad-master/
-OBJS    += engine/libs/linux64/liblua5.1.a
+OBJS    += $(wildcard ~/.dub/packages/luad-master/extlib/x86_64-linux-gnu/liblua.a)
 
 #------------------------------------------------------------------------------
 # Add stock items to BLOB if you use them
