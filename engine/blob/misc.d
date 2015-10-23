@@ -22,6 +22,13 @@ import derelict.sdl2.image;
 
 //-----------------------------------------------------------------------------
 
+string loadtext(string filename)
+{
+    return cast(string)extract(filename);
+}
+
+//-----------------------------------------------------------------------------
+
 SDL_Surface* loadimage(string filename)
 {
     auto buffer = extract(filename);
