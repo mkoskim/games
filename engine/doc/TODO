@@ -20,6 +20,9 @@ DONE:
   advanced and don't fix any problem or affect to performance in any way.
   Added complexity for nothing, or that how it feels now.
 
+- DONE: 'fetch' target in makefile, to fetch dub libraries, to ease setting
+  up a bit.
+
 *******************************************************************************
 
 WORKLIST:
