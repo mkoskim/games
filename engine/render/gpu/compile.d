@@ -157,7 +157,7 @@ private GLuint compileShader(GLenum shadertype, string[] files)
 
     foreach(i, content; source)
     {
-        ulong lines = countchars(to!string(content), "\n");
+        size_t lines = countchars(to!string(content), "\n");
         if(errorat.line <= lines) {
             errorat.filename = files[i];
             break;
@@ -190,7 +190,7 @@ private GLuint compileShader(GLenum shadertype, string[] files)
 
 private class Location
 {
-    ulong fileid, line;
+    size_t fileid, line;
     string filename;
     string msg;
 
@@ -201,8 +201,8 @@ private class Location
         );
         auto c = matchFirst(msg, re);
 
-        this.fileid = to!ulong(c["fileid"]);
-        this.line = to!ulong(c["line"]);
+        this.fileid = to!size_t(c["fileid"]);
+        this.line = to!size_t(c["line"]);
         this.msg = c.post();
         this.filename = "<unknown>";
     }

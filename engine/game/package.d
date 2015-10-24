@@ -12,6 +12,7 @@ public import engine.game.instance;
 public import engine.game.fiber;
 public import engine.game.perfmeter;
 public import engine.game.events;
+public import engine.game.input;
 public import engine.game.util: quit, rungc;
 
 debug public import engine.game.track: Track;
@@ -109,7 +110,8 @@ void init(string name, int width = 640, int height = 480)
     }
 
     render.init();
-    Joystick.init();
+    GameController.init();
+    EmulatedController.init();
 }
 
 //*****************************************************************************
