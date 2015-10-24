@@ -18,10 +18,10 @@ public import std.conv: to;
 public import gl3n.linalg;
 public import std.math: abs;
 
-debug public import engine.game.track: Track;
-
 public import std.exception: enforce;
-public import engine.game.util: quit, quitif, ERRORIF;
+public import engine.game.util: quit, quitif, ERROR, ERRORIF;
+
+debug public import engine.game.track: Track;
 
 //-----------------------------------------------------------------------------
 

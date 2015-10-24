@@ -2,6 +2,12 @@
 //
 // Sketching plugging LUA to game engine.
 //
+// NOTE: https://github.com/JakobOvrum/LuaD/issues/93
+//
+//      I might need to postpone this development until the
+//      bug is found & fixed. Otherwise I can't know if I made it
+//      right or wrong.
+//
 //*****************************************************************************
 
 import engine;
@@ -49,6 +55,8 @@ import std.stdio;
 // We don't want scripts to have direct access to filesystem.
 //-----------------------------------------------------------------------------
 
+import core.vararg;
+
 class LuaBox : LuaState
 {
     //-------------------------------------------------------------------------
@@ -61,18 +69,28 @@ class LuaBox : LuaState
             auto blob = newTable();
             this["blob"] = blob;
 
-            blob["loadtext"] = (string filename) {
-                return cast(string)(.blob.extract(filename));
-            };
+            blob["loadtext"]  = (string filename) { return cast(string)(.blob.extract(filename)); };
         }
     }
 
     //-------------------------------------------------------------------------
 
-    auto run(string filename, string func = null)
-    {
-        return doString(blob.loadtext("data/test.lua"));
+    LuaFunction func(string filename, string funcname) {
+        doString(blob.loadtext("data/test.lua"));
+        return get!LuaFunction(funcname);
     }
+
+    /*
+    LuaObject[] run(string filename, string funcname = null, ...)
+    {
+        doString(blob.loadtext("data/test.lua"));
+        if(funcname) {
+            auto func = get!LuaFunction(funcname);
+            return func();
+        }
+        return [];
+    }
+    */
 }
 
 //-----------------------------------------------------------------------------
@@ -83,6 +101,13 @@ void main()
 {
     auto lua = new LuaBox;
 
-    writeln(lua.run("data/test.lua"));
+    writeln(lua.func("data/test.lua", "loadmessage")());
+
+    /*
+    auto result = lua.run("data/test.lua");
+    writeln(result);
+    */
+
+    writeln("Done.");
 }
 

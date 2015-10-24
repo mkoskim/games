@@ -39,8 +39,7 @@ debug abstract class Track
 
         void rungc()
         {
-            import core.memory: GC;
-            GC.collect();
+            engine.game.util.rungc();
             debug report("Garbage collected:");
         }
 

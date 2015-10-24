@@ -11,6 +11,13 @@ module engine.game.util;
 public import engine.util;
 
 //-----------------------------------------------------------------------------
+
+void rungc() {
+    import core.memory: GC;
+    GC.collect();
+}
+
+//-----------------------------------------------------------------------------
 //
 // Quitting the game. Terminating runtime before exit() is optional feature
 // to run destructors and see that it happens without errors (which may

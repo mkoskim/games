@@ -17,6 +17,8 @@ OBJS=
 
 BLOBFILES=data/
 
+#USECOMPILER = gdc
+
 #------------------------------------------------------------------------------
 
 SRCPATH += ~/.dub/packages/luad-master/

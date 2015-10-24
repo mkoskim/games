@@ -24,6 +24,9 @@ DONE:
 
 WORKLIST:
 
+- ShaderToy: Web site with WebGL, has working shaders. Could be very cool
+  place to go through looking for shader ideas.
+
 - I need more freedom. What I should do is to create now a high (game) level
   interface to rendering. Then, while working with internals, that does note
   (necessarily) affect to the game functionality. It - no, they do not need
@@ -314,6 +317,10 @@ LOADERS, FILE FORMATS: We started to use Assimp to load model files. Some
 design, sketching and planning is needed, as well as tuning the render
 architecture more suitable for models loaded from files.
 
+- Currently there seems to be some sort of a bug with LuaD and DMD 2.067+
+  compilers causing it to segfault at exit. I might want to postpone the
+  development until the problem is found & fixed.
+
 - CONSIDER SERIOUSLY adding scripting support for asset loading! The idea
   here is, that e.g. lua scripts to load specific things are stored with
   the models, and thus they are stored to BLOB, too - no need for complex
@@ -389,7 +396,14 @@ issues have their relations to other sections in this TODO document.
   between render, canvas and such --> Because of this, I might consider taking
   glamour there.
 
-- I should go to version 130 with shaders. For creating compatible shader
+- Shaders: Raymarching? What is that? Realtime raytracing is the future. I
+  should investigate it very closely!
+
+- Shaders: Interior mapping, quite cool:
+
+    http://interiormapping.oogst3d.net/
+
+- I might need to go to version 130 with shaders. For creating compatible shader
   banks, it is mandatory to ensure that attributes are at the same location.
   Otherwise, loaded VBOs (via VAO) do not work: not a problem at the moment, as
   attributes are bind by hand.
