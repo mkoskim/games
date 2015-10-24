@@ -23,6 +23,10 @@ DONE:
 - DONE: 'fetch' target in makefile, to fetch dub libraries, to ease setting
   up a bit.
 
+- DONE: (Animation) Implemented Translate class to create things like this:
+
+        EasingCurve: http://qt-project.org/doc/qt-4.8/qeasingcurve.html
+
 *******************************************************************************
 
 WORKLIST:
@@ -597,14 +601,10 @@ classes to blit lots of things into 2D/3D space.
 
 ANIMATION:
 
-- Animation
-
-- EasingCurve: http://qt-project.org/doc/qt-4.8/qeasingcurve.html
-
 - Blender: http://wiki.blender.org/index.php/Doc:2.6/Manual/Animation
 
-- One tough question: How to update bounding volumes on animated meshes?
-  Use coarse approximation?
+- One tough question: How to update bounding volumes on animated (deforming)
+  meshes? Use coarse approximation? Try to guess the max possible?
 
 - Easy curve generator to tools... Some curves are easier to generate
   numerically with simulator...

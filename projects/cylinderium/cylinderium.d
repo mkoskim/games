@@ -40,7 +40,10 @@ class Scene : scene3d.Pipeline3D
 
         //---------------------------------------------------------------------
 
-        flat  = scene3d.Batch.Solid3D(scene3d.shaders.Flat3D.create());
+        flat  = new scene3d.Batch(
+            scene3d.State.Solid3D(scene3d.shaders.Flat3D.create()),
+            scene3d.Batch.Mode.unsorted
+        );
         solid = scene3d.Batch.Solid3D();
 
         addbatch(solid);
@@ -244,6 +247,8 @@ class Player : game.Fiber
         shipframe = scene3d.Grip.movable(root, vec3(0, RADIUS + 0.4, 0));
 
         ship = scene.nodes.add(scene3d.Grip.movable(shipframe), scene.playership);
+
+        // Make ship rolling when coming in
         ship.grip.rot.x = 360;
 
         //---------------------------------------------------------------------
@@ -261,69 +266,94 @@ class Player : game.Fiber
     }
 
     //-------------------------------------------------------------------------
-
+    //
+    // We use translation to achieve stable transitions. Camera position,
+    // ship velocity and orientation are controlled by speed, which is
+    // (mainly) controlled by joystick.
+    //
+    //-------------------------------------------------------------------------
+    
     override void run()
     {
-        const float maxrot = 2.5;
-        const float maxspeed = 0.5;
-
-        float speed = maxspeed*0.5;
-        float delta = 0.033;
+        //---------------------------------------------------------------------
+        // Rotation
+        //---------------------------------------------------------------------
+        
+        auto rotation = new Translate(vec2(-1, -2.5), vec2(+1, +2.5));
 
         void rotate()
         {
-            root.grip.rot.x += joystick.axes[game.JOY.AXIS.LY] * maxrot;
+            root.grip.rot.x += rotation(joystick.axes[game.JOY.AXIS.LY]);
 
             shipframe.grip.rot.x =  joystick.axes[game.JOY.AXIS.LY] * 30;	// "Roll"
             shipframe.grip.rot.z = -joystick.axes[game.JOY.AXIS.LX] * 45;	// "Pitch"
         }
 
+        //---------------------------------------------------------------------
+        // Moving, with turn control
+        //---------------------------------------------------------------------
+        
+        const float MAXSPEED  = 30;
+        const float TURNSTART = 10;
+        const float DELTA     =  1;
+        
+        auto velocity   = new Translate(vec2(-MAXSPEED, -0.5), vec2(+MAXSPEED,  +0.5));
+        auto campos     = new Translate(vec2(-MAXSPEED, -2.5), vec2(+MAXSPEED,  +2.5));
+        auto camposturn = new Translate(vec2(-TURNSTART,-8.0), vec2(+TURNSTART, +8.0));
+
+        auto shiprotz   = new Translate(vec2(-TURNSTART,-180), vec2(+TURNSTART, 0));
+
+        float speed = 15;
+
         void checkturn()
         {
-            if(speed < -0.1 || speed > 0.1) {
-                root.grip.pos.x += speed;
-                return;
-            }
-
-            speed = sgn(speed)*0.1;
-            int steps = 25;
-            float d = -sgn(speed)*0.2 / (steps);
-            for(int i = 0; i < steps; i++)
+            void update()
             {
-                cam.grip.pos.x  = (speed*10) * 7.5;
-                ship.grip.rot.z += 180.0/steps;
-                if(ship.grip.rot.z >= 360) ship.grip.rot.z -= 360;
-                root.grip.pos.x += speed;
-                speed += d*1;
-                if(i < steps-1) nextframe();
                 rotate();
+
+                root.grip.pos.x += velocity(speed);
+                cam.grip.pos.x  = campos(speed) + camposturn(speed);
+                ship.grip.rot.z = shiprotz(speed);
+            }
+            
+            if(abs(speed) < TURNSTART) {
+                float delta = -sgn(speed);
+                while(abs(speed) < TURNSTART)
+                {
+                    speed += delta;
+                    update();
+                    nextframe();
+                }
+            }
+            else
+            {
+                update();
             }
         }
 
         for(;;nextframe())
         {
-            rotate();
-
-            if(ship.grip.rot.x < ship.grip.rot.z) ship.grip.rot.x += min(8, ship.grip.rot.z - ship.grip.rot.x);
-            if(ship.grip.rot.x > ship.grip.rot.z) ship.grip.rot.x -= min(8, ship.grip.rot.x - ship.grip.rot.z);
-
+            /* Auto-turn on edges */
             if(root.grip.pos.x < MINX)
             {
-                if(speed < maxspeed*0.5) speed += delta;
+                if(speed < MAXSPEED*0.5) speed++;
             }
             else if(root.grip.pos.x > MAXX)
             {
-                if(speed > -maxspeed*0.5) speed -= delta;
+                if(speed > -MAXSPEED*0.5) speed--;
             }
             else
             {
-                speed += joystick.axes[game.JOY.AXIS.LX] * delta;
+                float acceleration = joystick.axes[game.JOY.AXIS.LX] * DELTA;
 
-                if(speed > maxspeed) speed = maxspeed;
-                if(speed < -maxspeed) speed = -maxspeed;
+                speed = fmax(-MAXSPEED, fmin(speed + acceleration, MAXSPEED));
             }
 
             checkturn();
+
+            /* In case our ship is upside down, turn it back */
+            if(ship.grip.rot.x < ship.grip.rot.z) ship.grip.rot.x += min(8, ship.grip.rot.z - ship.grip.rot.x);
+            if(ship.grip.rot.x > ship.grip.rot.z) ship.grip.rot.x -= min(8, ship.grip.rot.x - ship.grip.rot.z);
 
             cam.grip.pos.y += joystick.axes[game.JOY.AXIS.RY] * 0.5;
         }

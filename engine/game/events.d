@@ -97,10 +97,10 @@ class Joystick
     //
     //-------------------------------------------------------------------------
 
-	protected float axisvalue(int axis) {
+    protected float axisvalue(int axis) {
         float value = (axis + 0.5) / 32768.0;
         return (abs(value) < AXIS_TRESHOLD) ? 0.0 : value;
-	}
+    }
 
     protected void update(SDL_Event event)
     {
