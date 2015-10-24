@@ -452,7 +452,7 @@ void main()
                     //case SDLK_w: ship.shader.fill = !ship.shader.fill; break;
                     //case SDLK_e: ship.shader.enabled = !ship.shader.enabled; break;
 
-                    case SDLK_ESCAPE: return false;
+                    //case SDLK_ESCAPE: return false;
                     default: break;
                 } break;
                 default: break;

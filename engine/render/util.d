@@ -28,6 +28,13 @@ void printmat(string name, mat4 matrix)
 }
 
 //-----------------------------------------------------------------------------
+// Count OpenGL calls. This is mostly resetted for each frame, so uint (4*10^9)
+// just gotta be enough even on 64-bit machines.
+//-----------------------------------------------------------------------------
+
+uint glcalls = 0;   
+
+//-----------------------------------------------------------------------------
 //
 // Checking & throwing GL errors, inspired by glamour. Usage:
 //
@@ -36,7 +43,6 @@ void printmat(string name, mat4 matrix)
 //-----------------------------------------------------------------------------
 
 import std.traits : ReturnType;
-ulong glcalls = 0;
 
 ReturnType!func checkgl(alias func, Args...)(Args args)
 {

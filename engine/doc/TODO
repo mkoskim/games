@@ -27,12 +27,16 @@ DONE:
 
         EasingCurve: http://qt-project.org/doc/qt-4.8/qeasingcurve.html
 
+- DONE: Make game controller optional, at least for games that does not need
+  them that much (i.e. have also keyboard control)
+
+- DONE: Keyboard emulated game controller
+
 *******************************************************************************
 
 WORKLIST:
 
-- ShaderToy: Web site with WebGL, has working shaders. Could be very cool
-  place to go through looking for shader ideas.
+- ALMOST DONE: Replace ulong with size_t (make 32-bit compilations to work)
 
 - I need more freedom. What I should do is to create now a high (game) level
   interface to rendering. Then, while working with internals, that does note
@@ -82,8 +86,6 @@ WORKLIST:
 - Maybe we use SDL rendering for GUI? Just to get rid of artifacts?
 
 - Maybe own dedicated 2D shader for GUI?
-
-- CONTINUE: Replace ulong with size_t
 
 - Model.sheet: This is using atlas for rendering. It would be
   probably best to implement dedicated atlas sprite blitter...
@@ -292,10 +294,7 @@ more portable (32-bit, 64-bit, Linux, Windows), easier to set up, and so on.
 
 USER INPUT:
 
-- Keyboard emulated game controller
-
-- Make game controller optional, at least for games that does not need them
-  that much (i.e. have also keyboard control)
+- Improve emulated game controller
 
 -------------------------------------------------------------------------------
 
@@ -404,6 +403,9 @@ issues have their relations to other sections in this TODO document.
   Shader implementation even lower level, and create intermediate structures
   between render, canvas and such --> Because of this, I might consider taking
   glamour there.
+
+- ShaderToy: Web site with WebGL, has working shaders. Could be very cool
+  place to go through looking for shader ideas.
 
 - Shaders: Raymarching? What is that? Realtime raytracing is the future. I
   should investigate it very closely!
