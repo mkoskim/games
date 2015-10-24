@@ -12,7 +12,7 @@ public import engine.game.instance;
 public import engine.game.fiber;
 public import engine.game.perfmeter;
 public import engine.game.events;
-public import engine.game.util: quit;
+public import engine.game.util: quit, rungc;
 
 debug public import engine.game.track: Track;
 

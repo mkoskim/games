@@ -2,9 +2,8 @@
 -- Testing...
 -- ----------------------------------------------------------------------------
 
-message = blob.loadtext("data/message.txt");
-
-print(message);
-
--- return message;
+function loadmessage()
+    message = blob.loadtext("data/message.txt");
+    return message, 1, "Yes";
+end
 
