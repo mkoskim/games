@@ -210,6 +210,8 @@ HOTTISH TOPICS:
 
 FIX/INVESTIGATE: Crashes, flaws etc.
 
+- SkyBox is not working on my laptop. Find the reason.
+
 - IMPORTANT: Querying shader uniform and attribute locations will not work
   correctly if the shader is not activated (the functions will return the
   locations of the active shader). So, during uploading, we should ensure that the
