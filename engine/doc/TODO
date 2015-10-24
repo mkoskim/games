@@ -2,35 +2,7 @@
 
 DONE:
 
-- DONE: Implement shader options somehow... State object, maybe? There is now
-  options[] for both shader and state. Shader specific options are applied to
-  all stages where shader is used. State specific options are only for the 
-  specific state.
-
-- DONE: (step forward shader family implementation) Mesh to intermediate format,
-  separate VAO buffer creation to shader family upload. It can also be local
-  buffer, as it is consumed during OpenGL download.  
-
-- DONE: Bitmap: create renderer only if it is needed (user wants to tweak
-  bitmap), as it is not that common that user wants to tweak loaded/created
-  bitmaps.
-
-- REJECTED: Bitmaps... In fact, if user creates empty bitmap, we can assume
-  that s/he's going to draw something on that. But it's probably just too
-  advanced and don't fix any problem or affect to performance in any way.
-  Added complexity for nothing, or that how it feels now.
-
-- DONE: 'fetch' target in makefile, to fetch dub libraries, to ease setting
-  up a bit.
-
-- DONE: (Animation) Implemented Translate class to create things like this:
-
-        EasingCurve: http://qt-project.org/doc/qt-4.8/qeasingcurve.html
-
-- DONE: Make game controller optional, at least for games that does not need
-  them that much (i.e. have also keyboard control)
-
-- DONE: Keyboard emulated game controller
+-
 
 *******************************************************************************
 
@@ -82,10 +54,6 @@ WORKLIST:
 - Decals (e.g. for targeting circles)
 
 - Examine, if BLOB could support symbolic links
-
-- Maybe we use SDL rendering for GUI? Just to get rid of artifacts?
-
-- Maybe own dedicated 2D shader for GUI?
 
 - Model.sheet: This is using atlas for rendering. It would be
   probably best to implement dedicated atlas sprite blitter...
@@ -601,6 +569,18 @@ classes to blit lots of things into 2D/3D space.
 
 -------------------------------------------------------------------------------
 
+2D OBJECTS, GUI, HUD: GUI sketching/planning/designing is ongoing. Sure, the
+focus is on game rendering engine (render/ directory structure), but also sure,
+GUI/HUD is pretty damn important to play a game, even a 3D game. And sure,
+if we need 2D graphics engine for HUD & GUI, why not use it for implementing
+2D games?
+
+- Maybe we use SDL rendering for GUI? Just to get rid of artifacts?
+
+- Maybe own dedicated 2D shader for GUI?
+
+-------------------------------------------------------------------------------
+
 ANIMATION:
 
 - Blender: http://wiki.blender.org/index.php/Doc:2.6/Manual/Animation
@@ -682,12 +662,6 @@ BITMAPS:
 - Atlas creation
 
 - Bitmap.splitSheet: Scaling splitted sprites does not work.
-
--------------------------------------------------------------------------------
-
-GUI, HUD: GUI sketching/planning/designing is ongoing. Sure, the focus is on
-game rendering engine (render/ directory structure), but also sure, GUI/HUD
-is pretty damn important to play a game.
 
 -------------------------------------------------------------------------------
 
