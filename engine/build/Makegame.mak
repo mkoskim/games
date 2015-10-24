@@ -15,7 +15,6 @@ endif
 #------------------------------------------------------------------------------
 
 fetch:
-	rm -rf ~/.dub/packages
 	dub fetch derelict-gl3     --version=1.0.15
 	dub fetch derelict-sdl2    --version=1.9.7
 	dub fetch derelict-util    --version=2.0.4
