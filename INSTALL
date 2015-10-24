@@ -8,31 +8,10 @@ later simplify the process in the future.
 
 To successfully compile and run projects, you will need:
 
-1) GAME CONTROLLER:
+1) SYSTEM LIBRARIES
 
-   Except for testbench/pacman, all the game prototypes
-   require game controller (XBox) to work. Implementation of "emulated"
-   joystick (using mouse & keyboard) is planned, but not yet started.
-
-
-2) OpenGL
-
-   You will need at least OpenGL 2.1. I have currently been planning to move
-   on to OpenGL 3.3, because it has many nice features to study closer.
-
-3) BUILD TOOLS:
-
-   Usual Linux-side building tools:
-
-   * GNU make
-
-   NOTE: Preliminary dub building support exists.
-
-
-4) SYSTEM LIBRARIES
-
-   System side libraries: Linux users may find these from their distribution's
-   repository, if not, you can install them from sources.
+   Linux users may find these from their distribution's repository, if not,
+   you can install them from sources.
 
         * OpenGL 2.1+         For graphics
         * SDL 2               Input, CPU side graphics, ...
@@ -43,7 +22,19 @@ To successfully compile and run projects, you will need:
    Your system should have support at least for PNG images. I'm not sure how
    std.zip is implemented, but it may require zlib.
 
-5) DMD D COMPILER:
+   You will need at least OpenGL 2.1. I have currently been planning to move
+   on to OpenGL 3.3, because it has many nice features to study closer.
+
+2) BUILD TOOLS:
+
+   Usual Linux-side building tools:
+
+   * GNU make
+
+   This is usually installed to Linux systems by default. NOTE: Preliminary
+   dub building support exists.
+
+3) DMD D COMPILER:
 
    This is easy to install to both Linux and Windows, and
    you can get it here:
@@ -53,7 +44,7 @@ To successfully compile and run projects, you will need:
    Previous version I was using was 2.067.1. I installed new version (2.069.0-b2)
    recently, and it seems to work.
 
-6) DUB
+4) DUB
 
    Project uses D libraries via dub. It can be downloaded here:
    
@@ -61,7 +52,7 @@ To successfully compile and run projects, you will need:
         
    Currently I am using version 0.9.24.
 
-7) D LIBRARIES
+5) D LIBRARIES
 
    The project uses:
 
@@ -74,11 +65,17 @@ To successfully compile and run projects, you will need:
         $ cd testbench/pacman
         testbench/pacman$ make fetch
 
-8) If everything is fine, you can compile and run some of the examples
+6) If everything is fine, you can compile and run some of the examples
    using make:
 
       testbench/pacman$ make default
 
 Sadly to Windows users, current build system utilizes common Linux side
 building tools and symbolic links. I will continue to simplify the build.
+
+- - -
+
+GAME CONTROLLER: Now, with emulated controller, games can be basically played
+without having a real one. But it is still recommended. My games are and will be
+made to be played with game controller (XBox).
 
