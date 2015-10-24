@@ -15,12 +15,13 @@ endif
 #------------------------------------------------------------------------------
 
 fetch:
+	rm -rf ~/.dub/packages
 	dub fetch derelict-gl3     --version=1.0.15
 	dub fetch derelict-sdl2    --version=1.9.7
 	dub fetch derelict-util    --version=2.0.4
 	dub fetch derelict-assimp3 --version=1.0.1
 	dub fetch gl3n             --version=1.2.0
-	dub fetch luad
+	dub fetch luad --force-remove
 
 SRCPATH += ~/.dub/packages/derelict-gl3-1.0.15/source/
 SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.7/source/

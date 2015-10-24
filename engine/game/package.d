@@ -74,7 +74,7 @@ void init(string name, int width = 640, int height = 480)
             _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION);
     }
 
-    //askfor(2, 1); // OpenGL 2.1+ for GLSL version 1.20
+    askfor(2, 1); // OpenGL 2.1+ for GLSL version 1.20
     //askfor(3, 3);   // OpenGL 3.3, GLSL 330 - many nice features!
     //askfor(4, 0);
 
