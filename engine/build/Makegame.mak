@@ -7,13 +7,20 @@
 #------------------------------------------------------------------------------
 
 ifeq ("$(EXE)","")
-	EXE=$(basename $(MAIN))
+    EXE=$(basename $(MAIN))
 endif
 
 #------------------------------------------------------------------------------
-# Manual insertion of dub packages to source paths. Use dub to fetch the
-# packages.
+# DUB packages.
 #------------------------------------------------------------------------------
+
+fetch:
+	dub fetch derelict-gl3     --version=1.0.15
+	dub fetch derelict-sdl2    --version=1.9.7
+	dub fetch derelict-util    --version=2.0.4
+	dub fetch derelict-assimp3 --version=1.0.1
+	dub fetch gl3n             --version=1.2.0
+	dub fetch luad
 
 SRCPATH += ~/.dub/packages/derelict-gl3-1.0.15/source/
 SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.7/source/
@@ -21,9 +28,8 @@ SRCPATH += ~/.dub/packages/derelict-util-2.0.4/source/
 SRCPATH += ~/.dub/packages/derelict-assimp3-1.0.1/source/
 SRCPATH += ~/.dub/packages/gl3n-1.2.0/
 
-# SRCPATH += ~/.dub/packages/luad-master/
-# LIBS += lua
-
+#------------------------------------------------------------------------------
+# Attempt to use GDC... Failed.
 #------------------------------------------------------------------------------
 
 DMD = rdmd
