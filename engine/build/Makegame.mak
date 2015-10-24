@@ -11,6 +11,10 @@ ifeq ("$(EXE)","")
 endif
 
 #------------------------------------------------------------------------------
+
+default: note debug run
+
+#------------------------------------------------------------------------------
 # DUB packages.
 #------------------------------------------------------------------------------
 
@@ -54,13 +58,14 @@ DMD += $(addprefix -I, $(SRCPATH))
 
 #------------------------------------------------------------------------------
 
-usage:
+note:
+	@echo "Use 'make help' for available options."
+
+help:
 	@echo "Usage:"
 	@echo "    make default"
-	@echo "    make debug run"
-	@echo "    make release run"
-
-default: debug run
+	@echo "    make debug [run]"
+	@echo "    make release [run]"
 
 debug: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)

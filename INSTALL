@@ -15,7 +15,12 @@ To successfully compile and run projects, you will need:
    joystick (using mouse & keyboard) is planned, but not yet started.
 
 
-2) BUILD TOOLS:
+2) OpenGL
+
+   You will need at least OpenGL 2.1. I have currently been planning to move
+   on to OpenGL 3.3, because it has many nice features to study closer.
+
+3) BUILD TOOLS:
 
    Usual Linux-side building tools:
 
@@ -24,7 +29,7 @@ To successfully compile and run projects, you will need:
    NOTE: Preliminary dub building support exists.
 
 
-3) SYSTEM LIBRARIES
+4) SYSTEM LIBRARIES
 
    System side libraries: Linux users may find these from their distribution's
    repository, if not, you can install them from sources.
@@ -38,7 +43,7 @@ To successfully compile and run projects, you will need:
    Your system should have support at least for PNG images. I'm not sure how
    std.zip is implemented, but it may require zlib.
 
-4) DMD D COMPILER:
+5) DMD D COMPILER:
 
    This is easy to install to both Linux and Windows, and
    you can get it here:
@@ -48,7 +53,15 @@ To successfully compile and run projects, you will need:
    Previous version I was using was 2.067.1. I installed new version (2.069.0-b2)
    recently, and it seems to work.
 
-5) D LIBRARIES
+6) DUB
+
+   Project uses D libraries via dub. It can be downloaded here:
+   
+        http://code.dlang.org/download
+        
+   Currently I am using version 0.9.24.
+
+7) D LIBRARIES
 
    The project uses:
 
@@ -61,7 +74,7 @@ To successfully compile and run projects, you will need:
         $ cd testbench/pacman
         testbench/pacman$ make fetch
 
-6) If everything is fine, you can compile and run some of the examples
+8) If everything is fine, you can compile and run some of the examples
    using make:
 
       testbench/pacman$ make default
