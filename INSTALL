@@ -20,7 +20,8 @@ To successfully compile and run projects, you will need:
         * Assimp 3.0+         For loading 3D models
    
    Your system should have support at least for PNG images. I'm not sure how
-   std.zip is implemented, but it may require zlib.
+   std.zip is implemented, but it may require zlib. Luckily, both are
+   usually installed by default in Linux systems.
 
    You will need at least OpenGL 2.1. I have currently been planning to move
    on to OpenGL 3.3, because it has many nice features to study closer.
