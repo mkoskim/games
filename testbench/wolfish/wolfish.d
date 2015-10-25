@@ -84,12 +84,12 @@ class Scene : scene3d.Pipeline3D
                 "engine/stock/cubemaps/skybox1/back.png",
                 "engine/stock/cubemaps/skybox1/front.png"
                 /*/
-                "engine/stock/cubemaps/skybox2/universe_right.png",
-                "engine/stock/cubemaps/skybox2/universe_left.png",
-                "engine/stock/cubemaps/skybox2/universe_top.png",
-                "engine/stock/cubemaps/skybox2/universe_bottom.png",
-                "engine/stock/cubemaps/skybox2/universe_back.png",
-                "engine/stock/cubemaps/skybox2/universe_front.png",
+                "engine/stock/unsorted/cubemaps/skybox2/universe_right.png",
+                "engine/stock/unsorted/cubemaps/skybox2/universe_left.png",
+                "engine/stock/unsorted/cubemaps/skybox2/universe_top.png",
+                "engine/stock/unsorted/cubemaps/skybox2/universe_bottom.png",
+                "engine/stock/unsorted/cubemaps/skybox2/universe_back.png",
+                "engine/stock/unsorted/cubemaps/skybox2/universe_front.png",
                 
                 /**/
                 ]
@@ -151,69 +151,69 @@ class Scene : scene3d.Pipeline3D
         //---------------------------------------------------------------------
 
         auto matCaveWall = new scene3d.Material(
-            colormap("engine/stock/tiles/CaveWall/ColorMap.png"),
-            normalmap("engine/stock/tiles/CaveWall/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/CaveWall/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/CaveWall/NormalMap.png"),
             1.00);
 
         auto matCrackedPlaster = new scene3d.Material(
-            colormap("engine/stock/tiles/CrackedPlaster/ColorMap.png"),
-            normalmap("engine/stock/tiles/CrackedPlaster/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/CrackedPlaster/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/CrackedPlaster/NormalMap.png"),
             0.95);
 
         auto matSantaFeStucco = new scene3d.Material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
-            colormap("engine/stock/tiles/CaveWall/ColorMap.png"),
-            normalmap("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/CaveWall/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/SantaFeStucco/NormalMap.png"),
             0.95);
 
         auto matTanStucco = new scene3d.Material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
-            colormap("engine/stock/tiles/TanStucco/ColorMap.png"),
-            normalmap("engine/stock/tiles/TanStucco/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/TanStucco/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/TanStucco/NormalMap.png"),
             0.95);
 
         auto matBrickWall = new scene3d.Material(
-            colormap("engine/stock/tiles/BrickWall1/ColorMap.png"),
-            normalmap("engine/stock/tiles/BrickWall1/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/BrickWall1/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/BrickWall1/NormalMap.png"),
             0.95);
 
         auto matGraniteWall = new scene3d.Material(
-            colormap("engine/stock/tiles/GraniteWall/ColorMap.png"),
-            normalmap("engine/stock/tiles/GraniteWall/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/GraniteWall/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/GraniteWall/NormalMap.png"),
             0.95);
 
         auto matCrustyConcrete = new scene3d.Material(
-            colormap("engine/stock/tiles/Concrete/Crusty/ColorMap.png"),
-            normalmap("engine/stock/tiles/Concrete/Crusty/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/Concrete/Crusty/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/Concrete/Crusty/NormalMap.png"),
             0.95);
 
         auto matDirtyConcrete = new scene3d.Material(
-            colormap("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
-            normalmap("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
+            colormap("engine/stock/unsorted/tiles/Concrete/Dirty/ColorMap.png"),
+            normalmap("engine/stock/unsorted/tiles/Concrete/Dirty/NormalMap.png"),
             0.95);
 
         auto matCarvedSandstone = new scene3d.Material(
-            colormap("engine/stock/tiles/CarvedSandstone/ColorMap.png"),
+            colormap("engine/stock/unsorted/tiles/CarvedSandstone/ColorMap.png"),
             //"engine/stock/tiles/CaveWall/ColorMap.png",
             //vec3(0.5, 0.4, 0.2),
-            normalmap("engine/stock/tiles/CarvedSandstone/NormalMap.png"),
+            normalmap("engine/stock/unsorted/tiles/CarvedSandstone/NormalMap.png"),
             0.95);
 
         auto matAlienCarving = new scene3d.Material(
             //"engine/stock/tiles/AlienCarving/ColorMap.png",
             colormap(vec4(0.75, 0.5, 0.25, 1)),
-            normalmap("engine/stock/tiles/AlienCarving/NormalMap.png"),
+            normalmap("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png"),
             0.15);
 
         auto matMetallicAssembly = new scene3d.Material(
             //"engine/stock/tiles/MetallicAssembly/ColorMap.png",
             colormap(vec4(0.5, 0.5, 0.5, 1)),
-            normalmap("engine/stock/tiles/MetallicAssembly/NormalMap.png"),
+            normalmap("engine/stock/unsorted/tiles/MetallicAssembly/NormalMap.png"),
             0.15);
 
         auto matGlass = new scene3d.Material(
             colormap(vec4(0.8, 0.8, 0.9, 0.3)),
-            normalmap("engine/stock/tiles/SantaFeStucco/NormalMap.png"),
+            normalmap("engine/stock/unsorted/tiles/SantaFeStucco/NormalMap.png"),
             0.50
         );
 
@@ -221,9 +221,9 @@ class Scene : scene3d.Pipeline3D
         // Load meshes
         //---------------------------------------------------------------------
 
-        auto wallmesh = blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj");
-        auto floormesh = blob.wavefront.loadmesh("engine/stock/mesh/Cube/Floor.obj");
-        auto monkeymesh = blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj").scale(0.66);
+        auto wallmesh = blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/CubeWrap.obj");
+        auto floormesh = blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/Floor.obj");
+        auto monkeymesh = blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Suzanne/Suzanne.obj").scale(0.66);
         
         //---------------------------------------------------------------------
         // Create models to batches
@@ -316,7 +316,7 @@ class Player : game.Fiber
 
         cam = scene3d.Camera.basic3D(0.1, 20, scene3d.Grip.movable(root));
 
-        joystick = game.joysticks[0];
+        joystick = game.controller;
         
         mat = &maze.propshapes[0].material;
 

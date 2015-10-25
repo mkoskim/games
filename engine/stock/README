@@ -9,6 +9,17 @@ Most importantly, it contains the default font used by text rendering
 functions, if font is not explicitly specified. Second, it contains some basic
 geometric shapes for 2D/3D graphics.
 
+Organization:
+
+    engine/stock/           This directory
+
+        system/             Resources needed by engine itself
+        
+        unsorted/           Unsorted resources used during development
+        
+        universe/           Planned place for directories containing more
+                            consistent sets of assets.
+
 In future, this directory could be organized more logically, so that games
 can choose their stock item sets.
 
