@@ -19,15 +19,7 @@ module engine.game.input;
 import derelict.sdl2.sdl;
 
 import engine.game.util;
-
-//-----------------------------------------------------------------------------
-// Keyboard status
-//-----------------------------------------------------------------------------
-
-bool[uint] keystatus;
-
-bool keydown(uint keycode) { return keycode in keystatus && keystatus[keycode]; }
-bool keyup(uint keycode)   { return !keydown(keycode); }
+import engine.game.instance: controller;
 
 //-----------------------------------------------------------------------------
 // Game controller class
@@ -39,13 +31,37 @@ abstract class Joystick
     byte[]  buttons;
     byte[]  hats;
 
-    abstract void update(SDL_Event event);
+    //-------------------------------------------------------------------------
+
+    abstract string name();
+
+    static Joystick[] available() { return cast(Joystick[])controllers ~ cast(Joystick)emulated; }
+
+    //-------------------------------------------------------------------------
+
+    package static Joystick chosen = null;
+
+    package static void init()
+    {
+        SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+
+        int num = SDL_NumJoysticks();
+
+        foreach(i; 0 .. num) {
+            controllers ~= new GameController(i);
+        }
+
+        emulated = new EmulatedController();
+        
+        chosen = (controllers) ? controllers[0] : emulated;
+    }
 }
 
-Joystick[] joysticks;
+package GameController[] controllers;
+package EmulatedController emulated;
 
 //-----------------------------------------------------------------------------
-// Definitions for XBox 360 controller
+// Controller (XBox/360) definitions
 //-----------------------------------------------------------------------------
 
 struct JOY
@@ -102,10 +118,92 @@ struct JOY
 }
 
 //-----------------------------------------------------------------------------
+// Keyboard status
+//-----------------------------------------------------------------------------
+
+bool[uint] keystatus;
+
+bool keydown(uint keycode) { return keycode in keystatus && keystatus[keycode]; }
+bool keyup(uint keycode)   { return !keydown(keycode); }
+
+//-----------------------------------------------------------------------------
+// Emulated joystick: emulate game controller with keyboard and mouse.
+// TODO: Provide interface for game to set default emulation.
+// TODO: Provide interface for game to configure emulation.
+// TODO: Button emulation should send joy button event.
+//-----------------------------------------------------------------------------
+
+struct EMULATE { JOY.AXIS axis; float value; JOY.BTN btn; }
+
+EMULATE[SDL_Keycode] Arrows() { return [
+    SDLK_RIGHT: EMULATE(JOY.AXIS.LX, +1, JOY.BTN.LS_RIGHT),
+    SDLK_LEFT:  EMULATE(JOY.AXIS.LX, -1, JOY.BTN.LS_LEFT),
+    SDLK_DOWN:  EMULATE(JOY.AXIS.LY, +1, JOY.BTN.LS_DOWN),
+    SDLK_UP:    EMULATE(JOY.AXIS.LY, -1, JOY.BTN.LS_UP),
+]; }
+
+EMULATE[SDL_Keycode] WASDArrows() { return [
+    SDLK_d: EMULATE(JOY.AXIS.LX, +1, JOY.BTN.LS_RIGHT),
+    SDLK_a: EMULATE(JOY.AXIS.LX, -1, JOY.BTN.LS_LEFT),
+    SDLK_s: EMULATE(JOY.AXIS.LY, +1, JOY.BTN.LS_DOWN),
+    SDLK_w: EMULATE(JOY.AXIS.LY, -1, JOY.BTN.LS_UP),
+
+    SDLK_RIGHT: EMULATE(JOY.AXIS.RX, +1, JOY.BTN.LS_RIGHT),
+    SDLK_LEFT:  EMULATE(JOY.AXIS.RX, -1, JOY.BTN.LS_LEFT),
+    SDLK_DOWN:  EMULATE(JOY.AXIS.RY, +1, JOY.BTN.LS_DOWN),
+    SDLK_UP:    EMULATE(JOY.AXIS.RY, -1, JOY.BTN.LS_UP),
+];}
+
+package class EmulatedController : Joystick
+{
+    EMULATE[SDL_Keycode] emulate;
+    
+    this()
+    {
+        axes    = new float[JOY.AXIS.COUNT];
+        buttons = new byte[JOY.BTN.COUNT];
+
+        axes[0 .. $]    = 0.0;
+        buttons[0 .. $] = false;
+
+        emulate = Arrows;
+    }
+
+    override string name() { return "Keyboard & Mouse"; }
+
+    void update(SDL_Event event) {
+        switch(event.type) {
+            case SDL_KEYUP, SDL_KEYDOWN: break;
+            default: return;
+        }
+
+        SDL_Keycode key = event.key.keysym.sym;
+
+        if(key in emulate) {
+            EMULATE e = emulate[key];
+            bool pressed = (event.type == SDL_KEYDOWN);
+            
+            if(e.axis != JOY.AXIS.NONE) axes[e.axis]  = pressed ? e.value : 0;
+            if(e.btn  != JOY.BTN.NONE)
+            {
+                buttons[e.btn] = pressed;
+
+                SDL_Event ev;
+                ev.type           = pressed ? SDL_JOYBUTTONDOWN : SDL_JOYBUTTONUP;
+                ev.jbutton.which  = cast(int)controllers.length;
+                ev.jbutton.button = cast(ubyte)e.btn;
+                ev.jbutton.state  = pressed;
+                SDL_PushEvent(&ev);
+            }
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
 // Real game controllers
 //-----------------------------------------------------------------------------
 
-class GameController : Joystick
+package class GameController : Joystick
 {
     //-------------------------------------------------------------------------
 
@@ -126,7 +224,7 @@ class GameController : Joystick
         return (abs(value) < AXIS_TRESHOLD) ? 0.0 : value;
     }
 
-    override void update(SDL_Event event)
+    void update(SDL_Event event)
     {
         void emulate(ubyte btn, uint type)
         {
@@ -231,10 +329,16 @@ class GameController : Joystick
 
     //-------------------------------------------------------------------------
 
+    override string name() {
+        return to!string(SDL_JoystickName(stick));
+    }
+
+    //-------------------------------------------------------------------------
+
     private SDL_Joystick *stick;    // SDL Joystick
     private SDL_Haptic *ffb;        // SDL Force Feedback
 
-    private this(int num)
+    this(int num)
     {
         debug Track.add(this);
 
@@ -278,73 +382,6 @@ class GameController : Joystick
         debug Track.remove(this);
         SDL_JoystickClose(stick);
         if(ffb) SDL_HapticClose(ffb);
-    }
-
-    //-------------------------------------------------------------------------
-
-    package static void init()
-    {
-        SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-
-        int num = SDL_NumJoysticks();
-
-        foreach(i; 0 .. num) {
-            joysticks ~= new GameController(i);
-        }
-    }
-}
-
-//-----------------------------------------------------------------------------
-// Emulated joystick: emulate game controller with keyboard and mouse.
-// In future, we need configurability.
-//-----------------------------------------------------------------------------
-
-EmulatedController emulated;
-
-class EmulatedController : Joystick
-{
-    struct EMULATE { JOY.AXIS axisp, axisn; JOY.BTN btn; }
-    
-    EMULATE[SDL_Keycode] emulate;
-    
-    this()
-    {
-        axes    = new float[JOY.AXIS.COUNT];
-        buttons = new byte[JOY.BTN.COUNT];
-
-        axes[0 .. $]    = 0.0;
-        buttons[0 .. $] = false;
-
-        emulate = [
-            SDLK_RIGHT: EMULATE(JOY.AXIS.LX, JOY.AXIS.NONE, JOY.BTN.LS_LEFT),
-            SDLK_LEFT:  EMULATE(JOY.AXIS.NONE, JOY.AXIS.LX, JOY.BTN.LS_RIGHT),
-            SDLK_DOWN:  EMULATE(JOY.AXIS.LY, JOY.AXIS.NONE, JOY.BTN.LS_DOWN),
-            SDLK_UP:    EMULATE(JOY.AXIS.NONE, JOY.AXIS.LY, JOY.BTN.LS_UP),
-        ];
-    }
-
-    override void update(SDL_Event event) {
-        switch(event.type) {
-            case SDL_KEYUP, SDL_KEYDOWN: break;
-            default: return;
-        }
-
-        SDL_Keycode key = event.key.keysym.sym;
-
-        if(key in emulate) {
-            EMULATE e = emulate[key];
-            bool pressed = (event.type == SDL_KEYDOWN);
-            
-            if(e.axisp != JOY.AXIS.NONE) axes[e.axisp]  = pressed ? +1 : 0;
-            if(e.axisn != JOY.AXIS.NONE) axes[e.axisn]  = pressed ? -1 : 0;
-            if(e.btn   != JOY.BTN.NONE)  buttons[e.btn] = pressed;
-        }
-    }
-
-    package static void init()
-    {
-        emulated = new EmulatedController();
-        joysticks ~= emulated;
     }
 }
 

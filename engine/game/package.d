@@ -110,8 +110,15 @@ void init(string name, int width = 640, int height = 480)
     }
 
     render.init();
-    GameController.init();
-    EmulatedController.init();
+    Joystick.init();
+    
+    debug {
+        writeln("Controllers:");
+        foreach(id, joy; Joystick.available)
+        {
+            writefln("- Joy %d: %s", id, joy.name);
+        }
+    }
 }
 
 //*****************************************************************************
@@ -134,7 +141,6 @@ class Profile
     auto frame  = new PerfMeter();
     auto busy   = new PerfMeter();
     auto render = new PerfMeter();
-    //auto renderCPU = new PerfMeter();
 
     float fps()    { return 1000 / frame.average; }
     float fpsmax() { return 1000 / busy.average; }

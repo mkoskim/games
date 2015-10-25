@@ -225,7 +225,6 @@ class Player : game.Fiber
     scene3d.Node ship;
     scene3d.Camera cam;
 
-    game.Joystick joystick;
     float MINX, MAXX;
 
     //-------------------------------------------------------------------------
@@ -235,8 +234,6 @@ class Player : game.Fiber
         super(scene.actors);
 
         //---------------------------------------------------------------------
-
-        joystick = game.joysticks[0];
 
         MINX = -10;
         MAXX = scene.mothership.length + 10;
@@ -275,6 +272,8 @@ class Player : game.Fiber
     
     override void run()
     {
+        auto joystick = game.controller;
+
         //---------------------------------------------------------------------
         // Rotation
         //---------------------------------------------------------------------
@@ -298,26 +297,26 @@ class Player : game.Fiber
         const float DELTA     =  1;
         
         auto velocity   = new Translate(vec2(-MAXSPEED, -0.5), vec2(+MAXSPEED,  +0.5));
-        auto campos     = new Translate(vec2(-MAXSPEED, -2.5), vec2(+MAXSPEED,  +2.5));
-        auto camposturn = new Translate(vec2(-TURNSTART,-8.0), vec2(+TURNSTART, +8.0));
+        auto campos     = new Translate(vec2(-MAXSPEED, -5.0), vec2(+MAXSPEED,  +5.0));
+        auto camposturn = new Translate(vec2(-TURNSTART,-5.0), vec2(+TURNSTART, +5.0));
 
         auto shiprotz   = new Translate(vec2(-TURNSTART,-180), vec2(+TURNSTART, 0));
 
-        float speed = 15;
+        float speed = MAXSPEED * 0.5;
 
+        void update()
+        {
+            rotate();
+
+            root.grip.pos.x += velocity(speed);
+            cam.grip.pos.x  = campos(speed) + camposturn(speed);
+            ship.grip.rot.z = shiprotz(speed);
+        }
+        
         void checkturn()
         {
-            void update()
-            {
-                rotate();
-
-                root.grip.pos.x += velocity(speed);
-                cam.grip.pos.x  = campos(speed) + camposturn(speed);
-                ship.grip.rot.z = shiprotz(speed);
-            }
-            
             if(abs(speed) < TURNSTART) {
-                float delta = -sgn(speed);
+                float delta = -sgn(speed) * DELTA;
                 while(abs(speed) < TURNSTART)
                 {
                     speed += delta;
@@ -447,6 +446,12 @@ void main()
         (SDL_Event event) {
             switch(event.type)
             {
+                /*
+                case SDL_JOYBUTTONDOWN:
+                    writefln("Joy(%d) button: %d", event.jbutton.which, event.jbutton.button);
+                    break;
+                */
+
                 case SDL_KEYDOWN: switch(event.key.keysym.sym)
                 {
                     //case SDLK_w: ship.shader.fill = !ship.shader.fill; break;
