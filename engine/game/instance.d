@@ -11,6 +11,7 @@ module engine.game.instance;
 
 import derelict.sdl2.sdl;
 
+import engine.game.input;
 import engine.render.gpu.framebuffer;
 
 //-----------------------------------------------------------------------------
@@ -28,4 +29,8 @@ struct SCREEN
 
 SCREEN screen;
 uint frame = 0;
+
+//-----------------------------------------------------------------------------
+
+Joystick controller() { return Joystick.chosen; }
 

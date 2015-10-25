@@ -262,7 +262,34 @@ more portable (32-bit, 64-bit, Linux, Windows), easier to set up, and so on.
 
 USER INPUT:
 
-- Improve emulated game controller
+- There should be interface for game to set the default emulation
+  (e.g. Arrows: arrow keys -> left stick, WASDArrows: WASD -> left stick,
+  arrows -> right stick).
+
+- Include mouse to emulation. Mouse can emulate two axes.
+
+- Emulated controller needs to push SDL joystick events (buttons, axes).
+  Especially button events are important, as they are most probably used
+  by GUI.
+
+- Joystick messages, including emulated ones, should only come from
+  active controller.
+  
+- When choosing controller, we need to process events from all controllers.
+
+- For GUI: Because you might still use keyboard/mouse for GUI even when
+  having controller (when examining things closer), it is good that even
+  with controller keyboard & mouse works for GUI. Currently, it works:
+  we process emulated joystick, and that happens to be configure for
+  arrows -> LT. This does not necessarily work if emulated controller
+  is e.g. WASDArrows.
+  
+- In fact: I have thought that if game asks for naming things, you can use
+  keyboard to type in the name. But... If we have emulated keyboard, then
+  that typing has side effects... Need to be resolved at some point.
+
+- "action detected" flag to joystick, so that we can flash at joystick
+  selection menu from which controller we have received some action.
 
 -------------------------------------------------------------------------------
 
