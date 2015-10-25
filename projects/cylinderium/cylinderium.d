@@ -80,7 +80,7 @@ class Scene : scene3d.Pipeline3D
         //---------------------------------------------------------------------
 
         star = flat.upload(
-            blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/Cube.obj").scale(0.1),
+            blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/Cube.obj").scale(0.075),
             new scene3d.Material(vec4(1, 1, 0.75, 1), 0.75)
         );
 
@@ -275,23 +275,11 @@ class Player : game.Fiber
         auto joystick = game.controller;
 
         //---------------------------------------------------------------------
-        // Rotation
+        // Moving, with turn control
         //---------------------------------------------------------------------
         
         auto rotation = new Translate(vec2(-1, -2.5), vec2(+1, +2.5));
 
-        void rotate()
-        {
-            root.grip.rot.x += rotation(joystick.axes[game.JOY.AXIS.LY]);
-
-            shipframe.grip.rot.x =  joystick.axes[game.JOY.AXIS.LY] * 30;	// "Roll"
-            shipframe.grip.rot.z = -joystick.axes[game.JOY.AXIS.LX] * 45;	// "Pitch"
-        }
-
-        //---------------------------------------------------------------------
-        // Moving, with turn control
-        //---------------------------------------------------------------------
-        
         const float MAXSPEED  = 30;
         const float TURNSTART = 10;
         const float DELTA     =  1;
@@ -306,32 +294,23 @@ class Player : game.Fiber
 
         void update()
         {
-            rotate();
+            root.grip.rot.x += rotation(joystick.axes[game.JOY.AXIS.LY]);
+
+            shipframe.grip.rot.x =  joystick.axes[game.JOY.AXIS.LY] * 30;	// "Roll"
+            shipframe.grip.rot.z = -joystick.axes[game.JOY.AXIS.LX] * 45;	// "Pitch"
 
             root.grip.pos.x += velocity(speed);
             cam.grip.pos.x  = campos(speed) + camposturn(speed);
             ship.grip.rot.z = shiprotz(speed);
         }
         
-        void checkturn()
-        {
-            if(abs(speed) < TURNSTART) {
-                float delta = -sgn(speed) * DELTA;
-                while(abs(speed) < TURNSTART)
-                {
-                    speed += delta;
-                    update();
-                    nextframe();
-                }
-            }
-            else
-            {
-                update();
-            }
-        }
+        //---------------------------------------------------------------------
 
-        for(;;nextframe())
+        for(;;)
         {
+            // Zooming for development purposes
+            cam.grip.pos.y += joystick.axes[game.JOY.AXIS.RY] * 0.5;
+
             /* Auto-turn on edges */
             if(root.grip.pos.x < MINX)
             {
@@ -348,13 +327,23 @@ class Player : game.Fiber
                 speed = fmax(-MAXSPEED, fmin(speed + acceleration, MAXSPEED));
             }
 
-            checkturn();
+            if(abs(speed) < TURNSTART) {
+                float delta = -sgn(speed) * DELTA;
+                while(abs(speed) < TURNSTART)
+                {
+                    speed += delta;
+                    update();
+                    nextframe();
+                }
+                continue;
+            }
 
             /* In case our ship is upside down, turn it back */
             if(ship.grip.rot.x < ship.grip.rot.z) ship.grip.rot.x += min(8, ship.grip.rot.z - ship.grip.rot.x);
             if(ship.grip.rot.x > ship.grip.rot.z) ship.grip.rot.x -= min(8, ship.grip.rot.x - ship.grip.rot.z);
 
-            cam.grip.pos.y += joystick.axes[game.JOY.AXIS.RY] * 0.5;
+            update();
+            nextframe();
         }
     }
 }
@@ -412,7 +401,9 @@ void main()
 
     //-------------------------------------------------------------------------
     // Things like this, these would be great to be encapsuled as loader
-    // scripts written in some scripting language like lua.
+    // scripts written in some scripting language like lua. This particular
+    // skybox does not like that good at background, it is just a
+    // placeholder.
     //-------------------------------------------------------------------------
 
     auto skybox = new postprocess.SkyBox(
