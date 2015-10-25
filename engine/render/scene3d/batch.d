@@ -160,9 +160,11 @@ class Batch
             case Mode.unsorted: break;
             case Mode.front2back:
                 sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(nodes);
+                //sort!((a, b) => a.viewspace.bsp.z < b.viewspace.bsp.z)(nodes);
                 break;
             case Mode.back2front:
                 sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(nodes);
+                //sort!((a, b) => a.viewspace.bsp.z > b.viewspace.bsp.z)(nodes);
                 break;
         }
 

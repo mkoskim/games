@@ -2,13 +2,24 @@
 
 DONE:
 
--
+- DONE: Emulated controller needs to push SDL joystick events (buttons, axes).
+  Especially button events are important, as they are most probably used
+  by GUI.
+
+- DONE: Didnt work as well w/ transparent objects - Currently, sorting happens
+  by (squared) distance to camera. Could it work as good just by Z-coordinate?
+  Lets try it out.
+
+- DONE: sin/cos to Translate
 
 *******************************************************************************
 
 WORKLIST:
 
 - ALMOST DONE: Replace ulong with size_t (make 32-bit compilations to work)
+
+- Start developing portal engine. Start with level editor. We need editor
+  to create portals.
 
 - I need more freedom. What I should do is to create now a high (game) level
   interface to rendering. Then, while working with internals, that does note
@@ -226,8 +237,9 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 
 -------------------------------------------------------------------------------
 
-DEBUG FEATURES, PROGRAMMING HELPERS: Features for helping to debug and develop
-things:
+DEBUG FEATURES, PROGRAMMING HELPERS, "USER-FRIENDLINESS": Features for helping
+to debug and develop things, making source more portable (32/64-bit,
+Linux/Windows), easier to set up, and so on:
 
 - "Debug channel" to rendering batches: adding a debug mesh to an object
   will be sent there. Geometry shaders could be excellent for this purpose?
@@ -247,14 +259,6 @@ things:
   example for debugging (rendering normally invisible things). Low priority,
   thought, at least initially.
 
-
--------------------------------------------------------------------------------
-
-"USER-FRIENDLINESS": Some planned efforts to make code more "user-friendly":
-more portable (32-bit, 64-bit, Linux, Windows), easier to set up, and so on.
-
-- SDL FillRect & Font rendering segfaults on 32-bit machine
-
 - It would be nice to add D doc comments, at least test it. Finally, it would
   be nice if I could make it to compile with dub, and use dub registry.
 
@@ -267,10 +271,6 @@ USER INPUT:
   arrows -> right stick).
 
 - Include mouse to emulation. Mouse can emulate two axes.
-
-- Emulated controller needs to push SDL joystick events (buttons, axes).
-  Especially button events are important, as they are most probably used
-  by GUI.
 
 - Joystick messages, including emulated ones, should only come from
   active controller.
@@ -290,6 +290,22 @@ USER INPUT:
 
 - "action detected" flag to joystick, so that we can flash at joystick
   selection menu from which controller we have received some action.
+
+-------------------------------------------------------------------------------
+
+RESOURCES:
+
+- Create some simple 'Giana sisters' / 'Super Mario' universe. It would be nice
+  to have 3D asset, so that it can be used to create (1) pseudo-3D platform,
+  (2) pseudo-3D maze, and (3) 3D maze game.  
+
+- How about "Paper Doll" set? 2D meshes with skeletal animation for 2D games?
+  Is it possible, is it easy, does it help anything?
+
+- Sintel The Game! There could be a set of animated 3D objects for my
+  development purposes!
+
+        http://sintelgame.org/
 
 -------------------------------------------------------------------------------
 
@@ -389,6 +405,23 @@ FIBERS, EVENT PROCESSING:
 
 -------------------------------------------------------------------------------
 
+GAME ALGORITHMS:
+
+- Path: Create simple node network for games like pacman, where all movable
+  objects follow paths from node to node.
+  
+- In pacman: player and ghost have (slightly) different path network. Also,
+  we can use some kind of weighting to make ghosts to come out from their
+  "nest" quicker, and prevent them getting back.
+  
+- Waypoint: Mechanism to create transform paths with waypoints.
+
+- Navmesh: This is where we area heading to
+
+- Set start & end derivates for Translate, and let it smooth the translation
+
+-------------------------------------------------------------------------------
+
 SHADERS: Shaders are so central part that they reserve their own section
 here. Shader is connected to at least objects, materials and scenes, so these
 issues have their relations to other sections in this TODO document.
@@ -451,6 +484,27 @@ issues have their relations to other sections in this TODO document.
     them to stock/ - or create a new directory for defaults...
 
 - Move default shaders under ext/ directory (?)
+
+-------------------------------------------------------------------------------
+
+GEOMETRY SHADER: Creating shapes on-the-fly:
+
+- Create rectangle for blitting 2D sprite to screen (from point input)
+
+- Create particle mesh for particle engine: But maybe it is better for this
+  to store it as VAO, so that you can change the particle shape.
+
+- Debugging: Showing normals etc.
+
+-------------------------------------------------------------------------------
+
+SPECIALS:
+
+- Interior shading: Creating interiors (viewed outside) just with
+  fragment shader without any geometry. Think if we find good application
+  for this, or can use the basic idea for something useful:
+
+        http://interiormapping.oogst3d.net/
 
 -------------------------------------------------------------------------------
 
@@ -606,6 +660,11 @@ if we need 2D graphics engine for HUD & GUI, why not use it for implementing
 
 - Maybe own dedicated 2D shader for GUI?
 
+- Z-buffering with 2D: It could help at certain things, as then you could
+  send objects to blitter in random order. But it would not work with
+  transparent bitmaps anyways, and most 2D games trust heavily on transparency
+  to implement shapes (unlike 3D which uses meshes for shapes).
+
 -------------------------------------------------------------------------------
 
 ANIMATION:
@@ -647,6 +706,13 @@ shaders.
 - Environment mapping (reflections):
 
     http://learnopengl.com/#!Advanced-OpenGL/Cubemaps
+
+-------------------------------------------------------------------------------
+
+POSTPROCESSING EFFECTS:
+
+- "Flashing" - we do this as we did at the beginning, by blitting a
+  window size rectangle at the top of the rendered scene.
 
 -------------------------------------------------------------------------------
 

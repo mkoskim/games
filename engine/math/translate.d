@@ -21,11 +21,16 @@ import engine.math.util;
 class Translate
 {
     //-------------------------------------------------------------------------
-    // Some basic translation functions.
+    // Some basic translation functions. You can use your own custom
+    // translate functions by feeding it to constructor.
     //-------------------------------------------------------------------------
     
     static float Linear(float factor) {
         return factor;
+    }
+
+    static float Cosine(float factor) {
+        return 0.5*(1 - cos(PI*factor));
     }
 
     static float InOutQuad(float factor) {
