@@ -80,7 +80,7 @@ class Scene : scene3d.Pipeline3D
         //---------------------------------------------------------------------
 
         star = flat.upload(
-            blob.wavefront.loadmesh("engine/stock/mesh/Cube/Cube.obj").scale(0.1),
+            blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/Cube.obj").scale(0.1),
             new scene3d.Material(vec4(1, 1, 0.75, 1), 0.75)
         );
 
@@ -417,12 +417,12 @@ void main()
 
     auto skybox = new postprocess.SkyBox(
         new render.Cubemap([
-            "engine/stock/cubemaps/skybox2/universe_right.png",
-            "engine/stock/cubemaps/skybox2/universe_left.png",
-            "engine/stock/cubemaps/skybox2/universe_top.png",
-            "engine/stock/cubemaps/skybox2/universe_bottom.png",
-            "engine/stock/cubemaps/skybox2/universe_back.png",
-            "engine/stock/cubemaps/skybox2/universe_front.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_right.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_left.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_top.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_bottom.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_back.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_front.png",
             ]
         ),
         game.screen.fb
