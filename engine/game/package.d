@@ -116,7 +116,11 @@ void init(string name, int width = 640, int height = 480)
         writeln("Controllers:");
         foreach(id, joy; Joystick.available)
         {
-            writefln("- Joy %d: %s", id, joy.name);
+            writefln("[%s] Joy %d: %s",
+                (joy == controller) ? "x" : " ",
+                id,
+                joy.name
+            );
         }
     }
 }

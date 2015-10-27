@@ -12,6 +12,9 @@ module engine.render.scene3d.batch;
 import engine.render.util;
 import engine.render.loader.mesh;
 
+import engine.render.gpu.texture;
+import gpu = engine.render.gpu.state, engine.render.gpu.shader;
+
 import engine.render.scene3d.types.transform;
 import engine.render.scene3d.types.bounds;
 import engine.render.scene3d.types.material;
@@ -19,10 +22,7 @@ import engine.render.scene3d.types.model;
 import engine.render.scene3d.types.node;
 import engine.render.scene3d.types.view;
 
-import engine.render.scene3d.shader;
-import engine.render.scene3d.state;
-
-import engine.render.gpu.texture;
+import engine.render.scene3d.feeder;
 
 import std.algorithm;
 
@@ -36,14 +36,13 @@ import std.algorithm;
 //
 //*****************************************************************************
 
-class Batch
+class Batch : Feeder
 {
-    State state;
     enum Mode { unsorted, front2back, back2front };
     Mode mode;
 
-    this(State state, Mode mode = Mode.unsorted) {
-        this.state = state;
+    this(gpu.State state, Mode mode = Mode.unsorted) {
+        super(state);
         this.mode = mode;
     }
 
@@ -54,24 +53,24 @@ class Batch
 
     //static Batch Default2D() { return new Batch(State.Default2D()); }
     static Batch Solid3D() { return new Batch(State.Solid3D(), Mode.front2back); }
-    static Batch Solid3D(Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
-    static Batch Solid3D(State state) { return new Batch(state, Mode.front2back); }
+    static Batch Solid3D(gpu.Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
+    static Batch Solid3D(gpu.State state) { return new Batch(state, Mode.front2back); }
 
     static Batch Transparent3D() { return new Batch(State.Transparent3D(), Mode.back2front); }
-    static Batch Transparent3D(Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
-    static Batch Transparent3D(State state) { return new Batch(state, Mode.back2front); }
+    static Batch Transparent3D(gpu.Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
+    static Batch Transparent3D(gpu.State state) { return new Batch(state, Mode.back2front); }
 
     //-------------------------------------------------------------------------
-    // Asset management
+    // Asset management...
     //-------------------------------------------------------------------------
 
-    Shader.VAO[Mesh] meshes;
+    VAO[Mesh] meshes;
 
-    Shader.VAO upload(Mesh mesh)
+    override VAO upload(Mesh mesh)
     {
         if(!(mesh in meshes))
         {
-            meshes[mesh] = (cast(Shader)state.shader).upload(mesh);
+            meshes[mesh] = super.upload(mesh);
         }
         return meshes[mesh];
     }
@@ -92,9 +91,9 @@ class Batch
         return model;
     }
 
-    Model upload(Shader.VAO vao, Material material) { return upload(new Model(vao, material)); }
-    Model upload(Shader.VAO vao, Texture colormap)  { return upload(vao, new Material(colormap)); }
-    Model upload(Shader.VAO vao, vec4 color)        { return upload(vao, new Material(color)); }    
+    Model upload(VAO vao, Material material) { return upload(new Model(vao, material)); }
+    Model upload(VAO vao, Texture colormap)  { return upload(vao, new Material(colormap)); }
+    Model upload(VAO vao, vec4 color)        { return upload(vao, new Material(color)); }    
     
     Model upload(Mesh mesh, Material material) { return upload(upload(mesh), material); }
     Model upload(Mesh mesh, Texture colormap)  { return upload(mesh, new Material(colormap)); }
@@ -115,7 +114,7 @@ class Batch
         return list;
     }
 
-    Model[] upload(Shader.VAO vao, Bitmap[] colormaps)
+    Model[] upload(VAO vao, Bitmap[] colormaps)
     {
         Model[] list;
         foreach(colormap; Texture.Loader.Default(colormaps)) {
@@ -153,7 +152,7 @@ class Batch
         if(!length) return;
 
         state.activate();
-        (cast(Shader)state.shader).loadView(cam);
+        loadView(cam);
 
         final switch(mode)
         {
@@ -173,7 +172,7 @@ class Batch
             if(!node.model.material) continue;
             if(!node.model.vao) continue;
 
-            (cast(Shader)state.shader).render(node.transform, node.model.material, node.model.vao);
+            render(node.transform, node.model.material, node.model.vao);
         }
     }
 }
@@ -202,7 +201,7 @@ class BatchGroup
         return batch;
     }
 
-    Batch addbatch(State state, Batch.Mode = Batch.Mode.unsorted)
+    Batch addbatch(gpu.State state, Batch.Mode = Batch.Mode.unsorted)
     {
         return addbatch(new Batch(state));
     }
@@ -249,6 +248,8 @@ class BatchGroup
         foreach(batch; batches) l += batch.length();
         return l;
     }
+    
+    Batch opIndex(int index) { return batches[index]; }
     
     //-------------------------------------------------------------------------
 

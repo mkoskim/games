@@ -24,6 +24,8 @@ module engine.render.scene3d.layer;
 import engine.render.util;
 import engine.render.loader.mesh;
 
+import gpu = engine.render.gpu.state;
+
 import engine.render.scene3d.types.transform;
 import engine.render.scene3d.types.material;
 import engine.render.scene3d.types.model;
@@ -31,8 +33,7 @@ import engine.render.scene3d.types.node;
 import engine.render.scene3d.types.view;
 import engine.render.scene3d.types.light;
 
-import engine.render.scene3d.shader;
-import engine.render.scene3d.state;
+import engine.render.scene3d.feeder;
 import engine.render.scene3d.batch;
 
 import engine.game.fiber;
@@ -150,8 +151,8 @@ class BufferedRender
     //-------------------------------------------------------------------------
 
     Batch addbatch(Batch batch) { return batches.addbatch(batch); }
-    Batch addbatch(State state) { return batches.addbatch(state); }
-    Batch addbatch(State state, Batch.Mode mode) { return batches.addbatch(state, mode); }
+    Batch addbatch(gpu.State state) { return batches.addbatch(state); }
+    Batch addbatch(gpu.State state, Batch.Mode mode) { return batches.addbatch(state, mode); }
     Batch addbatch(Batch batch, Batch.Mode mode) { return batches.addbatch(batch, mode); }
 
     CollectableNodeGroup addgroup(CollectableNodeGroup group) { groups ~= group; return group; }
@@ -166,8 +167,8 @@ class BufferedRender
 
         // TODO: Hack! Design light subsystem
         if(light) {
-            batches.batches[0].state.activate();    
-            (cast(Shader)batches.batches[0].state.shader).light(light);
+            batches.batches[0].activate();    
+            batches.batches[0].light(light);
         }
 
         batches.draw(cam);
@@ -183,17 +184,18 @@ class BufferedRender
 
 class UnbufferedRender : NodeGroup
 {
-    State state;
+    gpu.State state;
+
     View cam;
     Light light;
     BatchGroup batches;
     
     //-------------------------------------------------------------------------
 
-    this(View cam, State state)
+    this(View cam, gpu.State state)
     {
-        this.cam = cam;
         this.state = state;
+        this.cam = cam;
         this.batches = new BatchGroup();
     }
 
@@ -211,8 +213,10 @@ class UnbufferedRender : NodeGroup
     void draw()
     {
         // TODO: Hack! Design light subsystem
-        state.activate();    
-        if(light) (cast(Shader)state.shader).light(light);
+        if(light) {
+            batches[0].activate();    
+            batches[0].light(light);
+        }
         
         batches.draw(cam);
     }
