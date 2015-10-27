@@ -2,9 +2,6 @@
 //
 // Materials for rendering
 //
-// TO BE REWORKED! Objects have object-specific modifiers (e.g. color
-// modifier).
-//
 //*****************************************************************************
 
 module engine.render.scene3d.types.material;
@@ -56,7 +53,7 @@ class Material
         if(whitemap is null) whitemap = Texture.Loader.Default(vec4(1, 1, 1, 1));
         if(flatmap is null)  flatmap  = Texture.Loader.Default(vec4(0.5, 0.5, 1, 1));
 
-        this.colormap = colormap ? colormap : whitemap;
+        this.colormap  = colormap ? colormap : whitemap;
         this.normalmap = normalmap ? normalmap : flatmap;
         this.roughness = roughness;
     }
