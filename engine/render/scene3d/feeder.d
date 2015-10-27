@@ -227,7 +227,10 @@ abstract class Feeder
 
 //*****************************************************************************
 //
-// Some 3D shaders and rendering states
+// Some 3D shaders and rendering states... Bad thing: these names conflict
+// with GPU side names, so extra careful is needed. Needs to be changed at
+// some point. But anyways, when creating new ways to utilize shaders, you
+// probably want to encapsulate shader creation, too.
 //
 //*****************************************************************************
 

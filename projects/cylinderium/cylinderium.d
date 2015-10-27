@@ -49,6 +49,8 @@ class Scene : scene3d.Pipeline3D
         addbatch(solid);
         addbatch(flat);
 
+        auto material = new scene3d.Material.Loader();
+
         //---------------------------------------------------------------------
         // Black-yellow stripes texture
         //---------------------------------------------------------------------
@@ -64,31 +66,31 @@ class Scene : scene3d.Pipeline3D
 
         floor = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Floor.obj").move(0, RADIUS, 0),
-            new scene3d.Material(vec4(0.5, 0.5, 0.5, 1), 0.85)
+            material(vec4(0.5, 0.5, 0.5, 1), 0.85)
         );
 
         wall = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Wall.obj").move(0, RADIUS, 0),
-            new scene3d.Material(warnbmp, 0.75)
+            material(warnbmp, 0.75)
         );
 
         tower = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Guntower.obj").move(0, RADIUS, 0),
-            new scene3d.Material(vec4(1, 0, 0, 1), 0.75)
+            material(vec4(1, 0, 0, 1), 0.75)
         );
 
         //---------------------------------------------------------------------
 
         star = flat.upload(
             blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/Cube.obj").scale(0.075),
-            new scene3d.Material(vec4(1, 1, 0.75, 1), 0.75)
+            material(vec4(1, 1, 0.75, 1), 0.75)
         );
 
         //---------------------------------------------------------------------
 
         playership = solid.upload(
             blob.wavefront.loadmesh("data/mesh/Ship.obj"), //.scale(1.25)
-            new scene3d.Material(vec4(0.4, 0.4, 0.7, 1))
+            material(vec4(0.4, 0.4, 0.7, 1))
         );
 
         //---------------------------------------------------------------------

@@ -47,7 +47,7 @@ class Material
     float roughness;
 
     //-------------------------------------------------------------------------
-
+    
     this(Texture colormap, Texture normalmap, float roughness = 1.0)
     {
         static Texture whitemap = null;
@@ -62,63 +62,78 @@ class Material
     }
 
     //-------------------------------------------------------------------------
-
-    this() { this(cast(Texture)null, cast(Texture)null); }
-
-    //-------------------------------------------------------------------------
-
-    this(Texture colormap, float roughness = 1.0)
+    
+    static class Loader
     {
-        this(colormap, null, roughness);
-    }
+        Texture.Loader ColorMap;
+        Texture.Loader NormalMap;
+        
+        this()
+        {
+            ColorMap = (new Texture.Loader())
+                .setMipmap(true)
+                .setFiltering(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+                .setCompress(true)
+            ;
+            NormalMap = (new Texture.Loader())
+                .setMipmap(true)
+                .setFiltering(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+            ;
+        }
+        
+        this(Texture.Loader colormap, Texture.Loader normalmap)
+        {
+            this.ColorMap = colormap;
+            this.NormalMap = normalmap;
+        }
 
-    //-------------------------------------------------------------------------
+        //---------------------------------------------------------------------
 
-    this(string colormap, string normalmap, float roughness = 1.0)
-    {
-        this(Texture.Loader.Default(colormap), Texture.Loader.Default(normalmap), roughness);
-    }
+        Material opCall() { return new Material(null, null); }
 
-    this(vec4 color, Texture normalmap, float roughness = 1.0)
-    {
-        this(Texture.Loader.Default(color), normalmap, roughness);
-    }
+        Material opCall(Texture colormap, Texture normalmap, float roughness = 1.0)
+        {
+            return new Material(colormap, normalmap, roughness);
+        }
 
-    this(vec4 color, string normalmap, float roughness = 1.0)
-    {
-        this(Texture.Loader.Default(color), Texture.Loader.Default(normalmap), roughness);
-    }
+        // Materials without normal maps --------------------------------------
+        
+        Material opCall(string colormap, float roughness = 1.0)
+        {
+            return this.opCall(ColorMap(colormap), null, roughness);
+        }
 
-    this(string colormap, float roughness = 1.0)
-    {
-        this(Texture.Loader.Default(colormap), roughness);
-    }
+        Material opCall(Bitmap colormap, float roughness = 1.0)
+        {
+            return this.opCall(ColorMap(colormap), null, roughness);
+        }
 
-    this(Bitmap colormap, float roughness = 1.0)
-    {
-        this(Texture.Loader.Default(colormap), null, roughness);
-    }
+        Material opCall(vec4 color, float roughness = 1.0)
+        {
+            return this.opCall(ColorMap(color), null, roughness);
+        }
 
-    this(vec4 color, float roughness = 1.0)
-    {
-        this(Texture.Loader.Default(color), null, roughness);
-    }
+        // Materials with normal maps -----------------------------------------
+        
+        Material opCall(string colormap, string normalmap, float roughness = 1.0)
+        {
+            return this.opCall(ColorMap(colormap), NormalMap(normalmap), roughness);
+        }
 
-    this(float r, float g, float b, float a = 1)
-    {
-        this(vec4(r, g, b, a));
-    }
+        Material opCall(vec4 color, string normalmap, float roughness = 1.0)
+        {
+            return this.opCall(ColorMap(color), NormalMap(normalmap), roughness);
+        }
 
-    //-------------------------------------------------------------------------
-    // Creating materials from list of bitmaps, for example, to create
-    // icons etc.
-    //-------------------------------------------------------------------------
+        Material opCall(string colormap, Texture normalmap, float roughness = 1.0)
+        {
+            return this.opCall(ColorMap(colormap), normalmap, roughness);
+        }
 
-    static Material[] upload(Texture.Loader upload, Bitmap[] bitmaps)
-    {
-        Material[] list;
-        foreach(texture; upload(bitmaps)) list ~= new Material(texture);
-        return list;
-    }
+        Material opCall(vec4 color, Texture normalmap, float roughness = 1.0)
+        {
+            return this.opCall(ColorMap(color), normalmap, roughness);
+        }
+    }    
 }
 

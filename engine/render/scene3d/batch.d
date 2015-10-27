@@ -91,13 +91,8 @@ class Batch : Feeder
         return model;
     }
 
-    Model upload(VAO vao, Material material) { return upload(new Model(vao, material)); }
-    Model upload(VAO vao, Texture colormap)  { return upload(vao, new Material(colormap)); }
-    Model upload(VAO vao, vec4 color)        { return upload(vao, new Material(color)); }    
-    
+    Model upload(VAO vao, Material material) { return upload(new Model(vao, material)); }    
     Model upload(Mesh mesh, Material material) { return upload(upload(mesh), material); }
-    Model upload(Mesh mesh, Texture colormap)  { return upload(mesh, new Material(colormap)); }
-    Model upload(Mesh mesh, vec4 color)        { return upload(mesh, new Material(color)); }    
 
     Model upload()                             { return upload(new Model(null, null)); }    
 
@@ -105,6 +100,7 @@ class Batch : Feeder
     // Bulk uploads
     //-------------------------------------------------------------------------
 
+    /*
     Model[] upload(Mesh mesh, Material[] materials)
     {
         Model[] list;
@@ -127,6 +123,7 @@ class Batch : Feeder
     {
         return upload(upload(mesh), colormaps);
     }
+    */
 
     //-------------------------------------------------------------------------
     // Node buffer

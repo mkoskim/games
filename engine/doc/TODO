@@ -18,8 +18,9 @@ WORKLIST:
 
 - ALMOST DONE: Replace ulong with size_t (make 32-bit compilations to work)
 
-- Canvas (direct draw): Canvas object do not render objects, instead it is
-  there for drawing commands. Mainly used as a base for GUI.
+- Canvas (direct draw): Canvas do not contain "passive" objects to be
+  rendered, instead it has objects to create drawing commands on canvas. Mainly
+  for use as a base for GUI.
 
 - Joystick hotplugging (scan for new joysticks)
 

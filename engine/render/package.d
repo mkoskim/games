@@ -99,7 +99,7 @@ private void checkExtensions()
 
     bool[string] extensions = function() {
         bool[string] lookup;
-        string[] list = std.array.split(to!string(glGetString(GL_EXTENSIONS)));
+        string[] list = std.array.split(to!string(checkgl!glGetString(GL_EXTENSIONS)));
         foreach(key; list) lookup[key] = true;
         return lookup;
     }();
@@ -178,8 +178,16 @@ private void checkExtensions()
     // https://www.opengl.org/registry/specs/ARB/explicit_attrib_location.txt
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_explicit_attrib_location", 33);
+    check("GL_ARB_explicit_attrib_location", 33);   // yes
 
+    //-------------------------------------------------------------------------
+    // Do we have separate attrib binding? Can we set up vertex array without
+    // binding it and buffers first?
+    //-------------------------------------------------------------------------
+
+    check("GL_ARB_vertex_attrib_binding", 43);      // Yes
+    check("GL_ARB_direct_state_access", 44);        // No
+    
     //-------------------------------------------------------------------------
     // Primitive restart can be a nice feature:
     //      https://www.opengl.org/wiki/Vertex_Rendering#Primitive_Restart
