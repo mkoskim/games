@@ -137,6 +137,30 @@ class Texture
 
         //---------------------------------------------------------------------
 
+        Loader setFiltering(GLenum min, GLenum mag) {
+            filtering.min = min;
+            filtering.mag = mag;
+            return this;
+        }
+
+        Loader setWrapping(GLenum s, GLenum t) {
+            wrapping.s = s;
+            wrapping.t = t;
+            return this;
+        }
+
+        Loader setMipmap(bool state) {
+            mipmap = state;
+            return this;
+        }
+
+        Loader setCompress(bool state) {
+            compress = state;
+            return this;
+        }
+
+        //---------------------------------------------------------------------
+
         Texture opCall(SDL_Surface *surface)
         {
             return new Texture(

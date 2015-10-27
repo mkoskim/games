@@ -55,6 +55,17 @@ string[] grid = [
 //
 //*****************************************************************************
 
+//-----------------------------------------------------------------------------
+//
+// How it really should work?
+//
+// 1) You create Pipeline object
+// 2) You attach shader/state pairs to it
+// 3) You attach node storages
+// 4) You attach texture samplers, too
+//
+//-----------------------------------------------------------------------------
+
 class Scene : scene3d.Pipeline3D
 {
     Player player;
@@ -77,12 +88,12 @@ class Scene : scene3d.Pipeline3D
         skybox = new postprocess.SkyBox(
             new render.Cubemap([
                 /*
-                "engine/stock/cubemaps/skybox1/right.png",
-                "engine/stock/cubemaps/skybox1/left.png",
-                "engine/stock/cubemaps/skybox1/top.png",
-                "engine/stock/cubemaps/skybox1/bottom.png",
-                "engine/stock/cubemaps/skybox1/back.png",
-                "engine/stock/cubemaps/skybox1/front.png"
+                "engine/stock/unsorted/cubemaps/skybox1/right.png",
+                "engine/stock/unsorted/cubemaps/skybox1/left.png",
+                "engine/stock/unsorted/cubemaps/skybox1/top.png",
+                "engine/stock/unsorted/cubemaps/skybox1/bottom.png",
+                "engine/stock/unsorted/cubemaps/skybox1/back.png",
+                "engine/stock/unsorted/cubemaps/skybox1/front.png"
                 /*/
                 "engine/stock/unsorted/cubemaps/skybox2/universe_right.png",
                 "engine/stock/unsorted/cubemaps/skybox2/universe_left.png",
@@ -131,17 +142,11 @@ class Scene : scene3d.Pipeline3D
         auto transparent = addbatch(scene3d.Batch.Transparent3D(solidshader));
 
         //---------------------------------------------------------------------
-        // Texture loader(s)
+        // Material loader(s): Material loaders have sampling parameters for
+        // color and normal maps.
         //---------------------------------------------------------------------
 
-        auto colormap = new render.Texture.Loader();
-        colormap.mipmap = true;
-        colormap.filtering.min = GL_LINEAR_MIPMAP_LINEAR;
-        colormap.compress = true;
-
-        auto normalmap = new render.Texture.Loader();
-        normalmap.mipmap = true;
-        normalmap.filtering.min = GL_LINEAR_MIPMAP_LINEAR;
+        auto material = new scene3d.Material.Loader();
 
         //---------------------------------------------------------------------
         //
@@ -150,70 +155,70 @@ class Scene : scene3d.Pipeline3D
         //
         //---------------------------------------------------------------------
 
-        auto matCaveWall = new scene3d.Material(
-            colormap("engine/stock/unsorted/tiles/CaveWall/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/CaveWall/NormalMap.png"),
+        auto matCaveWall = material(
+            "engine/stock/unsorted/tiles/CaveWall/ColorMap.png",
+            "engine/stock/unsorted/tiles/CaveWall/NormalMap.png",
             1.00);
 
-        auto matCrackedPlaster = new scene3d.Material(
-            colormap("engine/stock/unsorted/tiles/CrackedPlaster/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/CrackedPlaster/NormalMap.png"),
+        auto matCrackedPlaster = material(
+            "engine/stock/unsorted/tiles/CrackedPlaster/ColorMap.png",
+            "engine/stock/unsorted/tiles/CrackedPlaster/NormalMap.png",
             0.95);
 
-        auto matSantaFeStucco = new scene3d.Material(
+        auto matSantaFeStucco = material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
-            colormap("engine/stock/unsorted/tiles/CaveWall/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/SantaFeStucco/NormalMap.png"),
+            "engine/stock/unsorted/tiles/CaveWall/ColorMap.png",
+            "engine/stock/unsorted/tiles/SantaFeStucco/NormalMap.png",
             0.95);
 
-        auto matTanStucco = new scene3d.Material(
+        auto matTanStucco = material(
             //"engine/stock/tiles/SantaFeStucco/ColorMap.png",
-            colormap("engine/stock/unsorted/tiles/TanStucco/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/TanStucco/NormalMap.png"),
+            "engine/stock/unsorted/tiles/TanStucco/ColorMap.png",
+            "engine/stock/unsorted/tiles/TanStucco/NormalMap.png",
             0.95);
 
-        auto matBrickWall = new scene3d.Material(
-            colormap("engine/stock/unsorted/tiles/BrickWall1/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/BrickWall1/NormalMap.png"),
+        auto matBrickWall = material(
+            "engine/stock/unsorted/tiles/BrickWall1/ColorMap.png",
+            "engine/stock/unsorted/tiles/BrickWall1/NormalMap.png",
             0.95);
 
-        auto matGraniteWall = new scene3d.Material(
-            colormap("engine/stock/unsorted/tiles/GraniteWall/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/GraniteWall/NormalMap.png"),
+        auto matGraniteWall = material(
+            "engine/stock/unsorted/tiles/GraniteWall/ColorMap.png",
+            "engine/stock/unsorted/tiles/GraniteWall/NormalMap.png",
             0.95);
 
-        auto matCrustyConcrete = new scene3d.Material(
-            colormap("engine/stock/unsorted/tiles/Concrete/Crusty/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/Concrete/Crusty/NormalMap.png"),
+        auto matCrustyConcrete = material(
+            "engine/stock/unsorted/tiles/Concrete/Crusty/ColorMap.png",
+            "engine/stock/unsorted/tiles/Concrete/Crusty/NormalMap.png",
             0.95);
 
-        auto matDirtyConcrete = new scene3d.Material(
-            colormap("engine/stock/unsorted/tiles/Concrete/Dirty/ColorMap.png"),
-            normalmap("engine/stock/unsorted/tiles/Concrete/Dirty/NormalMap.png"),
+        auto matDirtyConcrete = material(
+            "engine/stock/unsorted/tiles/Concrete/Dirty/ColorMap.png",
+            "engine/stock/unsorted/tiles/Concrete/Dirty/NormalMap.png",
             0.95);
 
-        auto matCarvedSandstone = new scene3d.Material(
-            colormap("engine/stock/unsorted/tiles/CarvedSandstone/ColorMap.png"),
+        auto matCarvedSandstone = material(
+            "engine/stock/unsorted/tiles/CarvedSandstone/ColorMap.png",
             //"engine/stock/tiles/CaveWall/ColorMap.png",
             //vec3(0.5, 0.4, 0.2),
-            normalmap("engine/stock/unsorted/tiles/CarvedSandstone/NormalMap.png"),
+            "engine/stock/unsorted/tiles/CarvedSandstone/NormalMap.png",
             0.95);
 
-        auto matAlienCarving = new scene3d.Material(
+        auto matAlienCarving = material(
             //"engine/stock/tiles/AlienCarving/ColorMap.png",
-            colormap(vec4(0.75, 0.5, 0.25, 1)),
-            normalmap("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png"),
+            vec4(0.75, 0.5, 0.25, 1),
+            "engine/stock/unsorted/tiles/AlienCarving/NormalMap.png",
             0.15);
 
-        auto matMetallicAssembly = new scene3d.Material(
+        auto matMetallicAssembly = material(
             //"engine/stock/tiles/MetallicAssembly/ColorMap.png",
-            colormap(vec4(0.5, 0.5, 0.5, 1)),
-            normalmap("engine/stock/unsorted/tiles/MetallicAssembly/NormalMap.png"),
+            vec4(0.5, 0.5, 0.5, 1),
+            "engine/stock/unsorted/tiles/MetallicAssembly/NormalMap.png",
             0.15);
 
-        auto matGlass = new scene3d.Material(
-            colormap(vec4(0.8, 0.8, 0.9, 0.3)),
-            normalmap("engine/stock/unsorted/tiles/SantaFeStucco/NormalMap.png"),
+        auto matGlass = material(
+            vec4(0.8, 0.8, 0.9, 0.3),
+            "engine/stock/unsorted/tiles/SantaFeStucco/NormalMap.png",
             0.50
         );
 
@@ -239,8 +244,8 @@ class Scene : scene3d.Pipeline3D
 
         floorshapes = [
             floors.upload(floormesh, matGraniteWall),
-            floors.upload(floormesh, new scene3d.Material(
-                colormap(vec4(0.25, 0.25, 0.25, 1)),
+            floors.upload(floormesh, material(
+                vec4(0.25, 0.25, 0.25, 1),
                 matGraniteWall.normalmap,
                 0.15
             )),
