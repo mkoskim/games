@@ -51,7 +51,6 @@ class Batch : Feeder
 
     //-------------------------------------------------------------------------
 
-    //static Batch Default2D() { return new Batch(State.Default2D()); }
     static Batch Solid3D() { return new Batch(State.Solid3D(), Mode.front2back); }
     static Batch Solid3D(gpu.Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
     static Batch Solid3D(gpu.State state) { return new Batch(state, Mode.front2back); }
@@ -61,7 +60,7 @@ class Batch : Feeder
     static Batch Transparent3D(gpu.State state) { return new Batch(state, Mode.back2front); }
 
     //-------------------------------------------------------------------------
-    // Asset management...
+    // Asset management... Needs to be restructured
     //-------------------------------------------------------------------------
 
     VAO[Mesh] meshes;
@@ -95,35 +94,6 @@ class Batch : Feeder
     Model upload(Mesh mesh, Material material) { return upload(upload(mesh), material); }
 
     Model upload()                             { return upload(new Model(null, null)); }    
-
-    //-------------------------------------------------------------------------
-    // Bulk uploads
-    //-------------------------------------------------------------------------
-
-    /*
-    Model[] upload(Mesh mesh, Material[] materials)
-    {
-        Model[] list;
-        foreach(material; materials) {
-            list ~= upload(upload(mesh), material);
-        }
-        return list;
-    }
-
-    Model[] upload(VAO vao, Bitmap[] colormaps)
-    {
-        Model[] list;
-        foreach(colormap; Texture.Loader.Default(colormaps)) {
-            list ~= upload(vao, colormap);
-        }
-        return list;
-    }
-
-    Model[] upload(Mesh mesh, Bitmap[] colormaps)
-    {
-        return upload(upload(mesh), colormaps);
-    }
-    */
 
     //-------------------------------------------------------------------------
     // Node buffer

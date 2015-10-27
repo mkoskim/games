@@ -133,13 +133,13 @@ class Scene : scene3d.Pipeline3D
         auto walls  = addbatch(scene3d.Batch.Solid3D(solidstate));
         auto props  = addbatch(scene3d.Batch.Solid3D(solidstate));
         auto floors = addbatch(solidstate, scene3d.Batch.Mode.unsorted);
+        auto transparent = addbatch(scene3d.Batch.Transparent3D(solidshader));
 
         //props.state.target = new render.Framebuffer();
 
         //props.state.options["useQuants"] = 8;
         //floors.state.options["useQuants"] = false;
 
-        auto transparent = addbatch(scene3d.Batch.Transparent3D(solidshader));
 
         //---------------------------------------------------------------------
         // Material loader(s): Material loaders have sampling parameters for

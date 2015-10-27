@@ -22,7 +22,15 @@ WORKLIST:
   rendered, instead it has objects to create drawing commands on canvas. Mainly
   for use as a base for GUI.
 
-- Joystick hotplugging (scan for new joysticks)
+- Joystick hotplugging (scan for added/removed joysticks)
+
+- We need "removed" flag for certain objects, like Node. As we don't know in
+  what groups/lists node is added, we can mark it to be removed, and when
+  it is found somewhere, it is then removed.
+
+- Examine order-independent transparency:
+
+    http://casual-effects.blogspot.in/2014/03/weighted-blended-order-independent.html
 
 - Start developing portal engine. Start with level editor. We need editor
   to create portals.
