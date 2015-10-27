@@ -1,10 +1,10 @@
 //*****************************************************************************
 //
-// Shader(s) for 3D pipeline
+// (Shader) Feeder for 3D nodes.
 //
 //*****************************************************************************
 
-module engine.render.scene3d.shader;
+module engine.render.scene3d.feeder;
 
 //-----------------------------------------------------------------------------
 //
@@ -21,47 +21,55 @@ import engine.render.scene3d.types.bounds;
 import engine.render.scene3d.types.view;
 import engine.render.scene3d.types.light;
 
-//import blob = engine.blob;
-//import std.string: toStringz;
-
 //-----------------------------------------------------------------------------
-// TODO: Look at the code. This is not implementation of a shader. No,
-// the gpu.Shader we have is just fine. This is an implementation to
-// interface resources (camera, meshes, materials) to a specific type
-// of shaders, using the shader interface (uniforms, buffers).
 //
-// So, we need to rethink this whole mechanism. Take a look to the shader
-// implementation in engine/postprocess/skybox.d to get some ideas.
+// Feeder object to feed 3D nodes to (hopefully suitable) shader. We now
+// implement this as an abstract class from which Batches are inherited,
+// but we might want to change this pluggable (composition) later.
 //
 //-----------------------------------------------------------------------------
 
-abstract class Shader : gpu.Shader
+abstract class Feeder
 {
+    protected gpu.State state;
+
+    this(gpu.State state)
+    {
+        this.state = state;
+    }
+
+    //-------------------------------------------------------------------------
+
+    void activate() { state.activate(); }
+
+    auto shader() { return state.shader; }
+
     //*************************************************************************
     //
-    // Camera
+    // Load camera. NOTE: I use term 'load' instead of 'set' to indicate that
+    // these operations are relatively costly.
     //
     //*************************************************************************
 
     void loadView(View cam)
     {
-        uniform("mProjection", cam.mProjection());
-        uniform("mView", cam.mView());
+        shader.uniform("mProjection", cam.mProjection());
+        shader.uniform("mView", cam.mView());
     }
 
     //*************************************************************************
     //
-    // Lights
+    // Lights (TODO: Just a hack)
     //
     //*************************************************************************
 
     void light(Light l)
     {
-        uniform("light.pos", l.transform.worldspace());
+        shader.uniform("light.pos", l.transform.worldspace());
 
-        uniform("light.radius", l.radius);
-        uniform("light.ambient", l.ambient);
-        uniform("light.color", l.color);
+        shader.uniform("light.radius", l.radius);
+        shader.uniform("light.ambient", l.ambient);
+        shader.uniform("light.color", l.color);
     }
 
     //*************************************************************************
@@ -72,18 +80,46 @@ abstract class Shader : gpu.Shader
 
     void loadMaterial(Material mat, Material.Modifier mod)
     {
-        texture("material.colormap", 0, mat.colormap);
-        texture("material.normalmap", 1, mat.normalmap);
+        shader.texture("material.colormap", 0, mat.colormap);
+        shader.texture("material.normalmap", 1, mat.normalmap);
 
-        uniform("material.roughness", mat.roughness);
+        shader.uniform("material.roughness", mat.roughness);
 
         if(mod is null) {
-            uniform("material.modifier.color", vec4(1, 1, 1, 1));
+            shader.uniform("material.modifier.color", vec4(1, 1, 1, 1));
         }
         else {
-            uniform("material.modifier.color", mod.color);
+            shader.uniform("material.modifier.color", mod.color);
         }
     }
+
+    //*************************************************************************
+    //
+    // Rendering objects
+    //
+    //*************************************************************************
+
+    void render(mat4 transform, VAO vao)
+    {
+        shader.uniform("mModel", transform);
+
+        vao.vao.bind();
+        vao.ibo.draw();
+        vao.vao.unbind();
+    }
+
+    void render(Transform[] transforms, VAO vao)
+    {
+        vao.vao.bind();
+        foreach(transform; transforms)
+        {
+            shader.uniform("mModel", transform.mModel());
+            vao.ibo.draw();
+        }
+        vao.vao.unbind();
+    }
+
+    //-------------------------------------------------------------------------
 
     final void render(Transform transform, Material mat, VAO vao)
     {
@@ -97,38 +133,10 @@ abstract class Shader : gpu.Shader
         render(transforms, vao);
     }
 
-    //-------------------------------------------------------------------------
-
-    void render(mat4 transform, VAO vao)
-    {
-        uniform("mModel", transform);
-
-        vao.vao.bind();
-        vao.ibo.draw();
-        vao.vao.unbind();
-    }
-
-    void render(Transform[] transforms, VAO vao)
-    {
-        vao.vao.bind();
-        foreach(transform; transforms)
-        {
-            uniform("mModel", transform.mModel());
-            vao.ibo.draw();
-        }
-        vao.vao.unbind();
-    }
-
-    void render(Transform transform, VAO vao)
+    final void render(Transform transform, VAO vao)
     {
         render(transform.mModel(), vao);
     }
-
-    //*************************************************************************
-    //
-    // Can we use uniform buffers for materials?
-    //
-    //*************************************************************************
 
     //*************************************************************************
     //
@@ -199,10 +207,10 @@ abstract class Shader : gpu.Shader
         );
         vao.vbo.bind();
 
-        attrib!(VERTEX.pos)(this, "vert_pos", VERTEX.sizeof);
-        attrib!(VERTEX.uv)(this, "vert_uv", VERTEX.sizeof);
-        attrib!(VERTEX.normal)(this, "vert_norm", VERTEX.sizeof);
-        attrib!(VERTEX.tangent)(this, "vert_tangent", VERTEX.sizeof);
+        shader.attrib!(VERTEX.pos)(shader, "vert_pos", VERTEX.sizeof);
+        shader.attrib!(VERTEX.uv)(shader, "vert_uv", VERTEX.sizeof);
+        shader.attrib!(VERTEX.normal)(shader, "vert_norm", VERTEX.sizeof);
+        shader.attrib!(VERTEX.tangent)(shader, "vert_tangent", VERTEX.sizeof);
 
         vao.bsp = BoundSphere.create(mesh);
 
@@ -215,100 +223,86 @@ abstract class Shader : gpu.Shader
 
         return vao;
     }
-
-    //-------------------------------------------------------------------------
-
-    protected this(string[] common, string[] vsfiles, string[] fsfiles)
-    {
-        super(common, vsfiles, fsfiles);
-    }
-
-    protected this(string filename) { this([], [filename], [filename]); }
-    protected this(string vsfile, string fsfile) { this([], [vsfile], [fsfile]); }
 }
 
 //*****************************************************************************
 //
-// Some 3D shaders
+// Some 3D shaders and rendering states
 //
 //*****************************************************************************
 
-class Default3D : Shader
+abstract class Shader
 {
-    static Shader create()
+    private static gpu.Shader create(string conffile, string vertmain, string fragmain)
     {
-        static Shader instance = null;
-        if(!instance) instance = new Default3D();
-        return instance;
-    }
-
-    //-------------------------------------------------------------------------
-
-    protected this(string conffile)
-    {
-        super(
+        return new gpu.Shader(
             [
                 conffile,
                 "engine/render/scene3d/glsl/types.3d.glsl",
                 "engine/render/scene3d/glsl/default3d.in.glsl",
             ], [
                 "engine/render/scene3d/glsl/verts.lib.glsl",
-                "engine/render/scene3d/glsl/verts.3d.glsl",
+                vertmain,
             ], [
                 "engine/render/scene3d/glsl/frags.lib.glsl",
-                "engine/render/scene3d/glsl/frags.3d.glsl",
+                fragmain,
             ]
         );
     }
 
-    private this()
+    static gpu.Shader Default3D(string conffile = null)
     {
-        this(null);
-    }
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
-class Flat3D : Shader
-{
-    static Shader create()
-    {
-        static Shader instance = null;
-        if(!instance) instance = new Flat3D();
+        static gpu.Shader instance = null;
+        if(!instance) instance = create(
+            conffile,
+            "engine/render/scene3d/glsl/verts.3d.glsl",
+            "engine/render/scene3d/glsl/frags.3d.glsl"
+        );
         return instance;
     }
 
-    //-------------------------------------------------------------------------
-
-    override void light(Light l) { }
-    override void loadMaterial(Material mat, Material.Modifier mod)
+    static gpu.Shader Flat3D(string conffile = null)
     {
-        texture("material.colormap", 0, mat.colormap);
-    }
-
-    //-------------------------------------------------------------------------
-
-    protected this(string conffile)
-    {
-        super(
-            [
+        static gpu.Shader instance = null;
+        if(!instance) {
+            instance = create(
                 conffile,
-                "engine/render/scene3d/glsl/types.3d.glsl",
-                "engine/render/scene3d/glsl/default3d.in.glsl",
-            ], [
-                "engine/render/scene3d/glsl/verts.lib.glsl",
                 "engine/render/scene3d/glsl/flat3d.glsl",
-            ], [
-                "engine/render/scene3d/glsl/frags.lib.glsl",
-                "engine/render/scene3d/glsl/flat3d.glsl",
-            ]
-        );
-    }
-
-    private this()
-    {
-        this(null);
+                "engine/render/scene3d/glsl/flat3d.glsl"
+            );
+            instance.setRejected(["vert_norm", "vert_tangent"]);
+        }
+        return instance;
     }
 }
+
+abstract class State
+{
+    static gpu.State Solid3D(gpu.Shader shader = Shader.Default3D())
+    {
+        return new gpu.State(shader, (){
+            checkgl!glEnable(GL_CULL_FACE);
+            checkgl!glCullFace(GL_BACK);
+            checkgl!glFrontFace(GL_CCW);
+            checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            checkgl!glEnable(GL_DEPTH_TEST);
+            checkgl!glDisable(GL_BLEND);
+        });
+    }
+
+    static gpu.State Transparent3D(gpu.Shader shader = Shader.Default3D())
+    {
+        return new gpu.State(shader, (){
+            checkgl!glEnable(GL_CULL_FACE);
+            checkgl!glCullFace(GL_BACK);
+            checkgl!glFrontFace(GL_CCW);
+            checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+            checkgl!glEnable(GL_DEPTH_TEST);
+            checkgl!glEnable(GL_BLEND);
+            checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        });
+    }
+}
+
 

@@ -105,7 +105,7 @@ class Scene : scene3d.Pipeline3D
         //---------------------------------------------------------------------
 
         //auto solidshader = scene3d.shaders.Flat3D.create();
-        auto solidshader = scene3d.shaders.Default3D.create();
+        auto solidshader = scene3d.Shader.Default3D();
 
         //*
         solidshader.options["fog.enabled"] = false;

@@ -170,7 +170,7 @@ private void checkExtensions()
     //-------------------------------------------------------------------------
 
     check("GL_ARB_shader_subroutine", 40);      // no
-    check("GL_ARB_geometry_shader4", 32);       // no
+    nocheck("GL_ARB_geometry_shader4", 32);     // no
 
     //-------------------------------------------------------------------------
     // Explicit locations for attributes? Using this needs modifications
@@ -207,7 +207,7 @@ private void checkExtensions()
     //      https://www.opengl.org/wiki/Query_Object#Timer_queries
     //-------------------------------------------------------------------------
 
-	check("GL_ARB_timer_query", 33);            // yes
+    check("GL_ARB_timer_query", 33);            // yes
 
     //-------------------------------------------------------------------------
     // Image Load/Store for order-independent transparency?!?

@@ -31,11 +31,27 @@ class Shader
     //
     //*************************************************************************
 
+    bool[string] optional;  // Try to look for uniform, but don't care if it does not exist
+    bool[string] rejected;  // Don't even try to look uniform
+    
+    void setOptional(string[] names) {
+        foreach(name; names) optional[name] = true;
+    }
+    
+    void setRejected(string[] names) {
+        foreach(name; names) rejected[name] = true;
+    }
+    
     private {
         GLint[string] _namecache;
 
-        void _getlocation(string namespace, string name, bool optional)
+        void _getlocation(string namespace, string name)
         {
+            if(name in rejected) {
+                _namecache[name] = -1;
+                return;
+            }
+
             extern(C) GLint function(GLuint, const(char)*) query;
 
             switch(namespace)
@@ -46,14 +62,14 @@ class Shader
             }
 
             GLint loc = checkgl!query(programID, name.toStringz);
-            if(loc == -1 && !optional) throw new Exception("Unknown GLSL identifier: " ~ name);
+            if(loc == -1 && !(name in optional)) throw new Exception("Unknown GLSL identifier: " ~ name);
             _namecache[name] = loc;
         }
     }
 
-    protected final GLint location(string namespace, string name, bool optional)
+    protected final GLint location(string namespace, string name)
     {
-        if(!(name in _namecache)) _getlocation(namespace, name, optional);
+        if(!(name in _namecache)) _getlocation(namespace, name);
         //debug writeln("Location: ", name, " @ ", locations[name]);
         return _namecache[name];
     }
@@ -72,10 +88,11 @@ class Shader
     //
     //*************************************************************************
 
-    final void uniform(string name, Variant value, bool optional = false)
+    final void uniform(string name, Variant value)
     {
-        GLint loc = location("uniform", name, optional);
+        GLint loc = location("uniform", name);
         if(loc == -1) return ;
+
         if     (value.type == typeid(bool))   checkgl!glUniform1i(loc, value.get!(bool));
         else if(value.type == typeid(int))    checkgl!glUniform1i(loc, value.get!(int));
         else if(value.type == typeid(float))  checkgl!glUniform1f(loc, value.get!(float));
@@ -86,12 +103,12 @@ class Shader
         else throw new Exception(format("Unknown type '%s' for uniform '%s'", to!string(value.type), name));
     }
 
-    final void uniform(string n, mat4 v, bool opt = false) { uniform(n, Variant(v), opt); }
-    final void uniform(string n, vec4 v, bool opt = false) { uniform(n, Variant(v), opt); }
-    final void uniform(string n, vec3 v, bool opt = false) { uniform(n, Variant(v), opt); }
-    final void uniform(string n, float v, bool opt = false) { uniform(n, Variant(v), opt); }
-    final void uniform(string n, int v, bool opt) { uniform(n, Variant(v), opt); }
-    final void uniform(string n, bool v, bool opt) { uniform(n, Variant(v), opt); }
+    final void uniform(string n, mat4 v)  { uniform(n, Variant(v)); }
+    final void uniform(string n, vec4 v)  { uniform(n, Variant(v)); }
+    final void uniform(string n, vec3 v)  { uniform(n, Variant(v)); }
+    final void uniform(string n, float v) { uniform(n, Variant(v)); }
+    final void uniform(string n, int v)   { uniform(n, Variant(v)); }
+    final void uniform(string n, bool v)  { uniform(n, Variant(v)); }
 
     Variant[string] options;
 
@@ -99,9 +116,9 @@ class Shader
     // Texture sampler. TODO: Maybe we change this to uniform.
     //-------------------------------------------------------------------------
 
-    final void texture(string name, GLenum unit, Texture texture, bool optional = false)
+    final void texture(string name, GLenum unit, Texture texture)
     {
-        GLint loc = location("uniform", name, optional);
+        GLint loc = location("uniform", name);
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_2D, texture.ID);
@@ -109,9 +126,9 @@ class Shader
         }
     }
 
-    final void texture(string name, GLenum unit, Cubemap cubemap, bool optional = false)
+    final void texture(string name, GLenum unit, Cubemap cubemap)
     {
-        GLint loc = location("uniform", name, optional);
+        GLint loc = location("uniform", name);
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.ID);
@@ -119,49 +136,11 @@ class Shader
         }
     }
 
-    //*************************************************************************
-    //
-    // Binding VBO fields to attributes
-    //
-    //*************************************************************************
-
-    /*
-    struct ATTRIB
-    {
-        GLenum type;        // GL_FLOAT, ...
-        GLint elems;        // Number of elements in this attribute (1 .. 4)
-        GLboolean normd;    // Normalized / not
-        size_t offset;       // Offset in interleaved buffers
-    }
-
-    ATTRIB[string] attribs;
-
-    void setattrib(string name, GLenum type, GLint elems, bool normalized, size_t offset) {
-        attribs[name] = ATTRIB(
-            //location("attrib", name),
-            type,
-            elems,
-            normalized ? GL_TRUE : GL_FALSE,
-            offset
-        );
-    }
-    */
-
     //-------------------------------------------------------------------------
-
-    /*
-    string[] attributes;
-
-    bool hasAttribute(string key)
-    {
-        foreach(attr; attributes) if(key == attr) return true;
-        return false;
-    }
-    */
 
     void connect(string name, GLenum type, GLint elems, bool normalized, size_t offset, size_t rowsize)
     {
-        GLint loc = location("attrib", name, true);
+        GLint loc = location("attrib", name);
         if(loc == -1) return;
 
         checkgl!glVertexAttribPointer(
@@ -177,7 +156,7 @@ class Shader
 
     void disconnect(string name)
     {
-        GLint loc = location("attrib", name, true);
+        GLint loc = location("attrib", name);
         checkgl!glDisableVertexAttribArray(loc);
     }
 

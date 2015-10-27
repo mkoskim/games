@@ -18,6 +18,11 @@ WORKLIST:
 
 - ALMOST DONE: Replace ulong with size_t (make 32-bit compilations to work)
 
+- Canvas (direct draw): Canvas object do not render objects, instead it is
+  there for drawing commands. Mainly used as a base for GUI.
+
+- Joystick hotplugging (scan for new joysticks)
+
 - Start developing portal engine. Start with level editor. We need editor
   to create portals.
 

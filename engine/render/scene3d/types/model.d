@@ -12,14 +12,10 @@ import engine.render.util;
 
 import engine.render.loader.mesh;
 
-import engine.render.scene3d.shader;
+// import engine.render.gpu.buffers;
+import engine.render.scene3d.feeder;
 import engine.render.scene3d.types.transform;
-//import engine.render.types.bound;
-//import engine.render.types.texture;
 import engine.render.scene3d.types.material;
-
-//import engine.render.types.view;
-//import engine.render.batch;
 
 //*****************************************************************************
 //
@@ -34,10 +30,10 @@ import engine.render.scene3d.types.material;
 
 class Model
 {
-    Shader.VAO vao;
+    Feeder.VAO vao;
     Material material;
 
-    this(Shader.VAO vao, Material material)
+    this(Feeder.VAO vao, Material material)
     {
         this.vao = vao;
         this.material = material;

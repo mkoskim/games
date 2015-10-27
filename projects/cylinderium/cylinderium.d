@@ -41,7 +41,7 @@ class Scene : scene3d.Pipeline3D
         //---------------------------------------------------------------------
 
         flat  = new scene3d.Batch(
-            scene3d.State.Solid3D(scene3d.shaders.Flat3D.create()),
+            scene3d.State.Solid3D(scene3d.Shader.Flat3D()),
             scene3d.Batch.Mode.unsorted
         );
         solid = scene3d.Batch.Solid3D();

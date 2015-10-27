@@ -19,8 +19,7 @@ public {
     import engine.render.scene3d.types.view;
     import engine.render.scene3d.types.light;
 
-    import shaders = engine.render.scene3d.shader: Default3D, Flat3D;
-    import engine.render.scene3d.state;
+    import engine.render.scene3d.feeder;
     import engine.render.scene3d.batch;
     import engine.render.scene3d.layer;
     import engine.render.scene3d.pipeline;
