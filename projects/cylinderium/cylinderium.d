@@ -194,6 +194,7 @@ class MotherShip
     {
         auto nodes  = pipeline.nodes.add("mothership");
         auto towers = pipeline.nodes.add("mothership.towers");
+        auto walls  = pipeline.nodes.add("mothership.walls");
         auto models = pipeline.assets("mothership");
         
         foreach(y, line; grid)
@@ -212,7 +213,7 @@ class MotherShip
                     case '|':
                     case '-':
                     case 'X': nodes.add(grip, models("floor")); break;
-                    case '#': nodes.add(grip, models("wall")); break;
+                    case '#': walls.add(grip, models("wall")); break;
                     case 'O': towers.add(grip, models("tower")); break;
 
                     case ' ': break;

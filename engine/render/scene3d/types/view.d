@@ -16,10 +16,7 @@ import engine.render.util;
 import engine.render.scene3d.types.transform;
 
 //-----------------------------------------------------------------------------
-// TODO: I havent used proxy views ever. Need to check if it is needed at
-// all, and we could simplify this a bit.
-//-----------------------------------------------------------------------------
-
+// TODO: Combine View and Camera
 //-----------------------------------------------------------------------------
 
 abstract class View
@@ -69,6 +66,8 @@ class Camera : View
     mat4 projection;
     Frustum _frustum;
 
+    //-------------------------------------------------------------------------
+
     override Frustum frustum() { return _frustum; }
 
     //-------------------------------------------------------------------------
@@ -82,22 +81,22 @@ class Camera : View
         this.grip = transform.grip;
     }
 
-    /*
-    this(mat4 projection)
-    {
-        this(projection, new Transform());
-    }
-
-    this(mat4 projection, vec3 pos, vec3 rot)
-    {
-        this(projection, new Transform(pos, rot));
-    }
-    */
-
     //-------------------------------------------------------------------------
 
     override mat4 mView() { return transform.mModel().inverse(); }
     override mat4 mProjection() { return projection; }
+
+    //-------------------------------------------------------------------------
+
+    void setProjection(float fov, float near, float far)
+    {
+        projection = mat4.perspective(
+            screen.width, screen.height,
+            fov,
+            near, far
+        );
+        _frustum = Frustum(projection);
+    }
 
     //-------------------------------------------------------------------------
     // By default, we add movable cameras
@@ -133,20 +132,5 @@ class Camera : View
             Grip.movable()
         );
     }
-}
-
-//-----------------------------------------------------------------------------
-
-class ViewProxy : View
-{
-    View *view;
-
-    this(View* view) { change(view); }
-
-    void change(View* view) { this.view = view; }
-
-    override mat4 mView() { return view.mView(); }
-    override mat4 mProjection() { return view.mProjection(); }
-    override Frustum frustum() { return view.frustum(); }	
 }
 

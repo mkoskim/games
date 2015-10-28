@@ -21,6 +21,9 @@ WORKLIST:
 - There is a need to separate gpu.Shader and GLSL compilation results. We
   might have shader with same source, but with different options.
 
+- Camera now has initial zooming. There is a need to make the solution more
+  generic.
+
 - Canvas (direct draw): Canvas do not contain "passive" objects to be
   rendered, instead it has objects to create drawing commands on canvas. Mainly
   for use as a base for GUI.
