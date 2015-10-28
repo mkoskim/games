@@ -95,8 +95,9 @@ abstract class Joystick
         if((joy in controllers) == null) {
             auto controller = new GameController(joy);
             controllers[controller.id] = controller;
+            chosen = controller;
             status();
-            writefln("Added joystick %d: Press 'guide' to select", controller.id);
+            //writefln("Added joystick %d: Press 'guide' to select", controller.id);
         }
     }
 }
@@ -194,6 +195,8 @@ EMULATE[SDL_Keycode] WASDArrows() { return [
     SDLK_DOWN:  EMULATE(JOY.AXIS.RY, +1, JOY.BTN.LS_DOWN),
     SDLK_UP:    EMULATE(JOY.AXIS.RY, -1, JOY.BTN.LS_UP),
 ];}
+
+//-----------------------------------------------------------------------------
 
 package class EmulatedController : Joystick
 {
@@ -377,8 +380,12 @@ package class GameController : Joystick
 
     //-------------------------------------------------------------------------
 
-    override string name() {
-        return to!string(SDL_JoystickName(stick));
+    override string name()
+    {
+        return format("%s (ffb: %s)",
+            to!string(SDL_JoystickName(stick)),
+            ffb ? "yes" : "no"
+        );
     }
 
     SDL_JoystickID id() { return SDL_JoystickInstanceID(stick); }
@@ -417,12 +424,6 @@ package class GameController : Joystick
         foreach(i; 0 .. buttons.length) buttons[i] = SDL_JoystickGetButton(stick, cast(int)i);
         foreach(i; 0 .. hats.length)    hats[i] = SDL_JoystickGetHat(stick, cast(int)i);
         foreach(i; 0 .. axes.length)    axes[i] = axisvalue(SDL_JoystickGetAxis(stick, cast(int)i));
-
-        debug writefln("Joystick#%d: %s (haptic: %s)",
-            num,
-            to!string(SDL_JoystickName(stick)),
-            ffb ? "yes" : "no"
-        );
     }
 
     void close()

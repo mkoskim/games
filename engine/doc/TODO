@@ -2,16 +2,6 @@
 
 DONE:
 
-- DONE: Emulated controller needs to push SDL joystick events (buttons, axes).
-  Especially button events are important, as they are most probably used
-  by GUI.
-
-- DONE: Didnt work as well w/ transparent objects - Currently, sorting happens
-  by (squared) distance to camera. Could it work as good just by Z-coordinate?
-  Lets try it out.
-
-- DONE: sin/cos to Translate
-
 *******************************************************************************
 
 WORKLIST:
@@ -30,8 +20,6 @@ WORKLIST:
   rendered, instead it has objects to create drawing commands on canvas. Mainly
   for use as a base for GUI.
 
-- Joystick hotplugging (scan for added/removed joysticks)
-
 - We need "removed" flag for certain objects, like Node. As we don't know in
   what groups/lists node is added, we can mark it to be removed, and when
   it is found somewhere, it is then removed.
@@ -42,6 +30,9 @@ WORKLIST:
 
 - Start developing portal engine. Start with level editor. We need editor
   to create portals.
+
+- Start working with navigation. The first step is to create a network
+  of nodes suitable for pacman-like games.
 
 - I need more freedom. What I should do is to create now a high (game) level
   interface to rendering. Then, while working with internals, that does note
@@ -56,8 +47,8 @@ WORKLIST:
 
     http://www.learnopengl.com/#!Model-Loading/Model
 
-- Better integration of SkyBox (and forthcoming postprocessing effects)
-  to 3D scene rendering.
+- Renderer framework: Better integration of SkyBox (and forthcoming
+  postprocessing effects) to 3D scene rendering.
 
 - Cubemap needs all faces to be: same size, same internal format, same
   mipmap level. Ensure this in loader.
@@ -72,11 +63,6 @@ WORKLIST:
   packet. Somehow we need to be able to create class to keep data... It
   might require storing VAOs and such to shader itself.
 
-- Also, one architectural problem is that now - as it is right - 3D scene
-  rendering state inherits from GPU rendering state, we loose the shader
-  rendering interface. Currently I am casting state shader to correct type,
-  but something better should be figured out.
-
 - I would need to collect some default setups to e.g. ext/ directory,
   so that I could work at higher levels without needing to worry about
   low level changes.
@@ -86,7 +72,7 @@ WORKLIST:
 
 - Decals (e.g. for targeting circles)
 
-- Examine, if BLOB could support symbolic links
+- Examine, if BLOB (std.archive) could support symbolic links
 
 - Model.sheet: This is using atlas for rendering. It would be
   probably best to implement dedicated atlas sprite blitter...
@@ -94,13 +80,14 @@ WORKLIST:
 - Bitmap manipulation: when loading BW bitmaps, convert them suitable
   for colorizing.
 
-- Shader Uniform buffers? Any use?
+- Study: Shader Uniform buffers? Any use?
 
     https://www.opengl.org/wiki/Uniform_Buffer_Object
     https://www.opengl.org/wiki/Interface_Block_(GLSL)
 
 - Fonts & Texture loader: Fonts may need specific texture loader, for example,
-  if the glyphs are zoomed considerably (e.g. text in 3D graphics).
+  if the glyphs are zoomed considerably (e.g. text in 3D graphics). This is
+  partly done, we have Texture.Loader class already to set sampling options.
 
 - One thing to think about some times: we would like to activate GPU
   processing as soon as possible, to make it work parallel to CPU. But there
@@ -139,12 +126,11 @@ MISC: Yet uncategorized "Post-It" notes...
   is to have sort of "stamping", textures over textures. We add node-specific
   material modifiers at some point (like color modifier, but at the same time,
   we could add texture modifiers, too).
-
-- Start working with navigation. The first step is to create a network
-  of nodes suitable for pacman-like games.
-
-- Renderers in layer.d are incomplete hacks. Reorganize them, so, that
-  move simplified solutions to ext/simple.d (that's the purpose of it)
+  
+- Node modifiers: this needs to be a bit more sophisticated mechanism. For
+  example, when drawing humans, we want skin color (as modifier) to be the
+  base color under everything. Then we have clothes colormap, and also
+  clothes variable colors (dyeing).
 
 - Node/Model classification. We assume, that no model (part) ever is added
   to two batches in single stage. So, what we need, is to know to what
@@ -185,29 +171,9 @@ MISC: Yet uncategorized "Post-It" notes...
         model.tags = ["visual", "shadowcaster"];
         model.part.tag = "solid";
 
-- Also, it might be very good idea now to separate resource management,
-  instead of keeping references in the batches. So, even thought it
-  means more writing, we do the thing something like this:
-  
-        resources.model = shaderfamily.upload(mesh, material);
-        resources.model.destination[pipeline] = pipeline.batchX;
-        ...
-
-  There is some ways to ease writing code, but anyways, the general idea
-  is that references to uploaded models are found only from:
-
-        1) nodes in scene
-        2) resource lookup table for scene
-
-  Destroying scene destroys also resources loaded for that.
-
-- Add "persistent" flag to Batch. Even regular 3D game may have
+- Add "persistent" flag to Batch? Even regular 3D game may have
   rendering objects that are persistent (no need for visibility checks,
   and always rendered).
-
-- Skybox as an example of persistent objects in batches. Are they? Currently
-  I am using own dedicated shader for skybox, so, they are not objects in
-  batches, but own dedicated "batch".
 
 -------------------------------------------------------------------------------
 
@@ -236,7 +202,7 @@ FIX/INVESTIGATE: Crashes, flaws etc.
   sprite sheet).
 
 - Shader compiler (see gpucompiler.d) can only report error location for
-  noveau driver. Needs (1) driver detection, and (2) custom reporting for
+  noveau/intel driver. Needs (1) driver detection, and (2) custom reporting for
   each driver.
 
 - With normalized integer vectors (see gputypes.d), we use scaling, but
@@ -252,10 +218,6 @@ FIX/INVESTIGATE: Crashes, flaws etc.
 - wolfish (and cylinderium) generally run at least as fast as pacman, although
   they use much more complicated CPU and GLSL code. I need to investigate 2D
   performance, as because of GUI elements it will matter to 3D games, too.
-
-- Study: Do we find any use for uniform buffers? See:
-
-        https://www.opengl.org/wiki/Uniform_Buffer_Object
 
 -------------------------------------------------------------------------------
 
@@ -283,6 +245,8 @@ Linux/Windows), easier to set up, and so on:
 
 - It would be nice to add D doc comments, at least test it. Finally, it would
   be nice if I could make it to compile with dub, and use dub registry.
+
+- Do some debugging aids: Seeing matrices etc.
 
 -------------------------------------------------------------------------------
 
@@ -349,8 +313,6 @@ GENERAL:
   since implementing Wavefront loader.
 
 - Maybe some offline tools for processing images, meshes and materials?
-
-- Do some debugging aids: Seeing matrices etc.
 
 -------------------------------------------------------------------------------
 
@@ -743,8 +705,9 @@ CAMERA:
 - Viewport settings to camera... In fact, create sort of RenderTarget
   class.
 
-- View, ViewProxy: I havent used View proxy ever. There is a need to
-  check if it has any use at all, or if we could simplify things a bit.
+- Camera: Store projection parameters to a class, and let it generate
+  projection. This is needed for zooming. Could act like Grip works for
+  Transform.
 
 -------------------------------------------------------------------------------
 
