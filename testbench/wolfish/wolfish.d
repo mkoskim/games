@@ -69,9 +69,9 @@ scene3d.Pipeline createPipeline()
 
     auto batches = pipeline.batches;
 
-    batches.add("walls",  states["solid"]);
-    batches.add("props",  states["solid"]);
-    batches.add("floors", states["solid"]);
+    batches.add("walls",       states["solid"]);
+    batches.add("props",       states["solid"]);
+    batches.add("floors",      states["solid"]);
     batches.add("transparent", states["transparent"]);
 
     return pipeline;
