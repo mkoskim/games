@@ -1,6 +1,7 @@
 //*****************************************************************************
 //
-// Rendering pipeline
+// Rendering pipeline. Pipeline is not the best name for this construction.
+// Maybe scene? Something else?
 //
 //*****************************************************************************
 

@@ -12,10 +12,12 @@ module engine.render.scene3d.batch;
 import engine.render.util;
 import engine.render.loader.mesh;
 
-import engine.render.gpu.texture;
-import gpu = engine.render.gpu.state, engine.render.gpu.shader;
+import gpu = 
+    engine.render.gpu.state,
+    engine.render.gpu.shader;
 
-//import engine.render.scene3d.types.transform;
+import engine.render.gpu.texture;
+
 import engine.render.scene3d.types.material;
 import engine.render.scene3d.types.model;
 import engine.render.scene3d.types.node;
@@ -40,18 +42,6 @@ class Batch : Feeder
 {
     this(gpu.State state) { super(state); }
     this(Batch batch) { this(batch.state); }
-
-    /*
-    //-------------------------------------------------------------------------
-
-    //static Batch Solid() { return new Batch(State.Solid3D(), Mode.front2back); }
-    static Batch Solid(gpu.Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
-    static Batch Solid(gpu.State state) { return new Batch(state, Mode.front2back); }
-
-    //static Batch Transparent() { return new Batch(State.Transparent3D(), Mode.back2front); }
-    static Batch Transparent(gpu.Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
-    static Batch Transparent(gpu.State state) { return new Batch(state, Mode.back2front); }
-    */
 
     //-------------------------------------------------------------------------
 
