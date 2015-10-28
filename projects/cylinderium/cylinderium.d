@@ -25,8 +25,10 @@ const float CAM_HEIGHT = 3.5 * RADIUS;
 //
 // Create render pipeline batches:
 //
-//      solid        Light'd render for most objects
-//      flat         Unlight'd render for stars (in star field)
+//      batch   state   shader      Used for
+//
+//      solid   solid   default     Lighted render for most objects
+//      flat    solid   flat        Unlighted render for stars (in star field)
 //
 //*****************************************************************************
 
@@ -38,11 +40,20 @@ scene3d.Pipeline createPipeline()
     auto states = pipeline.states;
     auto batches = pipeline.batches;
     
-    states.Solid3D("default", shaders.Default3D("default"));
-    states.Solid3D("flat", shaders.Flat3D("flat"));
+    with(shaders) {
+        Default3D("default");
+        Flat3D("flat");
+    }
     
-    batches.add("solid", states("default"));
-    batches.add("flat", states("flat"));
+    with(states) {
+        Solid3D("default", shaders["default"]);
+        Solid3D("flat", shaders["flat"]);
+    }
+    
+    with(batches) {
+        add("solid", states("default"));
+        add("flat", states("flat"));
+    }
 
     return pipeline;
 }
@@ -80,27 +91,29 @@ void loadModels(scene3d.Pipeline pipeline)
     }
 
     //---------------------------------------------------------------------
+    
+    with(mothership) {
+        upload(
+            "floor",
+            batches("solid"),
+            blob.wavefront.loadmesh("data/mesh/Floor.obj").move(0, RADIUS, 0),
+            material(vec4(0.5, 0.5, 0.5, 1), 0.85)
+        );
 
-    mothership.upload(
-        "floor",
-        batches("solid"),
-        blob.wavefront.loadmesh("data/mesh/Floor.obj").move(0, RADIUS, 0),
-        material(vec4(0.5, 0.5, 0.5, 1), 0.85)
-    );
+        upload(
+            "wall",
+            batches("solid"),
+            blob.wavefront.loadmesh("data/mesh/Wall.obj").move(0, RADIUS, 0),
+            material(warnbmp, 0.75)
+        );
 
-    mothership.upload(
-        "wall",
-        batches("solid"),
-        blob.wavefront.loadmesh("data/mesh/Wall.obj").move(0, RADIUS, 0),
-        material(warnbmp, 0.75)
-    );
-
-    mothership.upload(
-        "tower",
-        batches("solid"),
-        blob.wavefront.loadmesh("data/mesh/Guntower.obj").move(0, RADIUS, 0),
-        material(vec4(1, 0, 0, 1), 0.75)
-    );
+        upload(
+            "tower",
+            batches("solid"),
+            blob.wavefront.loadmesh("data/mesh/Guntower.obj").move(0, RADIUS, 0),
+            material(vec4(1, 0, 0, 1), 0.75)
+        );
+    }
 
     //---------------------------------------------------------------------
 
@@ -210,24 +223,25 @@ class MotherShip
 
                 switch(c)
                 {
+                    case ' ': break;
                     case '|':
                     case '-':
                     case 'X': nodes.add(grip, models("floor")); break;
                     case '#': walls.add(grip, models("wall")); break;
                     case 'O': towers.add(grip, models("tower")); break;
-
-                    case ' ': break;
                     default: throw new Exception("Unknown char: " ~ c);
                 }
             }
         }
 
+        //*
         createStars(
             pipeline,
-            500,
+            cast(int)(length + 150) * 2,
             -75, length + 75,
             MAX_HEIGHT + 0.5, 8*MAX_HEIGHT
         );
+        /**/
     }
 }
 

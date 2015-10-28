@@ -54,9 +54,9 @@ string[] grid = [
 
 void loadmaze(scene3d.Pipeline pipeline, string[] grid)
 {
-    import loader: loadmodels;
+    import loader: loadasset;
     
-    loadmodels(pipeline);
+    loadasset(pipeline);
     
     auto nodes = pipeline.nodes.add("maze");
     auto asset = pipeline.assets("maze");
