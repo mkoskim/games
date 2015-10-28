@@ -29,7 +29,7 @@ import engine.render.scene3d.types.light;
 //
 //-----------------------------------------------------------------------------
 
-abstract class Feeder
+class Feeder
 {
     protected gpu.State state;
 
@@ -41,7 +41,6 @@ abstract class Feeder
     //-------------------------------------------------------------------------
 
     void activate() { state.activate(); }
-
     auto shader() { return state.shader; }
 
     //*************************************************************************
@@ -63,7 +62,7 @@ abstract class Feeder
     //
     //*************************************************************************
 
-    void light(Light l)
+    void loadLight(Light l)
     {
         shader.uniform("light.pos", l.transform.worldspace());
 
@@ -146,6 +145,7 @@ abstract class Feeder
 
     protected class VAO
     {
+        Feeder target;
         BoundSphere bsp;
 
         gpu.VBO vbo;
@@ -197,6 +197,8 @@ abstract class Feeder
 
         auto vao = new VAO();
 
+        vao.target = this;
+
         vao.vao = new gpu.VAO();
         vao.vao.bind();
 
@@ -236,8 +238,9 @@ abstract class Feeder
 
 abstract class Shader
 {
-    private static gpu.Shader create(string conffile, string vertmain, string fragmain)
+    private static gpu.Shader create(string conffile, string vertmain, string fragmain = null)
     {
+        if(!fragmain) fragmain = vertmain;
         return new gpu.Shader(
             [
                 conffile,
@@ -268,12 +271,11 @@ abstract class Shader
     {
         static gpu.Shader instance = null;
         if(!instance) {
-            instance = create(
-                conffile,
-                "engine/render/scene3d/glsl/flat3d.glsl",
-                "engine/render/scene3d/glsl/flat3d.glsl"
-            );
-            instance.setRejected(["vert_norm", "vert_tangent"]);
+            instance = create(conffile, "engine/render/scene3d/glsl/flat3d.glsl");
+            instance.setRejected([
+                "vert_norm", "vert_tangent",
+                "light.pos", "light.color", "light.radius", "light.ambient",
+            ]);
         }
         return instance;
     }
@@ -307,5 +309,4 @@ abstract class State
         });
     }
 }
-
 

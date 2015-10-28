@@ -12,28 +12,22 @@ import engine.render.util;
 
 import engine.render.loader.mesh;
 
-// import engine.render.gpu.buffers;
-import engine.render.scene3d.feeder;
+import engine.render.scene3d.batch;
 import engine.render.scene3d.types.transform;
 import engine.render.scene3d.types.material;
 
-//*****************************************************************************
-//
-// Renderable: These classes know how to send themselves to shader.
-//
-//*****************************************************************************
-
 //-------------------------------------------------------------------------
 // Model combines shader vertex data (VAO, Vertex Array Object) with
-// material info (colormap, ...)
+// material info (colormap, ...). It also contains info where to send
+// it during rendering.
 //-------------------------------------------------------------------------
 
 class Model
 {
-    Feeder.VAO vao;
+    Batch.VAO vao;
     Material material;
 
-    this(Feeder.VAO vao, Material material)
+    this(Batch.VAO vao, Material material)
     {
         this.vao = vao;
         this.material = material;

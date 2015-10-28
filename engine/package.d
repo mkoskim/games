@@ -34,6 +34,9 @@ public {
     import derelict.opengl3.gl3;
     import derelict.assimp3.assimp;
     import gl3n.linalg;
+    
+    import std.exception: enforce;
+    import std.stdio: writeln, writefln;
 }
 
 pragma(lib, "dl");

@@ -16,37 +16,49 @@ import std.stdio;
 void main()
 {
     //-------------------------------------------------------------------------
+    // Init game with default window size
+    //-------------------------------------------------------------------------
 
     game.init();
 
     //-------------------------------------------------------------------------
-    // Scene! Lights! Camera!
+    // We need to set up our pipeline. At minimum, this needs one shader
+    // batch and one node source.
     //-------------------------------------------------------------------------
 
-    auto cam = scene3d.Camera.basic3D(
-        0.1, 10,        // Near - far
-        scene3d.Grip.movable(0, 0, 5)
-    );
+    auto pipeline = new scene3d.Pipeline;
 
-    auto scene = new scene3d.UnbufferedRender(
-        cam,
-        scene3d.State.Solid3D()
-    );
-
-    scene.light = new scene3d.Light(
-        scene3d.Grip.fixed(2, 2, 0),    // Position
-        vec3(1, 1, 1),                  // Color
-        7.5,                            // Range
-        0.25                            // Ambient level
-    );
-
-    auto nodes = scene.addbatch();
+    auto shaders = pipeline.shaders;
+    auto states = pipeline.states;
+    auto batches = pipeline.batches;
+        
+    shaders.add("default", scene3d.Shader.Default3D());
+    states.add("default", scene3d.State.Solid3D(shaders("default")));
+    batches.add("default", states("default"));
 
     //-------------------------------------------------------------------------
-    // Actor to stage
+    // We need to create a model by uploading it with batch (which we want
+    // to use to render the model). We can use asset sets to help this, but
+    // it is not mandatory. This demonstrates using asset loader to create
+    // renderable models.
     //-------------------------------------------------------------------------
-    
-    auto model = nodes.upload(
+
+    /* Create asset set named "models" */
+    auto asset = pipeline.assets.add("models");
+    auto material = pipeline.assets.material;
+
+    /* Load one material */
+    asset.upload("material", material(
+        //"engine/stock/tiles/Concrete/Dirty/ColorMap.png",
+        vec4(1, 0.8, 0, 1)
+        //"engine/stock/tiles/Concrete/Dirty/NormalMap.png",
+        //0.75
+        ));
+
+    /* Load one model */
+    asset.upload(
+        "model",
+        batches("default"),
         //blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj")
         //blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj"),
         //blob.wavefront.loadmesh("engine/stock/mesh/Chess/bishop.obj"),
@@ -54,83 +66,93 @@ void main()
         //blob.wavefront.loadmesh("engine/stock/mesh/Chess/knight.obj"),
         //blob.wavefront.loadmesh("engine/stock/mesh/Chess/pawn.obj"),
         //blob.wavefront.loadmesh("engine/stock/mesh/Chess/queen.obj"),
-        blob.wavefront.loadmesh("engine/stock/mesh/Chess/rook.obj"),
-        new scene3d.Material(
-            //new render.Texture("engine/stock/tiles/Concrete/Dirty/ColorMap.png"),
-            render.Texture.Loader.Default(vec4(1, 0.8, 0, 1)),
-            //new render.Texture("engine/stock/tiles/Concrete/Dirty/NormalMap.png"),
-            //0.75
-        )
+        blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Chess/rook.obj"),
+        "material"
     );
 
-    auto object = scene.add(scene3d.Grip.movable, model);
+    //-------------------------------------------------------------------------
+    // Create one node group. Node combines model with position.
+    //-------------------------------------------------------------------------
+
+    auto group = pipeline.nodes.add("objects");
+
+    auto object = group.add(scene3d.Grip.movable, asset("model"));
 
     //object.grip.pos -= model.vao.bsp.center;
+
+    //-------------------------------------------------------------------------
+    // Camera! Lights! Action!
+    //-------------------------------------------------------------------------
+
+    pipeline.cam = scene3d.Camera.basic3D(
+        0.1, 10,        // Near - far
+        scene3d.Grip.movable(0, 0, 5)
+    );
+
+    pipeline.light = new scene3d.Light(
+        scene3d.Grip.fixed(2, 2, 0),    // Position
+        vec3(1, 1, 1),                  // Color
+        7.5,                            // Range
+        0.25                            // Ambient level
+    );
 
     //-------------------------------------------------------------------------
     // Control
     //-------------------------------------------------------------------------
 
-    auto actors = new game.FiberQueue();
-    auto joystick = game.joysticks[0];
-
-    actors.addcallback(() {
+    pipeline.actors.addcallback(() {
         const float moverate = 0.25;
         const float turnrate = 5;
 
         object.grip.pos += vec3(
-            joystick.axes[game.JOY.AXIS.LX],
+            game.controller.axes[game.JOY.AXIS.LX],
             0,
-            -joystick.axes[game.JOY.AXIS.LY]
+            -game.controller.axes[game.JOY.AXIS.LY]
         ) * moverate;
 
         object.grip.rot += vec3(
-            joystick.axes[game.JOY.AXIS.RY],
-            joystick.axes[game.JOY.AXIS.RX],
+            game.controller.axes[game.JOY.AXIS.RY],
+            game.controller.axes[game.JOY.AXIS.RX],
             0
         ) * turnrate;
     });
 
     //-------------------------------------------------------------------------
 
-    actors.reportperf();
+    pipeline.actors.reportperf();
 
     //-------------------------------------------------------------------------
 
-    void draw() {
-        scene.draw();
+    bool processevents(SDL_Event event)
+    {
+        switch(event.type)
+        {
+            default: break;
+            case SDL_KEYDOWN: switch(event.key.keysym.sym)
+            {
+                default: break;
+                //case SDLK_w: scene.shader.fill = !scene.shader.fill; break;
+                //case SDLK_e: scene.shader.enabled = !scene.shader.enabled; break;
+                /*
+                case SDLK_r: {
+                    static bool normmaps = true;
+                    normmaps = !normmaps;
+                    maze.shader.activate();
+                    maze.shader.uniform("useNormalMapping", normmaps);
+                } break;
+                */
+            }
+        }
+        return true;
     }
 
     //-------------------------------------------------------------------------
 
     simple.gameloop(
-        50,       // FPS (limit)
-        &draw,    // Drawing
-        actors,   // list of actors
-
-        //---------------------------------------------------------------------
-
-        (SDL_Event event) {
-            switch(event.type)
-            {
-                default: break;
-                case SDL_KEYDOWN: switch(event.key.keysym.sym)
-                {
-                    default: break;
-                    //case SDLK_w: scene.shader.fill = !scene.shader.fill; break;
-                    //case SDLK_e: scene.shader.enabled = !scene.shader.enabled; break;
-                    /*
-                    case SDLK_r: {
-                        static bool normmaps = true;
-                        normmaps = !normmaps;
-                        maze.shader.activate();
-                        maze.shader.uniform("useNormalMapping", normmaps);
-                    } break;
-                    */
-                }
-            }
-            return true;
-        }
+        50,             // FPS (limit)
+        &pipeline.draw,    // Drawing
+        pipeline.actors,   // list of actors
+        &processevents
     );
 }
 

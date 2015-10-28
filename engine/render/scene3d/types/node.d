@@ -31,20 +31,21 @@ import engine.render.scene3d.types.model;
 import engine.render.scene3d.types.view;
 
 //-------------------------------------------------------------------------
-// Nodes are drawable objects that combine transform with shape
+// Nodes are drawable objects that combine transform with shape.
+// TODO: Multiple models for same node.
 //-------------------------------------------------------------------------
 
 class Node
 {
-    Model model;
     Transform transform;
+    Model model;
 
     //-------------------------------------------------------------------------
 
     @property Grip grip()
     {
-        if(!transform.grip) throw new Exception("Cannot move static nodes");
-        return transform.grip;
+        //if(!transform.grip) throw new Exception("Cannot move static nodes");
+        return enforce(transform.grip, "Cannot move static nodes");
     }
 
     //-------------------------------------------------------------------------
