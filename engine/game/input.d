@@ -25,6 +25,9 @@ import engine.game.instance: controller;
 // Game controller class
 //-----------------------------------------------------------------------------
 
+package GameController[SDL_JoystickID] controllers;
+package EmulatedController emulated;
+
 abstract class Joystick
 {
     float[] axes;
@@ -35,30 +38,68 @@ abstract class Joystick
 
     abstract string name();
 
-    static Joystick[] available() { return cast(Joystick[])controllers ~ cast(Joystick)emulated; }
+    static Joystick[] available() { 
+        Joystick[] joysticks;
+        foreach(joystick; controllers.values) joysticks ~= joystick;
+        joysticks ~= emulated;
+        return joysticks;
+    }
 
     //-------------------------------------------------------------------------
 
     package static Joystick chosen = null;
 
+    package static void status()
+    {
+        writeln("Controllers:");
+        foreach(joy; Joystick.available)
+        {
+            writefln("[%s] - %s",
+                (joy == controller) ? "x" : " ",
+                joy.name
+            );
+        }
+    }
+
     package static void init()
     {
         SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-
-        int num = SDL_NumJoysticks();
-
-        foreach(i; 0 .. num) {
-            controllers ~= new GameController(i);
-        }
+        SDL_JoystickEventState(SDL_ENABLE);
 
         emulated = new EmulatedController();
-        
-        chosen = (controllers) ? controllers[0] : emulated;
+
+        foreach(joy; 0 .. SDL_NumJoysticks()) {
+            auto controller = new GameController(joy);
+            controllers[controller.id] = controller;
+            if(!chosen) chosen = controller;
+        }
+
+        if(!chosen) chosen = emulated;
+        status();
+    }
+
+    package static void remove(SDL_JoystickID joy)
+    {
+        if(joy in controllers) {
+            auto removed = controllers[joy];
+            removed.close();
+            controllers.remove(joy);
+            
+            if(chosen == removed) chosen = emulated;
+            status();
+        }
+    }
+
+    package static void add(int joy)
+    {
+        if((joy in controllers) == null) {
+            auto controller = new GameController(joy);
+            controllers[controller.id] = controller;
+            status();
+            writefln("Added joystick %d: Press 'guide' to select", controller.id);
+        }
     }
 }
-
-package GameController[] controllers;
-package EmulatedController emulated;
 
 //-----------------------------------------------------------------------------
 // Controller (XBox/360) definitions
@@ -252,6 +293,7 @@ package class GameController : Joystick
             case SDL_JOYBUTTONDOWN:
             case SDL_JOYBUTTONUP:
                 buttons[event.jbutton.button] = event.jbutton.state;
+                if(event.jbutton.button == JOY.BTN.GUIDE) chosen = this;
                 break;
 
             //-----------------------------------------------------------------
@@ -339,6 +381,8 @@ package class GameController : Joystick
         return to!string(SDL_JoystickName(stick));
     }
 
+    SDL_JoystickID id() { return SDL_JoystickInstanceID(stick); }
+
     //-------------------------------------------------------------------------
 
     private SDL_Joystick *stick;    // SDL Joystick
@@ -374,8 +418,6 @@ package class GameController : Joystick
         foreach(i; 0 .. hats.length)    hats[i] = SDL_JoystickGetHat(stick, cast(int)i);
         foreach(i; 0 .. axes.length)    axes[i] = axisvalue(SDL_JoystickGetAxis(stick, cast(int)i));
 
-        SDL_JoystickEventState(SDL_ENABLE);
-
         debug writefln("Joystick#%d: %s (haptic: %s)",
             num,
             to!string(SDL_JoystickName(stick)),
@@ -383,11 +425,16 @@ package class GameController : Joystick
         );
     }
 
+    void close()
+    {
+        if(stick) stick = (SDL_JoystickClose(stick), null);
+        if(ffb) ffb = (SDL_HapticClose(ffb), null);
+    }
+
     ~this()
     {
         debug Track.remove(this);
-        SDL_JoystickClose(stick);
-        if(ffb) SDL_HapticClose(ffb);
+        close();
     }
 }
 

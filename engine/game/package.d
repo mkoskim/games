@@ -110,19 +110,7 @@ void init(string name, int width = 640, int height = 480)
     }
 
     render.init();
-    Joystick.init();
-    
-    debug {
-        writeln("Controllers:");
-        foreach(id, joy; Joystick.available)
-        {
-            writefln("[%s] Joy %d: %s",
-                (joy == controller) ? "x" : " ",
-                id,
-                joy.name
-            );
-        }
-    }
+    Joystick.init();    
 }
 
 //*****************************************************************************
