@@ -51,11 +51,11 @@ class Batch : Feeder
 
     //-------------------------------------------------------------------------
 
-    static Batch Solid() { return new Batch(State.Solid3D(), Mode.front2back); }
+    //static Batch Solid() { return new Batch(State.Solid3D(), Mode.front2back); }
     static Batch Solid(gpu.Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
     static Batch Solid(gpu.State state) { return new Batch(state, Mode.front2back); }
 
-    static Batch Transparent() { return new Batch(State.Transparent3D(), Mode.back2front); }
+    //static Batch Transparent() { return new Batch(State.Transparent3D(), Mode.back2front); }
     static Batch Transparent(gpu.Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
     static Batch Transparent(gpu.State state) { return new Batch(state, Mode.back2front); }
 

@@ -258,32 +258,27 @@ abstract class Shader
 
     static gpu.Shader Default3D(string conffile = null)
     {
-        static gpu.Shader instance = null;
-        if(!instance) instance = create(
+        return create(
             conffile,
             "engine/render/scene3d/glsl/verts.3d.glsl",
             "engine/render/scene3d/glsl/frags.3d.glsl"
         );
-        return instance;
     }
 
     static gpu.Shader Flat3D(string conffile = null)
     {
-        static gpu.Shader instance = null;
-        if(!instance) {
-            instance = create(conffile, "engine/render/scene3d/glsl/flat3d.glsl");
-            instance.setRejected([
-                "vert_norm", "vert_tangent",
-                "light.pos", "light.color", "light.radius", "light.ambient",
-            ]);
-        }
-        return instance;
+        auto shader = create(conffile, "engine/render/scene3d/glsl/flat3d.glsl");
+        shader.setRejected([
+            "vert_norm", "vert_tangent",
+            "light.pos", "light.color", "light.radius", "light.ambient",
+        ]);
+        return shader;
     }
 }
 
 abstract class State
 {
-    static gpu.State Solid3D(gpu.Shader shader = Shader.Default3D())
+    static gpu.State Solid3D(gpu.Shader shader)
     {
         return new gpu.State(shader, (){
             checkgl!glEnable(GL_CULL_FACE);
@@ -295,7 +290,7 @@ abstract class State
         });
     }
 
-    static gpu.State Transparent3D(gpu.Shader shader = Shader.Default3D())
+    static gpu.State Transparent3D(gpu.Shader shader)
     {
         return new gpu.State(shader, (){
             checkgl!glEnable(GL_CULL_FACE);

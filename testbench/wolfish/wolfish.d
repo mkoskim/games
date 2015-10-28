@@ -42,8 +42,8 @@ scene3d.Pipeline createPipeline()
 
     auto shaders = pipeline.shaders;
     
-    shaders.add("default", scene3d.Shader.Default3D());
-    shaders.add("flat", scene3d.Shader.Flat3D());
+    shaders.Default3D("default");
+    //shaders.Flat3D("flat");
     
     {   auto shader = shaders["default"];
         shader.options["fog.enabled"] = true;
@@ -54,8 +54,8 @@ scene3d.Pipeline createPipeline()
 
     auto states = pipeline.states;
 
-    states.add("solid", scene3d.State.Solid3D(shaders["default"]));
-    states.add("transparent", scene3d.State.Transparent3D(shaders["default"]));
+    states.Solid3D("solid", shaders["default"]);
+    states.Transparent3D("transparent", shaders["default"]);
 
     //-------------------------------------------------------------------------
     // Create batches for objects. In general, the simpler and faster it is

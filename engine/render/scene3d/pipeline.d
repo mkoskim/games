@@ -23,6 +23,8 @@ import engine.render.scene3d.types.light;
 import engine.render.scene3d.batch;
 //import engine.render.scene3d.layer;
 
+import feeder = engine.render.scene3d.feeder;
+
 //*****************************************************************************
 //
 // Low level interface. User can store custom shaders and states to
@@ -44,6 +46,15 @@ class ShaderGroup
     gpu.Shader get(string name) { return lookup[name]; }
     gpu.Shader opIndex(string name) { return get(name); }
     gpu.Shader opCall(string name) { return get(name); }
+
+    //-------------------------------------------------------------------------
+
+    gpu.Shader Default3D(string name) {
+        return add(name, feeder.Shader.Default3D());
+    }
+    gpu.Shader Flat3D(string name) {
+        return add(name, feeder.Shader.Flat3D());
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -61,6 +72,18 @@ class StateGroup
     gpu.State get(string name) { return lookup[name]; }
     gpu.State opIndex(string name) { return get(name); }
     gpu.State opCall(string name) { return get(name); }
+
+    //-------------------------------------------------------------------------
+
+    gpu.State Solid3D(string name, gpu.Shader shader)
+    {
+        return add(name, feeder.State.Solid3D(shader));
+    }
+
+    gpu.State Transparent3D(string name, gpu.Shader shader)
+    {
+        return add(name, feeder.State.Transparent3D(shader));
+    }
 }
 
 //-----------------------------------------------------------------------------
