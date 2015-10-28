@@ -35,7 +35,7 @@ class SkyBox
     }
 
     //-------------------------------------------------------------------------
-    // Dedicated SkyMap Shader (Singleton). For feeding Vertex Shader,
+    // Dedicated (Singleton) SkyMap Shader. For feeding Vertex Shader,
     // we create a unit cube by hand.
     //-------------------------------------------------------------------------
 
