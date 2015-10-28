@@ -160,6 +160,8 @@ package class EmulatedController : Joystick
     
     this()
     {
+        debug Track.add(this);
+
         axes    = new float[JOY.AXIS.COUNT];
         buttons = new byte[JOY.BTN.COUNT];
 
@@ -167,6 +169,10 @@ package class EmulatedController : Joystick
         buttons[0 .. $] = false;
 
         emulate = Arrows;
+    }
+
+    ~this() {
+        debug Track.remove(this);
     }
 
     override string name() { return "Keyboard & Mouse"; }

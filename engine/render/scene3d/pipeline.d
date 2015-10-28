@@ -209,9 +209,6 @@ class Asset
 {
     Model[string] models;
 
-    /* We could get rid of these tables after upload */
-    /* TODO: Mesh can be uploaded to several targets */
-
     Mesh[string] meshes;
     Material[string] materials;
     Batch.VAO[Mesh] shapes;
@@ -289,6 +286,8 @@ class AssetGroup
     Asset get(string name) { return assets[name]; }
     Asset opIndex(string name) { return get(name); }
     Asset opCall(string name) { return get(name); }
+
+    void remove(string name) { assets.remove(name); }
 }
 
 //*****************************************************************************
