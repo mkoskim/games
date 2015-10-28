@@ -35,21 +35,25 @@ scene3d.Pipeline createPipeline()
     //-------------------------------------------------------------------------
 
     auto shaders = pipeline.shaders;
+    auto states = pipeline.states;
     
-    shaders.Default3D("default");
-    //shaders.Flat3D("flat");
+    with(shaders) {
+        Default3D("default");
+        Flat3D("flat");
+    }
     
-    {   auto shader = shaders["default"];
-        shader.options["fog.enabled"] = true;
-        shader.options["fog.start"] = 15.0;
-        shader.options["fog.end"]   = 20.0;
-        shader.options["fog.color"] = vec4(0.0, 0.0, 0.0, 1);
+    with(shaders["default"]) {
+        options["fog.enabled"] = true;
+        options["fog.start"] = 15.0;
+        options["fog.end"]   = 20.0;
+        options["fog.color"] = vec4(0.0, 0.0, 0.0, 1);
+        //shader.options["useQuants"] = 4;
     }
 
-    auto states = pipeline.states;
-
-    states.Solid3D("solid", shaders["default"]);
-    states.Transparent3D("transparent", shaders["default"]);
+    with(pipeline.states) {
+        Solid3D("solid", shaders["default"]);
+        Transparent3D("transparent", shaders["default"]);
+    }
 
     //-------------------------------------------------------------------------
     // Create batches for objects. In general, the simpler and faster it is
@@ -61,12 +65,12 @@ scene3d.Pipeline createPipeline()
     //
     //-------------------------------------------------------------------------
 
-    auto batches = pipeline.batches;
-
-    batches.add("walls",       states["solid"]);
-    batches.add("props",       states["solid"]);
-    batches.add("floors",      states["solid"]);
-    batches.add("transparent", states["transparent"]);
+    with(pipeline.batches) {
+        add("walls",       states["solid"]);
+        add("props",       states["solid"]);
+        add("floors",      states["solid"]);
+        add("transparent", states["transparent"]);
+    }
 
     return pipeline;
 }
@@ -83,27 +87,79 @@ scene3d.Pipeline createPipeline()
 //
 //*****************************************************************************
 
-void loadmodels(scene3d.Pipeline pipeline)
+private string path(string filename) { return "engine/stock/unsorted/" ~ filename; }
+
+void loadasset(scene3d.Pipeline pipeline)
 {
     //---------------------------------------------------------------------
     // Clear previous level
     //---------------------------------------------------------------------
 
-    auto asset = pipeline.assets.add("maze");
+    pipeline.assets.add("maze");
+    
+    //---------------------------------------------------------------------
+    // Load new assets
+    //---------------------------------------------------------------------
 
-    string path(string filename) { return "engine/stock/unsorted/" ~ filename; }
+    loadmaterials(pipeline);
+    loadmodels(pipeline);
+}
+
+//-----------------------------------------------------------------------------
+// Load models
+//-----------------------------------------------------------------------------
+
+void loadmodels(scene3d.Pipeline pipeline)
+{
+    auto asset = pipeline.assets("maze");
 
     //---------------------------------------------------------------------
     // Load meshes
     //---------------------------------------------------------------------
 
-    asset.upload("wall",   blob.wavefront.loadmesh(path("mesh/Cube/CubeWrap.obj")));
-    asset.upload("floor",  blob.wavefront.loadmesh(path("mesh/Cube/Floor.obj")));
-    asset.upload("monkey", blob.wavefront.loadmesh(path("mesh/Suzanne/Suzanne.obj")).scale(0.66));
+    with(asset) {
+        upload("wall",   blob.wavefront.loadmesh(path("mesh/Cube/CubeWrap.obj")));
+        asset.upload("floor",  blob.wavefront.loadmesh(path("mesh/Cube/Floor.obj")));
+        asset.upload("monkey", blob.wavefront.loadmesh(path("mesh/Suzanne/Suzanne.obj")).scale(0.66));
+    }
+
+    //---------------------------------------------------------------------
+    // Make shortcuts to pipeline batches
+    //---------------------------------------------------------------------
+
+    auto batches = pipeline.batches;
+    
+    auto walls  = batches["walls"];
+    auto floors = batches["floors"];
+    auto props  = batches["props"];
+    auto transparent = batches["transparent"];
     
     //---------------------------------------------------------------------
-    // Load materials
+    // Create model lookup table
     //---------------------------------------------------------------------
+    
+    with(asset) {
+        upload("1", walls, "wall", "CaveWall");
+        upload("2", walls, "wall", "BrickWall");
+        upload("3", walls, "wall", "DirtyConcrete");
+        upload("4", walls, "wall", "MetallicAssembly");
+        upload("5", walls, "wall", "AlienCarving");
+        upload("#", asset("1"));
+
+        upload(" ", floors, "floor", "Floor");
+        upload("n", floors, "floor", "PaintedFloor");
+
+        upload("X", transparent, "monkey", "Glass");
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Load materials
+//-----------------------------------------------------------------------------
+
+void loadmaterials(scene3d.Pipeline pipeline)
+{
+    auto asset = pipeline.assets("maze");
 
     auto material = pipeline.assets.material;     // Material loader
 
@@ -179,33 +235,6 @@ void loadmodels(scene3d.Pipeline pipeline)
     asset.upload("PaintedFloor", material(
         vec4(0.25, 0.25, 0.25, 1),
         floormat.normalmap,
-        floormat.roughness));
-        
-    //---------------------------------------------------------------------
-    // Make shortcuts to pipeline batches
-    //---------------------------------------------------------------------
-
-    auto batches = pipeline.batches;
-    
-    auto walls  = batches["walls"];
-    auto floors = batches["floors"];
-    auto props  = batches["props"];
-    auto transparent = batches["transparent"];
-    
-    //---------------------------------------------------------------------
-    // Create model lookup table
-    //---------------------------------------------------------------------
-    
-    asset.upload("1", walls, "wall", "CaveWall");
-    asset.upload("2", walls, "wall", "BrickWall");
-    asset.upload("3", walls, "wall", "DirtyConcrete");
-    asset.upload("4", walls, "wall", "MetallicAssembly");
-    asset.upload("5", walls, "wall", "AlienCarving");
-    asset.upload("#", asset("1"));
-
-    asset.upload(" ", floors, "floor", "Floor");
-    asset.upload("n", floors, "floor", "PaintedFloor");
-
-    asset.upload("X", transparent, "monkey", "Glass");
+        floormat.roughness));        
 }
 
