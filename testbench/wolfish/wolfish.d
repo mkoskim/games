@@ -291,11 +291,11 @@ class Player : game.Fiber
 {
     scene3d.Transform root;
     scene3d.Camera cam;
+    float zoom;
 
     this(scene3d.Pipeline pipeline, vec3 pos)
     {
         super(pipeline.actors);
-        //super();
 
         root = scene3d.Grip.movable(pos);
         cam = scene3d.Camera.basic3D(
@@ -310,13 +310,14 @@ class Player : game.Fiber
             0.2
         );
         pipeline.cam = cam;
-        //pipeline.actors.add(this);
     }
 
     override void run()
     {
         const float turnrate = 5;
         const float maxspeed = 0.1;
+
+        const auto zoom = new Translate(vec2(-1, 75), vec2(1, 30));
 
         for(;;nextframe())
         {
@@ -332,39 +333,16 @@ class Player : game.Fiber
                 cam.grip.rot.x - game.controller.axes[game.JOY.AXIS.RY] * turnrate,
                 -30, 30
             );
-
-            //mat.roughness = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
-            //maze.light.color.b = (-joystick.axes[game.JOY.AXIS.LT]+1)/2;
-            //maze.light.color.g = maze.light.color.b;
+            
+            // TODO: Zooming - we want to use 'sniper riffle' to drop down
+            // an enemy.
+            
+            cam.setProjection(
+                zoom(game.controller.axes[game.JOY.AXIS.LT]),
+                0.1, 20
+            );
         }
     }
-}
-
-//-----------------------------------------------------------------------------
-
-static if(0) {
-    auto skybox = new postprocess.SkyBox(
-        new render.Cubemap([
-            /*
-            "engine/stock/unsorted/cubemaps/skybox1/right.png",
-            "engine/stock/unsorted/cubemaps/skybox1/left.png",
-            "engine/stock/unsorted/cubemaps/skybox1/top.png",
-            "engine/stock/unsorted/cubemaps/skybox1/bottom.png",
-            "engine/stock/unsorted/cubemaps/skybox1/back.png",
-            "engine/stock/unsorted/cubemaps/skybox1/front.png"
-            /*/
-            "engine/stock/unsorted/cubemaps/skybox2/universe_right.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_left.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_top.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_bottom.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_back.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_front.png",
-            
-            /**/
-            ]
-        ),
-        game.screen.fb
-    );
 }
 
 //-----------------------------------------------------------------------------
@@ -376,10 +354,6 @@ void main()
     auto pipeline = createPipeline();
 
     loadmaze(pipeline, grid);
-
-    //-------------------------------------------------------------------------
-
-    pipeline.actors.reportperf;
 
     //-------------------------------------------------------------------------
 
@@ -409,6 +383,10 @@ void main()
 
     //-------------------------------------------------------------------------
 
+    pipeline.actors.reportperf;
+
+    //-------------------------------------------------------------------------
+
     simple.gameloop(
         50,              // FPS
         &draw,           // draw
@@ -417,8 +395,10 @@ void main()
     );
 }
 
-static if(0)
-{
+//*****************************************************************************
+//*****************************************************************************
+//*****************************************************************************
+//*****************************************************************************
 
     //-------------------------------------------------------------------------
 
@@ -452,4 +432,4 @@ static if(0)
 
     //writeln("VBO row size: ", render.Mesh.VERTEX.sizeof);
     //writeln(to!string(glGetString(GL_EXTENSIONS)));
-}
+

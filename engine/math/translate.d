@@ -57,7 +57,7 @@ class Translate
 
     //-------------------------------------------------------------------------
 
-    float opCall(float pos)
+    float opCall(float pos) const
     {
         if(pos < start.x) return start.y;
         if(pos > end.x) return end.y;
