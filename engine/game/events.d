@@ -34,13 +34,17 @@ SDL_Event[] getevents()
         if(!SDL_PollEvent(&event)) break;
 
         void send2joystick(int joy, SDL_Event ev) {
-            if(joy < cast(int)controllers.length) controllers[joy].update(event);
+            //writeln("Joystick event: ", joy);
+            if(joy in controllers) controllers[joy].update(event);
         }
 
         switch(event.type)
         {
             default: break;
 
+            case SDL_JOYDEVICEADDED:   Joystick.add(event.jdevice.which); break;
+            case SDL_JOYDEVICEREMOVED: Joystick.remove(event.jdevice.which); break;
+            
             case SDL_JOYAXISMOTION: send2joystick(event.jaxis.which, event); break;
             case SDL_JOYBALLMOTION: send2joystick(event.jball.which, event); break;
             case SDL_JOYHATMOTION:  send2joystick(event.jhat.which, event); break;

@@ -97,12 +97,11 @@ void loadmaze(scene3d.Pipeline pipeline, string[] grid)
     }
 
     //---------------------------------------------------------------------
-    // If we don't have to create objects anymore, we can throw loaded
+    // As we don't have to create objects anymore, we can throw loaded
     // models away.
     //---------------------------------------------------------------------
 
     pipeline.assets.remove("maze");
-    game.rungc();
 }
 
 //*****************************************************************************
@@ -176,6 +175,7 @@ import loader: createPipeline;
 void main()
 {
     game.init(800, 600);
+    //game.init(1600, 900);
 
     auto pipeline = createPipeline();
 
@@ -208,8 +208,17 @@ void main()
     }
 
     //-------------------------------------------------------------------------
-
+    // Ask for performance report (once per sec to stdout)
+    //-------------------------------------------------------------------------
+    
     pipeline.actors.reportperf;
+
+    //-------------------------------------------------------------------------
+    // Run GC before entering game loop to get rid of all temporary objects,
+    // used to load level.
+    //-------------------------------------------------------------------------
+    
+    game.rungc();
 
     //-------------------------------------------------------------------------
 
