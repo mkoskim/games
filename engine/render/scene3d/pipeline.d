@@ -100,10 +100,7 @@ class BatchGroup
         return batch;
     }
 
-    Batch add(gpu.State state, Batch.Mode mode = Batch.Mode.unsorted)
-    {
-        return add(new Batch(state, mode));
-    }
+    Batch add(gpu.State state) { return add(new Batch(state)); }
 
     //-------------------------------------------------------------------------
     // Lookup table for named batches
@@ -121,9 +118,9 @@ class BatchGroup
         return get(name);
     }
 
-    Batch add(string name, gpu.State state, Batch.Mode mode = Batch.Mode.unsorted)
+    Batch add(string name, gpu.State state)
     {
-        lookup[name] = add(state, mode);
+        lookup[name] = add(state);
         return get(name);
     }
     

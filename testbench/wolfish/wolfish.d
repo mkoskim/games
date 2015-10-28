@@ -72,7 +72,7 @@ scene3d.Pipeline createPipeline()
     batches.add("walls",  states["solid"]);
     batches.add("props",  states["solid"]);
     batches.add("floors", states["solid"]);
-    batches.add("transparent", states["transparent"], scene3d.Batch.Mode.back2front);
+    batches.add("transparent", states["transparent"]);
 
     return pipeline;
 }
