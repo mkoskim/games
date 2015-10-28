@@ -64,24 +64,6 @@ abstract class NodeGroup
     Node add(vec3 pos, Model model) { return add(Grip.fixed(pos), model); }
     Node add(float x, float y, float z, Model model) { return add(Grip.fixed(x, y, z), model); }
     Node add(float x, float y, Model model) { return add(Grip.fixed(x, y), model); }
-
-    /*
-    Node add(vec3 pos) { return _add(new Node(pos)); }
-    Node add(Bone parent, Model model) { return _add(new Node(parent, model)); }
-
-    Node add(float x, float y) { return _add(new Node(vec3(x, y, 0))); }
-    Node add(float x, float y, Model model) { return _add(new Node(vec3(x, y, 0), model)); }
-    */
-
-    /*
-    Node add(vec3 pos, Shader.VAO mesh, Material mat) { return add(new Node(pos, mesh, mat)); }
-    Node add(vec3 pos, Shader.VAO mesh, vec4 color) { return add(new Node(pos, mesh, new Material(color))); }
-    Node add(vec3 pos, Shader.VAO mesh, Texture tex) { return add(new Node(pos, mesh, new Material(tex))); }
-
-    Node add(float x, float y, Shader.VAO mesh, Material mat) { return add(new Node(vec3(x, y, 0), mesh, mat)); }
-    Node add(float x, float y, Shader.VAO mesh, vec4 color) { return add(vec3(x, y, 0), mesh, color); }
-    Node add(float x, float y, Shader.VAO mesh, Texture tex) { return add(vec3(x, y, 0), mesh, tex); }
-    */
 }
 
 //-----------------------------------------------------------------------------

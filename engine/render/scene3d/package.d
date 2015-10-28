@@ -21,7 +21,6 @@ public {
 
     import engine.render.scene3d.feeder;
     import engine.render.scene3d.batch;
-    import engine.render.scene3d.layer;
     import engine.render.scene3d.pipeline;
 
     import gl3n.linalg;

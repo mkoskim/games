@@ -15,12 +15,12 @@ import engine.render.loader.mesh;
 import engine.render.gpu.texture;
 import gpu = engine.render.gpu.state, engine.render.gpu.shader;
 
-import engine.render.scene3d.types.transform;
-import engine.render.scene3d.types.bounds;
+//import engine.render.scene3d.types.transform;
 import engine.render.scene3d.types.material;
 import engine.render.scene3d.types.model;
 import engine.render.scene3d.types.node;
 import engine.render.scene3d.types.view;
+import engine.render.scene3d.types.light;
 
 import engine.render.scene3d.feeder;
 
@@ -51,49 +51,27 @@ class Batch : Feeder
 
     //-------------------------------------------------------------------------
 
-    static Batch Solid3D() { return new Batch(State.Solid3D(), Mode.front2back); }
-    static Batch Solid3D(gpu.Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
-    static Batch Solid3D(gpu.State state) { return new Batch(state, Mode.front2back); }
+    static Batch Solid() { return new Batch(State.Solid3D(), Mode.front2back); }
+    static Batch Solid(gpu.Shader shader) { return new Batch(State.Solid3D(shader), Mode.front2back); }
+    static Batch Solid(gpu.State state) { return new Batch(state, Mode.front2back); }
 
-    static Batch Transparent3D() { return new Batch(State.Transparent3D(), Mode.back2front); }
-    static Batch Transparent3D(gpu.Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
-    static Batch Transparent3D(gpu.State state) { return new Batch(state, Mode.back2front); }
+    static Batch Transparent() { return new Batch(State.Transparent3D(), Mode.back2front); }
+    static Batch Transparent(gpu.Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
+    static Batch Transparent(gpu.State state) { return new Batch(state, Mode.back2front); }
 
     //-------------------------------------------------------------------------
-    // Asset management... Needs to be restructured
-    //-------------------------------------------------------------------------
 
-    VAO[Mesh] meshes;
-
-    override VAO upload(Mesh mesh)
-    {
-        if(!(mesh in meshes))
-        {
-            meshes[mesh] = super.upload(mesh);
-        }
-        return meshes[mesh];
+    override VAO upload(Mesh mesh) {
+        return super.upload(mesh);
     }
 
-    //-------------------------------------------------------------------------
-    // Models managed by this batch: currently, this is mainly used to
-    // classify incoming nodes to correct batches.
-    //
-    // Loading empty model is used to create 'placeholders'
-    //
-    //-------------------------------------------------------------------------
-
-    bool[Model] models;
-
-    Model upload(Model model)
-    {
-        models[model] = true;
-        return model;
+    Model upload(VAO vao, Material material) {
+        return new Model(vao, material);
     }
 
-    Model upload(VAO vao, Material material) { return upload(new Model(vao, material)); }    
-    Model upload(Mesh mesh, Material material) { return upload(upload(mesh), material); }
-
-    Model upload()                             { return upload(new Model(null, null)); }    
+    Model upload(Mesh mesh, Material material) {
+        return upload(upload(mesh), material);
+    }
 
     //-------------------------------------------------------------------------
     // Node buffer
@@ -106,20 +84,15 @@ class Batch : Feeder
     Node add(Node node) { nodes ~= node; return node; }
     void clear() { nodes.length = 0; }
 
-    void remove(Node node)
-    {
-        auto i = countUntil(nodes, node);
-        if(i != -1) nodes = std.algorithm.remove!(SwapStrategy.unstable)(nodes, i);
-    }
-
     //-------------------------------------------------------------------------
 
-    void draw(View cam)
+    void draw(View cam, Light light)
     {
         if(!length) return;
 
         state.activate();
         loadView(cam);
+        loadLight(light);
 
         final switch(mode)
         {
@@ -136,6 +109,7 @@ class Batch : Feeder
 
         foreach(node; nodes)
         {
+            if(!node.model) continue;
             if(!node.model.material) continue;
             if(!node.model.vao) continue;
 
@@ -143,90 +117,4 @@ class Batch : Feeder
         }
     }
 }
-
-//*****************************************************************************
-//
-// BatchGroup: Work with multiple batches.
-//
-//*****************************************************************************
-
-class BatchGroup
-{
-    Batch[] batches;
-    
-    //-------------------------------------------------------------------------
-
-    Batch addbatch(Batch batch)
-    {
-        batches ~= batch;
-        return batch;
-    }
-
-    Batch addbatch(Batch batch, Batch.Mode mode)
-    {
-        batches ~= new Batch(batch, mode);
-        return batch;
-    }
-
-    Batch addbatch(gpu.State state, Batch.Mode = Batch.Mode.unsorted)
-    {
-        return addbatch(new Batch(state));
-    }
-
-    //-------------------------------------------------------------------------
-
-    private Batch findModel(Model model)
-    {
-        foreach(batch; batches)
-        {
-            if(model in batch.models) return batch;
-        }
-        return null;
-    }
-
-    Node add(Node node) { findModel(node.model).add(node); return node; }
-
-    //-------------------------------------------------------------------------
-
-    private Batch findNode(Node node)
-    {
-        foreach(batch; batches)
-        {
-            if(countUntil(batch.nodes, node) != -1) return batch;
-        }
-        return null;
-    }
-
-    void remove(Node node) {
-        auto batch = findNode(node);
-        if(batch) batch.remove(node);
-    }
-
-    //-------------------------------------------------------------------------
-
-    void clear()
-    {
-        foreach(batch; batches) batch.clear();
-    }
-    
-    size_t length()
-    {
-        size_t l = 0;
-        foreach(batch; batches) l += batch.length();
-        return l;
-    }
-    
-    Batch opIndex(int index) { return batches[index]; }
-    
-    //-------------------------------------------------------------------------
-
-    void draw(View cam)
-    {
-        foreach(batch; batches)
-        {
-            batch.draw(cam);
-        }
-    }
-}
-
 

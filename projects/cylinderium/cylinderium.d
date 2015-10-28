@@ -23,23 +23,34 @@ const float CAM_HEIGHT = 3.5 * RADIUS;
 
 //*****************************************************************************
 //
-// Create game assets
+// Create render pipeline batches:
+//
+//      solid        For most objects
+//      flat         For stars (in star field)
 //
 //*****************************************************************************
 
-class Scene : scene3d.Pipeline3D
+scene3d.Pipeline createPipeline()
 {
-    scene3d.Model floor, wall, tower, playership, star;
-    scene3d.Batch solid, flat;
+    auto pipeline = new scene3d.Pipeline();
 
-    MotherShip mothership;
+    auto shaders = pipeline.shaders;
+    auto states = pipeline.states;
+    auto batches = pipeline.batches;
+    
+    shaders.add("default", scene3d.Shader.Default3D());
+    states.add("default", scene3d.State.Solid3D(shaders("default")));
 
-    this()
-    {
-        super();
+    shaders.add("flat", scene3d.Shader.Flat3D());
+    states.add("flat", scene3d.State.Solid3D(shaders("flat")));
+    
+    batches.add("solid", states("default"));
+    batches.add("flat", states("flat"));
 
-        //---------------------------------------------------------------------
+    return pipeline;
+}
 
+/*
         flat  = new scene3d.Batch(
             scene3d.State.Solid3D(scene3d.Shader.Flat3D()),
             scene3d.Batch.Mode.unsorted
@@ -48,65 +59,80 @@ class Scene : scene3d.Pipeline3D
 
         addbatch(solid);
         addbatch(flat);
+*/
 
-        auto material = new scene3d.Material.Loader();
+//*****************************************************************************
+//
+// Create game assets
+//
+//*****************************************************************************
 
-        //---------------------------------------------------------------------
-        // Black-yellow stripes texture
-        //---------------------------------------------------------------------
+void loadModels(scene3d.Pipeline pipeline)
+{
+    //---------------------------------------------------------------------
+    // Create asset sets
+    //---------------------------------------------------------------------
 
-        auto warnbmp = new Bitmap(32, 32);
-        foreach(x; 0 .. warnbmp.width) foreach(y; 0 .. warnbmp.height) {
-            warnbmp.putpixel(x, y,
-                (((x+y) % 32) < 16) ? vec4(1, 1, 0, 1) : vec4(0, 0, 0, 1)
-            );
-        }
+    auto player = pipeline.assets.add("player");
+    auto mothership = pipeline.assets.add("mothership");
+    auto starfield = pipeline.assets.add("starfield");
 
-        //---------------------------------------------------------------------
+    //---------------------------------------------------------------------
 
-        floor = solid.upload(
-            blob.wavefront.loadmesh("data/mesh/Floor.obj").move(0, RADIUS, 0),
-            material(vec4(0.5, 0.5, 0.5, 1), 0.85)
+    auto batches = pipeline.batches;
+    auto material = pipeline.assets.material;    
+
+    //---------------------------------------------------------------------
+    // Black-yellow stripes texture
+    //---------------------------------------------------------------------
+
+    auto warnbmp = new Bitmap(32, 32);
+    foreach(x; 0 .. warnbmp.width) foreach(y; 0 .. warnbmp.height) {
+        warnbmp.putpixel(x, y,
+            (((x+y) % 32) < 16) ? vec4(1, 1, 0, 1) : vec4(0, 0, 0, 1)
         );
-
-        wall = solid.upload(
-            blob.wavefront.loadmesh("data/mesh/Wall.obj").move(0, RADIUS, 0),
-            material(warnbmp, 0.75)
-        );
-
-        tower = solid.upload(
-            blob.wavefront.loadmesh("data/mesh/Guntower.obj").move(0, RADIUS, 0),
-            material(vec4(1, 0, 0, 1), 0.75)
-        );
-
-        //---------------------------------------------------------------------
-
-        star = flat.upload(
-            blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/Cube.obj").scale(0.075),
-            material(vec4(1, 1, 0.75, 1), 0.75)
-        );
-
-        //---------------------------------------------------------------------
-
-        playership = solid.upload(
-            blob.wavefront.loadmesh("data/mesh/Ship.obj"), //.scale(1.25)
-            material(vec4(0.4, 0.4, 0.7, 1))
-        );
-
-        //---------------------------------------------------------------------
-
-        light = new scene3d.Light(
-            scene3d.Grip.fixed(0, 10, 0),
-            vec3(1, 1, 1),
-            40,
-            0.2
-        );
-
-        //---------------------------------------------------------------------
-
-        mothership = new MotherShip();
-        addgroup(mothership);
     }
+
+    //---------------------------------------------------------------------
+
+    mothership.upload(
+        "floor",
+        batches("solid"),
+        blob.wavefront.loadmesh("data/mesh/Floor.obj").move(0, RADIUS, 0),
+        material(vec4(0.5, 0.5, 0.5, 1), 0.85)
+    );
+
+    mothership.upload(
+        "wall",
+        batches("solid"),
+        blob.wavefront.loadmesh("data/mesh/Wall.obj").move(0, RADIUS, 0),
+        material(warnbmp, 0.75)
+    );
+
+    mothership.upload(
+        "tower",
+        batches("solid"),
+        blob.wavefront.loadmesh("data/mesh/Guntower.obj").move(0, RADIUS, 0),
+        material(vec4(1, 0, 0, 1), 0.75)
+    );
+
+    //---------------------------------------------------------------------
+
+    starfield.upload(
+        "star",
+        batches("flat"),
+        blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Cube/Cube.obj").scale(0.075),
+        material(vec4(1, 1, 0.75, 1), 0.75)
+    );
+
+    //---------------------------------------------------------------------
+
+    player.upload(
+        "ship",
+        batches("solid"),
+        blob.wavefront.loadmesh("data/mesh/Ship.obj"), //.scale(1.25)
+        material(vec4(0.4, 0.4, 0.7, 1))
+    );
 }
 
 //*****************************************************************************
@@ -155,14 +181,15 @@ static class grid
 //
 //*****************************************************************************
 
-class MotherShip : scene3d.BasicNodeGroup
+class MotherShip
 {
     float length = 0;
 
-    this() { super(); }
-    
-    void createStars(Scene scene, int count, float minx, float maxx, float minz, float maxz)
+    void createStars(scene3d.Pipeline pipeline, int count, float minx, float maxx, float minz, float maxz)
     {
+        auto stars = pipeline.nodes.add("stars");
+        auto star  = pipeline.assets("starfield")("star");
+
         foreach(i; 0 .. count)
         {
             float angle = random.uniform(0, 360)*(2*PI/360);
@@ -173,14 +200,15 @@ class MotherShip : scene3d.BasicNodeGroup
                 dist*cos(angle),
                 dist*sin(angle)
             );
-            add(pos, scene.star);
+            stars.add(pos, star);
         }
     }
 
-    void load(Scene scene, string[] grid)
+    this(scene3d.Pipeline pipeline, string[] grid)
     {
-        clear();
-
+        auto nodes  = pipeline.nodes.add("mothership");
+        auto models = pipeline.assets("mothership");
+        
         foreach(y, line; grid)
         {
             foreach(x, c; line)
@@ -196,9 +224,9 @@ class MotherShip : scene3d.BasicNodeGroup
                 {
                     case '|':
                     case '-':
-                    case 'X': add(grip, scene.floor); break;
-                    case '#': add(grip, scene.wall); break;
-                    case 'O': add(grip, scene.tower); break;
+                    case 'X': nodes.add(grip, models("floor")); break;
+                    case '#': nodes.add(grip, models("wall")); break;
+                    case 'O': nodes.add(grip, models("tower")); break;
 
                     case ' ': break;
                     default: throw new Exception("Unknown char: " ~ c);
@@ -207,13 +235,34 @@ class MotherShip : scene3d.BasicNodeGroup
         }
 
         createStars(
-            scene,
+            pipeline,
             500,
             -75, length + 75,
             MAX_HEIGHT + 0.5, 8*MAX_HEIGHT
         );
     }
 }
+
+/*
+class Scene : scene3d.Pipeline3D
+{
+    MotherShip mothership;
+
+    this()
+    {
+        super();
+
+        //---------------------------------------------------------------------
+
+        //---------------------------------------------------------------------
+
+        //---------------------------------------------------------------------
+
+        mothership = new MotherShip();
+        addgroup(mothership);
+    }
+}
+*/
 
 //*****************************************************************************
 //
@@ -231,21 +280,26 @@ class Player : game.Fiber
 
     //-------------------------------------------------------------------------
 
-    this(Scene scene)
+    this(scene3d.Pipeline pipeline, MotherShip mothership)
     {
-        super(scene.actors);
+        super(pipeline.actors);
+
+        //---------------------------------------------------------------------
+
+        auto nodes = pipeline.nodes.add("player");
+        auto playership = pipeline.assets("player")("ship");
 
         //---------------------------------------------------------------------
 
         MINX = -10;
-        MAXX = scene.mothership.length + 10;
+        MAXX = mothership.length + 10;
 
         //---------------------------------------------------------------------
 
         root = scene3d.Grip.movable(-40, 0, 0);
         shipframe = scene3d.Grip.movable(root, vec3(0, RADIUS + 0.4, 0));
 
-        ship = scene.nodes.add(scene3d.Grip.movable(shipframe), scene.playership);
+        ship = nodes.add(scene3d.Grip.movable(shipframe), playership);
 
         // Make ship rolling when coming in
         ship.grip.rot.x = 360;
@@ -261,7 +315,14 @@ class Player : game.Fiber
             )
         );
         
-        scene.cam = cam;
+        pipeline.cam = cam;
+
+        pipeline.light = new scene3d.Light(
+            scene3d.Grip.fixed(0, 10, 0),
+            vec3(1, 1, 1),
+            40,
+            0.2
+        );
     }
 
     //-------------------------------------------------------------------------
@@ -274,8 +335,6 @@ class Player : game.Fiber
     
     override void run()
     {
-        auto joystick = game.controller;
-
         //---------------------------------------------------------------------
         // Moving, with turn control
         //---------------------------------------------------------------------
@@ -296,10 +355,10 @@ class Player : game.Fiber
 
         void update()
         {
-            root.grip.rot.x += rotation(joystick.axes[game.JOY.AXIS.LY]);
+            root.grip.rot.x += rotation(game.controller.axes[game.JOY.AXIS.LY]);
 
-            shipframe.grip.rot.x =  joystick.axes[game.JOY.AXIS.LY] * 30;	// "Roll"
-            shipframe.grip.rot.z = -joystick.axes[game.JOY.AXIS.LX] * 45;	// "Pitch"
+            shipframe.grip.rot.x =  game.controller.axes[game.JOY.AXIS.LY] * 30;	// "Roll"
+            shipframe.grip.rot.z = -game.controller.axes[game.JOY.AXIS.LX] * 45;	// "Pitch"
 
             root.grip.pos.x += velocity(speed);
             cam.grip.pos.x  = campos(speed) + camposturn(speed);
@@ -311,7 +370,7 @@ class Player : game.Fiber
         for(;;)
         {
             // Zooming for development purposes
-            cam.grip.pos.y += joystick.axes[game.JOY.AXIS.RY] * 0.5;
+            cam.grip.pos.y += game.controller.axes[game.JOY.AXIS.RY] * 0.5;
 
             /* Auto-turn on edges */
             if(root.grip.pos.x < MINX)
@@ -324,7 +383,7 @@ class Player : game.Fiber
             }
             else
             {
-                float acceleration = joystick.axes[game.JOY.AXIS.LX] * DELTA;
+                float acceleration = game.controller.axes[game.JOY.AXIS.LX] * DELTA;
 
                 speed = fmax(-MAXSPEED, fmin(speed + acceleration, MAXSPEED));
             }
@@ -360,15 +419,83 @@ void main()
 {
     game.init(800, 600);
 
-    auto scene = new Scene();
+    auto pipeline = createPipeline();
 
-    scene.mothership.load(scene, grid.greeting);
+    loadModels(pipeline);
+
+    auto mothership = new MotherShip(pipeline, grid.greeting);
+    auto player = new Player(pipeline, mothership);
+
+    pipeline.actors.reportperf;
 
     //-------------------------------------------------------------------------
-    // Player
+    // Things like this, these would be great to be encapsuled as loader
+    // scripts written in some scripting language like lua. This particular
+    // skybox does not like that good at background, it is just a
+    // placeholder.
     //-------------------------------------------------------------------------
 
-    auto player = new Player(scene);
+    auto skybox = new postprocess.SkyBox(
+        new render.Cubemap([
+            "engine/stock/unsorted/cubemaps/skybox2/universe_right.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_left.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_top.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_bottom.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_back.png",
+            "engine/stock/unsorted/cubemaps/skybox2/universe_front.png",
+            ]
+        ),
+        game.screen.fb
+    );
+
+    //-------------------------------------------------------------------------
+
+    void draw()
+    {
+        pipeline.draw();
+        skybox.draw(pipeline.cam.mView(), pipeline.cam.mProjection());
+    }
+
+    //-------------------------------------------------------------------------
+
+    bool processevents(SDL_Event event)
+    {
+        switch(event.type)
+        {
+            /*
+            case SDL_JOYBUTTONDOWN:
+                writefln("Joy(%d) button: %d", event.jbutton.which, event.jbutton.button);
+                break;
+            */
+
+            case SDL_KEYDOWN: switch(event.key.keysym.sym)
+            {
+                //case SDLK_w: ship.shader.fill = !ship.shader.fill; break;
+                //case SDLK_e: ship.shader.enabled = !ship.shader.enabled; break;
+
+                //case SDLK_ESCAPE: return false;
+                default: break;
+            } break;
+            default: break;
+        }
+        return true;
+    }
+
+    //-------------------------------------------------------------------------
+
+    simple.gameloop(
+        50,                 // FPS (request)
+        &draw,              // draw
+        pipeline.actors,    // list of actors
+        &processevents
+    );
+    //-------------------------------------------------------------------------
+}
+
+//*****************************************************************************
+//*****************************************************************************
+//*****************************************************************************
+//*****************************************************************************
 
     //-------------------------------------------------------------------------
     // HUD (2D graphics not working atm)
@@ -398,67 +525,4 @@ void main()
 
     actors.addcallback(&updateHUD);
     */
-
-    scene.actors.reportperf;
-
-    //-------------------------------------------------------------------------
-    // Things like this, these would be great to be encapsuled as loader
-    // scripts written in some scripting language like lua. This particular
-    // skybox does not like that good at background, it is just a
-    // placeholder.
-    //-------------------------------------------------------------------------
-
-    auto skybox = new postprocess.SkyBox(
-        new render.Cubemap([
-            "engine/stock/unsorted/cubemaps/skybox2/universe_right.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_left.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_top.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_bottom.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_back.png",
-            "engine/stock/unsorted/cubemaps/skybox2/universe_front.png",
-            ]
-        ),
-        game.screen.fb
-    );
-
-    //-------------------------------------------------------------------------
-
-    void draw()
-    {
-        scene.draw();
-        skybox.draw(scene.cam.mView(), scene.cam.mProjection());
-    }
-
-    //-------------------------------------------------------------------------
-
-    simple.gameloop(
-        50,             // FPS (request)
-        &draw,          // draw
-        scene.actors,   // list of actors
-
-        (SDL_Event event) {
-            switch(event.type)
-            {
-                /*
-                case SDL_JOYBUTTONDOWN:
-                    writefln("Joy(%d) button: %d", event.jbutton.which, event.jbutton.button);
-                    break;
-                */
-
-                case SDL_KEYDOWN: switch(event.key.keysym.sym)
-                {
-                    //case SDLK_w: ship.shader.fill = !ship.shader.fill; break;
-                    //case SDLK_e: ship.shader.enabled = !ship.shader.enabled; break;
-
-                    //case SDLK_ESCAPE: return false;
-                    default: break;
-                } break;
-                default: break;
-            }
-            return true;
-        }
-    );
-
-    //-------------------------------------------------------------------------
-}
 
