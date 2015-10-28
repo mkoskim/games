@@ -19,18 +19,23 @@ class State
     Shader shader;              // Shader to use
     Variant[string] options;    // State-specific shader options
 
+    //-------------------------------------------------------------------------
+
+    enum Mode { unsorted, front2back, back2front };
+    Mode mode;
+
     void delegate() apply;  // Function to execute on switch
 
     //-------------------------------------------------------------------------
 
-    this(Framebuffer fb, Shader shader, void delegate() apply) {
+    this(Framebuffer fb, Shader shader, void delegate() apply, Mode mode = Mode.unsorted) {
         debug Track.add(this);
         this.target = fb;
         this.shader = shader;
         this.apply = apply;
     }
     
-    this(Shader shader, void delegate() apply) {
+    this(Shader shader, void delegate() apply, Mode mode = Mode.unsorted) {
         this(screen.fb, shader, apply);
     }
 

@@ -280,28 +280,36 @@ abstract class State
 {
     static gpu.State Solid3D(gpu.Shader shader)
     {
-        return new gpu.State(shader, (){
-            checkgl!glEnable(GL_CULL_FACE);
-            checkgl!glCullFace(GL_BACK);
-            checkgl!glFrontFace(GL_CCW);
-            checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            checkgl!glEnable(GL_DEPTH_TEST);
-            checkgl!glDisable(GL_BLEND);
-        });
+        return new gpu.State(
+            shader,
+            (){
+                checkgl!glEnable(GL_CULL_FACE);
+                checkgl!glCullFace(GL_BACK);
+                checkgl!glFrontFace(GL_CCW);
+                checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                checkgl!glEnable(GL_DEPTH_TEST);
+                checkgl!glDisable(GL_BLEND);
+            },
+            gpu.State.Mode.front2back
+        );
     }
 
     static gpu.State Transparent3D(gpu.Shader shader)
     {
-        return new gpu.State(shader, (){
-            checkgl!glEnable(GL_CULL_FACE);
-            checkgl!glCullFace(GL_BACK);
-            checkgl!glFrontFace(GL_CCW);
-            checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        return new gpu.State(
+            shader,
+            (){
+                checkgl!glEnable(GL_CULL_FACE);
+                checkgl!glCullFace(GL_BACK);
+                checkgl!glFrontFace(GL_CCW);
+                checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-            checkgl!glEnable(GL_DEPTH_TEST);
-            checkgl!glEnable(GL_BLEND);
-            checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        });
+                checkgl!glEnable(GL_DEPTH_TEST);
+                checkgl!glEnable(GL_BLEND);
+                checkgl!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            },
+            gpu.State.Mode.back2front
+        );
     }
 }
 

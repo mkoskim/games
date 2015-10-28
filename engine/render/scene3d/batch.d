@@ -38,17 +38,10 @@ import std.algorithm;
 
 class Batch : Feeder
 {
-    enum Mode { unsorted, front2back, back2front };
-    Mode mode;
+    this(gpu.State state) { super(state); }
+    this(Batch batch) { this(batch.state); }
 
-    this(gpu.State state, Mode mode = Mode.unsorted) {
-        super(state);
-        this.mode = mode;
-    }
-
-    this(Batch batch, Mode mode) { this(batch.state, mode); }
-    this(Batch batch) { this(batch.state, batch.mode); }
-
+    /*
     //-------------------------------------------------------------------------
 
     //static Batch Solid() { return new Batch(State.Solid3D(), Mode.front2back); }
@@ -58,6 +51,7 @@ class Batch : Feeder
     //static Batch Transparent() { return new Batch(State.Transparent3D(), Mode.back2front); }
     static Batch Transparent(gpu.Shader shader) { return new Batch(State.Transparent3D(shader), Mode.back2front); }
     static Batch Transparent(gpu.State state) { return new Batch(state, Mode.back2front); }
+    */
 
     //-------------------------------------------------------------------------
 
@@ -94,14 +88,14 @@ class Batch : Feeder
         loadView(cam);
         loadLight(light);
 
-        final switch(mode)
+        final switch(state.mode)
         {
-            case Mode.unsorted: break;
-            case Mode.front2back:
+            case gpu.State.Mode.unsorted: break;
+            case gpu.State.Mode.front2back:
                 sort!((a, b) => a.viewspace.bspdst2 < b.viewspace.bspdst2)(nodes);
                 //sort!((a, b) => a.viewspace.bsp.z < b.viewspace.bsp.z)(nodes);
                 break;
-            case Mode.back2front:
+            case gpu.State.Mode.back2front:
                 sort!((a, b) => a.viewspace.bspdst2 > b.viewspace.bspdst2)(nodes);
                 //sort!((a, b) => a.viewspace.bsp.z > b.viewspace.bsp.z)(nodes);
                 break;
