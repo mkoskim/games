@@ -25,8 +25,8 @@ const float CAM_HEIGHT = 3.5 * RADIUS;
 //
 // Create render pipeline batches:
 //
-//      solid        For most objects
-//      flat         For stars (in star field)
+//      solid        Light'd render for most objects
+//      flat         Unlight'd render for stars (in star field)
 //
 //*****************************************************************************
 
@@ -38,28 +38,14 @@ scene3d.Pipeline createPipeline()
     auto states = pipeline.states;
     auto batches = pipeline.batches;
     
-    shaders.add("default", scene3d.Shader.Default3D());
-    states.add("default", scene3d.State.Solid3D(shaders("default")));
-
-    shaders.add("flat", scene3d.Shader.Flat3D());
-    states.add("flat", scene3d.State.Solid3D(shaders("flat")));
+    states.Solid3D("default", shaders.Default3D("default"));
+    states.Solid3D("flat", shaders.Flat3D("flat"));
     
     batches.add("solid", states("default"));
     batches.add("flat", states("flat"));
 
     return pipeline;
 }
-
-/*
-        flat  = new scene3d.Batch(
-            scene3d.State.Solid3D(scene3d.Shader.Flat3D()),
-            scene3d.Batch.Mode.unsorted
-        );
-        solid = scene3d.Batch.Solid3D();
-
-        addbatch(solid);
-        addbatch(flat);
-*/
 
 //*****************************************************************************
 //
@@ -207,6 +193,7 @@ class MotherShip
     this(scene3d.Pipeline pipeline, string[] grid)
     {
         auto nodes  = pipeline.nodes.add("mothership");
+        auto towers = pipeline.nodes.add("mothership.towers");
         auto models = pipeline.assets("mothership");
         
         foreach(y, line; grid)
@@ -226,7 +213,7 @@ class MotherShip
                     case '-':
                     case 'X': nodes.add(grip, models("floor")); break;
                     case '#': nodes.add(grip, models("wall")); break;
-                    case 'O': nodes.add(grip, models("tower")); break;
+                    case 'O': towers.add(grip, models("tower")); break;
 
                     case ' ': break;
                     default: throw new Exception("Unknown char: " ~ c);
@@ -242,27 +229,6 @@ class MotherShip
         );
     }
 }
-
-/*
-class Scene : scene3d.Pipeline3D
-{
-    MotherShip mothership;
-
-    this()
-    {
-        super();
-
-        //---------------------------------------------------------------------
-
-        //---------------------------------------------------------------------
-
-        //---------------------------------------------------------------------
-
-        mothership = new MotherShip();
-        addgroup(mothership);
-    }
-}
-*/
 
 //*****************************************************************************
 //

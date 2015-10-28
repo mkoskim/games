@@ -290,7 +290,7 @@ abstract class State
                 checkgl!glEnable(GL_DEPTH_TEST);
                 checkgl!glDisable(GL_BLEND);
             },
-            gpu.State.Mode.front2back
+            gpu.State.Mode.unsorted
         );
     }
 
