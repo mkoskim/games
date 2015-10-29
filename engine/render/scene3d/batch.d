@@ -40,6 +40,8 @@ import std.algorithm;
 
 class Batch : Feeder
 {
+    bool enabled = true;
+
     this(gpu.State state) { super(state); }
     this(Batch batch) { this(batch.state); }
 
@@ -73,6 +75,7 @@ class Batch : Feeder
     void draw(View cam, Light light)
     {
         if(!length) return;
+        if(!enabled) return;
 
         state.activate();
         loadView(cam);

@@ -31,14 +31,19 @@ class Shader
     //
     //*************************************************************************
 
+    bool[string] features;  // Features of this shader for upper levels
     bool[string] optional;  // Try to look for uniform, but don't care if it does not exist
     bool[string] rejected;  // Don't even try to look uniform
     
-    void setOptional(string[] names) {
+    void setFeatures(string[] names...) {
+        foreach(name; names) features[name] = true;
+    }
+    
+    void setOptional(string[] names...) {
         foreach(name; names) optional[name] = true;
     }
     
-    void setRejected(string[] names) {
+    void setRejected(string[] names...) {
         foreach(name; names) rejected[name] = true;
     }
     
@@ -189,10 +194,10 @@ class Shader
         foreach(name, value; options) uniform(name, value);
     }
 
-    private static currentProgramID = 0;
-
     final void activate()
     {
+        static currentProgramID = 0;
+
         if(currentProgramID != programID)
         {
             checkgl!glUseProgram(programID);
@@ -209,9 +214,9 @@ class Shader
 
     GLuint programID;
 
-    this() {
+    this(GLuint ID = 0) {
         debug Track.add(this);
-        programID = 0;
+        programID = ID;
     }
 
     //-------------------------------------------------------------------------

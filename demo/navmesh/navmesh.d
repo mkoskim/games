@@ -13,105 +13,85 @@
 
 import engine;
 
-//-----------------------------------------------------------------------------
-// Maze is represented by triangles, which have base point and two vectors
-// defining the plane.
-//-----------------------------------------------------------------------------
-
-class NavFace
-{
-    vec3 basepoint;         // World coordinates
-    vec3 a, b;              // Sides
-
-    NavFace*[3] edges;  // Where edges lead
-}
-
-//-----------------------------------------------------------------------------
-// Agents represent objects that are tied to navmesh. They have reference
-// to the current triangle they are located, and local coordinates to it
-// (including height).
-//
-// TODO: This could be implemented sort of a "grip", that is, transformation
-// is fetched from navigation mesh.
-//
-//-----------------------------------------------------------------------------
-
-class NavAgent
-{
-    NavNode base;
-    vec3 local;
-}
-
-//-----------------------------------------------------------------------------
-
 void main()
 {
     //-------------------------------------------------------------------------
     
     game.init();
 
-    //-------------------------------------------------------------------------
-    // Scene! Lights! Camera!
-    //-------------------------------------------------------------------------
-        
-    auto cam = render.Camera.basic3D(
-        0.1, 10,        // Near - far
-        render.Grip.movable(0, 0, 5)
-    );
+    auto pipeline = new scene3d.SimplePipeline();
 
-    auto scene = new render.DirectRender(
-        cam,
-        render.State.Solid3D()
-    );
+    with(pipeline)
+    {
+        cam = scene3d.Camera.basic3D(
+            0.1, 10,                        // Near - far
+            scene3d.Grip.movable(0, 2, 5)   // Position
+        );
 
-    scene.light = new render.Light(
-        render.Grip.fixed(2, 2, 0), // Position
-        vec3(1, 1, 1),              // Color
-        7.5,                        // Range
-        0.25                        // Ambient level
-    );
+        light = new scene3d.Light(
+            scene3d.Grip.fixed(2, 2, 0),    // Position
+            vec3(1, 1, 1),                  // Color
+            7.5,                            // Range
+            0.25                            // Ambient level
+        );
+
+    }
 
     //-------------------------------------------------------------------------
+    // Create navmesh. Create object. Make object moving along navmesh.
+    //-------------------------------------------------------------------------
 
-    auto nodes = scene.addbatch();
+    render.Mesh navmesh;
 
-    auto model = nodes.upload(
-        blob.wavefront.loadmesh("engine/stock/mesh/Chess/knight.obj"),
-        vec4(0.8, 0.7, 0.1, 1)
+    navmesh = blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Geom/RectXZ.obj");
+
+    auto nav = pipeline.add(
+        scene3d.Grip.fixed(0, -1, 0),
+        navmesh,
+        pipeline.material(vec4(0.5, 0.5, 0.5, 1))
     );
 
-    auto object = scene.add(render.Grip.movable, model);
+    auto object = pipeline.add(
+        scene3d.Grip.movable(nav.transform), 
+        blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Chess/knight.obj"),
+        //blob.wavefront.loadmesh("engine/stock/unsorted/mesh/Geom/RectXZ.obj"),
+        pipeline.material(vec4(0.8, 0.7, 0.1, 1))
+    );
+
+    pipeline.cam.transform.parent = object.transform;
 
     //-------------------------------------------------------------------------
     // Control
     //-------------------------------------------------------------------------
 
-    auto actors = new game.FiberQueue();
-    auto joystick = game.joysticks[0];
-
-    actors.addcallback(() {
+    pipeline.actors.addcallback(() {
         const float moverate = 0.25;
         const float turnrate = 5;
         
         object.grip.pos += vec3(
-            joystick.axes[game.JOY.AXIS.LX],
+            game.controller.axes[game.JOY.AXIS.LX],
             0,
-            -joystick.axes[game.JOY.AXIS.LY]
+            game.controller.axes[game.JOY.AXIS.LY]
         ) * moverate;
         
-        object.grip.rot += vec3(
-            joystick.axes[game.JOY.AXIS.RY],
-            joystick.axes[game.JOY.AXIS.RX],
-            0
-        ) * turnrate;
+        with(pipeline.cam.grip)
+        {
+            rot += vec3(
+                game.controller.axes[game.JOY.AXIS.RY],
+                game.controller.axes[game.JOY.AXIS.RX],
+                0
+            ) * turnrate;
+            rot.x = clamp(rot.x, -30, 30);
+            rot.y = clamp(rot.y, -30, 30);
+        }
     });
 
     //-------------------------------------------------------------------------
 
     simple.gameloop(
-        50,             // FPS (limit)
-        &scene.draw,    // Drawing
-        actors,         // list of actors
+        50,                 // FPS (limit)
+        &pipeline.draw,     // Drawing
+        pipeline.actors,    // list of actors
         null
     );
 
