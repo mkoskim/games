@@ -6,24 +6,30 @@
 
 MAIN=navmesh.d
 
-BLOBFILES=data/
-
 #------------------------------------------------------------------------------
 
 EXE=
 
-#------------------------------------------------------------------------------
-
+LDFLAGS=
 LIBDIRS=
 LIBS=
-LDFLAGS=
+OBJS=
+
+BLOBFILES = data/
 
 #------------------------------------------------------------------------------
-# Add stock items to BLOB if you use them
+# Add items you use to BLOB.
 #------------------------------------------------------------------------------
 
-BLOBFILES += engine/stock/
-BLOBFILES += engine/render/shaders/glsl/
+BLOBFILES += engine/stock/unsorted
+
+#------------------------------------------------------------------------------
+# Directories containing files used by the engine itself.
+#------------------------------------------------------------------------------
+
+BLOBFILES += engine/render/scene3d/glsl/
+BLOBFILES += engine/render/postprocess/glsl/
+BLOBFILES += engine/stock/system
 
 include engine/build/Makegame.mak
 

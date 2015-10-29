@@ -1,6 +1,6 @@
 //*****************************************************************************
 //
-// (Shader) Feeder for 3D nodes.
+// (Shader) Feeder for 3D nodes - no, for 3D models.
 //
 //*****************************************************************************
 
@@ -64,6 +64,8 @@ class Feeder
 
     void loadLight(Light l)
     {
+        if(!("lighting" in shader.features)) return;
+
         shader.uniform("light.pos", l.transform.worldspace());
 
         shader.uniform("light.radius", l.radius);
@@ -79,6 +81,8 @@ class Feeder
 
     void loadMaterial(Material mat, Material.Modifier mod)
     {
+        if(!("material" in shader.features)) return;
+
         shader.texture("material.colormap", 0, mat.colormap);
         shader.texture("material.normalmap", 1, mat.normalmap);
 
@@ -234,16 +238,17 @@ class Feeder
 // some point. But anyways, when creating new ways to utilize shaders, you
 // probably want to encapsulate shader creation, too.
 //
+// TODO: Bit dirty code, clean up at some point.
+//
 //*****************************************************************************
 
 abstract class Shader
 {
-    private static gpu.Shader create(string conffile, string vertmain, string fragmain = null)
+    private static gpu.Shader create(string vertmain, string fragmain = null)
     {
         if(!fragmain) fragmain = vertmain;
         return new gpu.Shader(
             [
-                conffile,
                 "engine/render/scene3d/glsl/types.3d.glsl",
                 "engine/render/scene3d/glsl/default3d.in.glsl",
             ], [
@@ -256,22 +261,54 @@ abstract class Shader
         );
     }
 
-    static gpu.Shader Default3D(string conffile = null)
+    static gpu.Shader Default3D()
     {
-        return create(
-            conffile,
-            "engine/render/scene3d/glsl/verts.3d.glsl",
-            "engine/render/scene3d/glsl/frags.3d.glsl"
-        );
+        static GLuint ID = 0;
+        gpu.Shader shader;
+        
+        if(ID) {
+            shader = new gpu.Shader(ID);
+        } else {
+            shader = create(
+                "engine/render/scene3d/glsl/verts.3d.glsl",
+                "engine/render/scene3d/glsl/frags.3d.glsl"
+            );
+            ID = shader.programID;
+        }
+        shader.setFeatures("lighting", "material");
+        return shader;
     }
 
-    static gpu.Shader Flat3D(string conffile = null)
+    static gpu.Shader Flat3D()
     {
-        auto shader = create(conffile, "engine/render/scene3d/glsl/flat3d.glsl");
-        shader.setRejected([
-            "vert_norm", "vert_tangent",
-            "light.pos", "light.color", "light.radius", "light.ambient",
-        ]);
+        static GLuint ID = 0;
+        gpu.Shader shader;
+        
+        if(ID) {
+            shader = new gpu.Shader(ID);
+        } else {
+            shader = create("engine/render/scene3d/glsl/flat3d.glsl");
+            ID = shader.programID;
+        }
+
+        shader.setFeatures("material");
+        shader.setRejected("vert_norm", "vert_tangent");
+        return shader;
+    }
+
+    static gpu.Shader Depth3D()
+    {
+        static GLuint ID = 0;
+        gpu.Shader shader;
+        
+        if(ID) {
+            shader = new gpu.Shader(ID);
+        } else {
+            shader = create("engine/render/scene3d/glsl/depth3d.glsl");
+            ID = shader.programID;
+        }
+
+        shader.setRejected("vert_uv", "vert_norm", "vert_tangent");
         return shader;
     }
 }

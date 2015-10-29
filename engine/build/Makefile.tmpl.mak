@@ -15,14 +15,16 @@ LIBDIRS=
 LIBS=
 OBJS=
 
-BLOBFILES=data/
+BLOBFILES = data/
 
+#------------------------------------------------------------------------------
+# Add items you use to BLOB.
 #------------------------------------------------------------------------------
 
 BLOBFILES += engine/stock/unsorted
 
 #------------------------------------------------------------------------------
-# Add items you use to BLOB.
+# Directories containing files used by the engine itself.
 #------------------------------------------------------------------------------
 
 BLOBFILES += engine/render/scene3d/glsl/

@@ -128,11 +128,14 @@ void init(string name, int width = 640, int height = 480)
 //
 //*****************************************************************************
 
+import engine.math: SlidingAverage;
+
 class Profile
 {
-    auto frame  = new PerfMeter();
-    auto busy   = new PerfMeter();
-    auto render = new PerfMeter();
+    auto frame   = new PerfMeter();
+    auto busy    = new PerfMeter();
+    auto render  = new PerfMeter();
+    auto calls   = new SlidingAverage();
 
     float fps()    { return 1000 / frame.average; }
     float fpsmax() { return 1000 / busy.average; }
@@ -155,7 +158,7 @@ class Profile
             rendertime = timers.render.average;
 
         return format(
-            "FPS: %5.1f : busy %5.1f ms : logic/render/idle %5.1f%% / %5.1f%% / %5.1f%%",
+            "FPS: %5.1f : busy %5.1f ms : %5.1f%% / %5.1f%% / %5.1f%%",
             timers.fps,
             busytime,
             100.0*(busytime-rendertime)/frametime,
@@ -182,9 +185,12 @@ private int framelength = 1000/50;
 
 //-----------------------------------------------------------------------------
 
+import engine.render.util: glcalls;
+
 void startdraw()
 {
     if(Profile.timers) Profile.timers.render.start();
+    glcalls = 0;
     render.start();
 }
 
@@ -196,6 +202,7 @@ void waitframe()
     {
         Profile.timers.render.stop();
         Profile.timers.busy.stop();
+        Profile.timers.calls.update(glcalls);
     }
 
     static uint nextframe = 0;

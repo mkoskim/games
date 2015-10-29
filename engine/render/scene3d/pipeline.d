@@ -56,6 +56,9 @@ class ShaderGroup
     gpu.Shader Flat3D(string name) {
         return add(name, feeder.Shader.Flat3D());
     }
+    gpu.Shader Depth3D(string name) {
+        return add(name, feeder.Shader.Depth3D());
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -219,16 +222,16 @@ class Pipeline
 
     //-------------------------------------------------------------------------
 
-    this()
-    {
-    }
-
-    //-------------------------------------------------------------------------
-
-    View cam;
+    Camera cam;
     Light light;
 
     FiberQueue actors = new FiberQueue();
+
+    //-------------------------------------------------------------------------
+
+    this()
+    {
+    }
 
     //-------------------------------------------------------------------------
 
@@ -237,6 +240,45 @@ class Pipeline
         batches.clear();
         nodes.collect(cam);
         batches.draw(cam, light);
+    }
+}
+
+//*****************************************************************************
+//
+// Ultra simple pipeline. It has one batch, one node source. It has no
+// asset management (done by user).
+//
+//*****************************************************************************
+
+class SimplePipeline
+{
+    Batch batch;
+    NodeSource nodes = new NodeSource();
+    Material.Loader material = new Material.Loader();
+
+    Camera cam;
+    Light light;
+
+    FiberQueue actors = new FiberQueue();
+
+    this()
+    {
+        auto shader = feeder.Shader.Default3D();
+        auto state  = feeder.State.Transparent3D(shader);
+        batch = new Batch(state);
+    }
+
+    void draw()
+    {
+        batch.clear();
+        nodes.collect(cam);
+        batch.draw(cam, light);
+    }
+
+    Node add(Transform transform, Mesh mesh, Material material)
+    {
+        auto model = batch.upload(mesh, material);
+        return nodes.add(transform, model);
     }
 }
 
