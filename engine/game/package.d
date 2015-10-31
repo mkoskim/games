@@ -205,6 +205,9 @@ void waitframe()
         Profile.timers.calls.update(glcalls);
     }
 
+    /* Here, we could try to do something useful instead just sleeping. We
+     * may implement some sort of idle handler.
+     */
     static uint nextframe = 0;
     ticks = SDL_GetTicks();
     if(nextframe > ticks)
