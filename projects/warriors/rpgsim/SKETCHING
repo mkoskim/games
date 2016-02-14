@@ -1,0 +1,93 @@
+
+
+                            SIMULATED WORLD
+                            ---------------
+                            
+Warriors is a fighting game. But what do you do if you just one to chill
+around? My plan is that then you can take part to a simulated world in
+a sandbox style subgame. You have created your character to fight in
+dungeons, use the same one to live in a virtual pseudo-medieval world.
+
+
+                                * * *
+
+I want the simulation to be solid and stable. It will always lead to
+pseudo-medieval society, no matter how much it is stirred and shaken. Its main
+purpose is to create playground for player to *play a role* in a virtual world,
+it is not for simulating real world phenomenons.
+
+Some initial thoughts:
+
+1) NPCs dont die, at least quickly: first reason is that as PC is just another
+NPC, it would mean that PC can die, too. Second reason is that dying would
+need simulation of birth and growth, and the time span could extend far too
+long. Or, maybe they do: for each death, one of the childs is transformed to
+an adult, and one new child is added to world.
+
+2) The world does not "advance". They are at their own "technological
+singularity" already, they can't invent any new technological advances. Some
+technologies can be forgotten, thought, and need research to rediscover.
+
+Simulation has attraction point ("perfect balance"). If the world is shaken,
+it tries to come back to "sweet area". But on the other hand, I try to design
+the simulation so that stable point is unreachable, so that the
+simulation keeps evolving all the time without becoming static.
+
+
+                                * * *
+
+Simulation is bounded by:
+
+- Fixed number of resource fields: with fixed maximum "boosters", this
+  makes the world resource bounded.
+  
+- Fixed number of NPCs: NPCs are "time/work" resources, so world is bounded
+  by this coefficient, too.
+
+
+                                * * *
+
+FACILITY: To covert items to other types, NPCs need facilities like Farmland,
+Smelter, Smithy and so on. In addition to these, NPCs need to put time and
+needed reagents.
+
+As I would like NPCs to hire other NPCs to work on their facilities, there is
+a need for some sort of "facility slot tokens" - otherwise, one single smithy
+could serve all. So:
+
+    Facility => (Facility - 1) + N * Token
+
+    (Token + Time) + Reactants = Products
+
+Facility owner can give tokens to someone else to use the facility. Facilities
+need frequent renewal (maintenance), or they will wear out.
+
+Higher level facilities could give more tokens per day than single NPC can
+use, so it would be beneficial to hire someone to use the extra tokens.
+
+Owning facilities is limited. I don't want everything to be owned by one
+NPC.
+
+
+                                * * *
+
+EXPERTISE: It is planned that NPCs will steadly specialize themselves to certain
+tasks. We could start with five step expertise meter:
+
+    Novice  Apprentice  Adept   Expert  Master
+
+NPC must hold the previous levels in her/his expertise bag to maintain the
+level - that is, Adept level needs Apprentice and Novice levels at the same
+profession. So, NPC can be:
+
+    - Novice at five different professions
+    - Adept in one profession, and Apprentice on another
+    - Adept in one, and Novice in two
+    - Expert in one, and Novice in another
+
+To be a master in one profession, NPC can't hold expertise on another - but
+s/he can sacrifice this level to gain Novice level on another profession.
+
+Expertise in one profession grants expertise tokens. These can be used (1)
+to produce more low level items, or (2) to produce higher level items.
+

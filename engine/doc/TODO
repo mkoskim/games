@@ -10,6 +10,8 @@ WORKLIST:
 
 - Emulated joystick: trigger axis is between -1 ... 1, not between 0 ... +/- 1
 
+- Enums have .max property: check if this can be used in joystick definitions.
+
 - There is a need to separate gpu.Shader and GLSL compilation results. We
   might have shader with same source, but with different options.
 
