@@ -113,7 +113,9 @@ class Texture
     {
         static Loader Default;
 
-        static this() { Default = new Loader(); }
+        static this() {
+            Default = new Loader();
+        }
 
         //----------------------------------------------------------------------
 

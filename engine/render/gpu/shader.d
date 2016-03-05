@@ -142,7 +142,9 @@ class Shader
     }
 
     //-------------------------------------------------------------------------
-
+    // Connecting attributes from buffers
+    //-------------------------------------------------------------------------
+    
     void connect(string name, GLenum type, GLint elems, bool normalized, size_t offset, size_t rowsize)
     {
         GLint loc = location("attrib", name);
