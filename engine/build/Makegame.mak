@@ -19,17 +19,18 @@ default: note debug run
 #------------------------------------------------------------------------------
 
 fetch:
-	dub fetch derelict-gl3     --version=1.0.18
-	dub fetch derelict-sdl2    --version=1.9.7
-	dub fetch derelict-util    --version=2.0.4
+	dub fetch derelict-gl3     --version=1.0.19
+	dub fetch derelict-sdl2    --version=1.9.3
+	dub fetch derelict-util    --version=2.1.0
 	dub fetch derelict-assimp3 --version=1.0.1
+	dub fetch derelict-lua     --version=~5.2
 	dub fetch gl3n             --version=1.3.1
-	dub fetch luad
 
-SRCPATH += ~/.dub/packages/derelict-gl3-1.0.18/source/
-SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.7/source/
-SRCPATH += ~/.dub/packages/derelict-util-2.0.4/source/
+SRCPATH += ~/.dub/packages/derelict-gl3-1.0.19/source/
+SRCPATH += ~/.dub/packages/derelict-sdl2-1.9.3/source/
+SRCPATH += ~/.dub/packages/derelict-util-2.1.0/source/
 SRCPATH += ~/.dub/packages/derelict-assimp3-1.0.1/source/
+SRCPATH += ~/.dub/packages/derelict-lua-5.2/source/
 SRCPATH += ~/.dub/packages/gl3n-1.3.1/
 
 #------------------------------------------------------------------------------
