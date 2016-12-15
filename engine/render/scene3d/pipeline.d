@@ -14,13 +14,7 @@ import gpu =
     engine.render.gpu.shader;    
 
 import engine.game.fiber;
-import engine.render.scene3d.types.transform;
-import engine.render.scene3d.types.material;
-import engine.render.loader.mesh;
-import engine.render.scene3d.types.model;
-import engine.render.scene3d.types.node;
-import engine.render.scene3d.types.view;
-import engine.render.scene3d.types.light;
+import engine.asset.types;
 import engine.render.scene3d.asset;
 import engine.render.scene3d.batch;
 

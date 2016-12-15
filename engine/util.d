@@ -8,9 +8,6 @@ module engine.util;
 
 //-----------------------------------------------------------------------------
 
-//public import derelict.opengl3.gl3;
-//public import derelict.sdl2.sdl;
-
 public import std.stdio: writeln, writefln, write, writef;
 public import std.string: format;
 public import std.conv: to;

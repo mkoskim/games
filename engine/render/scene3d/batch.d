@@ -10,19 +10,13 @@ module engine.render.scene3d.batch;
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import engine.render.loader.mesh;
 
 import gpu = 
     engine.render.gpu.state,
     engine.render.gpu.shader;
 
 import engine.render.gpu.texture;
-
-import engine.render.scene3d.types.material;
-import engine.render.scene3d.types.model;
-import engine.render.scene3d.types.node;
-import engine.render.scene3d.types.view;
-import engine.render.scene3d.types.light;
+import engine.asset.types;
 
 import engine.render.scene3d.feeder;
 

@@ -4,11 +4,11 @@
 //
 //*****************************************************************************
 
-module engine.render.scene3d.types.transform;
+module engine.asset.types.transform;
 
 //-------------------------------------------------------------------------
 
-import engine.render.util;
+import engine.asset.util;
 
 //-------------------------------------------------------------------------
 // Grip is (basically) any kind of object that can output a 4x4 transform

@@ -4,12 +4,12 @@
 //
 //*****************************************************************************
 
-module engine.render.scene3d.types.light;
+module engine.asset.types.light;
 
 //-----------------------------------------------------------------------------
 
-import engine.render.util;
-import engine.render.scene3d.types.transform;
+import engine.asset.util;
+import engine.asset.types.transform;
 
 //-----------------------------------------------------------------------------
 

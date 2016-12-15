@@ -4,17 +4,19 @@
 //
 //*****************************************************************************
 
-module engine.render.scene3d.types.model;
+module engine.asset.types.model;
 
 //-------------------------------------------------------------------------
 
-import engine.render.util;
+import engine.asset.util;
 
-import engine.render.loader.mesh;
+import engine.asset.types.mesh;
 
-import engine.render.scene3d.batch;
-import engine.render.scene3d.types.transform;
-import engine.render.scene3d.types.material;
+import engine.asset.types.transform;
+import engine.asset.types.material;
+
+// TODO: Get rid of this
+import engine.render.scene3d.batch: Batch;
 
 //-------------------------------------------------------------------------
 // Model combines shader vertex data (VAO, Vertex Array Object) with

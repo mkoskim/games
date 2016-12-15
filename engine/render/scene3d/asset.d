@@ -7,9 +7,7 @@
 
 module engine.render.scene3d.asset;
 
-import engine.render.loader.mesh;
-import engine.render.scene3d.types.material;
-import engine.render.scene3d.types.model;
+import engine.asset.types;
 import engine.render.scene3d.batch;
 
 //*****************************************************************************

@@ -4,11 +4,11 @@
 //
 //*****************************************************************************
 
-module engine.render.scene3d.types.material;
+module engine.asset.types.material;
 
 //-----------------------------------------------------------------------------
 
-import engine.render.util;
+import engine.asset.util;
 import engine.render.gpu.texture;
 
 //-----------------------------------------------------------------------------
