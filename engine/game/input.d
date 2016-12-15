@@ -419,7 +419,7 @@ package class GameController : Joystick
         AXISBTN_FIRST = SDL_JoystickNumButtons(stick);
         HATBTN_FIRST  = AXISBTN_FIRST + cast(uint)axes.length*2;
 
-        SDL_JoystickUpdate(stick);
+        SDL_JoystickUpdate();
 
         foreach(i; 0 .. buttons.length) buttons[i] = SDL_JoystickGetButton(stick, cast(int)i);
         foreach(i; 0 .. hats.length)    hats[i] = SDL_JoystickGetHat(stick, cast(int)i);

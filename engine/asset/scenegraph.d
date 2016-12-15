@@ -8,11 +8,11 @@
 //*****************************************************************************
 //*****************************************************************************
 
-module engine.blob.scenegraph;
+module engine.asset.scenegraph;
 
 //-----------------------------------------------------------------------------
 
-import engine.blob.util;
+import engine.asset.util;
 import derelict.assimp3.assimp;
 
 //-----------------------------------------------------------------------------
@@ -60,10 +60,10 @@ void processNode(const aiNode* node, const aiScene* scene)
 
 //-----------------------------------------------------------------------------
 
-void load()
+void load(string filename)
 {
     const aiScene* scene = aiImportFile(
-        "testfiles/human.dae",
+        std.string.toStringz(filename),
         aiProcess_Triangulate |
         aiProcess_SortByPType |
         //aiProcess_JoinIdenticalVertices |

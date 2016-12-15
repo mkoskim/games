@@ -15,6 +15,11 @@ import std.stdio;
 
 void main()
 {
+    engine.asset.scenegraph.load("engine/stock/unsorted/mesh/Chess/bishop.obj");
+}
+
+static if(0) void main()
+{
     //-------------------------------------------------------------------------
     // Init game with default window size
     //-------------------------------------------------------------------------

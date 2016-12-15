@@ -4,9 +4,9 @@
 //
 //*****************************************************************************
 
-module engine.blob.extract;
+module engine.asset.blob;
 
-import engine.blob.util;
+import engine.asset.util;
 
 //-----------------------------------------------------------------------------
 // Blob archive
@@ -36,7 +36,7 @@ ubyte[] extract(string filename)
         archive.expand(file);
     }
     catch(RangeError e) {
-        /*
+        //*
         // For testing: Fall back to filesystem
         return cast(ubyte[])read(filename);
         /*/
@@ -45,38 +45,4 @@ ubyte[] extract(string filename)
     }
     return file.expandedData;
 }
-
-//-----------------------------------------------------------------------------
-// Method 1: BLOB is linked as section (see blob.S)
-//-----------------------------------------------------------------------------
-
-/*
-private extern(C) {
-    extern __gshared ubyte __BLOB_zip;
-    extern __gshared uint  __BLOB_zip_size;
-}
-
-static this()
-{
-    ubyte[] buffer = (&__BLOB_zip)[0 .. __BLOB_zip_size];
-    archive = new ZipArchive(buffer);
-}
-/**/
-
-//-----------------------------------------------------------------------------
-// Method 2: BLOB is concatenated to exe image (cat BLOB.zip >> exe). Don't
-// work at the moment, ZipArchive does not like random data at the beginning
-// of the "ZIP file"...
-//-----------------------------------------------------------------------------
-
-/*
-static this()
-{
-    import std.mmfile;
-    import std.stdio;
-    
-    auto exeimage = new MmFile("/proc/self/exe");
-    archive = new ZipArchive(exeimage[]);
-}
-/**/
 
