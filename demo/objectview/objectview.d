@@ -15,7 +15,9 @@ import std.stdio;
 
 void main()
 {
-    engine.asset.scenegraph.load("engine/stock/unsorted/mesh/Chess/bishop.obj");
+    //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/bishop.obj");
+    engine.asset.SceneGraph.load("data/test.dae");
+    //engine.asset.SceneGraph.load("data/test.obj");
 }
 
 static if(0) void main()
