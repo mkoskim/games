@@ -4,13 +4,13 @@
 //
 //*****************************************************************************
 
-module engine.ext.bitmap;
+module engine.asset.bitmap;
 
 //-----------------------------------------------------------------------------
 
 import derelict.sdl2.sdl;
 import engine.ext.util;
-import blob = engine.blob;
+import engine.asset.misc: loadimage;
 
 //-----------------------------------------------------------------------------
 
@@ -61,7 +61,7 @@ class Bitmap
 
     this(string filename)
     {
-        this(blob.loadimage(filename));
+        this(loadimage(filename));
     }
 
     this(string[] grid, vec4[char] colorchart)

@@ -9,7 +9,7 @@ module engine.render.gpu.compile;
 //-----------------------------------------------------------------------------
 
 import engine.render.util;
-import blob = engine.blob;
+import blob = engine.asset.blob;
 
 import std.string: toStringz, countchars;
 import std.algorithm: map;

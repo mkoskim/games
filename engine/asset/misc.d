@@ -4,7 +4,7 @@
 //
 //*****************************************************************************
 
-module engine.blob.misc;
+module engine.asset.misc;
 
 //-----------------------------------------------------------------------------
 // SDL (images and fonts)
@@ -14,7 +14,7 @@ import std.file: FileException;
 import std.string: format;
 import std.conv: to;
 
-import engine.blob.extract;
+import engine.asset.blob;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;

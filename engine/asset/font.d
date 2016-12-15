@@ -6,7 +6,7 @@
 //
 //*****************************************************************************
 
-module engine.ext.font;
+module engine.asset.font;
 
 //-----------------------------------------------------------------------------
 
@@ -23,6 +23,7 @@ public import derelict.sdl2.ttf:
 import engine.ext.util;
 
 import engine.render.gpu.texture;
+import engine.asset.misc: loadfont;
 
 //-----------------------------------------------------------------------------
 
@@ -46,7 +47,7 @@ class Font
 
         if(!(fontname in fonts))
         {
-            fonts[fontname] = new Font(blob.loadfont(filename, size), fontname);
+            fonts[fontname] = new Font(loadfont(filename, size), fontname);
         }
         return fonts[fontname];
     }

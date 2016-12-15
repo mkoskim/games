@@ -4,12 +4,12 @@
 //
 //*****************************************************************************
 
-module engine.blob.wavefront;
+module engine.asset.wavefront;
 
 //-----------------------------------------------------------------------------
 
-import engine.blob.util;
-import engine.blob.extract;
+import engine.asset.util;
+import engine.asset.blob;
 
 import engine.render.util;
 import engine.render.loader.mesh;
@@ -228,3 +228,4 @@ Mesh loadmesh(string filename)
 
     return mesh;
 }
+

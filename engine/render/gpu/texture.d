@@ -8,10 +8,10 @@ module engine.render.gpu.texture;
 
 //-----------------------------------------------------------------------------
 
-public import engine.ext.bitmap;
+public import engine.asset.bitmap;
 
 import engine.render.util;
-import blob = engine.blob;
+import blob = engine.asset.blob;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
