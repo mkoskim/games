@@ -9,7 +9,6 @@ module engine.render;
 //-----------------------------------------------------------------------------
 
 public import engine.render.gpu;
-public import engine.render.loader.mesh;
 
 import engine.game.instance;
 import engine.render.util;

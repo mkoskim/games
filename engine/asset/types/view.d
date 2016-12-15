@@ -4,7 +4,7 @@
 //
 //*****************************************************************************
 
-module engine.render.scene3d.types.view;
+module engine.asset.types.view;
 
 //-----------------------------------------------------------------------------
 
@@ -12,8 +12,8 @@ public import gl3n.frustum: Frustum, OUTSIDE, INTERSECT, INSIDE;
 
 import engine.game.instance;
 
-import engine.render.util;
-import engine.render.scene3d.types.transform;
+import engine.asset.util;
+import engine.asset.types.transform;
 
 //-----------------------------------------------------------------------------
 // TODO: Combine View and Camera

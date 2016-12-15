@@ -9,8 +9,13 @@ module engine.asset.bitmap;
 //-----------------------------------------------------------------------------
 
 import derelict.sdl2.sdl;
+import derelict.sdl2.image;
 import engine.ext.util;
-import engine.asset.misc: loadimage;
+import engine.asset.blob;
+
+import std.file: FileException;
+import std.string: format;
+import std.conv: to;
 
 //-----------------------------------------------------------------------------
 
@@ -58,6 +63,19 @@ class Bitmap
     }
 
     //-------------------------------------------------------------------------
+
+    private static SDL_Surface* loadimage(string filename)
+    {
+        auto buffer = extract(filename);
+        auto img = IMG_Load_RW(SDL_RWFromConstMem(buffer.ptr, cast(int)buffer.length), true);
+
+        if(!img) throw new FileException(
+            filename,
+            format("SDL:IMG_Load_RW: %s",to!string(SDL_GetError()))
+        );
+
+        return img;
+    }
 
     this(string filename)
     {

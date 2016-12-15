@@ -13,6 +13,7 @@ module engine.asset.scenegraph;
 //-----------------------------------------------------------------------------
 
 import engine.asset.util;
+import blob = engine.asset.blob;
 import derelict.assimp3.assimp;
 
 //-----------------------------------------------------------------------------
@@ -29,8 +30,11 @@ void processNode(const aiNode* node, const aiScene* scene)
     static string prefix = "";
     
     writeln(prefix, "Processing: ", tostr(node.mName));
-    
-    // Process all the node's meshes (if any)
+
+    // Process all the node's meshes (if any). NOTE: Meshes are
+    // stored as an array to scene object: node refers to them by
+    // index to this array.
+
     foreach(i; 0 .. node.mNumMeshes)
     {
         auto mesh = scene.mMeshes[node.mMeshes[i]]; 
@@ -62,14 +66,21 @@ void processNode(const aiNode* node, const aiScene* scene)
 
 void load(string filename)
 {
-    const aiScene* scene = aiImportFile(
-        std.string.toStringz(filename),
+    auto buffer = blob.extract(filename);
+
+    const aiScene* scene = aiImportFileFromMemory(
+        buffer.ptr,
+        cast(uint)buffer.length,
         aiProcess_Triangulate |
+        aiProcess_CalcTangentSpace |
+        aiProcess_GenNormals |
         aiProcess_SortByPType |
-        //aiProcess_JoinIdenticalVertices |
-        //aiProcess_OptimizeMeshes |
+        aiProcess_ImproveCacheLocality |
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_OptimizeMeshes |
         //aiProcess_OptimizeGraph |
-        0
+        0,
+        toStringz(std.path.extension(filename))
     ); 
 
     if(!scene)

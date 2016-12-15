@@ -10,6 +10,12 @@ module engine.asset.font;
 
 //-----------------------------------------------------------------------------
 
+import std.file: FileException;
+import std.string: format;
+import std.conv: to;
+
+import engine.asset.blob;
+
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 
@@ -23,7 +29,6 @@ public import derelict.sdl2.ttf:
 import engine.ext.util;
 
 import engine.render.gpu.texture;
-import engine.asset.misc: loadfont;
 
 //-----------------------------------------------------------------------------
 
@@ -40,6 +45,23 @@ class Font
     //-------------------------------------------------------------------------
 
     static Font[string] fonts;
+
+    private static TTF_Font* loadfont(string filename, int ptsize)
+    {
+        auto buffer = extract(filename);
+        auto font = TTF_OpenFontRW(
+            SDL_RWFromConstMem(buffer.ptr, cast(int)buffer.length),
+            true, 
+            ptsize
+        );
+
+        if(!font) throw new FileException(
+            filename,
+            format("SDL:TTF_OpenFontRW: %s",to!string(SDL_GetError()))
+        );
+
+        return font;
+    }
 
     static Font load(string filename, int size)
     {

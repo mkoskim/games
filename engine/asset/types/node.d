@@ -20,15 +20,15 @@
 //
 //*****************************************************************************
 
-module engine.render.scene3d.types.node;
+module engine.asset.types.node;
 
 //-------------------------------------------------------------------------
 
-import engine.render.util;
+import engine.asset.util;
 
-import engine.render.scene3d.types.transform;
-import engine.render.scene3d.types.model;
-import engine.render.scene3d.types.view;
+import engine.asset.types.transform;
+import engine.asset.types.model;
+import engine.asset.types.view;
 
 //-------------------------------------------------------------------------
 // Nodes are drawable objects that combine transform with shape.

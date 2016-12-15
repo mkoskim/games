@@ -8,8 +8,8 @@ module engine.asset.geom;
 
 //-----------------------------------------------------------------------------
 
-import engine.render.util;
-import engine.render.loader.mesh;
+import engine.asset.util;
+import engine.asset.types;
 
 const vec2 center = vec2(0.5, 0.5);
 
