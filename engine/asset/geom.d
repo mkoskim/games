@@ -9,7 +9,7 @@ module engine.asset.geom;
 //-----------------------------------------------------------------------------
 
 import engine.asset.util;
-import engine.asset.types;
+import engine.asset.types.mesh;
 
 const vec2 center = vec2(0.5, 0.5);
 
