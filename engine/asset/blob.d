@@ -46,3 +46,8 @@ ubyte[] extract(string filename)
     return file.expandedData;
 }
 
+string text(string filename)
+{
+    return cast(string)extract(filename);
+}
+

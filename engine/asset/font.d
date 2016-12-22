@@ -28,7 +28,7 @@ public import derelict.sdl2.ttf:
 
 import engine.ext.util;
 
-import engine.render.gpu.texture;
+import engine.gpu.texture;
 
 //-----------------------------------------------------------------------------
 

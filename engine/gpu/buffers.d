@@ -4,11 +4,10 @@
 //
 //*****************************************************************************
 
-module engine.render.gpu.buffers;
+module engine.gpu.buffers;
 
-import engine.render.util;
-
-import engine.render.gpu.types;
+import engine.gpu.util;
+import engine.gpu.types;
 
 //-------------------------------------------------------------------------
 // Vertex data buffers (VBO, Vertex Buffer Object)
@@ -29,11 +28,27 @@ protected class VBO
         unbind();
     }
 
+    //---------------------------------------------------------------------
+
+    GLenum type;
+    string name;
+
+    this(string name, GLenum type, void* buffer, size_t length, size_t elemsize)
+    {
+        this(buffer, length, elemsize);
+        this.name = name;
+        this.type = type;
+    }
+    
+    this(string name, vec3[] buffer) { this(name, GL_FLOAT_VEC3, buffer.ptr, buffer.length, vec3.sizeof); }
+    this(string name, vec2[] buffer) { this(name, GL_FLOAT_VEC2, buffer.ptr, buffer.length, vec2.sizeof); }
+
+    //---------------------------------------------------------------------
+
     ~this()
     {
         debug Track.remove(this);
         checkgl!glDeleteBuffers(1, &ID);
-        //writeln("~VBO.this: ", ID);
     }
 
     //---------------------------------------------------------------------
@@ -53,7 +68,7 @@ protected class IBO
     GLuint length;
     GLuint drawmode;
 
-    this(GLint drawmode, ushort[] faces, GLenum mode = GL_STATIC_DRAW)
+    this(ushort[] faces, GLint drawmode, GLenum mode = GL_STATIC_DRAW)
     {
         debug Track.add(this);
         length = cast(uint)faces.length;

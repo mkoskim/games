@@ -8,10 +8,10 @@ module engine.render;
 
 //-----------------------------------------------------------------------------
 
-public import engine.render.gpu;
+public import engine.gpu;
 
 import engine.game.instance;
-import engine.render.util;
+import engine.gpu.util;
 
 import std.stdio;
 import std.string;

@@ -12,11 +12,11 @@ module engine;
 
 public {
     import game = engine.game;
+    import asset = engine.asset;
+    import gpu = engine.gpu;
     //import render = engine.render;
-    //import gpu = engine.render.gpu;
     //import scene3d = engine.render.scene3d;
     //import postprocess = engine.render.postprocess;
-    import asset = engine.asset;
 }
 
 //-----------------------------------------------------------------------------
