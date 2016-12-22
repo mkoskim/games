@@ -26,11 +26,6 @@ private string tostr(const aiString str)
     return to!string(str.data[0 .. str.length]);
 }
 
-private vec3 tovec3(const aiVector3D vec)
-{
-    return vec3(vec.x, vec.y, vec.z);
-}
-
 //*****************************************************************************
 //
 // Make a "local" copy of ASSIMP data structures. This allows us to modify
@@ -47,43 +42,14 @@ class SceneGraph
     {
         string name;
         
-        //---------------------------------------------------------------------
-        struct Vertex
-        {
-            vec3 pos;
-            vec3 uv;
-            vec3 normal;
-            vec3 tangent;
-            
-            //this(vec3 pos, vec3 uv, vec3 normal, vec3 tangent)
-            this(vec3 pos, vec3 normal, vec3 tangent, vec3 uv)
-            {
-                this.pos = pos;
-                this.normal = normal;
-                this.tangent = tangent;
-                this.uv = uv;
-                
-                writefln("  - Vertex: (%.0f, %.0f, %.0f)", pos.x, pos.y, pos.z);
-            }
-        }
-
-        Vertex[int] vertices;
-
-        //---------------------------------------------------------------------
-
-        struct Triangle {
-            int a, b, c;
-            
-            this(const aiFace face)
-            {
-                a = face.mIndices[0];
-                b = face.mIndices[1];
-                c = face.mIndices[2];
-                writefln("  - Face: %d - %d - %d", a, b, c);
-            }
-        }
-        Triangle[] faces;
-
+        vec3[] pos;
+        vec2[] uv;
+        vec3[] t;
+        vec3[] b;
+        vec3[] n;
+        
+        ushort[] triangles;
+        
         //---------------------------------------------------------------------
 
         this(const aiMesh* mesh)
@@ -92,20 +58,32 @@ class SceneGraph
             writefln("Mesh: %s", name);
             writeln("- Vertices: ", mesh.mNumVertices);
             
-            foreach(i; 0 .. mesh.mNumVertices)
+            vec3 tovec3(const aiVector3D v) { return vec3(v.x, v.y, v.z); }
+            vec2 tovec2(const aiVector3D v) { return vec2(v.x, v.y); }
+            mat3 tomat3(const aiVector3D a, const aiVector3D b, const aiVector3D c)
             {
-                vertices[i] = Vertex(
-                    tovec3(mesh.mVertices[i]),
-                    tovec3(mesh.mNormals[i]),
-                    mesh.mTangents ? tovec3(mesh.mTangents[i]) : vec3(0, 0, 0),
-                    mesh.mTextureCoords[0] ? tovec3(mesh.mTextureCoords[0][i]) : vec3(),
-                );
+                return mat3(tovec3(a), tovec3(b), tovec3(c));
             }
             
-            writeln("- Faces: ", mesh.mNumFaces);
+            foreach(i; 0 .. mesh.mNumVertices)
+            {
+                pos ~= tovec3(mesh.mVertices[i]);
+                if(mesh.mTextureCoords[0]) uv ~= tovec2(mesh.mTextureCoords[0][i]);
+                if(mesh.mTangents) {
+                    t ~= tovec3(mesh.mTangents[i]);
+                    b ~= tovec3(mesh.mBitangents[i]);
+                    n ~= tovec3(mesh.mNormals[i]);
+                }
+                writeln("P: ", pos[i], "uv: ", uv[i]);
+            }
+            
             foreach(i; 0 .. mesh.mNumFaces)
             {
-                faces ~= Triangle(mesh.mFaces[i]);
+                triangles ~= [
+                    cast(ushort)mesh.mFaces[i].mIndices[0],
+                    cast(ushort)mesh.mFaces[i].mIndices[1],
+                    cast(ushort)mesh.mFaces[i].mIndices[2]
+                ];
             }
         }
     }

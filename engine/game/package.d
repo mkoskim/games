@@ -185,7 +185,7 @@ private int framelength = 1000/50;
 
 //-----------------------------------------------------------------------------
 
-import engine.render.util: glcalls;
+import engine.gpu.util: glcalls;
 
 void startdraw()
 {

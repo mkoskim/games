@@ -6,9 +6,9 @@
 //*****************************************************************************
 //*****************************************************************************
 
-module engine.render.gpu.framebuffer;
+module engine.gpu.framebuffer;
 
-import engine.render.util;
+import engine.gpu.util;
 import engine.game.instance;
 
 class Framebuffer

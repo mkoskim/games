@@ -12,7 +12,7 @@ module engine.game.instance;
 import derelict.sdl2.sdl;
 
 import engine.game.input;
-import engine.render.gpu.framebuffer;
+import engine.gpu.framebuffer;
 
 //-----------------------------------------------------------------------------
 

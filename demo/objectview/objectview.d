@@ -11,16 +11,129 @@ import engine;
 import std.random;
 import std.stdio;
 
-//-----------------------------------------------------------------------------
+import engine.gpu.util;
+
+//*****************************************************************************
+//
+static if(1)
+//
+//*****************************************************************************
 
 void main()
 {
-    //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/bishop.obj");
-    engine.asset.SceneGraph.load("data/test.dae");
-    //engine.asset.SceneGraph.load("data/test.obj");
+    game.init();
+
+    //-------------------------------------------------------------------------
+
+    auto shader = new gpu.Shader(
+        engine.asset.blob.text("data/simple.glsl")
+    );
+
+    auto state = new gpu.State(
+        shader,
+        (){
+            checkgl!glEnable(GL_CULL_FACE);
+            checkgl!glCullFace(GL_BACK);
+            checkgl!glFrontFace(GL_CCW);
+            checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            //checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            checkgl!glEnable(GL_DEPTH_TEST);
+            checkgl!glDisable(GL_BLEND);
+        }
+    );
+    
+    //-------------------------------------------------------------------------
+
+    //auto scene = engine.asset.SceneGraph.load("data/test.dae");
+    auto scene = engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj");
+
+    auto mesh = scene.meshes[0];
+
+    engine.gpu.VBO[string] vbos = [
+        "vert_pos": new engine.gpu.VBO("vert_pos", mesh.pos),
+        "vert_uv": new engine.gpu.VBO("vert_uv",  mesh.uv),
+        "vert_T": new engine.gpu.VBO("vert_T",  mesh.t),
+        "vert_B": new engine.gpu.VBO("vert_B",  mesh.b),
+        "vert_N": new engine.gpu.VBO("vert_N",  mesh.n),
+    ];
+
+    auto ibo = new engine.gpu.IBO(mesh.triangles, GL_TRIANGLES);
+
+    //-------------------------------------------------------------------------
+
+    auto vao = new engine.gpu.VAO();
+    
+    vao.bind();
+    foreach(attrib; shader.attributes.keys()) {
+        auto vbo = vbos[attrib];
+        shader.attrib(attrib, vbo.type, vbo);
+    }
+    ibo.bind();
+    vao.unbind();
+    ibo.unbind();
+
+    //-------------------------------------------------------------------------
+
+    auto loader   = engine.gpu.Texture.Loader.Default;
+    auto colormap = 
+        loader(vec4(0.5, 0.5, 0.5, 1))
+        //loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
+        ;
+    auto normalmap = 
+        //loader(vec4(0.5, 0.5, 1, 0))
+        loader("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png")
+    ;
+
+    //-------------------------------------------------------------------------
+
+    auto mProjection = mat4.perspective(
+        game.screen.width, game.screen.height,
+        60,
+        1, 100
+    );
+
+    auto mView = mat4.identity().translate(0, 0, -5);
+
+    auto pLight = vec3(5, 5, 0);
+
+    //-------------------------------------------------------------------------
+
+    void draw()
+    {
+        state.activate();
+        
+        state.shader.uniform("mProjection", mProjection);
+        state.shader.uniform("mView", mView);
+        state.shader.uniform("material.colormap", colormap, 0);
+        state.shader.uniform("material.normalmap", normalmap, 1);
+        state.shader.uniform("light.pos", pLight);
+    
+        static float angle = 0;
+        state.shader.uniform("mModel", mat4.identity().rotate(angle, vec3(1, 1, 0)));
+        angle += 0.01;
+
+        vao.bind();
+        ibo.draw();
+        vao.unbind();
+    }
+    
+    //-------------------------------------------------------------------------
+
+    simple.gameloop(
+        50,     // FPS (limit)
+        &draw,  // Drawing
+        null,   // list of actors
+        null    // Event processing
+    );
 }
 
-static if(0) void main()
+//*****************************************************************************
+//
+else 
+//
+//*****************************************************************************
+
+void main()
 {
     //-------------------------------------------------------------------------
     // Init game with default window size
@@ -45,6 +158,10 @@ static if(0) void main()
         );
     }
 
+    auto scene = engine.asset.SceneGraph.load("data/test.dae");
+    auto node = scene.lookup["Cube"];
+
+/*
     auto node = pipeline.add(
         scene3d.Grip.movable, 
             //blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj")
@@ -62,6 +179,7 @@ static if(0) void main()
             //0.75
         )
     );
+*/
 
     //-------------------------------------------------------------------------
     // Control

@@ -10,11 +10,11 @@
 //
 //*****************************************************************************
 
-module engine.render.gpu.state;
+module engine.gpu.state;
 
-import engine.render.util;
-import engine.render.gpu.shader;
-import engine.render.gpu.framebuffer;
+import engine.gpu.util;
+import engine.gpu.shader;
+import engine.gpu.framebuffer;
 import engine.game.instance;
 
 class State
@@ -27,20 +27,15 @@ class State
 
     //-------------------------------------------------------------------------
 
-    enum Mode { unsorted, front2back, back2front };
-    Mode mode;
-
-    //-------------------------------------------------------------------------
-
-    this(Framebuffer fb, Shader shader, void delegate() apply, Mode mode = Mode.unsorted) {
+    this(Framebuffer fb, Shader shader, void delegate() apply) {
         debug Track.add(this);
         this.target = fb;
         this.shader = shader;
         this.apply = apply;
     }
     
-    this(Shader shader, void delegate() apply, Mode mode = Mode.unsorted) {
-        this(screen.fb, shader, apply, mode);
+    this(Shader shader, void delegate() apply) {
+        this(screen.fb, shader, apply);
     }
 
     ~this() { debug Track.remove(this); }

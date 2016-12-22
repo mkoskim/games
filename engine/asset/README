@@ -1,6 +1,17 @@
-Asset loading and processing:
+
+
+                            GAME ASSETS
+                            -----------
+
+General data types needed for game, for example:
 
     - Meshes
-    - Textures (images)
+    - Bitmaps (textures)
     - Fonts
+
+These are used for:
+
+    1) Loading assets (ASSIMP)
+    2) Uploading GPU resources
+
 

@@ -4,19 +4,16 @@
 //
 //*****************************************************************************
 
-module engine.render.gpu.shader;
+module engine.gpu.shader;
 
 //-----------------------------------------------------------------------------
 
-import engine.render.util;
+import engine.gpu.util;
 
-import engine.render.gpu.types;
-import engine.render.gpu.texture;
-import engine.render.gpu.buffers;
-import engine.render.gpu.compile;
-
-//import engine.render.types.bounds;
-//import engine.render.types.mesh;
+import engine.gpu.types;
+import engine.gpu.texture;
+import engine.gpu.buffers;
+import engine.gpu.compile;
 
 import std.string: toStringz;
 import std.variant: Variant;
@@ -25,77 +22,68 @@ import std.variant: Variant;
 
 class Shader
 {
+    Variant[string] options;
+
     //*************************************************************************
     //
-    // Getting locations of shader parameters (uniforms and attributes)
+    // Getting locations of shader parameters (uniforms and attributes). We
+    // get these directly using Program ID, so we can bind buffers without
+    // activating the shader itself.
     //
     //*************************************************************************
 
-    bool[string] features;  // Features of this shader for upper levels
-    bool[string] optional;  // Try to look for uniform, but don't care if it does not exist
-    bool[string] rejected;  // Don't even try to look uniform
-    
-    void setFeatures(string[] names...) {
-        foreach(name; names) features[name] = true;
-    }
-    
-    void setOptional(string[] names...) {
-        foreach(name; names) optional[name] = true;
-    }
-    
-    void setRejected(string[] names...) {
-        foreach(name; names) rejected[name] = true;
-    }
-    
-    private {
-        GLint[string] _namecache;
+    GLint[string] uniforms;
+    GLint[string] attributes;
 
-        void _getlocation(string namespace, string name)
+    private auto getProgramParam(T)(GLenum name)
+    {
+        GLint result;
+        checkgl!glGetProgramiv(programID, name, &result);
+        return cast(T)result;
+    }
+
+    private void addUniform(GLint i) {
+        int maxlen = getProgramParam!int(GL_ACTIVE_UNIFORM_MAX_LENGTH);
+        char[] namebuf = new char[maxlen];
+        GLenum type;
+        GLint  size;
+
+        checkgl!glGetActiveUniform(programID, i, maxlen, null, &size, &type, namebuf.ptr);
+        uniforms[to!string(namebuf.ptr)] = i;
+    }
+        
+    private void addAttribute(GLint i) {
+        int maxlen = getProgramParam!int(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
+        char[] namebuf = new char[maxlen];
+        GLenum type;
+        GLint  size;
+
+        checkgl!glGetActiveAttrib(programID, i, maxlen, null, &size, &type, namebuf.ptr);
+        attributes[to!string(namebuf.ptr)] = i;
+    }
+
+    private void fillNameCache()
+    {
+        foreach(uint i; 0 .. getProgramParam!int(GL_ACTIVE_UNIFORMS))
         {
-            if(name in rejected) {
-                _namecache[name] = -1;
-                return;
-            }
-
-            extern(C) GLint function(GLuint, const(char)*) query;
-
-            switch(namespace)
-            {
-                case "uniform": query = glGetUniformLocation; break;
-                case "attrib":  query = glGetAttribLocation; break;
-                default: throw new Exception("Invalid namespace: " ~ namespace);
-            }
-
-            GLint loc = checkgl!query(programID, name.toStringz);
-            if(loc == -1 && !(name in optional)) throw new Exception("Unknown GLSL identifier: " ~ name);
-            _namecache[name] = loc;
+            addUniform(i);
         }
-    }
 
-    protected final GLint location(string namespace, string name)
-    {
-        if(!(name in _namecache)) _getlocation(namespace, name);
-        //debug writeln("Location: ", name, " @ ", locations[name]);
-        return _namecache[name];
-    }
-
-    debug void dumpNameCache()
-    {
-        foreach(id; _namecache.keys)
+        foreach(uint i; 0 .. getProgramParam!int(GL_ACTIVE_ATTRIBUTES))
         {
-            writeln(id, " @ ", _namecache[id]);
+            addAttribute(i);
         }
     }
 
     //*************************************************************************
     //
-    // Shader uniforms and options
+    // Shader uniforms
     //
     //*************************************************************************
 
     final void uniform(string name, Variant value)
     {
-        GLint loc = location("uniform", name);
+        GLint loc = uniforms[name];
         if(loc == -1) return ;
 
         if     (value.type == typeid(bool))   checkgl!glUniform1i(loc, value.get!(bool));
@@ -115,15 +103,15 @@ class Shader
     final void uniform(string n, int v)   { uniform(n, Variant(v)); }
     final void uniform(string n, bool v)  { uniform(n, Variant(v)); }
 
-    Variant[string] options;
+    //*************************************************************************
+    //
+    // Texture samplers. Maybe we change this to uniform?
+    //
+    //*************************************************************************
 
-    //-------------------------------------------------------------------------
-    // Texture sampler. TODO: Maybe we change this to uniform.
-    //-------------------------------------------------------------------------
-
-    final void texture(string name, GLenum unit, Texture texture)
+    final void uniform(string name, Texture texture, GLenum unit)
     {
-        GLint loc = location("uniform", name);
+        GLint loc = uniforms[name];
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_2D, texture.ID);
@@ -131,9 +119,9 @@ class Shader
         }
     }
 
-    final void texture(string name, GLenum unit, Cubemap cubemap)
+    final void uniform(string name, Cubemap cubemap, GLenum unit)
     {
-        GLint loc = location("uniform", name);
+        GLint loc = uniforms[name];
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.ID);
@@ -141,15 +129,21 @@ class Shader
         }
     }
 
-    //-------------------------------------------------------------------------
-    // Connecting attributes from buffers
-    //-------------------------------------------------------------------------
+    //*************************************************************************
+    //
+    // Connecting attributes from buffers. In fact, it would be easier to use
+    // non-interleaved buffers. Although interleaved ones are nice and compact,
+    // they cause lots of extra hassling. In addition, with interleaved ones
+    // it is harder to add vertex data to shaders.
+    //
+    //*************************************************************************
     
-    void connect(string name, GLenum type, GLint elems, bool normalized, size_t offset, size_t rowsize)
+    private void connect(VBO vbo, string name, GLenum type, GLint elems, bool normalized, size_t offset, size_t rowsize)
     {
-        GLint loc = location("attrib", name);
+        GLint loc = attributes[name];
         if(loc == -1) return;
 
+        vbo.bind();
         checkgl!glVertexAttribPointer(
             loc,                        // attribute location
             elems,                      // size
@@ -158,17 +152,30 @@ class Shader
             cast(GLint)rowsize,         // stride
             cast(void*)offset           // array buffer offset
         );
+        vbo.unbind();
         checkgl!glEnableVertexAttribArray(loc);
     }
 
-    void disconnect(string name)
+    private void disconnect(string name)
     {
-        GLint loc = location("attrib", name);
+        GLint loc = attributes[name];
         checkgl!glDisableVertexAttribArray(loc);
     }
 
     //-------------------------------------------------------------------------
 
+    void attrib(string name, GLenum type, VBO vbo)
+    {
+        switch(type) {
+            case GL_FLOAT     : connect(vbo, name, GL_FLOAT, 1, false, 0, 0); break;
+            case GL_FLOAT_VEC2: connect(vbo, name, GL_FLOAT, 2, false, 0, 0); break;
+            case GL_FLOAT_VEC3: connect(vbo, name, GL_FLOAT, 3, false, 0, 0); break;
+            case GL_FLOAT_VEC4: connect(vbo, name, GL_FLOAT, 4, false, 0, 0); break;
+            default: throw new Exception(format("Unknown type '%s' for attribute '%s'", to!string(type), name));
+        }            
+    }
+
+/*
     void attrib(T: vec2)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 2, false, offset, rowsize); }
     void attrib(T: vec3)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 3, false, offset, rowsize); }
     void attrib(T: vec4)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 4, false, offset, rowsize); }
@@ -184,6 +191,7 @@ class Shader
     {
         shader.attrib!(typeof(field))(name, field.offsetof, rowsize);
     }
+*/
 
     //*************************************************************************
     //
@@ -216,21 +224,23 @@ class Shader
 
     GLuint programID;
 
-    this(GLuint ID = 0) {
+    this(GLuint ID) {
         debug Track.add(this);
         programID = ID;
+        fillNameCache();
     }
 
     //-------------------------------------------------------------------------
 
-    this(string[] common, string[] vsfiles, string[] fsfiles)
+    this(string vs_source, string fs_source)
     {
-        debug Track.add(this);
-        programID = CompileProgram(common, vsfiles, fsfiles);
+        this(CompileProgram(vs_source, fs_source));
     }
 
-    this(string filename) { this([], [filename], [filename]); }
-    this(string vsfile, string fsfile) { this([], [vsfile], [fsfile]); }
+    this(string source)
+    {
+        this(source, source);
+    }
 
     //-------------------------------------------------------------------------
 

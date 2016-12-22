@@ -4,13 +4,13 @@
 //
 //*****************************************************************************
 
-module engine.render.gpu.compile;
+module engine.gpu.compile;
 
 //-----------------------------------------------------------------------------
 
-import engine.render.util;
-import blob = engine.asset.blob;
+import engine.gpu.util;
 
+import blob = engine.asset.blob;
 import std.string: toStringz, countchars;
 import std.algorithm: map;
 import std.regex;
@@ -59,13 +59,13 @@ class ShaderCompileError : Exception
 //
 //*****************************************************************************
 
-GLuint CompileProgram(string[] common, string[] vsfiles, string[] fsfiles)
+GLuint CompileProgram(string vs_source, string fs_source)
 {
     //-------------------------------------------------------------------------
 
     GLuint[] shaders = [
-        compileShader(GL_VERTEX_SHADER,   common ~ vsfiles),
-        compileShader(GL_FRAGMENT_SHADER, common ~ fsfiles)
+        compileShader(GL_VERTEX_SHADER,   vs_source),
+        compileShader(GL_FRAGMENT_SHADER, fs_source)
     ];
 
     //-------------------------------------------------------------------------
@@ -86,7 +86,7 @@ GLuint CompileProgram(string[] common, string[] vsfiles, string[] fsfiles)
 
     debug validate(programID);
 
-    //debug dumpSymbols(programID);
+    debug dumpSymbols(programID);
 
     //-------------------------------------------------------------------------
 
@@ -105,32 +105,28 @@ GLuint CompileProgram(string[] common, string[] vsfiles, string[] fsfiles)
 //
 //*****************************************************************************
 
-private GLuint compileShader(GLenum shadertype, string[] files)
+private GLuint compileShader(GLenum shadertype, string[] srcs...)
 {
     const string[GLenum] header = [
         GL_VERTEX_SHADER: "#define VERTEX_SHADER\n",
         GL_FRAGMENT_SHADER: "#define FRAGMENT_SHADER\n"
     ];
 
-    //-------------------------------------------------------------------------
-    // Construct string array from sources. At the top of the source we put
-    // some built-ins. We allow null filenames for missing optional parts.
-    //-------------------------------------------------------------------------
-
     const(char)*[] source = [
         toStringz("#version 120\n"),
         toStringz(header[shadertype])
     ];
 
-    foreach(file; files) {
-        if(file)
-            source ~= toStringz(cast(string)blob.extract(file));
+    foreach(src; srcs) {
+        if(src)
+            source ~= toStringz(src);
         else
             source ~= "";
     }
 
-    files = [ "internal", "internal" ] ~ files;
-
+    //-------------------------------------------------------------------------
+    // Construct string array from sources. At the top of the source we put
+    // some built-ins. We allow null filenames for missing optional parts.
     //-------------------------------------------------------------------------
 
     auto shaderID = checkgl!glCreateShader(shadertype);
@@ -147,12 +143,12 @@ private GLuint compileShader(GLenum shadertype, string[] files)
 
     //-------------------------------------------------------------------------
 
-    //debug writeln(getShaderSource(shaderID));
+    debug writeln(getShaderSource(shaderID));
 
-/*
-    throw new ShaderCompileError(format("%s", getShaderInfoLog(shaderID)));
-/*/
     string msg = getShaderInfoLog(shaderID);
+//*
+    throw new ShaderCompileError(format("%s", msg));
+/*/
     auto errorat = new Location(msg);
 
     foreach(i, content; source)
@@ -268,7 +264,7 @@ private string getProgramInfoLog(GLuint programID)
 }
 
 //-----------------------------------------------------------------------------
-// Validation & symbol dumping
+// Program validation
 //-----------------------------------------------------------------------------
 
 private void validate(GLuint programID)
@@ -281,12 +277,14 @@ private void validate(GLuint programID)
     if(!status) writeln("- Message: ", getProgramInfoLog(programID));
 }
 
+//-----------------------------------------------------------------------------
+// Dumping symbols: This is pretty useful information, and could be moved to
+// Shader class. This is now moved, but remains here as a duplicate until
+// compiling is moved, too.
+//-----------------------------------------------------------------------------
+
 private void dumpSymbols(GLuint programID)
 {
-    int count = getProgram!int(programID, GL_ACTIVE_UNIFORMS);
-    int maxlen = getProgram!int(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH);
-    char[] namebuf = new char[maxlen];
-
     string[GLenum] type2str = [
         GL_FLOAT: "float", GL_FLOAT_VEC2: "vec2", GL_FLOAT_VEC3: "vec3", GL_FLOAT_VEC4: "vec4",
         GL_INT: "int", GL_INT_VEC2: "ivec2", GL_INT_VEC3: "ivec3", GL_INT_VEC4: "ivec4",
@@ -298,10 +296,15 @@ private void dumpSymbols(GLuint programID)
 
     writeln("Program: ", programID);
 
+    //-------------------------------------------------------------------------
+
     writeln("- Uniforms:");
 
-    foreach(uint i; 0 .. count)
+    foreach(uint i; 0 .. getProgram!int(programID, GL_ACTIVE_UNIFORMS))
     {
+        int maxlen = getProgram!int(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH);
+        char[] namebuf = new char[maxlen];
+
         GLint size;
         GLenum type;
 
@@ -320,10 +323,31 @@ private void dumpSymbols(GLuint programID)
         );
     }
 
-    writeln("- Vertex attributes: Not yet implemented.");
-    writeln("- Varying: Not yet implemented.");
+    //-------------------------------------------------------------------------
 
-    //writeln("Uniforms: ", count);
-    //writeln("Maxlen: ", maxlen);
+    writeln("- Vertex attributes:");
+    
+    foreach(uint i; 0 .. getProgram!int(programID, GL_ACTIVE_ATTRIBUTES))
+    {
+        int maxlen = getProgram!int(programID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
+        char[] namebuf = new char[maxlen];
+
+        GLint size;
+        GLenum type;
+
+        checkgl!glGetActiveAttrib(
+            programID, i, maxlen,
+            null, 
+            &size,
+            &type,
+            namebuf.ptr
+        );
+
+        writefln("    %2d: %-" ~ to!string(maxlen) ~"s: %d x %s",
+            i,
+            to!string(namebuf.ptr),
+            size, type2str[type],
+        );
+    }
 }
 

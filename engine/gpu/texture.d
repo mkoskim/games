@@ -4,14 +4,13 @@
 //
 //*****************************************************************************
 
-module engine.render.gpu.texture;
+module engine.gpu.texture;
 
 //-----------------------------------------------------------------------------
 
 public import engine.asset.bitmap;
 
-import engine.render.util;
-import blob = engine.asset.blob;
+import engine.gpu.util;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
