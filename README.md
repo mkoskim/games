@@ -3,6 +3,11 @@ Game projects with common engine
 
 "<strike>Reinventing</strike> Reconstructing the wheel, again..." - it is a way to learn how things work.
 
+**NOTE:** Currently, most of the examples do not compile. I am working - when
+working - with new asset loading system based on assimp, integrating lua for
+loading assets, and then restructure shader engine to match the changes. Meanwhile,
+feel free to browse the code.
+
 **Description:** See:
 
 [games wiki](https://github.com/mkoskim/games/wiki)
