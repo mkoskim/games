@@ -13,7 +13,7 @@ import engine.gpu.types;
 // Vertex data buffers (VBO, Vertex Buffer Object)
 //-------------------------------------------------------------------------
 
-protected class VBO
+class VBO
 {
     GLuint ID;
 
@@ -62,7 +62,7 @@ protected class VBO
 // TODO: Add ranged draw.
 //-------------------------------------------------------------------------
 
-protected class IBO
+class IBO
 {
     GLuint ID;
     GLuint length;
@@ -102,7 +102,7 @@ protected class IBO
 // Vertex Array Object
 //-------------------------------------------------------------------------
 
-protected class VAO
+class VAO
 {
     uint ID;
 
