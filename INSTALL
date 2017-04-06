@@ -1,10 +1,24 @@
 This project has been made with:
 
-    - Linux Mint 64-bit (Current: 17.2 Rafaela)
-    - DMD compiler (current: 2.069.0-b2)
+    - Linux Mint 64-bit (Current: 18.1)
+    - DMD compiler (current: 2.073.2)
     
-It is far from easy to be compiled on other platforms at the moment. I try
-later simplify the process in the future.
+-------------------------------------------------------------------------------
+
+Currently, there is setup/setup.sh which tries to simplify installation of
+necessary libraries and their versions. Try it:
+
+    $ cd setup
+    setup$ sudo setup.sh
+
+
+-------------------------------------------------------------------------------
+
+GAME CONTROLLER: Now, with emulated controller, games can be basically played
+without having a real one. But game controller is still recommended. My games
+are and will be made to be played with such (XBox).
+
+-------------------------------------------------------------------------------
 
 To successfully compile and run projects, you will need:
 
@@ -18,6 +32,7 @@ To successfully compile and run projects, you will need:
         * SDL 2 TTF           For loading & rendering fonts
         * SDL 2 Image         For loading images
         * Assimp 3.0+         For loading 3D models
+        * Lua 5.2             For scripting
    
    Your system should have support at least for PNG images. I'm not sure how
    std.zip is implemented, but it may require zlib. Luckily, both are
@@ -25,6 +40,8 @@ To successfully compile and run projects, you will need:
 
    You will need at least OpenGL 2.1. I have currently been planning to move
    on to OpenGL 3.3, because it has many nice features to study closer.
+
+-------------------------------------------------------------------------------
 
 2) BUILD TOOLS:
 
@@ -35,6 +52,8 @@ To successfully compile and run projects, you will need:
    This is usually installed to Linux systems by default. NOTE: Preliminary
    dub building support exists.
 
+-------------------------------------------------------------------------------
+
 3) DMD D COMPILER:
 
    This is easy to install to both Linux and Windows, and
@@ -42,8 +61,9 @@ To successfully compile and run projects, you will need:
 
         http://dlang.org/download.html
 
-   Previous version I was using was 2.067.1. I installed new version (2.069.0-b2)
-   recently, and it seems to work.
+   Current version in use is 2.073.2
+
+-------------------------------------------------------------------------------
 
 4) DUB
 
@@ -52,6 +72,8 @@ To successfully compile and run projects, you will need:
         http://code.dlang.org/download
         
    Currently I am using version 0.9.24.
+
+-------------------------------------------------------------------------------
 
 5) D LIBRARIES
 
@@ -66,6 +88,8 @@ To successfully compile and run projects, you will need:
         $ cd testbench/pacman
         testbench/pacman$ make fetch
 
+-------------------------------------------------------------------------------
+
 6) If everything is fine, you can compile and run some of the examples
    using make:
 
@@ -73,10 +97,4 @@ To successfully compile and run projects, you will need:
 
 Sadly to Windows users, current build system utilizes common Linux side
 building tools and symbolic links. I will continue to simplify the build.
-
-- - -
-
-GAME CONTROLLER: Now, with emulated controller, games can be basically played
-without having a real one. But it is still recommended. My games are and will be
-made to be played with game controller (XBox).
 

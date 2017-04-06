@@ -22,6 +22,11 @@ import std.variant: Variant;
 
 class Shader
 {
+    //-------------------------------------------------------------------------
+    // Options are values for uniforms. These might (should?) be moved to
+    // OpenGL state object.
+    //-------------------------------------------------------------------------
+    
     Variant[string] options;
 
     //*************************************************************************
@@ -32,8 +37,21 @@ class Shader
     //
     //*************************************************************************
 
-    GLint[string] uniforms;
-    GLint[string] attributes;
+    struct PARAM {
+        GLint  location;
+        GLint  size;
+        GLenum type;
+        
+        this(int loc, GLenum type, GLint size)
+        {
+            this.location = loc;
+            this.size = size;
+            this.type = type;
+        }
+    }
+
+    PARAM[string] uniforms;
+    PARAM[string] attributes;
 
     private auto getProgramParam(T)(GLenum name)
     {
@@ -45,11 +63,11 @@ class Shader
     private void addUniform(GLint i) {
         int maxlen = getProgramParam!int(GL_ACTIVE_UNIFORM_MAX_LENGTH);
         char[] namebuf = new char[maxlen];
-        GLenum type;
         GLint  size;
+        GLenum type;
 
         checkgl!glGetActiveUniform(programID, i, maxlen, null, &size, &type, namebuf.ptr);
-        uniforms[to!string(namebuf.ptr)] = i;
+        uniforms[to!string(namebuf.ptr)] = PARAM(i, type, size);
     }
         
     private void addAttribute(GLint i) {
@@ -59,7 +77,7 @@ class Shader
         GLint  size;
 
         checkgl!glGetActiveAttrib(programID, i, maxlen, null, &size, &type, namebuf.ptr);
-        attributes[to!string(namebuf.ptr)] = i;
+        attributes[to!string(namebuf.ptr)] = PARAM(i, type, size);
     }
 
     private void fillNameCache()
@@ -83,7 +101,7 @@ class Shader
 
     final void uniform(string name, Variant value)
     {
-        GLint loc = uniforms[name];
+        GLint loc = uniforms[name].location;
         if(loc == -1) return ;
 
         if     (value.type == typeid(bool))   checkgl!glUniform1i(loc, value.get!(bool));
@@ -111,7 +129,7 @@ class Shader
 
     final void uniform(string name, Texture texture, GLenum unit)
     {
-        GLint loc = uniforms[name];
+        GLint loc = uniforms[name].location;
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_2D, texture.ID);
@@ -121,7 +139,7 @@ class Shader
 
     final void uniform(string name, Cubemap cubemap, GLenum unit)
     {
-        GLint loc = uniforms[name];
+        GLint loc = uniforms[name].location;
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.ID);
@@ -140,7 +158,7 @@ class Shader
     
     private void connect(VBO vbo, string name, GLenum type, GLint elems, bool normalized, size_t offset, size_t rowsize)
     {
-        GLint loc = attributes[name];
+        GLint loc = attributes[name].location;
         if(loc == -1) return;
 
         vbo.bind();
@@ -158,7 +176,7 @@ class Shader
 
     private void disconnect(string name)
     {
-        GLint loc = attributes[name];
+        GLint loc = attributes[name].location;
         checkgl!glDisableVertexAttribArray(loc);
     }
 

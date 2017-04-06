@@ -16,6 +16,18 @@ public import std.string: toStringz;
 
 //-----------------------------------------------------------------------------
 
+const enum string[GLenum] glTypeName = 
+[
+    GL_FLOAT: "float", GL_FLOAT_VEC2: "vec2", GL_FLOAT_VEC3: "vec3", GL_FLOAT_VEC4: "vec4",
+    GL_INT: "int", GL_INT_VEC2: "ivec2", GL_INT_VEC3: "ivec3", GL_INT_VEC4: "ivec4",
+    GL_BOOL: "bool", GL_BOOL_VEC2: "bvec2", GL_BOOL_VEC3: "bvec3", GL_BOOL_VEC4: "bvec4",
+    GL_FLOAT_MAT2: "mat2", GL_FLOAT_MAT3: "mat3", GL_FLOAT_MAT4: "mat4",
+    GL_SAMPLER_2D: "sampler2d",
+    GL_SAMPLER_CUBE: "samplercube",
+];
+
+//-----------------------------------------------------------------------------
+
 void printmat(string name, mat4 matrix)
 {
     writeln(name);
