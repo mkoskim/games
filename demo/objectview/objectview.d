@@ -116,16 +116,19 @@ void main()
     {
         state.activate();
         
-        state.shader.uniform("mProjection", mProjection);
-        state.shader.uniform("mView", mView);
-        state.shader.uniform("material.colormap", colormap, 0);
-        state.shader.uniform("material.normalmap", normalmap, 1);
-        state.shader.uniform("light.pos", pLight);
-    
         static float angle = 0;
-        state.shader.uniform("mModel", mat4.identity().rotate(angle, vec3(1, 1, 0)));
         angle += 0.01;
 
+        with(state.shader)
+        {
+            uniform("mProjection", mProjection);
+            uniform("mView", mView);
+            uniform("mModel", mat4.identity().rotate(angle, vec3(1, 1, 0)));
+            uniform("material.colormap", colormap, 0);
+            uniform("material.normalmap", normalmap, 1);
+            uniform("light.pos", pLight);
+        }
+    
         vao.bind();
         ibo.draw();
         vao.unbind();

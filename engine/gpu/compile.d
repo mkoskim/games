@@ -31,9 +31,9 @@ One important design principle is that error reporting works correctly.
 Otherwise it can be awfully hard to figure out what went wrong. Sadly, there
 are several problems with this:
 
-1) Not all drivers report source file number correctly (my driver internally
-   concatenates source strings, report always "0" and report concatenated
-   string's line number.
+1) Not all drivers report source file number correctly (my OpenGL driver
+   seems to concatenate source strings internally, and thus it always
+   reports "0" and concatenated string's line number)
    
 2) Error message format is driver-specific
 
@@ -279,21 +279,12 @@ private void validate(GLuint programID)
 
 //-----------------------------------------------------------------------------
 // Dumping symbols: This is pretty useful information, and could be moved to
-// Shader class. This is now moved, but remains here as a duplicate until
-// compiling is moved, too.
+// Shader class. UPDATE: This is now moved, but remains here as a duplicate
+// until compiling is moved, too.
 //-----------------------------------------------------------------------------
 
 private void dumpSymbols(GLuint programID)
 {
-    string[GLenum] type2str = [
-        GL_FLOAT: "float", GL_FLOAT_VEC2: "vec2", GL_FLOAT_VEC3: "vec3", GL_FLOAT_VEC4: "vec4",
-        GL_INT: "int", GL_INT_VEC2: "ivec2", GL_INT_VEC3: "ivec3", GL_INT_VEC4: "ivec4",
-        GL_BOOL: "bool", GL_BOOL_VEC2: "bvec2", GL_BOOL_VEC3: "bvec3", GL_BOOL_VEC4: "bvec4",
-        GL_FLOAT_MAT2: "mat2", GL_FLOAT_MAT3: "mat3", GL_FLOAT_MAT4: "mat4",
-        GL_SAMPLER_2D: "sampler2d",
-        GL_SAMPLER_CUBE: "samplercube",
-    ];
-
     writeln("Program: ", programID);
 
     //-------------------------------------------------------------------------
@@ -319,7 +310,7 @@ private void dumpSymbols(GLuint programID)
         writefln("    %2d: %-" ~ to!string(maxlen) ~"s: %d x %s",
             i,
             to!string(namebuf.ptr),
-            size, type2str[type],
+            size, glTypeName[type],
         );
     }
 
@@ -346,7 +337,7 @@ private void dumpSymbols(GLuint programID)
         writefln("    %2d: %-" ~ to!string(maxlen) ~"s: %d x %s",
             i,
             to!string(namebuf.ptr),
-            size, type2str[type],
+            size, glTypeName[type],
         );
     }
 }
