@@ -111,14 +111,16 @@ class Texture
     static class Loader
     {
         static Loader Default;
+        static Loader Compressed;
 
         static this() {
-            Default = new Loader();
+            Default    = new Loader();
+            Compressed = new Loader().setCompress(true);
         }
 
         //----------------------------------------------------------------------
 
-        struct FILTERING { GLenum min, mag; }
+        struct FILTERING { GLenum mag, min; }
         struct WRAPPING { GLenum s, t; }
 
         FILTERING filtering;
@@ -130,17 +132,17 @@ class Texture
         //----------------------------------------------------------------------
 
         this() {
-            filtering = FILTERING(GL_LINEAR, GL_LINEAR);
-            wrapping  = WRAPPING(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-            mipmap = false;
             compress = false;
+            mipmap   = true;
+            filtering = FILTERING(GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
+            wrapping  = WRAPPING(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         }
 
         //---------------------------------------------------------------------
 
-        Loader setFiltering(GLenum min, GLenum mag) {
-            filtering.min = min;
+        Loader setFiltering(GLenum mag, GLenum min) {
             filtering.mag = mag;
+            filtering.min = min;
             return this;
         }
 
@@ -246,8 +248,8 @@ class Texture
             num_mipmaps = cast(int)log2(fmax(width, height)) - 4;
             if(num_mipmaps < 0) num_mipmaps = 0;
 
-            import engine.game.instance: screen;
-            if(screen.glversion > 30) num_mipmaps = 0;
+            //import engine.game.instance: screen;
+            //if(screen.glversion > 30) num_mipmaps = 0;
             //TODO("Mipmap generation not working on GL30+");
         }
 
