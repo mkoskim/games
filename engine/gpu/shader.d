@@ -39,15 +39,8 @@ class Shader
 
     struct PARAM {
         GLint  location;
-        GLint  size;
         GLenum type;
-        
-        this(int loc, GLenum type, GLint size)
-        {
-            this.location = loc;
-            this.size = size;
-            this.type = type;
-        }
+        GLint  size;
     }
 
     PARAM[string] uniforms;
@@ -91,6 +84,26 @@ class Shader
         {
             addAttribute(i);
         }
+        
+        dumpNameCache();
+    }
+
+    private void dumpNameCache()
+    {
+        writeln("- Uniforms:");
+        foreach(name, param; uniforms) writefln("    %-20s@%d: %d x %s",
+            name,
+            param.location,
+            param.size,
+            glTypeName[param.type]
+        );
+        writeln("- Attributes:");
+        foreach(name, param; attributes) writefln("    %-20s@%d: %d x %s",
+            name,
+            param.location,
+            param.size,
+            glTypeName[param.type]
+        );
     }
 
     //*************************************************************************

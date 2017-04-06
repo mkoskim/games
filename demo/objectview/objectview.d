@@ -87,15 +87,20 @@ void main()
     ibo.unbind();
 
     //-------------------------------------------------------------------------
-
-    auto loader   = engine.gpu.Texture.Loader.Default;
+    // Textures are uploaded by loaders: these may have different sampling
+    // parameters.
+    //-------------------------------------------------------------------------
+    
+    auto cm_loader = engine.gpu.Texture.Loader.Compressed;
+    auto nm_loader = engine.gpu.Texture.Loader.Default;
+    
     auto colormap = 
-        loader(vec4(0.5, 0.5, 0.5, 1))
-        //loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
+        //cm_loader(vec4(0.5, 0.5, 0.5, 1))
+        cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
         ;
     auto normalmap = 
-        //loader(vec4(0.5, 0.5, 1, 0))
-        loader("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png")
+        //nm_loader(vec4(0.5, 0.5, 1, 0))
+        nm_loader("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png")
     ;
 
     //-------------------------------------------------------------------------

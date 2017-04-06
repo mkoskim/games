@@ -54,8 +54,7 @@ class ShaderCompileError : Exception
 
 //*****************************************************************************
 //
-// Compilation main function: compile vertex and fragment shaders, from
-// common source combined with shader specific source.
+// Compiling a GPU program
 //
 //*****************************************************************************
 
@@ -86,7 +85,7 @@ GLuint CompileProgram(string vs_source, string fs_source)
 
     debug validate(programID);
 
-    debug dumpSymbols(programID);
+    //debug dumpSymbols(programID);
 
     //-------------------------------------------------------------------------
 
@@ -117,6 +116,11 @@ private GLuint compileShader(GLenum shadertype, string[] srcs...)
         toStringz(header[shadertype])
     ];
 
+    //-------------------------------------------------------------------------
+    // Construct string array from sources. At the top of the source we put
+    // some built-ins. We allow null filenames for missing optional parts.
+    //-------------------------------------------------------------------------
+
     foreach(src; srcs) {
         if(src)
             source ~= toStringz(src);
@@ -125,15 +129,10 @@ private GLuint compileShader(GLenum shadertype, string[] srcs...)
     }
 
     //-------------------------------------------------------------------------
-    // Construct string array from sources. At the top of the source we put
-    // some built-ins. We allow null filenames for missing optional parts.
-    //-------------------------------------------------------------------------
 
     auto shaderID = checkgl!glCreateShader(shadertype);
+
     checkgl!glShaderSource(shaderID, cast(int)source.length, source.ptr, null);
-
-    //-------------------------------------------------------------------------
-
     checkgl!glCompileShader(shaderID);
 
     if(getShader!bool(shaderID, GL_COMPILE_STATUS))
@@ -142,13 +141,13 @@ private GLuint compileShader(GLenum shadertype, string[] srcs...)
     }
 
     //-------------------------------------------------------------------------
-
+    // In case of error, dump shader source
+    //-------------------------------------------------------------------------
+    
     debug writeln(getShaderSource(shaderID));
 
     string msg = getShaderInfoLog(shaderID);
-//*
-    throw new ShaderCompileError(format("%s", msg));
-/*/
+/*
     auto errorat = new Location(msg);
 
     foreach(i, content; source)
@@ -173,6 +172,8 @@ private GLuint compileShader(GLenum shadertype, string[] srcs...)
         errorat.line,
         errorat.msg)
     );
+/*/
+    throw new ShaderCompileError(format("%s", msg));
 /**/
 }
 
@@ -217,8 +218,8 @@ private auto getShader(T)(GLuint shaderID, GLenum name)
 
 debug private string getShaderSource(GLuint shaderID)
 {
-    int src_length;
-    checkgl!glGetShaderiv(shaderID, GL_SHADER_SOURCE_LENGTH, &src_length);
+    int src_length = getShader!int(shaderID, GL_SHADER_SOURCE_LENGTH);
+    //checkgl!glGetShaderiv(shaderID, GL_SHADER_SOURCE_LENGTH, &src_length);
     char[] buffer = new char[src_length];
     checkgl!glGetShaderSource(shaderID, src_length, null, buffer.ptr);
     return to!string(buffer);
@@ -226,8 +227,8 @@ debug private string getShaderSource(GLuint shaderID)
 
 private string getShaderInfoLog(GLuint shaderID)
 {
-    int log_length;
-    checkgl!glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &log_length);
+    int log_length = getShader!int(shaderID, GL_INFO_LOG_LENGTH);
+    //checkgl!glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &log_length);
 
     if(log_length)
     {
@@ -251,8 +252,8 @@ private auto getProgram(T)(GLuint programID, GLenum name)
 
 private string getProgramInfoLog(GLuint programID)
 {
-    int log_length;
-    checkgl!glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &log_length);
+    int log_length = getProgram!int(programID, GL_INFO_LOG_LENGTH);
+    //checkgl!glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &log_length);
 
     if(log_length)
     {
@@ -283,6 +284,7 @@ private void validate(GLuint programID)
 // until compiling is moved, too.
 //-----------------------------------------------------------------------------
 
+/*
 private void dumpSymbols(GLuint programID)
 {
     writeln("Program: ", programID);
@@ -341,4 +343,5 @@ private void dumpSymbols(GLuint programID)
         );
     }
 }
+*/
 
