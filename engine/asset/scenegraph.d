@@ -16,6 +16,7 @@ import blob = engine.asset.blob;
 import derelict.assimp3.assimp;
 
 import engine.asset.types.transform;
+import std.path;
 
 //*****************************************************************************
 //

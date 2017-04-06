@@ -428,8 +428,8 @@ package class GameController : Joystick
 
     void close()
     {
-        if(stick) stick = (SDL_JoystickClose(stick), null);
-        if(ffb) ffb = (SDL_HapticClose(ffb), null);
+        if(stick) { SDL_JoystickClose(stick); stick = null; }
+        if(ffb)   { SDL_HapticClose(ffb);     ffb = null; }
     }
 
     ~this()

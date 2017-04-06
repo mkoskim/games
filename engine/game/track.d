@@ -7,6 +7,7 @@
 module engine.game.track;
 
 import std.stdio;
+import engine.game.util;
 
 debug abstract class Track
 {
