@@ -24,7 +24,11 @@ void main()
     game.init();
 
     //-------------------------------------------------------------------------
-
+    // Create shader from GLSL, and GPU/OpenGL "state" for the shader: it is
+    // intended that these two are tightly coupled - state settings are
+    // treated like shader parameters.
+    //-------------------------------------------------------------------------
+    
     auto shader = new gpu.Shader(
         engine.asset.blob.text("data/simple.glsl")
     );
@@ -43,12 +47,20 @@ void main()
     );
     
     //-------------------------------------------------------------------------
-
+    // Load asset
+    //-------------------------------------------------------------------------
+    
     //auto scene = engine.asset.SceneGraph.load("data/test.dae");
     auto scene = engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj");
 
     auto mesh = scene.meshes[0];
 
+    //-------------------------------------------------------------------------
+    // Make it GPU VBOs (Vertex Buffer Object) and IBO (vertex indexing array)
+    // Here we could use some kind of magic: we can extract shader uniforms
+    // and vertex attributes, and then bind them to VBOs with same names.
+    //-------------------------------------------------------------------------
+    
     engine.gpu.VBO[string] vbos = [
         "vert_pos": new engine.gpu.VBO("vert_pos", mesh.pos),
         "vert_uv": new engine.gpu.VBO("vert_uv",  mesh.uv),
@@ -60,7 +72,9 @@ void main()
     auto ibo = new engine.gpu.IBO(mesh.triangles, GL_TRIANGLES);
 
     //-------------------------------------------------------------------------
-
+    // Create VAO to bind buffers together (automatize buffer bindings)
+    //-------------------------------------------------------------------------
+    
     auto vao = new engine.gpu.VAO();
     
     vao.bind();

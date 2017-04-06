@@ -11,7 +11,7 @@ module engine.asset.font;
 //-----------------------------------------------------------------------------
 
 import std.file: FileException;
-import std.string: format;
+import std.string: format, toStringz;
 import std.conv: to;
 
 import engine.asset.blob;
@@ -136,7 +136,7 @@ class Font
     Texture texture(string text) {
         SDL_Color color={255, 255, 255, 255};
 
-        auto bitmap = TTF_RenderText_Blended(font, std.string.toStringz(text), color);
+        auto bitmap = TTF_RenderText_Blended(font, toStringz(text), color);
         if(!bitmap) throw new TTFError(
             format(
                 "TTF_RenderText_Blended: %s ('%s')",
