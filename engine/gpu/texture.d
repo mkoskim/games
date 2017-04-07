@@ -52,19 +52,21 @@ private GLuint _GLformat(SDL_Surface *surface)
 
 private void uploadTextureData(
     GLenum target,
-    GLint level,
     GLint w, GLint h,
+    GLint mipmap_levels,
     GLenum format,
     GLenum type,
     void* buffer,
     bool compress
 )
 {
+    checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipmap_levels);
+
     GLenum intformat;
 
     final switch(format)
     {
-        
         case GL_BGRA:
         case GL_RGBA:
             format = GL_RGBA;
@@ -80,14 +82,16 @@ private void uploadTextureData(
 
     checkgl!glTexImage2D(
         target,
-        level,              // Mipmap level
-        intformat,          // Internal format
+        0,
+        intformat,
         w, h,
-        0,                  // Border
-        format,             // Format of data
-        type,               // Data type/width
-        buffer              // Actual data
+        0,
+        format,
+        type,
+        buffer
     );
+
+    if(mipmap_levels) checkgl!glGenerateMipmap(target);
 }
 
 //-----------------------------------------------------------------------------
@@ -126,14 +130,12 @@ class Texture
         FILTERING filtering;
         WRAPPING wrapping;
 
-        bool mipmap;
         bool compress;
 
         //----------------------------------------------------------------------
 
         this() {
             compress = false;
-            mipmap   = true;
             filtering = FILTERING(GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
             wrapping  = WRAPPING(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         }
@@ -149,11 +151,6 @@ class Texture
         Loader setWrapping(GLenum s, GLenum t) {
             wrapping.s = s;
             wrapping.t = t;
-            return this;
-        }
-
-        Loader setMipmap(bool state) {
-            mipmap = state;
             return this;
         }
 
@@ -236,38 +233,14 @@ class Texture
 
         //---------------------------------------------------------------------
 
-        //debug writeln("Format: ", _name[format], " internal: ", _name[intformat]);
-
         checkgl!glGenTextures(1, &ID);
 
         checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
-        int num_mipmaps = 0;
-        if(loader.mipmap) {
-            import std.math: log2, fmax;
-            num_mipmaps = cast(int)log2(fmax(width, height)) - 4;
-            if(num_mipmaps < 0) num_mipmaps = 0;
-
-            //import engine.game.instance: screen;
-            //if(screen.glversion > 30) num_mipmaps = 0;
-            //TODO("Mipmap generation not working on GL30+");
-        }
-
-        uploadTextureData(
-            GL_TEXTURE_2D,
-            0,                  // Mipmap level
-            w, h,
-            format,             // Format of data
-            type,               // Data type/width
-            buffer,             // Actual data
-            loader.compress
-        );
-
-        if(num_mipmaps)
-        {
-            checkgl!glGenerateMipmap(GL_TEXTURE_2D);
-        }
-
+        //---------------------------------------------------------------------
+        // Set up texture sampling
+        //---------------------------------------------------------------------
+        
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, loader.filtering.mag);
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, loader.filtering.min);
 
@@ -275,8 +248,38 @@ class Texture
         checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, loader.wrapping.t);
         //checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, loader.wrapping.r);
 
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-        checkgl!glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, num_mipmaps);
+        //---------------------------------------------------------------------
+
+        int mipmap_levels = 0;
+        
+        switch(loader.filtering.min)
+        {
+            case GL_LINEAR_MIPMAP_LINEAR:
+            case GL_LINEAR_MIPMAP_NEAREST:
+            case GL_NEAREST_MIPMAP_LINEAR:
+            case GL_NEAREST_MIPMAP_NEAREST:
+                import std.math: log2, fmax;
+                mipmap_levels = cast(int)log2(fmax(width, height)) - 4;
+                if(mipmap_levels < 0) mipmap_levels = 0;
+                break;
+            default: break;
+        }
+        
+        //---------------------------------------------------------------------
+        // Upload texture data to GPU
+        //---------------------------------------------------------------------
+
+        uploadTextureData(
+            GL_TEXTURE_2D,
+            w, h,
+            mipmap_levels,      // Mipmap levels
+            format,             // Format of data
+            type,               // Data type/width
+            buffer,             // Actual data
+            loader.compress
+        );
+
+        //---------------------------------------------------------------------
 
         checkgl!glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -388,8 +391,8 @@ class Cubemap
 
         foreach(i; 0 .. 6) uploadTextureData(
             GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-            0,
             surfaces[i].w, surfaces[i].h,
+            0,
             _GLformat(surfaces[i]),
             GL_UNSIGNED_BYTE,
             surfaces[i].pixels,

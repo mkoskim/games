@@ -55,22 +55,26 @@ class Shader
 
     private void addUniform(GLint i) {
         int maxlen = getProgramParam!int(GL_ACTIVE_UNIFORM_MAX_LENGTH);
-        char[] namebuf = new char[maxlen];
+        char[] namebuf = new char[maxlen+1];
+        
         GLint  size;
         GLenum type;
-
         checkgl!glGetActiveUniform(programID, i, maxlen, null, &size, &type, namebuf.ptr);
-        uniforms[to!string(namebuf.ptr)] = PARAM(i, type, size);
+        GLint location = glGetUniformLocation(programID, namebuf.ptr);
+        
+        uniforms[to!string(namebuf.ptr)] = PARAM(location, type, size);
     }
         
     private void addAttribute(GLint i) {
         int maxlen = getProgramParam!int(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
-        char[] namebuf = new char[maxlen];
+        char[] namebuf = new char[maxlen+1];
+
         GLenum type;
         GLint  size;
-
         checkgl!glGetActiveAttrib(programID, i, maxlen, null, &size, &type, namebuf.ptr);
-        attributes[to!string(namebuf.ptr)] = PARAM(i, type, size);
+        GLint location = glGetAttribLocation(programID, namebuf.ptr);
+        
+        attributes[to!string(namebuf.ptr)] = PARAM(location, type, size);
     }
 
     private void fillNameCache()
@@ -136,7 +140,7 @@ class Shader
 
     //*************************************************************************
     //
-    // Texture samplers. Maybe we change this to uniform?
+    // Texture samplers
     //
     //*************************************************************************
 
