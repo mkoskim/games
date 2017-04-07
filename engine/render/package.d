@@ -30,6 +30,7 @@ void init()
     //-------------------------------------------------------------------------
 
     checkExtensions();
+    //checkGPUCapabilities();
 
     //-------------------------------------------------------------------------
     // Clear error flags
@@ -80,6 +81,36 @@ void flush()
     checkgl!glFinish();
 }
 */
+
+//*****************************************************************************
+//
+// Check GPU capabilities
+// 
+//*****************************************************************************
+
+private void checkGPUCapabilities()
+{
+    auto getInt(GLenum what)
+    {
+        GLint result;
+        glGetIntegerv(what, &result);
+        return result;
+    }
+    
+    writefln("GPU Capablities");
+    writefln("- Texture units..............: %d", getInt(GL_MAX_TEXTURE_IMAGE_UNITS));
+    writefln("- Max. combined texture units: %d", getInt(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+    writefln("- Max. vertex texture units..: %d", getInt(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS));
+
+    writefln("- Max. uniform locations.....: %d", getInt(GL_MAX_UNIFORM_LOCATIONS));
+
+    writefln("- Max. uniform vectors.......: %d", getInt(GL_MAX_FRAGMENT_UNIFORM_VECTORS));
+    writefln("- Max. vertex uniform vectors: %d", getInt(GL_MAX_VERTEX_UNIFORM_VECTORS));
+
+    writefln("- Max. varying vectors.......: %d", getInt(GL_MAX_VARYING_VECTORS));
+    
+    writefln("- Max. vertex attributes.....: %d", getInt(GL_MAX_VERTEX_ATTRIBS));
+}
 
 //*****************************************************************************
 //
@@ -144,6 +175,12 @@ private void checkExtensions()
     require("GL_ARB_framebuffer_object", 30);
 
     //-------------------------------------------------------------------------
+    // Do we have texture storage for mipmaps?
+    //-------------------------------------------------------------------------
+
+    check("GL_ARB_texture_storage", 42);        // Yes
+
+    //-------------------------------------------------------------------------
     // Plan is to use instanced rendering... Do we have it?
     //-------------------------------------------------------------------------
 
@@ -179,6 +216,7 @@ private void checkExtensions()
     //-------------------------------------------------------------------------
 
     check("GL_ARB_explicit_attrib_location", 33);   // yes
+    check("GL_ARB_explicit_uniform_location", 43);   // ???
 
     //-------------------------------------------------------------------------
     // Do we have separate attrib binding? Can we set up vertex array without
