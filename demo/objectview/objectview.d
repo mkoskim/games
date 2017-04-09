@@ -117,7 +117,7 @@ void main()
 
     auto mView = mat4.identity().translate(0, 0, -5);
 
-    auto pLight = vec3(5, 5, 0);
+    auto pLight = vec3(5, 5, -2);
 
     //-------------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ void main()
         state.activate();
         
         static float angle = 0;
-        angle += 0.01;
+        angle += 0.02;
 
         with(state.shader)
         {
