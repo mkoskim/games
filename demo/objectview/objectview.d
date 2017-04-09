@@ -50,8 +50,12 @@ void main()
     // Load asset
     //-------------------------------------------------------------------------
     
-    //auto scene = engine.asset.SceneGraph.load("data/test.dae");
-    auto scene = engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj");
+    auto scene =
+        engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Suzanne/Suzanne.obj")
+        //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj")
+        //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/king.obj")
+        //engine.asset.SceneGraph.load("data/test.dae")
+        ;
 
     auto mesh = scene.meshes[0];
 
@@ -62,11 +66,11 @@ void main()
     //-------------------------------------------------------------------------
     
     engine.gpu.VBO[string] vbos = [
-        "vert_pos": new engine.gpu.VBO("vert_pos", mesh.pos),
-        "vert_uv": new engine.gpu.VBO("vert_uv",  mesh.uv),
-        "vert_T": new engine.gpu.VBO("vert_T",  mesh.t),
-        "vert_B": new engine.gpu.VBO("vert_B",  mesh.b),
-        "vert_N": new engine.gpu.VBO("vert_N",  mesh.n),
+        "vert_pos": new engine.gpu.VBO(mesh.pos),
+        "vert_uv": new engine.gpu.VBO(mesh.uv),
+        "vert_T": new engine.gpu.VBO(mesh.t),
+        "vert_B": new engine.gpu.VBO(mesh.b),
+        "vert_N": new engine.gpu.VBO(mesh.n),
     ];
 
     auto ibo = new engine.gpu.IBO(mesh.triangles, GL_TRIANGLES);

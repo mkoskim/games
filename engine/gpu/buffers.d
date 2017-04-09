@@ -31,17 +31,15 @@ class VBO
     //---------------------------------------------------------------------
 
     GLenum type;
-    string name;
 
-    this(string name, GLenum type, void* buffer, size_t length, size_t elemsize)
+    this(GLenum type, void* buffer, size_t length, size_t elemsize)
     {
         this(buffer, length, elemsize);
-        this.name = name;
         this.type = type;
     }
     
-    this(string name, vec3[] buffer) { this(name, GL_FLOAT_VEC3, buffer.ptr, buffer.length, vec3.sizeof); }
-    this(string name, vec2[] buffer) { this(name, GL_FLOAT_VEC2, buffer.ptr, buffer.length, vec2.sizeof); }
+    this(vec3[] buffer) { this(GL_FLOAT_VEC3, buffer.ptr, buffer.length, vec3.sizeof); }
+    this(vec2[] buffer) { this(GL_FLOAT_VEC2, buffer.ptr, buffer.length, vec2.sizeof); }
 
     //---------------------------------------------------------------------
 
