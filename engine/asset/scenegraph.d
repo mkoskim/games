@@ -55,16 +55,16 @@ class SceneGraph
 
         this(const aiMesh* mesh)
         {
-            name = tostr(mesh.mName);
-            writefln("Mesh: %s", name);
-            writeln("- Vertices: ", mesh.mNumVertices);
-            
             vec3 tovec3(const aiVector3D v) { return vec3(v.x, v.y, v.z); }
             vec2 tovec2(const aiVector3D v) { return vec2(v.x, v.y); }
             mat3 tomat3(const aiVector3D a, const aiVector3D b, const aiVector3D c)
             {
                 return mat3(tovec3(a), tovec3(b), tovec3(c));
             }
+            
+            name = tostr(mesh.mName);
+            writefln("Mesh: %s", name);
+            writeln("- Vertices: ", mesh.mNumVertices);
             
             foreach(i; 0 .. mesh.mNumVertices)
             {
