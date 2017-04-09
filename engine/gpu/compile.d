@@ -85,8 +85,6 @@ GLuint CompileProgram(string vs_source, string fs_source)
 
     debug validate(programID);
 
-    //debug dumpSymbols(programID);
-
     //-------------------------------------------------------------------------
 
     foreach(shaderID; shaders)
@@ -144,7 +142,7 @@ private GLuint compileShader(GLenum shadertype, string[] srcs...)
     // In case of error, dump shader source
     //-------------------------------------------------------------------------
     
-    debug writeln(getShaderSource(shaderID));
+    //debug writeln(getShaderSource(shaderID));
 
     string msg = getShaderInfoLog(shaderID);
 /*
@@ -219,7 +217,7 @@ private auto getShader(T)(GLuint shaderID, GLenum name)
 debug private string getShaderSource(GLuint shaderID)
 {
     int src_length = getShader!int(shaderID, GL_SHADER_SOURCE_LENGTH);
-    //checkgl!glGetShaderiv(shaderID, GL_SHADER_SOURCE_LENGTH, &src_length);
+
     char[] buffer = new char[src_length];
     checkgl!glGetShaderSource(shaderID, src_length, null, buffer.ptr);
     return to!string(buffer);
@@ -228,7 +226,6 @@ debug private string getShaderSource(GLuint shaderID)
 private string getShaderInfoLog(GLuint shaderID)
 {
     int log_length = getShader!int(shaderID, GL_INFO_LOG_LENGTH);
-    //checkgl!glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &log_length);
 
     if(log_length)
     {
@@ -253,7 +250,6 @@ private auto getProgram(T)(GLuint programID, GLenum name)
 private string getProgramInfoLog(GLuint programID)
 {
     int log_length = getProgram!int(programID, GL_INFO_LOG_LENGTH);
-    //checkgl!glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &log_length);
 
     if(log_length)
     {
@@ -277,71 +273,4 @@ private void validate(GLuint programID)
 
     if(!status) writeln("- Message: ", getProgramInfoLog(programID));
 }
-
-//-----------------------------------------------------------------------------
-// Dumping symbols: This is pretty useful information, and could be moved to
-// Shader class. UPDATE: This is now moved, but remains here as a duplicate
-// until compiling is moved, too.
-//-----------------------------------------------------------------------------
-
-/*
-private void dumpSymbols(GLuint programID)
-{
-    writeln("Program: ", programID);
-
-    //-------------------------------------------------------------------------
-
-    writeln("- Uniforms:");
-
-    foreach(uint i; 0 .. getProgram!int(programID, GL_ACTIVE_UNIFORMS))
-    {
-        int maxlen = getProgram!int(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH);
-        char[] namebuf = new char[maxlen];
-
-        GLint size;
-        GLenum type;
-
-        checkgl!glGetActiveUniform(
-            programID, i, maxlen,
-            null, 
-            &size,
-            &type,
-            namebuf.ptr
-        );
-
-        writefln("    %2d: %-" ~ to!string(maxlen) ~"s: %d x %s",
-            i,
-            to!string(namebuf.ptr),
-            size, glTypeName[type],
-        );
-    }
-
-    //-------------------------------------------------------------------------
-
-    writeln("- Vertex attributes:");
-    
-    foreach(uint i; 0 .. getProgram!int(programID, GL_ACTIVE_ATTRIBUTES))
-    {
-        int maxlen = getProgram!int(programID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
-        char[] namebuf = new char[maxlen];
-
-        GLint size;
-        GLenum type;
-
-        checkgl!glGetActiveAttrib(
-            programID, i, maxlen,
-            null, 
-            &size,
-            &type,
-            namebuf.ptr
-        );
-
-        writefln("    %2d: %-" ~ to!string(maxlen) ~"s: %d x %s",
-            i,
-            to!string(namebuf.ptr),
-            size, glTypeName[type],
-        );
-    }
-}
-*/
 

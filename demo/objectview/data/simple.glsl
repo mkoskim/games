@@ -1,3 +1,9 @@
+//*****************************************************************************
+//
+// Simple GLSL shader
+//
+//*****************************************************************************
+
 uniform mat4 mProjection;
 uniform mat4 mView;
 uniform mat4 mModel;
@@ -34,13 +40,15 @@ attribute vec3 vert_N;
 
 //-----------------------------------------------------------------------------
 
-varying vec3 frag_pos;      // Fragment @ view space
+varying vec3 frag_pos;          // Fragment @ view space
 varying vec2 frag_uv;
 varying mat3 frag_TBN;
-varying vec3 frag_light_pos;
+varying vec3 frag_light_pos;    // Light relative to fragment
 
 //*****************************************************************************
+//
 #ifdef VERTEX_SHADER
+//
 //*****************************************************************************
 
 mat3 compute_TBN(vec3 normal, vec3 tangent, vec3 bitangent)
@@ -68,7 +76,9 @@ void main()
 #endif
 
 //*****************************************************************************
+//
 #ifdef FRAGMENT_SHADER
+//
 //*****************************************************************************
 
 float Lambert_diffuse(vec3 n, vec3 v, vec3 l)

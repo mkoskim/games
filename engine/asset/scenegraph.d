@@ -63,8 +63,8 @@ class SceneGraph
             }
             
             name = tostr(mesh.mName);
-            writefln("Mesh: %s", name);
-            writeln("- Vertices: ", mesh.mNumVertices);
+            //writefln("Mesh: %s", name);
+            //writeln("- Vertices: ", mesh.mNumVertices);
             
             foreach(i; 0 .. mesh.mNumVertices)
             {
@@ -75,7 +75,7 @@ class SceneGraph
                     b ~= tovec3(mesh.mBitangents[i]);
                     n ~= tovec3(mesh.mNormals[i]);
                 }
-                writeln("P: ", pos[i], "uv: ", uv[i]);
+                //writeln("P: ", pos[i], "uv: ", uv[i]);
             }
             
             foreach(i; 0 .. mesh.mNumFaces)
@@ -151,13 +151,14 @@ class SceneGraph
 
     this(const aiScene* scene)
     {
+    /*
         writeln("Animations: ", scene.mNumAnimations);
         writeln("Cameras...: ", scene.mNumCameras);
         writeln("Lights....: ", scene.mNumLights);
         writeln("Textures..: ", scene.mNumTextures);
         writeln("Materials.: ", scene.mNumMaterials);
         writeln("Meshes....: ", scene.mNumMeshes);
-
+    */
         loadMeshes(scene);
         root = loadNode(null, scene.mRootNode);
     }

@@ -259,7 +259,7 @@ class Shader
 
     GLuint programID;
 
-    this(GLuint ID) {
+    private this(GLuint ID) {
         debug Track.add(this);
         programID = ID;
         fillNameCache();

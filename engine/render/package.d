@@ -210,13 +210,19 @@ private void checkExtensions()
     nocheck("GL_ARB_geometry_shader4", 32);     // no
 
     //-------------------------------------------------------------------------
+    // Interfacing to GPU programs
+    //-------------------------------------------------------------------------
+
+    check("GL_ARB_program_interface_query", 43);    // yes
+
+    //-------------------------------------------------------------------------
     // Explicit locations for attributes? Using this needs modifications
     // at GLSL side:
     // https://www.opengl.org/registry/specs/ARB/explicit_attrib_location.txt
     //-------------------------------------------------------------------------
 
     check("GL_ARB_explicit_attrib_location", 33);   // yes
-    check("GL_ARB_explicit_uniform_location", 43);   // ???
+    check("GL_ARB_explicit_uniform_location", 43);   // yes
 
     //-------------------------------------------------------------------------
     // Do we have separate attrib binding? Can we set up vertex array without
@@ -227,14 +233,14 @@ private void checkExtensions()
     check("GL_ARB_direct_state_access", 44);        // No
     
     //-------------------------------------------------------------------------
-    // Primitive restart can be a nice feature:
+    // Primitive restart might be a nice feature:
     //      https://www.opengl.org/wiki/Vertex_Rendering#Primitive_Restart
     //-------------------------------------------------------------------------
 
     check("GL_NV_primitive_restart", 31);       // yes
 
     //-------------------------------------------------------------------------
-    // Texture swizzling can be useful for some features:
+    // Texture swizzling might be useful for some features:
     //      https://www.opengl.org/wiki/Texture#Swizzle_mask
     //-------------------------------------------------------------------------
 
@@ -260,8 +266,8 @@ private void checkExtensions()
     //      https://www.opengl.org/wiki/Image_Load_Store#Image_size
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_shader_image_size", 43);          // no
-    check("GL_ARB_shader_image_load_store", 42);    // no
+    check("GL_ARB_shader_image_size", 43);          // yes
+    check("GL_ARB_shader_image_load_store", 42);    // yes
     check("GL_EXT_shader_image_load_store", 42);    // no
 
     //-------------------------------------------------------------------------
