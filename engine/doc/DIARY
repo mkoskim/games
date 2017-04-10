@@ -3,6 +3,40 @@ thoughts about the development.
 
 -------------------------------------------------------------------------------
 
+April 10, 2017: After over one and half year break, I came back to develop
+this game engine and game collection. Not surprisingly, I am still struggling
+with the architectural problems. This time I have three objectives:
+
+1) Finalize ASSIMP-based asset loader.
+
+2) Integrate Lua scripting to asset loading.
+
+3) Implement mechanism to create family of compatbile shaders, to be able
+   to create one VAO from object and use it with all shaders.
+
+Why Lua for asset loading? It would be much easier to set up assets if
+you can add script to disk to prepare the loading: for example, choosing
+right meshes and materials from "atlas" file when accessing something.
+
+Compatible shader families: Mainly this would mean that certain vertex
+attributes are bind to certain (fixed) locations. There is generally two
+ways to do this: (1) Using "layout(location=X)" in the GLSL, and (2) using
+glBindAttribLocation.
+
+My current thought is that I use glBindAttribLocation. If I can make it
+working, you would not need to explicitly assign locations to attributes in
+GLSL, but the engine would assign them to same locations when loading shaders.
+
+One new thing is that I examine possibilities to create uniform buffers
+for frame-wide parameters, like projection and view matrices. Uniform
+buffers work so that you put the values to them once, and can use those values
+in all compatible shaders.
+
+Uniform buffers may not help with object-specific settings like skeletal
+animation and materials, but this we will see later.
+
+-------------------------------------------------------------------------------
+
 May 12, 2015: After few months break, I came back to develop this game engine
 and game collection. I am still struggling with the architectural problems.
 
