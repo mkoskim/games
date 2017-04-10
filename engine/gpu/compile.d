@@ -9,7 +9,7 @@ module engine.gpu.compile;
 //-----------------------------------------------------------------------------
 
 import engine.gpu.util;
-
+import engine.gpu.shader;
 import blob = engine.asset.blob;
 import std.string: toStringz, countchars;
 import std.algorithm: map;
@@ -58,8 +58,17 @@ class ShaderCompileError : Exception
 //
 //*****************************************************************************
 
-GLuint CompileProgram(string vs_source, string fs_source)
+GLuint CompileProgram(Shader.Family family, string vs_source, string fs_source)
 {
+    //-------------------------------------------------------------------------
+
+    GLuint programID = checkgl!glCreateProgram();
+
+    foreach(name, param; family.attributes)
+    {
+        checkgl!glBindAttribLocation(programID, param.location, toStringz(name));
+    }
+    
     //-------------------------------------------------------------------------
 
     GLuint[] shaders = [
@@ -69,9 +78,18 @@ GLuint CompileProgram(string vs_source, string fs_source)
 
     //-------------------------------------------------------------------------
 
-    GLuint programID = checkgl!glCreateProgram();
     foreach(shaderID; shaders) checkgl!glAttachShader(programID, shaderID);
     checkgl!glLinkProgram(programID);
+
+    //-------------------------------------------------------------------------
+
+    foreach(shaderID; shaders)
+    {
+        checkgl!glDetachShader(programID, shaderID);
+        checkgl!glDeleteShader(shaderID);
+    }
+
+    //-------------------------------------------------------------------------
 
     if(!getProgram!bool(programID, GL_LINK_STATUS))
     {
@@ -87,12 +105,6 @@ GLuint CompileProgram(string vs_source, string fs_source)
 
     //-------------------------------------------------------------------------
 
-    foreach(shaderID; shaders)
-    {
-        checkgl!glDetachShader(programID, shaderID);
-        checkgl!glDeleteShader(shaderID);
-    }
-
     return programID;
 }
 
@@ -102,7 +114,7 @@ GLuint CompileProgram(string vs_source, string fs_source)
 //
 //*****************************************************************************
 
-private GLuint compileShader(GLenum shadertype, string[] srcs...)
+GLuint compileShader(GLenum shadertype, string[] srcs...)
 {
     const string[GLenum] header = [
         GL_VERTEX_SHADER: "#define VERTEX_SHADER\n",
