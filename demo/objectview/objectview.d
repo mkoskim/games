@@ -33,6 +33,8 @@ void main()
         engine.asset.blob.text("data/simple.glsl")
     );
 
+    auto family = shader.family;
+
     auto state = new gpu.State(
         shader,
         (){
@@ -82,9 +84,9 @@ void main()
     auto vao = new engine.gpu.VAO();
     
     vao.bind();
-    foreach(attrib; shader.attributes.keys()) {
+    foreach(attrib; family.attributes.keys()) {
         auto vbo = vbos[attrib];
-        shader.attrib(attrib, vbo.type, vbo);
+        family.attrib(attrib, vbo.type, vbo);
     }
     ibo.bind();
     vao.unbind();
@@ -111,7 +113,7 @@ void main()
 
     auto mProjection = mat4.perspective(
         game.screen.width, game.screen.height,
-        60,
+        50,
         1, 100
     );
 

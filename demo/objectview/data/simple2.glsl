@@ -110,8 +110,8 @@ void main(void)
     
     texel.rgb = lighting * texel.rgb;
 
-    gl_FragColor = texel;
+    //gl_FragColor = texel;
     //gl_FragColor = vec4(n, 1);
-    //gl_FragColor = vec4(1, 0, 0, 1);
+    gl_FragColor = vec4(1, 0, 0, 1);
 }
 #endif

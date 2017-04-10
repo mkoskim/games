@@ -17,6 +17,7 @@ import engine.gpu.compile;
 
 import std.string: toStringz;
 import std.variant: Variant;
+import core.exception;
 
 //-----------------------------------------------------------------------------
 
@@ -43,8 +44,112 @@ class Shader
         GLint  size;
     }
 
+    //-------------------------------------------------------------------------
+
     PARAM[string] uniforms;
-    PARAM[string] attributes;
+
+    private void addUniform(string name, GLint location, GLenum type, GLint size)
+    {
+        uniforms[name] = PARAM(location, type, size);
+    }
+
+    GLint uniformLocation(string name)
+    {
+        try {
+            return uniforms[name].location;
+        } catch(core.exception.RangeError) {
+            return -1;
+        }
+    }
+
+    //-------------------------------------------------------------------------
+
+    static class Family
+    {
+        PARAM[string] attributes;
+
+        void addAttribute(string name, GLint location, GLenum type, GLint size)
+        {
+            attributes[name] = PARAM(location, type, size);
+        }
+
+        GLint attribLocation(string name)
+        {
+            try {
+                return attributes[name].location;
+            } catch(core.exception.RangeError) {
+                return -1;
+            }
+        }
+
+        //*************************************************************************
+        //
+        // Connecting attributes from buffers. In fact, it would be easier to use
+        // non-interleaved buffers. Although interleaved ones are nice and compact,
+        // they cause lots of extra hassling. In addition, with interleaved ones
+        // it is harder to add vertex data to shaders.
+        //
+        //*************************************************************************
+        
+        private void connect(VBO vbo, string name, GLenum type, GLint elems, bool normalized, size_t offset, size_t rowsize)
+        {
+            GLint loc = attribLocation(name);
+            if(loc == -1) return;
+
+            vbo.bind();
+            checkgl!glVertexAttribPointer(
+                loc,                        // attribute location
+                elems,                      // size
+                type,                       // type
+                normalized,                 // normalized?
+                cast(GLint)rowsize,         // stride
+                cast(void*)offset           // array buffer offset
+            );
+            vbo.unbind();
+            checkgl!glEnableVertexAttribArray(loc);
+        }
+
+        private void disconnect(string name)
+        {
+            GLint loc = attribLocation(name);
+            checkgl!glDisableVertexAttribArray(loc);
+        }
+
+        //-------------------------------------------------------------------------
+
+        void attrib(string name, GLenum type, VBO vbo)
+        {
+            switch(type) {
+                case GL_FLOAT     : connect(vbo, name, GL_FLOAT, 1, false, 0, 0); break;
+                case GL_FLOAT_VEC2: connect(vbo, name, GL_FLOAT, 2, false, 0, 0); break;
+                case GL_FLOAT_VEC3: connect(vbo, name, GL_FLOAT, 3, false, 0, 0); break;
+                case GL_FLOAT_VEC4: connect(vbo, name, GL_FLOAT, 4, false, 0, 0); break;
+                default: throw new Exception(format("Unknown type '%s' for attribute '%s'", to!string(type), name));
+            }            
+        }
+
+    /*
+        void attrib(T: vec2)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 2, false, offset, rowsize); }
+        void attrib(T: vec3)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 3, false, offset, rowsize); }
+        void attrib(T: vec4)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 4, false, offset, rowsize); }
+
+        void attrib(T: ivec4x8b)(string name, size_t offset, size_t rowsize) { connect(name, T.gltype, T.glsize, T.glnormd, offset, rowsize); }
+        void attrib(T: fvec2x16b)(string name, size_t offset, size_t rowsize) { connect(name, T.gltype, T.glsize, T.glnormd, offset, rowsize); }
+
+        //void attrib(T: ivec3x10b)(string name, size_t offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
+
+        void attrib(T)(string name, size_t offset, size_t rowsize) { throw new Error("Attribute type " ~ T.stringof ~ " not implemented."); }
+
+        static void attrib(alias field)(Shader shader, string name, size_t rowsize)
+        {
+            shader.attrib!(typeof(field))(name, field.offsetof, rowsize);
+        }
+    */
+    }
+    
+    Family family;
+    
+    //-------------------------------------------------------------------------
 
     private auto getProgramParam(T)(GLenum name)
     {
@@ -62,7 +167,7 @@ class Shader
         checkgl!glGetActiveUniform(programID, i, maxlen, null, &size, &type, namebuf.ptr);
         GLint location = glGetUniformLocation(programID, namebuf.ptr);
         
-        uniforms[to!string(namebuf.ptr)] = PARAM(location, type, size);
+        addUniform(to!string(namebuf.ptr), location, type, size);
     }
         
     private void addAttribute(GLint i) {
@@ -74,10 +179,10 @@ class Shader
         checkgl!glGetActiveAttrib(programID, i, maxlen, null, &size, &type, namebuf.ptr);
         GLint location = glGetAttribLocation(programID, namebuf.ptr);
         
-        attributes[to!string(namebuf.ptr)] = PARAM(location, type, size);
+        family.addAttribute(to!string(namebuf.ptr), location, type, size);
     }
 
-    private void fillNameCache()
+    private void updateNameCache()
     {
         foreach(uint i; 0 .. getProgramParam!int(GL_ACTIVE_UNIFORMS))
         {
@@ -102,7 +207,7 @@ class Shader
             glTypeName[param.type]
         );
         writeln("- Attributes:");
-        foreach(name, param; attributes) writefln("    %-20s@%d: %d x %s",
+        foreach(name, param; family.attributes) writefln("    %-20s@%d: %d x %s",
             name,
             param.location,
             param.size,
@@ -118,7 +223,7 @@ class Shader
 
     final void uniform(string name, Variant value)
     {
-        GLint loc = uniforms[name].location;
+        GLint loc = uniformLocation(name);
         if(loc == -1) return ;
 
         if     (value.type == typeid(bool))   checkgl!glUniform1i(loc, value.get!(bool));
@@ -146,7 +251,8 @@ class Shader
 
     final void uniform(string name, Texture texture, GLenum unit)
     {
-        GLint loc = uniforms[name].location;
+        GLint loc = uniformLocation(name);
+        
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_2D, texture.ID);
@@ -156,77 +262,14 @@ class Shader
 
     final void uniform(string name, Cubemap cubemap, GLenum unit)
     {
-        GLint loc = uniforms[name].location;
+        GLint loc = uniformLocation(name);
+
         if(loc != -1) {
             checkgl!glActiveTexture(GL_TEXTURE0 + unit);
             checkgl!glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.ID);
             checkgl!glUniform1i(loc, unit);
         }
     }
-
-    //*************************************************************************
-    //
-    // Connecting attributes from buffers. In fact, it would be easier to use
-    // non-interleaved buffers. Although interleaved ones are nice and compact,
-    // they cause lots of extra hassling. In addition, with interleaved ones
-    // it is harder to add vertex data to shaders.
-    //
-    //*************************************************************************
-    
-    private void connect(VBO vbo, string name, GLenum type, GLint elems, bool normalized, size_t offset, size_t rowsize)
-    {
-        GLint loc = attributes[name].location;
-        if(loc == -1) return;
-
-        vbo.bind();
-        checkgl!glVertexAttribPointer(
-            loc,                        // attribute location
-            elems,                      // size
-            type,                       // type
-            normalized,                 // normalized?
-            cast(GLint)rowsize,         // stride
-            cast(void*)offset           // array buffer offset
-        );
-        vbo.unbind();
-        checkgl!glEnableVertexAttribArray(loc);
-    }
-
-    private void disconnect(string name)
-    {
-        GLint loc = attributes[name].location;
-        checkgl!glDisableVertexAttribArray(loc);
-    }
-
-    //-------------------------------------------------------------------------
-
-    void attrib(string name, GLenum type, VBO vbo)
-    {
-        switch(type) {
-            case GL_FLOAT     : connect(vbo, name, GL_FLOAT, 1, false, 0, 0); break;
-            case GL_FLOAT_VEC2: connect(vbo, name, GL_FLOAT, 2, false, 0, 0); break;
-            case GL_FLOAT_VEC3: connect(vbo, name, GL_FLOAT, 3, false, 0, 0); break;
-            case GL_FLOAT_VEC4: connect(vbo, name, GL_FLOAT, 4, false, 0, 0); break;
-            default: throw new Exception(format("Unknown type '%s' for attribute '%s'", to!string(type), name));
-        }            
-    }
-
-/*
-    void attrib(T: vec2)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 2, false, offset, rowsize); }
-    void attrib(T: vec3)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 3, false, offset, rowsize); }
-    void attrib(T: vec4)(string name, size_t offset, size_t rowsize) { connect(name, GL_FLOAT, 4, false, offset, rowsize); }
-
-    void attrib(T: ivec4x8b)(string name, size_t offset, size_t rowsize) { connect(name, T.gltype, T.glsize, T.glnormd, offset, rowsize); }
-    void attrib(T: fvec2x16b)(string name, size_t offset, size_t rowsize) { connect(name, T.gltype, T.glsize, T.glnormd, offset, rowsize); }
-
-    //void attrib(T: ivec3x10b)(string name, size_t offset) { setattrib(name, T.gltype, T.glsize, T.glnormd, offset); }
-
-    void attrib(T)(string name, size_t offset, size_t rowsize) { throw new Error("Attribute type " ~ T.stringof ~ " not implemented."); }
-
-    static void attrib(alias field)(Shader shader, string name, size_t rowsize)
-    {
-        shader.attrib!(typeof(field))(name, field.offsetof, rowsize);
-    }
-*/
 
     //*************************************************************************
     //
@@ -257,25 +300,25 @@ class Shader
     //
     //*************************************************************************
 
-    GLuint programID;
-
-    private this(GLuint ID) {
+    GLuint   programID;
+    
+    private this(Family family, GLuint ID) {
         debug Track.add(this);
         programID = ID;
-        fillNameCache();
+        this.family = family;
+        updateNameCache();
     }
 
     //-------------------------------------------------------------------------
 
-    this(string vs_source, string fs_source)
+    this(Family family, string vs_source, string fs_source)
     {
-        this(CompileProgram(vs_source, fs_source));
+        this(family, CompileProgram(family, vs_source, fs_source));
     }
 
-    this(string source)
-    {
-        this(source, source);
-    }
+    this(Family family, string source) { this(family, source, source); }
+    this(string vs_source, string fs_source) { this(new Family(), vs_source, fs_source); }
+    this(string source) { this(new Family(), source); }
 
     //-------------------------------------------------------------------------
 
