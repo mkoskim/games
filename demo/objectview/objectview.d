@@ -29,30 +29,30 @@ void main()
     // treated like shader parameters.
     //-------------------------------------------------------------------------
 
-    auto shader = new gpu.Shader(
-        engine.asset.blob.text("data/simple.glsl")
-    );
-
-    auto shader_normals = new gpu.Shader(
-        shader.family,
-        engine.asset.blob.text("data/normals_face.glsl"),
-        engine.asset.blob.text("data/normals_face.glsl"),
-        engine.asset.blob.text("data/normals_face.glsl")
-    );
-
     with(gpu.State)
     {
+        init(GL_FRONT_AND_BACK, GL_FILL);
         init(GL_CULL_FACE_MODE, GL_BACK);
         init(GL_FRONT, GL_CCW);
         init(GL_BLEND, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         init(GL_DEPTH_FUNC, GL_LESS);
+        init(GL_DEPTH_TEST);
     }
 
+    auto shader = new gpu.Shader(
+        engine.asset.blob.text("data/simple.glsl")
+    );
+
     auto state = new gpu.State(shader)
-        .set(GL_FRONT_AND_BACK, GL_FILL)
-        .set(GL_DEPTH_TEST)
-        .set(GL_BLEND)
+        //.set(GL_FRONT_AND_BACK, GL_LINE)
     ;
+
+    auto shader_normals = new gpu.Shader(
+        shader.family,
+        engine.asset.blob.text("data/normals_vert.glsl"),
+        engine.asset.blob.text("data/normals_vert.glsl"),
+        engine.asset.blob.text("data/normals_vert.glsl")
+    );
 
     auto state_normals = new gpu.State(shader_normals);
 
@@ -123,7 +123,7 @@ void main()
 
     auto mProjection = mat4.perspective(
         game.screen.width, game.screen.height,
-        50,
+        60,
         1, 100
     );
 
@@ -144,7 +144,7 @@ void main()
         {
             uniform("mProjection", mProjection);
             uniform("mView", mView);
-            uniform("mModel", mat4.identity().rotate(angle, vec3(1, 1, 0)));
+            uniform("mModel", mat4.identity().rotate(angle, vec3(0, 1, 0)));
             uniform("material.colormap", colormap, 0);
             uniform("material.normalmap", normalmap, 1);
             uniform("light.pos", pLight);
@@ -154,6 +154,7 @@ void main()
         ibo.draw();
         vao.unbind();
         
+        /*
         state_normals.activate();
         with(state_normals.shader)
         {
@@ -165,7 +166,8 @@ void main()
         
         vao.bind();
         ibo.draw();
-        vao.unbind();        
+        vao.unbind();
+        */
     }
 
     //-------------------------------------------------------------------------
