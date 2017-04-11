@@ -8,8 +8,6 @@ uniform mat4 mProjection;
 uniform mat4 mView;
 uniform mat4 mModel;
 
-uniform float normal_length;
-
 //-----------------------------------------------------------------------------
 
 #ifdef VERTEX_SHADER
@@ -34,6 +32,8 @@ void main()
 #ifdef GEOMETRY_SHADER
 //
 //*****************************************************************************
+
+uniform float normal_length;
 
 layout(triangles) in;
 layout(line_strip, max_vertices=2) out;

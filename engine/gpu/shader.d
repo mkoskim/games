@@ -48,9 +48,14 @@ class Shader
 
     PARAM[string] uniforms;
 
+    private void addUniform(string name, PARAM param)
+    {
+        uniforms[name] = param;
+    }
+
     private void addUniform(string name, GLint location, GLenum type, GLint size)
     {
-        uniforms[name] = PARAM(location, type, size);
+        addUniform(name, PARAM(location, type, size));
     }
 
     GLint uniformLocation(string name)
@@ -68,9 +73,14 @@ class Shader
     {
         PARAM[string] attributes;
 
+        void addAttribute(string name, PARAM param)
+        {
+            attributes[name] = param;
+        }
+
         void addAttribute(string name, GLint location, GLenum type, GLint size)
         {
-            attributes[name] = PARAM(location, type, size);
+            addAttribute(name, PARAM(location, type, size));
         }
 
         GLint attribLocation(string name)
@@ -151,6 +161,18 @@ class Shader
     
     //-------------------------------------------------------------------------
 
+    private void dump(string name, PARAM param)
+    {
+        writefln("    %-20s@%d: %d x %s",
+            name,
+            param.location,
+            param.size,
+            glTypeName[param.type]
+        );
+    }
+
+    //-------------------------------------------------------------------------
+
     private auto getProgramParam(T)(GLenum name)
     {
         GLint result;
@@ -179,33 +201,36 @@ class Shader
         checkgl!glGetActiveAttrib(programID, i, maxlen, null, &size, &type, namebuf.ptr);
         GLint location = glGetAttribLocation(programID, namebuf.ptr);
         
-        family.addAttribute(to!string(namebuf.ptr), location, type, size);
+        auto name  = to!string(namebuf.ptr);
+        auto param = PARAM(location, type, size);
+
+        dump(name, param);
+        family.addAttribute(name, param);
     }
 
     private void updateNameCache()
     {
+        writeln("- Active uniforms:");
+        
         foreach(uint i; 0 .. getProgramParam!int(GL_ACTIVE_UNIFORMS))
         {
             addUniform(i);
         }
 
+        writeln("- Active attributes:");
+        
         foreach(uint i; 0 .. getProgramParam!int(GL_ACTIVE_ATTRIBUTES))
         {
             addAttribute(i);
         }
         
-        dumpNameCache();
+        //dumpNameCache();
     }
 
     private void dumpNameCache()
     {
         writeln("- Uniforms:");
-        foreach(name, param; uniforms) writefln("    %-20s@%d: %d x %s",
-            name,
-            param.location,
-            param.size,
-            glTypeName[param.type]
-        );
+        foreach(name, param; uniforms) 
         writeln("- Attributes:");
         foreach(name, param; family.attributes) writefln("    %-20s@%d: %d x %s",
             name,
