@@ -40,23 +40,6 @@ void init()
 
     //-------------------------------------------------------------------------
 
-    /*
-    checkgl!glEnable(GL_MULTISAMPLE);
-
-    checkgl!glEnable(GL_LINE_SMOOTH);
-    checkgl!glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-
-    checkgl!glEnable(GL_POLYGON_SMOOTH);
-    checkgl!glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-    /**/
-
-    //-------------------------------------------------------------------------
-
-    checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    checkgl!glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-    //-------------------------------------------------------------------------
-
     screen.fb.bind();
     screen.fb.clear();
 }
@@ -128,12 +111,24 @@ private void checkExtensions()
 {
     writeln("OpenGL extension queries:");
 
-    bool[string] extensions = function() {
+    bool[string] getExtensions()
+    {
         bool[string] lookup;
-        string[] list = std.array.split(to!string(checkgl!glGetString(GL_EXTENSIONS)));
-        foreach(key; list) lookup[key] = true;
+        if(screen.glversion < 30)
+        {
+            string[] list = std.array.split(to!string(checkgl!glGetString(GL_EXTENSIONS)));
+            foreach(key; list) lookup[key] = true;
+        } else {
+            GLint n;
+            checkgl!glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+            for(int i = 0; i < n; i++) {
+                lookup[to!string(glGetStringi(GL_EXTENSIONS, i))] = true;
+            }            
+        }
         return lookup;
-    }();
+    }
+
+    bool[string] extensions = getExtensions();
 
     bool hasExtension(string key)
     {
@@ -144,10 +139,18 @@ private void checkExtensions()
 
     bool check(string extension, int coreat)
     {
-        if(coreat && screen.glversion >= coreat) return true;
+        bool report(bool result, string msg)
+        {
+            writefln("- %-40s ... %s", extension, msg);
+            return result;
+        }
+        
+        if(coreat && screen.glversion >= coreat)
+        {
+            return report(true, "Core");
+        }
         bool status = hasExtension(extension);
-        writefln("- %-40s ... %s", extension, (status ? "Yes" : "No"));
-        return status;
+        return report(status, (status ? "Yes" : "No"));
     }
 
     void require(string extension, int coreat)

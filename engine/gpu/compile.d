@@ -58,7 +58,12 @@ class ShaderCompileError : Exception
 //
 //*****************************************************************************
 
-GLuint CompileProgram(Shader.Family family, string vs_source, string fs_source)
+GLuint CompileProgram(
+    Shader.Family family,
+    string vs_source,
+    string gs_source,
+    string fs_source
+)
 {
     //-------------------------------------------------------------------------
 
@@ -71,10 +76,11 @@ GLuint CompileProgram(Shader.Family family, string vs_source, string fs_source)
     
     //-------------------------------------------------------------------------
 
-    GLuint[] shaders = [
-        compileShader(GL_VERTEX_SHADER,   vs_source),
-        compileShader(GL_FRAGMENT_SHADER, fs_source)
-    ];
+    GLuint[] shaders;
+    
+    if(vs_source) shaders ~= compileShader(GL_VERTEX_SHADER,   vs_source);
+    if(gs_source) shaders ~= compileShader(GL_GEOMETRY_SHADER, gs_source);
+    if(fs_source) shaders ~= compileShader(GL_FRAGMENT_SHADER, fs_source);
 
     //-------------------------------------------------------------------------
 
@@ -117,12 +123,14 @@ GLuint CompileProgram(Shader.Family family, string vs_source, string fs_source)
 GLuint compileShader(GLenum shadertype, string[] srcs...)
 {
     const string[GLenum] header = [
-        GL_VERTEX_SHADER: "#define VERTEX_SHADER\n",
+        GL_VERTEX_SHADER:   "#define VERTEX_SHADER\n",
+        GL_GEOMETRY_SHADER: "#define GEOMETRY_SHADER\n",
         GL_FRAGMENT_SHADER: "#define FRAGMENT_SHADER\n"
     ];
 
     const(char)*[] source = [
-        toStringz("#version 120\n"),
+        //toStringz("#version 120\n"),
+        toStringz("#version 330\n"),
         toStringz(header[shadertype])
     ];
 
@@ -131,12 +139,7 @@ GLuint compileShader(GLenum shadertype, string[] srcs...)
     // some built-ins. We allow null filenames for missing optional parts.
     //-------------------------------------------------------------------------
 
-    foreach(src; srcs) {
-        if(src)
-            source ~= toStringz(src);
-        else
-            source ~= "";
-    }
+    foreach(src; srcs) if(src) source ~= toStringz(src);
 
     //-------------------------------------------------------------------------
 

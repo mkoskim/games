@@ -28,30 +28,40 @@ void main()
     // intended that these two are tightly coupled - state settings are
     // treated like shader parameters.
     //-------------------------------------------------------------------------
-    
+
     auto shader = new gpu.Shader(
         engine.asset.blob.text("data/simple.glsl")
     );
 
-    auto family = shader.family;
-
-    auto state = new gpu.State(
-        shader,
-        (){
-            checkgl!glEnable(GL_CULL_FACE);
-            checkgl!glCullFace(GL_BACK);
-            checkgl!glFrontFace(GL_CCW);
-            checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            //checkgl!glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            checkgl!glEnable(GL_DEPTH_TEST);
-            checkgl!glDisable(GL_BLEND);
-        }
+    auto shader_normals = new gpu.Shader(
+        shader.family,
+        engine.asset.blob.text("data/normals_face.glsl"),
+        engine.asset.blob.text("data/normals_face.glsl"),
+        engine.asset.blob.text("data/normals_face.glsl")
     );
-    
+
+    with(gpu.State)
+    {
+        init(GL_CULL_FACE_MODE, GL_BACK);
+        init(GL_FRONT, GL_CCW);
+        init(GL_BLEND, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        init(GL_DEPTH_FUNC, GL_LESS);
+    }
+
+    auto state = new gpu.State(shader)
+        .set(GL_FRONT_AND_BACK, GL_FILL)
+        .set(GL_DEPTH_TEST)
+        .set(GL_BLEND)
+    ;
+
+    auto state_normals = new gpu.State(shader_normals);
+
+    auto family = state.shader.family;
+
     //-------------------------------------------------------------------------
     // Load asset
     //-------------------------------------------------------------------------
-    
+
     auto scene =
         engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Suzanne/Suzanne.obj")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj")
@@ -66,7 +76,7 @@ void main()
     // Here we could use some kind of magic: we can extract shader uniforms
     // and vertex attributes, and then bind them to VBOs with same names.
     //-------------------------------------------------------------------------
-    
+
     engine.gpu.VBO[string] vbos = [
         "vert_pos": new engine.gpu.VBO(mesh.pos),
         "vert_uv": new engine.gpu.VBO(mesh.uv),
@@ -80,9 +90,9 @@ void main()
     //-------------------------------------------------------------------------
     // Create VAO to bind buffers together (automatize buffer bindings)
     //-------------------------------------------------------------------------
-    
+
     auto vao = new engine.gpu.VAO();
-    
+
     vao.bind();
     foreach(attrib; family.attributes.keys()) {
         auto vbo = vbos[attrib];
@@ -96,17 +106,17 @@ void main()
     // Textures are uploaded by loaders: these may have different sampling
     // parameters.
     //-------------------------------------------------------------------------
-    
+
     auto cm_loader = engine.gpu.Texture.Loader.Compressed;
     auto nm_loader = engine.gpu.Texture.Loader.Default;
-    
-    auto colormap = 
-        //cm_loader(vec4(0.5, 0.5, 0.5, 1))
-        cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
+
+    auto colormap =
+        cm_loader(vec4(0.5, 0.5, 0.5, 1))
+        //cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
         ;
-    auto normalmap = 
-        //nm_loader(vec4(0.5, 0.5, 1, 0))
-        nm_loader("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png")
+    auto normalmap =
+        nm_loader(vec4(0.5, 0.5, 1, 0))
+        //nm_loader("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png")
     ;
 
     //-------------------------------------------------------------------------
@@ -125,11 +135,11 @@ void main()
 
     void draw()
     {
-        state.activate();
-        
+
         static float angle = 0;
         angle += 0.02;
 
+        state.activate();
         with(state.shader)
         {
             uniform("mProjection", mProjection);
@@ -139,12 +149,25 @@ void main()
             uniform("material.normalmap", normalmap, 1);
             uniform("light.pos", pLight);
         }
-    
+
         vao.bind();
         ibo.draw();
         vao.unbind();
+        
+        state_normals.activate();
+        with(state_normals.shader)
+        {
+            uniform("mProjection", mProjection);
+            uniform("mView", mView);
+            uniform("mModel", mat4.identity().rotate(angle, vec3(1, 1, 0)));
+            uniform("normal_length", 0.1);
+        }
+        
+        vao.bind();
+        ibo.draw();
+        vao.unbind();        
     }
-    
+
     //-------------------------------------------------------------------------
 
     simple.gameloop(
@@ -157,7 +180,7 @@ void main()
 
 //*****************************************************************************
 //
-else 
+else
 //
 //*****************************************************************************
 
@@ -191,7 +214,7 @@ void main()
 
 /*
     auto node = pipeline.add(
-        scene3d.Grip.movable, 
+        scene3d.Grip.movable,
             //blob.wavefront.loadmesh("engine/stock/mesh/Cube/CubeWrap.obj")
             //blob.wavefront.loadmesh("engine/stock/mesh/Suzanne/Suzanne.obj"),
             //blob.wavefront.loadmesh("engine/stock/mesh/Chess/bishop.obj"),
