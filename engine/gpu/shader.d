@@ -289,8 +289,8 @@ class Shader
         if(currentProgramID != programID)
         {
             checkgl!glUseProgram(programID);
-            setOptions(options);
             currentProgramID = programID;
+            setOptions(options);
         }
     }
 
@@ -311,14 +311,23 @@ class Shader
 
     //-------------------------------------------------------------------------
 
-    this(Family family, string vs_source, string fs_source)
+    this(Family family, string vs_src, string gs_src, string fs_src)
     {
-        this(family, CompileProgram(family, vs_source, fs_source));
+        this(family, CompileProgram(family, vs_src, gs_src, fs_src));
+    }
+    
+    this(Family family, string vs_src, string fs_src)
+    { 
+        this(family, vs_src, null, fs_src);
+    }
+    
+    this(string vs_src, string fs_src)
+    {
+        this(new Family(), vs_src, fs_src);
     }
 
     this(Family family, string source) { this(family, source, source); }
-    this(string vs_source, string fs_source) { this(new Family(), vs_source, fs_source); }
-    this(string source) { this(new Family(), source); }
+    this(string source)                { this(new Family(), source); }
 
     //-------------------------------------------------------------------------
 

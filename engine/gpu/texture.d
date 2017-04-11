@@ -120,12 +120,14 @@ class Texture
         static this() {
             Default    = new Loader();
             Compressed = new Loader().setCompress(true);
+            //checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            //checkgl!glPixelStorei(GL_PACK_ALIGNMENT, 1);
         }
 
         //----------------------------------------------------------------------
 
         struct FILTERING { GLenum mag, min; }
-        struct WRAPPING { GLenum s, t; }
+        struct WRAPPING  { GLenum s, t; }
 
         FILTERING filtering;
         WRAPPING wrapping;
