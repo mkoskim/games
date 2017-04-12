@@ -4,12 +4,6 @@
 //
 //*****************************************************************************
 
-uniform mat4 mProjection;
-uniform mat4 mView;
-uniform mat4 mModel;
-
-uniform float normal_length;
-
 //-----------------------------------------------------------------------------
 
 #ifdef VERTEX_SHADER
@@ -17,21 +11,45 @@ attribute vec3 vert_pos;
 attribute vec3 vert_N;
 #endif
 
+struct Vertex2Geom
+{
+    vec3 normal;
+};
+
+//-----------------------------------------------------------------------------
+// Options
+//-----------------------------------------------------------------------------
+
+uniform struct {
+    float length;
+    vec4  color;
+} normal;
+
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Frame wide settings
+//-----------------------------------------------------------------------------
+
+uniform mat4 mProjection;
+uniform mat4 mView;
+
+//-----------------------------------------------------------------------------
+
+uniform mat4 mModel;
+
 //*****************************************************************************
 //
 #ifdef VERTEX_SHADER
 //
 //*****************************************************************************
 
-out Geom
-{
-    vec3 normal;
-} geom;
+out Vertex2Geom geom;
 
 void main()
 {
     gl_Position = vec4(vert_pos, 1);
-    geom.normal = vert_N;    
+    geom.normal = vert_N;
 }
 #endif
 
@@ -44,10 +62,7 @@ void main()
 layout(triangles) in;
 layout(line_strip, max_vertices=6) out;
 
-in Geom
-{
-    vec3 normal;
-} geom[];
+in  Vertex2Geom geom[];
 
 void main()
 {
@@ -61,7 +76,7 @@ void main()
         gl_Position = MVP * vec4(P, 1.0);
         EmitVertex();
     
-        gl_Position = MVP * vec4(P + N * normal_length, 1.0);
+        gl_Position = MVP * vec4(P + N * normal.length, 1.0);
         EmitVertex();
     
         EndPrimitive();
@@ -77,6 +92,6 @@ void main()
 
 void main(void)
 {
-    gl_FragColor = vec4(0, 1, 0, 1);
+    gl_FragColor = normal.color;
 }
 #endif
