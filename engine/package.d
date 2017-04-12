@@ -66,7 +66,7 @@ static this()
 
     SDL_Init(0);
 
-    int img_formats = IMG_INIT_PNG;
+    int img_formats = IMG_INIT_PNG | IMG_INIT_JPG | IMG_INIT_TIF;
     if(IMG_Init(img_formats) != img_formats) {
         throw new Exception(format("IMG_Init: %s", to!string(IMG_GetError())));
     }

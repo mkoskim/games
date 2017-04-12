@@ -120,8 +120,6 @@ class Texture
         static this() {
             Default    = new Loader();
             Compressed = new Loader().setCompress(true);
-            //checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            //checkgl!glPixelStorei(GL_PACK_ALIGNMENT, 1);
         }
 
         //----------------------------------------------------------------------
@@ -140,6 +138,7 @@ class Texture
             compress = false;
             filtering = FILTERING(GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
             wrapping  = WRAPPING(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+            //wrapping = WRAPPING(GL_REPEAT, GL_REPEAT);
         }
 
         //---------------------------------------------------------------------

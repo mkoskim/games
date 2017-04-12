@@ -63,10 +63,13 @@ void main()
     //-------------------------------------------------------------------------
 
     auto scene =
-        engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Suzanne/Suzanne.obj")
+        //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Suzanne/Suzanne.obj")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/test.dae")
+        //engine.asset.SceneGraph.load("local/Girl/Girl.FBX")
+        //engine.asset.SceneGraph.load("local/Girl/Girl.obj")
+        engine.asset.SceneGraph.load("local/Girl/Girl_scaled.obj")
         ;
 
     auto mesh = scene.meshes[0];
@@ -111,8 +114,9 @@ void main()
     auto nm_loader = engine.gpu.Texture.Loader.Default;
 
     auto colormap =
-        cm_loader(vec4(0.5, 0.5, 0.5, 1))
+        //cm_loader(vec4(0.5, 0.5, 0.5, 1))
         //cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
+        cm_loader("local/Girl/Girl_cm.png")
         ;
     auto normalmap =
         nm_loader(vec4(0.5, 0.5, 1, 0))
@@ -124,13 +128,17 @@ void main()
     auto mProjection = mat4.perspective(
         game.screen.width, game.screen.height,
         60,
-        1, 100
+        1, 200
     );
 
-    auto mView = mat4.identity().translate(0, 0, -5);
-
-    auto pLight = vec3(5, 5, -2);
-
+    /*
+    auto mView  = mat4.identity().translate(0, -50, -125);
+    auto pLight = vec3(50, 50, -50);
+    /*/
+    auto mView  = mat4.identity().translate(0, -1.5, -3.5);
+    auto pLight = vec3(1.5, 3, -3);
+    /**/
+    
     //-------------------------------------------------------------------------
 
     void draw()

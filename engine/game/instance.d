@@ -22,8 +22,10 @@ struct SCREEN
     SDL_Window* window = null;
 
     SDL_GLContext glcontext = null;
-    int glversion;
 
+    float glversion;
+    float glsl;
+    
     Framebuffer fb;
 }
 
