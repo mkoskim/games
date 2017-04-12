@@ -1,0 +1,10 @@
+Test model for ASSIMP based asset loader. Originally loaded here:
+
+    http://tf3dm.com/3d-model/puo-37663.html
+    
+Modifications:
+
+    - Scaled down
+    - Exported as Wavefront and Collada
+    - Color map exported as PNG
+

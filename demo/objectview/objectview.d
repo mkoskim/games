@@ -21,7 +21,7 @@ static if(1)
 
 void main()
 {
-    game.init();
+    game.init(800, 600);
 
     //-------------------------------------------------------------------------
     // Create shader from GLSL, and GPU/OpenGL "state" for the shader: it is
@@ -35,6 +35,7 @@ void main()
         init(GL_CULL_FACE_MODE, GL_BACK);
         init(GL_FRONT, GL_CCW);
         init(GL_BLEND, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        init(GL_BLEND, GL_TRUE);
         init(GL_DEPTH_FUNC, GL_LESS);
         init(GL_DEPTH_TEST);
     }
@@ -67,9 +68,9 @@ void main()
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/test.dae")
-        //engine.asset.SceneGraph.load("local/Girl/Girl.FBX")
-        //engine.asset.SceneGraph.load("local/Girl/Girl.obj")
-        engine.asset.SceneGraph.load("local/Girl/Girl_scaled.obj")
+        engine.asset.SceneGraph.load("data/Girl/Girl.obj")
+        //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
+        //engine.asset.SceneGraph.load("local/Purple_Giana/Giana_scaled.obj")
         ;
 
     auto mesh = scene.meshes[0];
@@ -84,7 +85,7 @@ void main()
         "vert_pos": new engine.gpu.VBO(mesh.pos),
         "vert_uv": new engine.gpu.VBO(mesh.uv),
         "vert_T": new engine.gpu.VBO(mesh.t),
-        "vert_B": new engine.gpu.VBO(mesh.b),
+        //"vert_B": new engine.gpu.VBO(mesh.b),
         "vert_N": new engine.gpu.VBO(mesh.n),
     ];
 
@@ -116,7 +117,7 @@ void main()
     auto colormap =
         //cm_loader(vec4(0.5, 0.5, 0.5, 1))
         //cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
-        cm_loader("local/Girl/Girl_cm.png")
+        cm_loader("data/Girl/Girl_cm.png")
         ;
     auto normalmap =
         nm_loader(vec4(0.5, 0.5, 1, 0))
@@ -131,11 +132,11 @@ void main()
         1, 200
     );
 
-    /*
-    auto mView  = mat4.identity().translate(0, -50, -125);
-    auto pLight = vec3(50, 50, -50);
-    /*/
+    //*
     auto mView  = mat4.identity().translate(0, -1.5, -3.5);
+    auto pLight = vec3(1.5, 3, -3);
+    /*/
+    auto mView  = mat4.identity().translate(0, 0, -3.5);
     auto pLight = vec3(1.5, 3, -3);
     /**/
     
@@ -168,14 +169,15 @@ void main()
         {
             uniform("mProjection", mProjection);
             uniform("mView", mView);
-            uniform("mModel", mat4.identity().rotate(angle, vec3(1, 1, 0)));
-            uniform("normal_length", 0.1);
+            uniform("mModel", mat4.identity().rotate(angle, vec3(0, 1, 0)));
+            uniform("normal.length", 0.1);
+            uniform("normal.color", vec4(0, 0.3, 0, 1));
         }
         
         vao.bind();
         ibo.draw();
         vao.unbind();
-        */
+        /**/
     }
 
     //-------------------------------------------------------------------------

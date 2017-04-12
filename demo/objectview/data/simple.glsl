@@ -4,11 +4,42 @@
 //
 //*****************************************************************************
 
-uniform mat4 mProjection;
-uniform mat4 mView;
-uniform mat4 mModel;
+#extension GL_ARB_shader_image_load_store: require
 
 //-----------------------------------------------------------------------------
+
+#ifdef VERTEX_SHADER
+attribute vec3 vert_pos;
+attribute vec2 vert_uv;
+attribute vec3 vert_T;
+attribute vec3 vert_N;
+#endif
+
+struct FragInput
+{
+    vec2 uv;
+    mat3 TBN;
+
+    vec3 light_dir;    // Light relative to fragment
+    vec3 view_dir;     // Viewer relative to fragment
+};
+
+//-----------------------------------------------------------------------------
+// Vertex data format
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Frame wide settings
+//-----------------------------------------------------------------------------
+
+uniform mat4 mProjection;
+uniform mat4 mView;
+
+//-----------------------------------------------------------------------------
+// Object wide settings
+//-----------------------------------------------------------------------------
+
+uniform mat4 mModel;
 
 struct MATERIAL
 {
@@ -29,51 +60,34 @@ uniform LIGHT light;
 
 //-----------------------------------------------------------------------------
 
-#ifdef VERTEX_SHADER
-attribute vec3 vert_pos;
-attribute vec2 vert_uv;
-
-attribute vec3 vert_T;
-attribute vec3 vert_B;
-attribute vec3 vert_N;
-#endif
-
-//-----------------------------------------------------------------------------
-
-varying vec3 frag_pos;          // Fragment @ view space
-varying vec2 frag_uv;
-varying mat3 frag_TBN;
-varying vec3 frag_light_dir;    // Light relative to fragment
-varying vec3 frag_view_dir;
-
 //*****************************************************************************
 //
 #ifdef VERTEX_SHADER
 //
 //*****************************************************************************
 
-mat3 compute_TBN(vec3 normal, vec3 tangent, vec3 bitangent)
+out FragInput frag;
+
+mat3 compute_TBN(vec3 normal, vec3 tangent)
 {
     mat3 m = mat3(mView * mModel);
 
     vec3 n = normal;
     vec3 t = tangent;
-    vec3 b = bitangent;
+    vec3 b = cross(n, t);
 
     return m * mat3(t, b, n);
 }
 
 void main()
 {
-    frag_pos = (mView * mModel * vec4(vert_pos, 1)).xyz;
+    vec3 frag_pos = (mView * mModel * vec4(vert_pos, 1)).xyz;
     gl_Position = mProjection * vec4(frag_pos, 1);
 
-    frag_uv  = vert_uv;
-
-    frag_TBN = compute_TBN(vert_N, vert_T, vert_B);
-
-    frag_light_dir = normalize(light.pos - frag_pos);
-    frag_view_dir  = normalize(-frag_pos);
+    frag.uv  = vert_uv;
+    frag.TBN = compute_TBN(vert_N, vert_T);
+    frag.light_dir = normalize(light.pos - frag_pos);
+    frag.view_dir  = normalize(-frag_pos);
 }
 #endif
 
@@ -82,6 +96,10 @@ void main()
 #ifdef FRAGMENT_SHADER
 //
 //*****************************************************************************
+
+layout(early_fragment_tests) in;
+
+in FragInput frag;
 
 float Lambert_diffuse(vec3 n, vec3 v, vec3 l)
 {
@@ -97,16 +115,19 @@ float Phong_specular(vec3 n, vec3 v, vec3 l)
 
 void main(void)
 {
-    vec4 texel = texture2D(material.colormap, frag_uv);
+    vec4 texel = texture2D(material.colormap, frag.uv);
 
-    vec3 n = texture2D(material.normalmap, frag_uv).rgb*2.0 - 1.0;
-    n = frag_TBN * n;
-    //n = normalize(frag_TBN * n);
+    vec3 n = texture2D(material.normalmap, frag.uv).rgb*2.0 - 1.0;
+    n = frag.TBN * n;
 
-    vec3 v = frag_view_dir;
-    vec3 l = frag_light_dir; 
+    vec3 v = frag.view_dir;
+    vec3 l = frag.light_dir; 
 
-    float lighting = 0.1 + Lambert_diffuse(n, v, l) + Phong_specular(n, v, l);
+    float lighting = 
+        Lambert_diffuse(n, v, l) +
+        Phong_specular(n, v, l) +
+        0.25
+    ;
     
     texel.rgb = lighting * texel.rgb;
 
