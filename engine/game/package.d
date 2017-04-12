@@ -33,7 +33,7 @@ import std.string: toStringz;
 void init() { init("Unnamed"); }
 void init(int width, int height) { init("Unnamed", width, height); }
 
-void init(string name, int width = 640, int height = 480)
+void init(string name, int width = 640, int height = 480, float glversion = 3.3)
 {
     screen.width = width;
     screen.height = height;
@@ -57,27 +57,30 @@ void init(string name, int width = 640, int height = 480)
     // to move this part to render side.
     //-------------------------------------------------------------------------
 
-    int asked;
-    
-    void askfor(int major, int minor) {
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
-        asked = major*10 + minor;
+    float asked;
+
+    void askfor(float glversion) {
+        asked = glversion;
+        int ver = to!int(glversion * 10);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, ver / 10);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, ver % 10);
     }
 
     void got(SDL_GLContext context) {
         screen.glcontext = ERRORIF(
             context,
-            format("OpenGL context creation failed. Do you have OpenGL %.1f or higher?", asked / 10.0)
+            format(
+                "OpenGL context creation failed. " ~
+                "Do you have OpenGL %.1f or higher?", asked
+            )
         );
         screen.glversion = 
-            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION)*10 +
-            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION);
+            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION) +
+            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION)/10.0;
+        screen.glsl = to!float(to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
     }
 
-    //askfor(2, 1); // OpenGL 2.1+ for GLSL version 1.20
-    askfor(3, 3); // OpenGL 3.3, GLSL 330 - many nice features!
-    //askfor(4, 0);
+    askfor(glversion);
 
     screen.window = SDL_CreateWindow(
         toStringz(name),
@@ -98,13 +101,13 @@ void init(string name, int width = 640, int height = 480)
     SDL_GL_SetSwapInterval(-1);   // Tearing
 
     debug {
-        writeln("OpenGL:");
-        writefln("- Context..: Version %.1f", screen.glversion / 10.0);
+        writeln ("OpenGL:");
+        writefln("- Context..: Version %.1f", screen.glversion);
         writefln("- Derelict.: Version %s", glv);
-        writeln("- GLSL.....: ", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
-        writeln("- Version..: ", to!string(glGetString(GL_VERSION)));
-        writeln("- Vendor...: ", to!string(glGetString(GL_VENDOR)));
-        writeln("- Renderer.: ", to!string(glGetString(GL_RENDERER)));
+        writefln("- GLSL.....: %.2f", screen.glsl);
+        writeln ("- Version..: ", to!string(glGetString(GL_VERSION)));
+        writeln ("- Vendor...: ", to!string(glGetString(GL_VENDOR)));
+        writeln ("- Renderer.: ", to!string(glGetString(GL_RENDERER)));
 
         //writeln("Extensions: ", to!string(glGetString(GL_EXTENSIONS)));
     }

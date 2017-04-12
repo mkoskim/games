@@ -40,6 +40,11 @@ void init()
 
     //-------------------------------------------------------------------------
 
+    checkgl!glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    checkgl!glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+    //-------------------------------------------------------------------------
+
     screen.fb.bind();
     screen.fb.clear();
 }
@@ -114,7 +119,7 @@ private void checkExtensions()
     bool[string] getExtensions()
     {
         bool[string] lookup;
-        if(screen.glversion < 30)
+        if(screen.glversion < 3.0)
         {
             string[] list = std.array.split(to!string(checkgl!glGetString(GL_EXTENSIONS)));
             foreach(key; list) lookup[key] = true;
@@ -141,11 +146,12 @@ private void checkExtensions()
     {
         bool report(bool result, string msg)
         {
-            writefln("- %-40s ... %s", extension, msg);
+            //writefln("- %-40s ... %s", extension, msg);
+            writefln("- %-4s: %s", msg, extension);
             return result;
         }
         
-        if(coreat && screen.glversion >= coreat)
+        if(coreat && screen.glversion >= coreat / 10.0)
         {
             return report(true, "Core");
         }

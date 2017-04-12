@@ -56,15 +56,16 @@ class SceneGraph
         this(const aiMesh* mesh)
         {
             vec3 tovec3(const aiVector3D v) { return vec3(v.x, v.y, v.z); }
-            vec2 tovec2(const aiVector3D v) { return vec2(v.x, v.y); }
+            vec2 tovec2(const aiVector3D v) { return vec2(v.x, 1-v.y); }
             mat3 tomat3(const aiVector3D a, const aiVector3D b, const aiVector3D c)
             {
                 return mat3(tovec3(a), tovec3(b), tovec3(c));
             }
             
             name = tostr(mesh.mName);
-            //writefln("Mesh: %s", name);
-            //writeln("- Vertices: ", mesh.mNumVertices);
+            writefln("Mesh: %s", name);
+            writeln("- Vertices: ", mesh.mNumVertices);
+            writeln("- Faces...: ", mesh.mNumFaces);
             
             foreach(i; 0 .. mesh.mNumVertices)
             {
@@ -120,11 +121,11 @@ class SceneGraph
         {
             this.parent = parent;
             name = tostr(node.mName);
-            writeln("Node: ", name);
+            //writeln("Node: ", name);
             foreach(i; 0 .. node.mNumMeshes)
             {
                 meshes ~= node.mMeshes[i];
-                writeln("- Mesh: ", node.mMeshes[i]);
+                //writeln("- Mesh: ", node.mMeshes[i]);
             }
         }
     }
@@ -151,14 +152,14 @@ class SceneGraph
 
     this(const aiScene* scene)
     {
-    /*
+    //*
         writeln("Animations: ", scene.mNumAnimations);
         writeln("Cameras...: ", scene.mNumCameras);
         writeln("Lights....: ", scene.mNumLights);
         writeln("Textures..: ", scene.mNumTextures);
         writeln("Materials.: ", scene.mNumMaterials);
         writeln("Meshes....: ", scene.mNumMeshes);
-    */
+    /**/
         loadMeshes(scene);
         root = loadNode(null, scene.mRootNode);
     }
@@ -173,13 +174,14 @@ class SceneGraph
             buffer.ptr,
             cast(uint)buffer.length,
                 aiProcess_Triangulate |
-                aiProcess_GenNormals |
+                //aiProcess_GenNormals |
+                aiProcess_GenSmoothNormals |
                 aiProcess_CalcTangentSpace |
-                //aiProcess_SortByPType |
-                aiProcess_ImproveCacheLocality |
                 aiProcess_JoinIdenticalVertices |
+                aiProcess_ImproveCacheLocality |
                 aiProcess_OptimizeMeshes |
                 //aiProcess_OptimizeGraph |
+                //aiProcess_SortByPType |
                 0,
             toStringz(std.path.extension(filename))
         ); 

@@ -10,6 +10,7 @@ module engine.gpu.compile;
 
 import engine.gpu.util;
 import engine.gpu.shader;
+import engine.game: screen;
 import blob = engine.asset.blob;
 import std.string: toStringz, countchars;
 import std.algorithm: map;
@@ -130,7 +131,7 @@ GLuint compileShader(GLenum shadertype, string[] srcs...)
 
     const(char)*[] source = [
         //toStringz("#version 120\n"),
-        toStringz("#version 330\n"),
+        toStringz(format("#version %d\n", to!int(screen.glsl * 100))),
         toStringz(header[shadertype])
     ];
 
