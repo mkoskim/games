@@ -68,9 +68,10 @@ void main()
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/test.dae")
-        engine.asset.SceneGraph.load("data/Girl/Girl.obj")
-        //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
-        //engine.asset.SceneGraph.load("local/Purple_Giana/Giana_scaled.obj")
+        //engine.asset.SceneGraph.load("data/Girl/Girl.obj", engine.asset.SceneGraph.Option.FlipUV)
+        //engine.asset.SceneGraph.load("data/Girl/Girl.dae", engine.asset.SceneGraph.Option.FlipUV)
+        engine.asset.SceneGraph.load("local/Purple_Giana/Giana_scaled.obj", engine.asset.SceneGraph.Option.CombineMeshes)
+        //engine.asset.SceneGraph.load("local/Purple_Giana/Giana_scaled.dae")
         ;
 
     auto mesh = scene.meshes[0];
@@ -115,9 +116,9 @@ void main()
     auto nm_loader = engine.gpu.Texture.Loader.Default;
 
     auto colormap =
-        //cm_loader(vec4(0.5, 0.5, 0.5, 1))
+        cm_loader(vec4(0.5, 0.5, 0.5, 1))
         //cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
-        cm_loader("data/Girl/Girl_cm.png")
+        //cm_loader("data/Girl/Girl_cm.png")
         ;
     auto normalmap =
         nm_loader(vec4(0.5, 0.5, 1, 0))
