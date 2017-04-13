@@ -56,7 +56,7 @@ class SceneGraph
         this(const aiMesh* mesh)
         {
             vec3 tovec3(const aiVector3D v) { return vec3(v.x, v.y, v.z); }
-            vec2 tovec2(const aiVector3D v) { return vec2(v.x, 1 - v.y); }
+            vec2 tovec2(const aiVector3D v) { return vec2(v.x, v.y); }
             mat3 tomat3(const aiVector3D a, const aiVector3D b, const aiVector3D c)
             {
                 return mat3(tovec3(a), tovec3(b), tovec3(c));
@@ -166,23 +166,35 @@ class SceneGraph
 
     //-------------------------------------------------------------------------
 
-    static SceneGraph load(string filename)
+    enum Option {
+        FlipUV,
+        CombineMeshes,
+    };
+
+    static SceneGraph load(string filename, Option[] options...)
     {
         auto buffer = blob.extract(filename);
+
+        aiPostProcessSteps postprocess = 
+            aiProcess_Triangulate |
+            aiProcess_MakeLeftHanded |
+            //aiProcess_GenNormals |
+            aiProcess_GenSmoothNormals |
+            aiProcess_CalcTangentSpace |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_ImproveCacheLocality |
+            aiProcess_OptimizeMeshes;
+
+        foreach(option; options) final switch(option)
+        {
+            case SceneGraph.Option.FlipUV: postprocess |= aiProcess_FlipUVs; break;
+            case SceneGraph.Option.CombineMeshes: postprocess |= aiProcess_OptimizeGraph; break;
+        }
 
         auto loaded = aiImportFileFromMemory(
             buffer.ptr,
             cast(uint)buffer.length,
-                aiProcess_Triangulate |
-                //aiProcess_GenNormals |
-                aiProcess_GenSmoothNormals |
-                aiProcess_CalcTangentSpace |
-                aiProcess_JoinIdenticalVertices |
-                aiProcess_ImproveCacheLocality |
-                aiProcess_OptimizeMeshes |
-                aiProcess_OptimizeGraph |
-                //aiProcess_SortByPType |
-                0,
+            postprocess,
             toStringz(std.path.extension(filename))
         ); 
 
