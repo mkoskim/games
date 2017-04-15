@@ -8,7 +8,7 @@ system based on assimp, integrating lua for loading assets, and then
 restructure shader engine to match the changes. At the moment, 
 most of the examples do not compile. The one that I am using to develop is:
 
-demo/objectviewer
+tools/objectviewer
 
 Feel free to try it, and browse the rest of the code.
 

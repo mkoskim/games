@@ -177,7 +177,7 @@ class SceneGraph
 
         aiPostProcessSteps postprocess = 
             aiProcess_Triangulate |
-            aiProcess_MakeLeftHanded |
+            //aiProcess_MakeLeftHanded |
             //aiProcess_GenNormals |
             aiProcess_GenSmoothNormals |
             aiProcess_CalcTangentSpace |
