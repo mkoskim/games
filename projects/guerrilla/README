@@ -1,0 +1,17 @@
+
+
+                            Guerrilla
+                            ---------
+                            
+                            
+The objective is to create a third person shooter game resembling a bit
+"Tomb Raider 2013". Some basics:
+
+- Protagonist is armed with few weapons, like semi-automatic handgun and
+  or assault riffle
+  
+- Arena shooter: player advances from "arena" (closed or semi-closed area
+  filled with spawning enemies) to another. Arenas are connected to each
+  other, but player's abilities to go back or forward are limited.
+  
+
