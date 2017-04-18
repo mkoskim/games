@@ -11,7 +11,7 @@ The objective is to create a third person shooter game resembling a bit
   or assault riffle
   
 - Arena shooter: player advances from "arena" (closed or semi-closed area
-  filled with spawning enemies) to another. Arenas are connected to each
-  other, but player's abilities to go back or forward are limited.
+  filled with spawning enemies) to another. Arenas are seamlessly connected
+  to each other, but player's abilities to go back or forward are limited.
   
 
