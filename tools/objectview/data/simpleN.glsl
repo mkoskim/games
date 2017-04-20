@@ -11,14 +11,13 @@
 #ifdef VERTEX_SHADER
 attribute vec3 vert_pos;
 attribute vec2 vert_uv;
-attribute vec3 vert_T;
 attribute vec3 vert_N;
 #endif
 
 struct FragInput
 {
     vec2 uv;
-    mat3 TBN;
+    vec3 n;
 
     vec3 light_dir;    // Light relative to fragment
     vec3 view_dir;     // Viewer relative to fragment
@@ -68,24 +67,15 @@ uniform LIGHT light;
 
 out FragInput frag;
 
-mat3 compute_TBN(vec3 normal, vec3 tangent)
-{
-    mat3 m = mat3(mView * mModel);
-
-    vec3 n = normal;
-    vec3 t = tangent;
-    vec3 b = cross(n, t);
-
-    return m * mat3(t, b, n);
-}
-
 void main()
 {
-    vec3 frag_pos = (mView * mModel * vec4(vert_pos, 1)).xyz;
+    mat4 mViewSpace = mView * mModel;
+    
+    vec3 frag_pos = (mViewSpace * vec4(vert_pos, 1)).xyz;
     gl_Position = mProjection * vec4(frag_pos, 1);
 
-    frag.uv  = vert_uv;
-    frag.TBN = compute_TBN(vert_N, vert_T);
+    frag.uv = vert_uv;
+    frag.n  = (mViewSpace * vec4(vert_N, 0)).xyz;
     frag.light_dir = normalize(light.pos - frag_pos);
     frag.view_dir  = normalize(-frag_pos);
 }
@@ -117,8 +107,7 @@ void main(void)
 {
     vec4 texel = texture2D(material.colormap, frag.uv);
 
-    vec3 n = texture2D(material.normalmap, frag.uv).rgb*2.0 - 1.0;
-    n = frag.TBN * n;
+    vec3 n = frag.n;
 
     vec3 v = frag.view_dir;
     vec3 l = frag.light_dir; 

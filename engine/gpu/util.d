@@ -16,14 +16,40 @@ public import std.string: toStringz;
 
 //-----------------------------------------------------------------------------
 
-const enum string[GLenum] glTypeName = 
+const enum string[GLenum] GLenumName = 
 [
+    //-------------------------------------------------------------------------
+    // OpenGL shader types
+    //-------------------------------------------------------------------------
+
     GL_FLOAT: "float", GL_FLOAT_VEC2: "vec2", GL_FLOAT_VEC3: "vec3", GL_FLOAT_VEC4: "vec4",
-    GL_INT: "int", GL_INT_VEC2: "ivec2", GL_INT_VEC3: "ivec3", GL_INT_VEC4: "ivec4",
-    GL_BOOL: "bool", GL_BOOL_VEC2: "bvec2", GL_BOOL_VEC3: "bvec3", GL_BOOL_VEC4: "bvec4",
+    GL_INT:   "int",   GL_INT_VEC2:  "ivec2", GL_INT_VEC3:  "ivec3", GL_INT_VEC4:  "ivec4",
+    GL_BOOL:  "bool",  GL_BOOL_VEC2: "bvec2", GL_BOOL_VEC3: "bvec3", GL_BOOL_VEC4: "bvec4",
     GL_FLOAT_MAT2: "mat2", GL_FLOAT_MAT3: "mat3", GL_FLOAT_MAT4: "mat4",
     GL_SAMPLER_2D: "sampler2d",
     GL_SAMPLER_CUBE: "samplercube",
+
+    //-------------------------------------------------------------------------
+    // OpenGL image formats
+    //-------------------------------------------------------------------------
+
+    GL_BGRA: "GL_BGRA",
+    GL_RGBA: "GL_RGBA",
+    GL_BGR: "GL_BGR",
+    GL_RGB: "GL_RGB",
+
+    GL_RGB8: "GL_RGB8",
+
+    GL_COMPRESSED_RGB: "GL_COMPRESSED_RGB",
+    GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
+
+    GL_COMPRESSED_RGB_S3TC_DXT1_EXT: "GL_COMPRESSED_RGB_S3TC_DXT1",
+    GL_COMPRESSED_RGBA_S3TC_DXT1_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT1",
+    GL_COMPRESSED_RGBA_S3TC_DXT3_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT3",
+    GL_COMPRESSED_RGBA_S3TC_DXT5_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT5",
+
+    0x86B0: "GL_COMPRESSED_RGB_FXT1_3DFX",
+    0x86B1: "GL_COMPRESSED_RGBA_FXT1_3DFX",
 ];
 
 //-----------------------------------------------------------------------------

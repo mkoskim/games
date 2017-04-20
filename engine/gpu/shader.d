@@ -167,7 +167,7 @@ class Shader
             name,
             param.location,
             param.size,
-            glTypeName[param.type]
+            GLenumName[param.type]
         );
     }
 
@@ -236,7 +236,7 @@ class Shader
             name,
             param.location,
             param.size,
-            glTypeName[param.type]
+            GLenumName[param.type]
         );
     }
 
