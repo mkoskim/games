@@ -69,7 +69,8 @@ void main()
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.dae")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
-        engine.asset.SceneGraph.load("engine/stock/unsorted/tests/furnace.dae")
+        engine.asset.SceneGraph.load("local/Female1.dae")
+        //engine.asset.SceneGraph.load("engine/stock/unsorted/tests/furnace.dae")
         ;
 
     auto mesh = scene.meshes[0];
@@ -83,10 +84,10 @@ void main()
     auto nm_loader = engine.gpu.Texture.Loader.Default;
 
     auto colormap =
-        //cm_loader(vec4(0.5, 0.5, 0.5, 1))
+        cm_loader(vec4(0.5, 0.5, 0.5, 1))
         //cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
         //cm_loader("engine/stock/unsorted/tiles/BrickWall1/ColorMap.png")
-        cm_loader("data/Girl/Girl_cm.png")
+        //cm_loader("data/Girl/Girl_cm.png")
         ;
     colormap.info();
 
@@ -135,7 +136,7 @@ void main()
         1, 200
     );
 
-    auto mView = mat4.look_at(vec3(0, -3, 2), vec3(0, 0, 2), vec3(0, 0, 1));
+    auto mView = mat4.look_at(vec3(0, -10, 2), vec3(0, 0, 2), vec3(0, 0, 1));
     auto pLight = vec3(5, 3, 7);
     
     //-------------------------------------------------------------------------
