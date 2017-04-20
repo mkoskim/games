@@ -138,7 +138,6 @@ class Texture
             compress = false;
             filtering = FILTERING(GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
             wrapping  = WRAPPING(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-            //wrapping = WRAPPING(GL_REPEAT, GL_REPEAT);
         }
 
         //---------------------------------------------------------------------
@@ -157,6 +156,11 @@ class Texture
 
         Loader setCompress(bool state) {
             compress = state;
+            return this;
+        }
+
+        Loader setMipmap(bool state) {
+            filtering.mag = state ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
             return this;
         }
 
@@ -294,32 +298,6 @@ class Texture
     }
 
     //-------------------------------------------------------------------------
-
-    private static const string[GLenum] formatname;
-
-    static this() {
-        formatname = [
-            GL_BGRA: "GL_BGRA",
-            GL_RGBA: "GL_RGBA",
-            GL_BGR: "GL_BGR",
-            GL_RGB: "GL_RGB",
-
-            GL_RGB8: "GL_RGB8",
-
-            GL_COMPRESSED_RGB: "GL_COMPRESSED_RGB",
-            GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
-
-            GL_COMPRESSED_RGB_S3TC_DXT1_EXT: "GL_COMPRESSED_RGB_S3TC_DXT1",
-            GL_COMPRESSED_RGBA_S3TC_DXT1_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT1",
-            GL_COMPRESSED_RGBA_S3TC_DXT3_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT3",
-            GL_COMPRESSED_RGBA_S3TC_DXT5_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT5",
-
-            0x86B0: "GL_COMPRESSED_RGB_FXT1_3DFX",
-            0x86B1: "GL_COMPRESSED_RGBA_FXT1_3DFX",
-        ];
-    }
-
-    //-------------------------------------------------------------------------
     // Print out information (for e.g. debugging purposes)
     //-------------------------------------------------------------------------
 
@@ -340,7 +318,7 @@ class Texture
         string getformatname() {
             import core.exception: RangeError;
             try {
-                return formatname[getlvlparam(GL_TEXTURE_INTERNAL_FORMAT)];
+                return GLenumName[getlvlparam(GL_TEXTURE_INTERNAL_FORMAT)];
             }
             catch(RangeError e) {
                 return to!string(getlvlparam(GL_TEXTURE_INTERNAL_FORMAT));

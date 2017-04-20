@@ -41,7 +41,8 @@ void main()
     }
 
     auto shader = new gpu.Shader(
-        engine.asset.blob.text("data/simple.glsl")
+        engine.asset.blob.text("data/simpleTBN.glsl")
+        //engine.asset.blob.text("data/simpleN.glsl")
     );
 
     auto state = new gpu.State(shader)
@@ -65,11 +66,10 @@ void main()
 
     auto scene =
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Suzanne/Suzanne.obj")
-        //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.obj")
+        //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.dae")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/king.obj")
-        //engine.asset.SceneGraph.load("data/test.dae")
-        //engine.asset.SceneGraph.load("data/Girl/Girl.obj", engine.asset.SceneGraph.Option.FlipUV)
-        engine.asset.SceneGraph.load("data/Girl/Girl.dae", engine.asset.SceneGraph.Option.FlipUV)
+        //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
+        engine.asset.SceneGraph.load("engine/stock/unsorted/tests/furnace.dae")
         ;
 
     auto mesh = scene.meshes[0];
@@ -85,11 +85,15 @@ void main()
     auto colormap =
         //cm_loader(vec4(0.5, 0.5, 0.5, 1))
         //cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
+        //cm_loader("engine/stock/unsorted/tiles/BrickWall1/ColorMap.png")
         cm_loader("data/Girl/Girl_cm.png")
         ;
+    colormap.info();
+
     auto normalmap =
         nm_loader(vec4(0.5, 0.5, 1, 0))
         //nm_loader("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png")
+        //nm_loader("engine/stock/unsorted/tiles/Concrete/Crusty/NormalMap.png")
     ;
 
     //-------------------------------------------------------------------------
@@ -131,13 +135,8 @@ void main()
         1, 200
     );
 
-    //*
-    auto mView  = mat4.identity().translate(0, -1.5, -3.5);
-    auto pLight = vec3(1.5, 3, -3);
-    /*/
-    auto mView  = mat4.identity().translate(0, 0, -3.5);
-    auto pLight = vec3(1.5, 3, -3);
-    /**/
+    auto mView = mat4.look_at(vec3(0, -3, 2), vec3(0, 0, 2), vec3(0, 0, 1));
+    auto pLight = vec3(5, 3, 7);
     
     //-------------------------------------------------------------------------
 
@@ -145,14 +144,16 @@ void main()
     {
 
         static float angle = 0;
-        angle += 0.02;
+        angle += 0.005;
+
+        mat4 mModel = mat4.identity().rotate(angle, vec3(0, 0, 1));
 
         state.activate();
         with(state.shader)
         {
             uniform("mProjection", mProjection);
             uniform("mView", mView);
-            uniform("mModel", mat4.identity().rotate(angle, vec3(0, 1, 0)));
+            uniform("mModel", mModel);
             uniform("material.colormap", colormap, 0);
             uniform("material.normalmap", normalmap, 1);
             uniform("light.pos", pLight);
@@ -168,7 +169,7 @@ void main()
         {
             uniform("mProjection", mProjection);
             uniform("mView", mView);
-            uniform("mModel", mat4.identity().rotate(angle, vec3(0, 1, 0)));
+            uniform("mModel", mModel);
             uniform("normal.length", 0.1);
             uniform("normal.color", vec4(0, 0.3, 0, 1));
         }

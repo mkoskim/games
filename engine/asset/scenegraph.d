@@ -56,7 +56,7 @@ class SceneGraph
         this(const aiMesh* mesh)
         {
             vec3 tovec3(const aiVector3D v) { return vec3(v.x, v.y, v.z); }
-            vec2 tovec2(const aiVector3D v) { return vec2(v.x, v.y); }
+            vec2 tovec2(const aiVector3D v) { return vec2(v.x, 1 - v.y); }
             mat3 tomat3(const aiVector3D a, const aiVector3D b, const aiVector3D c)
             {
                 return mat3(tovec3(a), tovec3(b), tovec3(c));
@@ -71,12 +71,14 @@ class SceneGraph
             {
                 pos ~= tovec3(mesh.mVertices[i]);
                 if(mesh.mTextureCoords[0]) uv ~= tovec2(mesh.mTextureCoords[0][i]);
+                if(mesh.mNormals) {
+                    n ~= tovec3(mesh.mNormals[i]);
+                }
                 if(mesh.mTangents) {
                     t ~= tovec3(mesh.mTangents[i]);
                     b ~= tovec3(mesh.mBitangents[i]);
-                    n ~= tovec3(mesh.mNormals[i]);
                 }
-                //writeln("P: ", pos[i], "uv: ", uv[i]);
+                //writeln("P=", pos[i], "n=", n[i]);
             }
             
             foreach(i; 0 .. mesh.mNumFaces)
@@ -177,10 +179,11 @@ class SceneGraph
 
         aiPostProcessSteps postprocess = 
             aiProcess_Triangulate |
-            //aiProcess_MakeLeftHanded |
             //aiProcess_GenNormals |
             aiProcess_GenSmoothNormals |
             aiProcess_CalcTangentSpace |
+            //aiProcess_MakeLeftHanded |
+            //aiProcess_FlipUVs |
             aiProcess_JoinIdenticalVertices |
             aiProcess_ImproveCacheLocality |
             aiProcess_OptimizeMeshes;
