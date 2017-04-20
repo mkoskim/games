@@ -14,14 +14,14 @@ LDFLAGS=
 LIBDIRS=
 LIBS=
 OBJS=
-BLOBFILES = data/
 
 #------------------------------------------------------------------------------
 # Add items you use to BLOB.
 #------------------------------------------------------------------------------
 
-BLOBFILES += local/
+BLOBFILES = data/
 BLOBFILES += engine/stock/unsorted
+#BLOBFILES += local/
 
 #------------------------------------------------------------------------------
 # Directories containing files used by the engine itself.
