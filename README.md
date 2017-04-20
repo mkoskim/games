@@ -1,16 +1,21 @@
 Game projects with common engine
 ================================
 
-"<strike>Reinventing</strike> Reconstructing the wheel, again..." - it is a way to learn how things work.
+~~Reinventing~~ Reconstructing the wheel - it is a way to learn how
+things work.
 
-**NOTE:** Currently I am working - when working - with new asset loading
-system based on assimp, integrating lua for loading assets, and then
-restructure shader engine to match the changes. At the moment, 
+---
+
+**NOTE:** Currently I am working - when working - with (1) new asset loading
+system based on assimp, (2) integrating lua for loading assets, and then
+(3) restructure shader engine to match the changes. At the moment, 
 most of the examples do not compile. The one that I am using to develop is:
 
 tools/objectviewer
 
 Feel free to try it, and browse the rest of the code.
+
+---
 
 **Description:** See:
 
