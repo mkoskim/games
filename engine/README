@@ -28,11 +28,10 @@ FEATURES: Current main features:
 
 DIRECTORIES:
 
-engine/blob/
+engine/asset/
 
-    BLOB management. BLOB is a zip file baked with the executable to contain
-    data files the game needs. This directory contains different loaders to
-    get data from BLOB to the game.
+	Asset loading, including BLOB management. BLOB is a zip file baked with
+	the executable to contain data files the game needs.
     
 engine/build/
 
@@ -41,10 +40,6 @@ engine/build/
 engine/doc/
 
     Various documents (e.g. TODO, CHANGELOG)
-    
-engine/experimental/
-
-    Possible experimental code.
     
 engine/ext/
 
@@ -58,6 +53,15 @@ engine/game/
     handling, general initialization (opening window, loading libraries), and
     Fiber class for concurrency.
 
+engine/gpu/
+	
+	Lower level graphics. This includes different classes and data types to
+	control GPU.
+	
+engine/libs/
+
+	Possible static libraries.
+	
 engine/render/
 
     Modules to implement frame rendering.
@@ -65,4 +69,3 @@ engine/render/
 engine/stock/
 
     Various stock items, like fonts, bitmaps, ...
-
