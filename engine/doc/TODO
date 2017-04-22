@@ -6,6 +6,10 @@ DONE:
 
 WORKLIST:
 
+- Shader GLSL code need not to be included to BLOB. If it goes there
+  automatically, it is OK. In other cases (e.g. stock shaders), we can
+  always use import to link the GLSL.
+
 - ALMOST DONE: Replace ulong with size_t (make 32-bit compilations to work)
 
 - Emulated joystick: trigger axis is between -1 ... 1, not between 0 ... +/- 1

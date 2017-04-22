@@ -32,7 +32,7 @@ void main()
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Cube/Cube.dae")
         //engine.asset.SceneGraph.load("engine/stock/unsorted/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
-        engine.asset.SceneGraph.load("local/stockset/sketches/Female.dae")
+        engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.dae")
         //engine.asset.SceneGraph.load("local/stockset/sketches/Female.obj")
         ;
 
