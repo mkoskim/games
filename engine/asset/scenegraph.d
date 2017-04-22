@@ -66,6 +66,7 @@ class SceneGraph
             writefln("Mesh: %s", name);
             writeln("- Vertices: ", mesh.mNumVertices);
             writeln("- Faces...: ", mesh.mNumFaces);
+            writeln("- Bones...: ", mesh.mNumBones);
             
             foreach(i; 0 .. mesh.mNumVertices)
             {
@@ -155,12 +156,13 @@ class SceneGraph
     this(const aiScene* scene)
     {
     //*
-        writeln("Animations: ", scene.mNumAnimations);
-        writeln("Cameras...: ", scene.mNumCameras);
-        writeln("Lights....: ", scene.mNumLights);
-        writeln("Textures..: ", scene.mNumTextures);
-        writeln("Materials.: ", scene.mNumMaterials);
-        writeln("Meshes....: ", scene.mNumMeshes);
+        writeln("Root........: ", tostr(scene.mRootNode.mName));
+        writeln("- Meshes....: ", scene.mNumMeshes);
+        writeln("- Textures..: ", scene.mNumTextures);
+        writeln("- Materials.: ", scene.mNumMaterials);
+        writeln("- Animations: ", scene.mNumAnimations);
+        writeln("- Lights....: ", scene.mNumLights);
+        writeln("- Cameras...: ", scene.mNumCameras);
     /**/
         loadMeshes(scene);
         root = loadNode(null, scene.mRootNode);
