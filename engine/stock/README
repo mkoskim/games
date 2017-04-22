@@ -15,7 +15,7 @@ Organization:
 
         system/             Resources needed by engine itself
         
-        unsorted/           Unsorted resources used during development
+        generic/            Generic, unsorted resources
         
         universe/           Planned place for directories containing more
                             consistent sets of assets.
