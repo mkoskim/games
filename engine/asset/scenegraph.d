@@ -63,6 +63,7 @@ class SceneGraph
             }
             
             name = tostr(mesh.mName);
+
             writefln("Mesh: %s", name);
             writeln("- Vertices: ", mesh.mNumVertices);
             writeln("- Faces...: ", mesh.mNumFaces);
@@ -89,6 +90,11 @@ class SceneGraph
                     cast(ushort)mesh.mFaces[i].mIndices[1],
                     cast(ushort)mesh.mFaces[i].mIndices[2]
                 ];
+            }
+            
+            foreach(i; 0 .. mesh.mNumBones)
+            {
+                writeln("- ", tostr(mesh.mBones[i].mName));
             }
         }
     }

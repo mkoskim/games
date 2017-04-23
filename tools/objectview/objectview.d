@@ -51,8 +51,8 @@ void main()
         //cm_loader("engine/stock/unsorted/tiles/AlienCarving/ColorMap.png")
         //cm_loader("engine/stock/unsorted/tiles/BrickWall1/ColorMap.png")
         //cm_loader("data/Girl/Girl_cm.png")
+        //.info()
         ;
-    colormap.info();
 
     auto normalmap =
         nm_loader(vec4(0.5, 0.5, 1, 0))
@@ -68,7 +68,7 @@ void main()
         1, 200
     );
 
-    auto mView = mat4.look_at(vec3(0, -20, 3), vec3(0, 0, 2), vec3(0, 0, 1));
+    auto mView = mat4.look_at(vec3(0, -20, 15), vec3(0, 0, 7), vec3(0, 0, 1));
     auto pLight = vec3(5, 3, 7);
     
     //-------------------------------------------------------------------------

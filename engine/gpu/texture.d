@@ -301,7 +301,7 @@ class Texture
     // Print out information (for e.g. debugging purposes)
     //-------------------------------------------------------------------------
 
-    void info()
+    auto info()
     {
         GLint getparam(GLenum param) {
             GLint value;
@@ -327,7 +327,7 @@ class Texture
 
         checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
-        writeln("ID...........: ", ID);
+        writeln("Texture ID...: ", ID);
         writeln("- Dimensions.: ", getlvlparam(GL_TEXTURE_WIDTH), " x ", getlvlparam(GL_TEXTURE_HEIGHT));
         writeln("- Levels.....: ", getparam(GL_TEXTURE_MAX_LEVEL));
         writeln("- Format.....: ", getformatname());
@@ -336,6 +336,7 @@ class Texture
         }
 
         checkgl!glBindTexture(GL_TEXTURE_2D, 0);
+        return this;
     }
 }
 
