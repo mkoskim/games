@@ -55,9 +55,10 @@ void main()
         ;
 
     auto normalmap =
-        nm_loader(vec4(0.5, 0.5, 1, 0))
+        //nm_loader(vec4(0.5, 0.5, 1, 0))
         //nm_loader("engine/stock/unsorted/tiles/AlienCarving/NormalMap.png")
         //nm_loader("engine/stock/unsorted/tiles/Concrete/Crusty/NormalMap.png")
+        nm_loader("local/stockset/Humanoid/Female/NormalMap.png")
     ;
 
     //-------------------------------------------------------------------------
