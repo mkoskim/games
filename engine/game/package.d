@@ -27,13 +27,14 @@ import engine.game.util;
 import engine.util;
 
 import std.string: toStringz;
+import std.array: split;
 
 //-----------------------------------------------------------------------------
 
 void init() { init("Unnamed"); }
 void init(int width, int height) { init("Unnamed", width, height); }
 
-void init(string name, int width = 640, int height = 480, float glversion = 3.3)
+void init(string name, int width = 640, int height = 480, float askfor = 3.3)
 {
     screen.width = width;
     screen.height = height;
@@ -44,6 +45,10 @@ void init(string name, int width = 640, int height = 480, float glversion = 3.3)
     // OpenGL context parameters
     //-------------------------------------------------------------------------
 
+    // Ask for specified OpenGL version
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, to!int(askfor));
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, to!int(askfor*10) % 10);
+    
     // Ask for standard 24-bit colors
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -53,34 +58,8 @@ void init(string name, int width = 640, int height = 480, float glversion = 3.3)
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
 
     //-------------------------------------------------------------------------
-    // Asking specific versions, and seeing what we got. It would be good
-    // to move this part to render side.
+    // Try to create context
     //-------------------------------------------------------------------------
-
-    float asked;
-
-    void askfor(float glversion) {
-        asked = glversion;
-        int ver = to!int(glversion * 10);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, ver / 10);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, ver % 10);
-    }
-
-    void got(SDL_GLContext context) {
-        screen.glcontext = ERRORIF(
-            context,
-            format(
-                "OpenGL context creation failed. " ~
-                "Do you have OpenGL %.1f or higher?", asked
-            )
-        );
-        screen.glversion = 
-            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION) +
-            _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION)/10.0;
-        screen.glsl = to!float(to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
-    }
-
-    askfor(glversion);
 
     screen.window = SDL_CreateWindow(
         toStringz(name),
@@ -89,12 +68,29 @@ void init(string name, int width = 640, int height = 480, float glversion = 3.3)
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
     );
 
-    got(SDL_GL_CreateContext(screen.window));
+    screen.glcontext = ERRORIF(
+        SDL_GL_CreateContext(screen.window),
+        format(
+            "OpenGL context creation failed. " ~
+            "Do you have OpenGL %.1f or higher?", askfor
+        )
+    );
 
-    auto glv = DerelictGL3.reload();
+    DerelictGL3.reload();
+
+    //-------------------------------------------------------------------------
+    // Got it - fill in info
+    //-------------------------------------------------------------------------
 
     screen.fb = new render.Framebuffer(0, width, height);
-    screen.fb.clear();
+
+    screen.glversion =
+        _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION) + 
+        _sdlattr!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION) * 0.1
+    ;
+    screen.glsl = to!float(
+        to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)).split()[0]
+    );
 
     //SDL_GL_SetSwapInterval(0);    // Immediate
     //SDL_GL_SetSwapInterval(1);    // VSync
@@ -102,14 +98,13 @@ void init(string name, int width = 640, int height = 480, float glversion = 3.3)
 
     debug {
         writeln ("OpenGL:");
-        writefln("- Context..: Version %.1f", screen.glversion);
-        writefln("- Derelict.: Version %s", glv);
+        writefln("- Context..: %.1f", screen.glversion);
         writefln("- GLSL.....: %.2f", screen.glsl);
-        writeln ("- Version..: ", to!string(glGetString(GL_VERSION)));
+        writefln("- Derelict.: %s",   to!string(DerelictGL3.loadedVersion()));
+        writeln ("- Driver...: ", to!string(glGetString(GL_RENDERER)));
         writeln ("- Vendor...: ", to!string(glGetString(GL_VENDOR)));
-        writeln ("- Renderer.: ", to!string(glGetString(GL_RENDERER)));
-
-        //writeln("Extensions: ", to!string(glGetString(GL_EXTENSIONS)));
+        writeln ("- Version..: ", to!string(glGetString(GL_VERSION)));
+        writeln ("- GLSL.....: ", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
     }
 
     render.init();

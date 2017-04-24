@@ -9,23 +9,23 @@ module engine.game.instance;
 
 //-----------------------------------------------------------------------------
 
-import derelict.sdl2.sdl;
-
 import engine.game.input;
 import engine.gpu.framebuffer;
+
+import derelict.sdl2.sdl;
+import derelict.opengl3.gl;
 
 //-----------------------------------------------------------------------------
 
 struct SCREEN
 {
-    int width, height;
-    SDL_Window* window = null;
-
+    SDL_Window*   window    = null;
     SDL_GLContext glcontext = null;
 
     float glversion;
     float glsl;
-    
+
+    int width, height;
     Framebuffer fb;
 }
 

@@ -140,18 +140,17 @@ private void checkExtensions()
         return (key in extensions) ? true : false;
     }
 
-    void nocheck(string extension, int coreat) {}
+    void nocheck(string extension, float coreat) {}
 
-    bool check(string extension, int coreat)
+    bool check(string extension, float coreat)
     {
         bool report(bool result, string msg)
         {
-            //writefln("- %-40s ... %s", extension, msg);
             writefln("- %-4s: %s", msg, extension);
             return result;
         }
         
-        if(coreat && screen.glversion >= coreat / 10.0)
+        if(coreat && screen.glversion >= coreat)
         {
             return report(true, "Core");
         }
@@ -159,7 +158,7 @@ private void checkExtensions()
         return report(status, (status ? "Yes" : "No"));
     }
 
-    void require(string extension, int coreat)
+    void require(string extension, float coreat)
     {
         ERRORIF(
             check(extension, coreat),
@@ -180,49 +179,49 @@ private void checkExtensions()
     // VAOs and framebuffers - this is crucial.
     //-------------------------------------------------------------------------
 
-    require("GL_ARB_vertex_array_object", 30);
-    require("GL_ARB_framebuffer_object", 30);
+    require("GL_ARB_vertex_array_object", 3.0);
+    require("GL_ARB_framebuffer_object", 3.0);
 
     //-------------------------------------------------------------------------
     // Do we have texture storage for mipmaps?
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_texture_storage", 42);        // Yes
+    check("GL_ARB_texture_storage", 4.2);        // Yes
 
     //-------------------------------------------------------------------------
     // Plan is to use instanced rendering... Do we have it?
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_draw_instanced", 31);         // yes
-    check("GL_ARB_instanced_arrays", 33);       // yes
+    check("GL_ARB_draw_instanced", 3.1);         // yes
+    check("GL_ARB_instanced_arrays", 3.3);       // yes
 
     //-------------------------------------------------------------------------
     // Array Textures: The description is interesting...
     //      https://www.opengl.org/wiki/Array_Texture
     //-------------------------------------------------------------------------
 
-    check("GL_EXT_texture_array", 30);          // yes
+    check("GL_EXT_texture_array", 3.0);          // yes
 
     //-------------------------------------------------------------------------
     // Do we have uniform buffers? Do we find any use for them?
     //      https://www.opengl.org/wiki/Interface_Block_(GLSL)
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_uniform_buffer_object", 31);          // yes
-    check("GL_ARB_shader_storage_buffer_object", 31);   // no
+    check("GL_ARB_uniform_buffer_object", 3.1);          // yes
+    check("GL_ARB_shader_storage_buffer_object", 3.1);   // no
 
     //-------------------------------------------------------------------------
     // Do we have shader subroutines? Do we have geometry shader?
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_shader_subroutine", 40);      // no
-    nocheck("GL_ARB_geometry_shader4", 32);     // no
+    check("GL_ARB_shader_subroutine", 4.0);      // no
+    nocheck("GL_ARB_geometry_shader4", 3.2);     // no
 
     //-------------------------------------------------------------------------
     // Interfacing to GPU programs
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_program_interface_query", 43);    // yes
+    check("GL_ARB_program_interface_query", 4.3);    // yes
 
     //-------------------------------------------------------------------------
     // Explicit locations for attributes? Using this needs modifications
@@ -230,60 +229,60 @@ private void checkExtensions()
     // https://www.opengl.org/registry/specs/ARB/explicit_attrib_location.txt
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_explicit_attrib_location", 33);   // yes
-    check("GL_ARB_explicit_uniform_location", 43);   // yes
+    check("GL_ARB_explicit_attrib_location", 3.3);   // yes
+    check("GL_ARB_explicit_uniform_location", 4.3);   // yes
 
     //-------------------------------------------------------------------------
     // Do we have separate attrib binding? Can we set up vertex array without
     // binding it and buffers first?
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_vertex_attrib_binding", 43);      // Yes
-    check("GL_ARB_direct_state_access", 44);        // No
+    check("GL_ARB_vertex_attrib_binding", 4.3);      // Yes
+    check("GL_ARB_direct_state_access", 4.4);        // No
     
     //-------------------------------------------------------------------------
     // Primitive restart might be a nice feature:
     //      https://www.opengl.org/wiki/Vertex_Rendering#Primitive_Restart
     //-------------------------------------------------------------------------
 
-    check("GL_NV_primitive_restart", 31);       // yes
+    check("GL_NV_primitive_restart", 3.1);       // yes
 
     //-------------------------------------------------------------------------
     // Texture swizzling might be useful for some features:
     //      https://www.opengl.org/wiki/Texture#Swizzle_mask
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_texture_swizzle", 33);        // yes
+    check("GL_ARB_texture_swizzle", 3.3);        // yes
 
     //-------------------------------------------------------------------------
     // Could we store skeletal animation transforms to buffer texture?
     //      https://www.opengl.org/wiki/Buffer_Texture
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_texture_buffer_object", 30);  // no
-    check("GL_EXT_texture_buffer_object", 30);  // no
+    check("GL_ARB_texture_buffer_object", 3.0);  // no
+    check("GL_EXT_texture_buffer_object", 3.0);  // no
 
     //-------------------------------------------------------------------------
     // Performance timers - need I say more?
     //      https://www.opengl.org/wiki/Query_Object#Timer_queries
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_timer_query", 33);            // yes
+    check("GL_ARB_timer_query", 3.3);            // yes
 
     //-------------------------------------------------------------------------
     // Image Load/Store for order-independent transparency?!?
     //      https://www.opengl.org/wiki/Image_Load_Store#Image_size
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_shader_image_size", 43);          // yes
-    check("GL_ARB_shader_image_load_store", 42);    // yes
-    check("GL_EXT_shader_image_load_store", 42);    // no
+    check("GL_ARB_shader_image_size", 4.3);          // yes
+    check("GL_ARB_shader_image_load_store", 4.2);    // yes
+    check("GL_EXT_shader_image_load_store", 4.2);    // no
 
     //-------------------------------------------------------------------------
     // Do we have GL_INT_2_10_10_10_REV? Do we find any use for it?
     //-------------------------------------------------------------------------
 
-    check("GL_ARB_vertex_type_2_10_10_10_rev", 33); // yes
+    check("GL_ARB_vertex_type_2_10_10_10_rev", 3.3); // yes
 
     //-------------------------------------------------------------------------
 }

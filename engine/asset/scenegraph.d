@@ -37,6 +37,11 @@ private string tostr(const aiString str)
 class SceneGraph
 {
     //*************************************************************************
+    //
+    // TODO: Mesh & Node classes should be user-defined. This file could
+    // contain abstract class with loading interface, but how data is finally
+    // stored to GPU depends on the shaders used by the game.
+    //
     //*************************************************************************
 
     class Mesh
@@ -98,6 +103,9 @@ class SceneGraph
             }
         }
     }
+
+    //*************************************************************************
+    //*************************************************************************
 
     //-------------------------------------------------------------------------
 
