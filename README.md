@@ -9,7 +9,7 @@ things work.
 Quick install:
 
 ```
-$ git clone https://github.com/mkoskim/games.git --recursive`
+$ git clone https://github.com/mkoskim/games.git --recursive
 $ cd games
 games$ ./setup.sh
 ```
