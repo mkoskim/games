@@ -29,6 +29,9 @@ SRCPATH += engine/libs/gl3n/
 # Submodule versions (just as reminder)
 #------------------------------------------------------------------------------
 
+submodules:
+	git submodule --quiet foreach 'echo $$name `git status | head -n 1`'
+
 #submodules_add:
 #	git submodule add https://github.com/DerelictOrg/DerelictUtil.git
 #	git submodule add https://github.com/DerelictOrg/DerelictGL3.git
@@ -39,14 +42,6 @@ SRCPATH += engine/libs/gl3n/
 #
 #submodules_fetch:
 #	git submodule update --init --recursive
-#
-#fetch: submodules_fetch
-#	dub fetch derelict-util    --version=2.1.0
-#	dub fetch derelict-sdl2    --version=1.9.7
-#	dub fetch derelict-gl3     --version=1.0.19
-#	dub fetch derelict-assimp3 --version=1.0.1
-#	dub fetch derelict-lua     --version=1.2.3
-#	dub fetch gl3n             --version=1.3.1
 
 #------------------------------------------------------------------------------
 # Attempt to use GDC... Failed.
