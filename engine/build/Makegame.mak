@@ -15,24 +15,42 @@ endif
 default: note debug run
 
 #------------------------------------------------------------------------------
-# DUB packages.
+# D libraries
 #------------------------------------------------------------------------------
-
-fetch:
-#	dub fetch derelict-util    --version=2.1.0
-#	dub fetch derelict-sdl2    --version=1.9.7
-#	dub fetch derelict-gl3     --version=1.0.19
-	dub fetch derelict-assimp3 --version=1.0.1
-	dub fetch derelict-lua     --version=~5.2
-	dub fetch gl3n             --version=1.3.1
 
 SRCPATH += engine/libs/DerelictUtil/source/
 SRCPATH += engine/libs/DerelictGL3/source/
 SRCPATH += engine/libs/DerelictSDL2/source/
+SRCPATH += engine/libs/DerelictASSIMP3/source/
+SRCPATH += engine/libs/DerelictLua/source/
+SRCPATH += engine/libs/gl3n/
 
-SRCPATH += ~/.dub/packages/derelict-assimp3-1.0.1/source/
-SRCPATH += ~/.dub/packages/derelict-lua-5.2/source/
-SRCPATH += ~/.dub/packages/gl3n-1.3.1/
+#SRCPATH += ~/.dub/packages/derelict-assimp3-1.0.1/source/
+#SRCPATH += ~/.dub/packages/derelict-lua-5.2/source/
+#SRCPATH += ~/.dub/packages/gl3n-1.3.1/
+
+#------------------------------------------------------------------------------
+# Submodule versions (just as reminder)
+#------------------------------------------------------------------------------
+
+#submodules_add:
+#	git submodule add https://github.com/DerelictOrg/DerelictUtil.git
+#	git submodule add https://github.com/DerelictOrg/DerelictGL3.git
+#	git submodule add https://github.com/DerelictOrg/DerelictSDL2.git
+#	git submodule add https://github.com/DerelictOrg/DerelictASSIMP3.git
+#	git submodule add https://github.com/DerelictOrg/DerelictLua.git
+#	git submodule add https://github.com/Dav1dde/gl3n.git
+#
+#submodules_fetch:
+#	git submodule update --init --recursive
+#
+#fetch: submodules_fetch
+#	dub fetch derelict-util    --version=2.1.0
+#	dub fetch derelict-sdl2    --version=1.9.7
+#	dub fetch derelict-gl3     --version=1.0.19
+#	dub fetch derelict-assimp3 --version=1.0.1
+#	dub fetch derelict-lua     --version=1.2.3
+#	dub fetch gl3n             --version=1.3.1
 
 #------------------------------------------------------------------------------
 # Attempt to use GDC... Failed.
