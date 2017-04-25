@@ -10,3 +10,4 @@ this rule to allow static linking. This is the directory for them.
 - - -
 
 NOTE: LuaD is shipped with static lua library.
+

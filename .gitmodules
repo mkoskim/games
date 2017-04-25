@@ -1,0 +1,9 @@
+[submodule "engine/libs/DerelictSDL2"]
+	path = engine/libs/DerelictSDL2
+	url = https://github.com/DerelictOrg/DerelictSDL2.git
+[submodule "engine/libs/DerelictGL3"]
+	path = engine/libs/DerelictGL3
+	url = https://github.com/DerelictOrg/DerelictGL3.git
+[submodule "engine/libs/DerelictUtil"]
+	path = engine/libs/DerelictUtil
+	url = https://github.com/DerelictOrg/DerelictUtil.git
