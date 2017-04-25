@@ -11,6 +11,7 @@ necessary libraries and their versions. Try it:
     $ cd setup
     setup$ sudo setup.sh
 
+REMEMBER to clone submodules, too!
 
 -------------------------------------------------------------------------------
 
@@ -65,32 +66,7 @@ To successfully compile and run projects, you will need:
 
 -------------------------------------------------------------------------------
 
-4) DUB
-
-   Project uses D libraries via dub. It can be downloaded here:
-   
-        http://code.dlang.org/download
-        
-   Currently I am using version 0.9.24.
-
--------------------------------------------------------------------------------
-
-5) D LIBRARIES
-
-   The project uses:
-
-        * derelict: For OpenGL, SDL2 and Assimp3 bindings
-        * gl3n: 3D maths
-
-   There is preliminary support in Makefile to fetch these. Go in one of the
-   project directories, and type 'make fetch', for example:
-   
-        $ cd testbench/pacman
-        testbench/pacman$ make fetch
-
--------------------------------------------------------------------------------
-
-6) If everything is fine, you can compile and run some of the examples
+4) If everything is fine, you can compile and run some of the examples
    using make:
 
       testbench/pacman$ make default

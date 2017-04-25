@@ -6,6 +6,12 @@ things work.
 
 ---
 
+Cloning repository with submodules:
+
+`git clone https://github.com/mkoskim/games.git --recursive`
+
+---
+
 **NOTE:** Currently I am working - when working - with (1) new asset loading
 system based on assimp, (2) integrating lua for loading assets, and then
 (3) restructure shader engine to match the changes. At the moment, 
@@ -30,4 +36,9 @@ Feel free to try it, and browse the rest of the code.
 **Installing:** See:
 
 [INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
+
+---
+
+*New:* This project now takes D libraries as git submodules, so dub is no
+more needed. Hopefully I can keep up with versions...
 
