@@ -25,10 +25,6 @@ SRCPATH += engine/libs/DerelictASSIMP3/source/
 SRCPATH += engine/libs/DerelictLua/source/
 SRCPATH += engine/libs/gl3n/
 
-#SRCPATH += ~/.dub/packages/derelict-assimp3-1.0.1/source/
-#SRCPATH += ~/.dub/packages/derelict-lua-5.2/source/
-#SRCPATH += ~/.dub/packages/gl3n-1.3.1/
-
 #------------------------------------------------------------------------------
 # Submodule versions (just as reminder)
 #------------------------------------------------------------------------------
