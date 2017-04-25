@@ -6,7 +6,7 @@ things work.
 
 ---
 
-Quick install:
+Quick installation for Linux Mint 18 (64-bit):
 
 ```
 $ git clone https://github.com/mkoskim/games.git --recursive
