@@ -6,7 +6,7 @@ echo Installing system libraries...
 echo
 ###############################################################################
 
-apt install\
+sudo apt-get install\
     libsdl2-dev\
     libsdl2-image-dev\
     libsdl2-ttf-dev\
@@ -23,7 +23,7 @@ echo
 DMD=2.073.2
 
 DMDDEB=dmd_$DMD-0_amd64.deb
-DMDDEBFILE=../local/$DMDDEB
+DMDDEBFILE=local/$DMDDEB
 
 #------------------------------------------------------------------------------
 
@@ -37,14 +37,6 @@ else
 	wget http://downloads.dlang.org/releases/2.x/$DMD/$DMDDEB -O $DMDDEBFILE
 	sudo dpkg -i $DMDDEBFILE
 fi
-
-###############################################################################
-echo
-echo Installing D libraries...
-echo
-###############################################################################
-
-make -f ../engine/build/Makegame.mak fetch
 
 ###############################################################################
 

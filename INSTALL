@@ -1,15 +1,14 @@
 This project has been made with:
 
     - Linux Mint 64-bit (Current: 18.1)
-    - DMD compiler (current: 2.073.2)
+    - DMD compiler (Current: 2.073.2)
     
 -------------------------------------------------------------------------------
 
 Currently, there is setup/setup.sh which tries to simplify installation of
 necessary libraries and their versions. Try it:
 
-    $ cd setup
-    setup$ sudo setup.sh
+    $ setup.sh
 
 REMEMBER to clone submodules, too!
 
