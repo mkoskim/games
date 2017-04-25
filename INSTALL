@@ -5,17 +5,17 @@ This project has been made with:
 
 You may encounter compatibility problems on other platforms and compilers.
 See notes at bottom.
-	
+
 -------------------------------------------------------------------------------
 
 There is now setup.sh which tries to simplify installation of necessary
 libraries. Try it:
 
-    $ setup.sh
+    $ ./setup.sh
 
-If everything goes right, it installs/updates your system side libraries,
-and installs DMD compiler. If everything does not go well, you may need to
-tweak your installation manually.
+If everything goes right, it installs (1) system side libraries and (2) DMD
+compiler. If everything does not go well, you may need to tweak your
+installation manually.
 	
 -------------------------------------------------------------------------------
 
@@ -37,8 +37,7 @@ To successfully compile and run projects, you will need:
    std.zip is implemented, but it may require zlib. Luckily, both are
    usually installed by default in Linux systems.
 
-   You will need at least OpenGL 2.1. I have currently been planning to move
-   on to OpenGL 3.3, because it has many nice features to study closer.
+   You will need at least OpenGL 3.3.
 
 -------------------------------------------------------------------------------
 
@@ -48,8 +47,7 @@ To successfully compile and run projects, you will need:
 
    * GNU make
 
-   This is usually installed to Linux systems by default. NOTE: Preliminary
-   dub building support exists.
+   This is usually installed to Linux systems by default.
 
 -------------------------------------------------------------------------------
 
