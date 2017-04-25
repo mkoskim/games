@@ -6,7 +6,7 @@ things work.
 
 ---
 
-Cloning repository with submodules:
+Clone repository with submodules:
 
 `git clone https://github.com/mkoskim/games.git --recursive`
 
@@ -23,6 +23,10 @@ Feel free to try it, and browse the rest of the code.
 
 ---
 
+**Installing:** See:
+
+[INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
+
 **Description:** See:
 
 [games wiki](https://github.com/mkoskim/games/wiki)
@@ -33,12 +37,8 @@ Feel free to try it, and browse the rest of the code.
 
 [TODO](https://github.com/mkoskim/games/blob/master/engine/doc/TODO)
 
-**Installing:** See:
-
-[INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
-
 ---
 
-*New:* This project now takes D libraries as git submodules, so dub is no
+**New:** This project now takes D libraries as git submodules, so dub is no
 more needed. Hopefully I can keep up with versions...
 
