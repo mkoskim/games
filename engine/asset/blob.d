@@ -33,19 +33,18 @@ import std.zip;
 import std.file: FileException, read;
 import core.exception: RangeError;
 
-ubyte[] extract(string filename)
+void[] extract(string filename)
 {
-    ArchiveMember file;
-
-    try {
-        file = archive.directory[filename];
+    try
+    {
+        ArchiveMember file = archive.directory[filename];
         archive.expand(file);
         return file.expandedData;
     }
-    catch(RangeError e) {
-        if(fallback)
-        {
-            return cast(ubyte[])read(filename);
+    catch(RangeError e)
+    {
+        if(fallback) {
+            return read(filename);
         } else {
             throw new FileException(filename, "File not found");
         }
@@ -58,4 +57,5 @@ string text(string filename)
 {
     return cast(string)extract(filename);
 }
+
 
