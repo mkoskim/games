@@ -6,9 +6,15 @@ things work.
 
 ---
 
-Clone repository with submodules:
+Quick install:
 
-`git clone https://github.com/mkoskim/games.git --recursive`
+```
+$ git clone https://github.com/mkoskim/games.git --recursive`
+$ cd games
+games$ ./setup.sh
+```
+
+For more info: [INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
 
 ---
 
@@ -22,10 +28,6 @@ tools/objectviewer
 Feel free to try it, and browse the rest of the code.
 
 ---
-
-**Installing:** See:
-
-[INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
 
 **Description:** See:
 
