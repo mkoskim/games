@@ -9,6 +9,12 @@ module engine.asset.blob;
 import engine.asset.util;
 
 //-----------------------------------------------------------------------------
+// Fall back to filesystem if requested file is not in BLOB
+//-----------------------------------------------------------------------------
+
+bool fallback = false;
+
+//-----------------------------------------------------------------------------
 // Blob archive
 //-----------------------------------------------------------------------------
 
@@ -34,17 +40,19 @@ ubyte[] extract(string filename)
     try {
         file = archive.directory[filename];
         archive.expand(file);
+        return file.expandedData;
     }
     catch(RangeError e) {
-        //*
-        // For testing: Fall back to filesystem
-        return cast(ubyte[])read(filename);
-        /*/
-        throw new FileException(filename, "File not found");
-        /**/
+        if(fallback)
+        {
+            return cast(ubyte[])read(filename);
+        } else {
+            throw new FileException(filename, "File not found");
+        }
     }
-    return file.expandedData;
 }
+
+//-----------------------------------------------------------------------------
 
 string text(string filename)
 {
