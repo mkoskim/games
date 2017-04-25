@@ -29,7 +29,7 @@ SRCPATH += engine/libs/gl3n/
 # Submodule versions (just as reminder)
 #------------------------------------------------------------------------------
 
-submodules:
+subinfo:
 	git submodule --quiet foreach 'echo $$name `git status | head -n 1`'
 
 #submodules_add:

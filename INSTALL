@@ -2,22 +2,21 @@ This project has been made with:
 
     - Linux Mint 64-bit (Current: 18.1)
     - DMD compiler (Current: 2.073.2)
-    
+
+You may encounter compatibility problems on other platforms and compilers.
+See notes at bottom.
+	
 -------------------------------------------------------------------------------
 
-Currently, there is setup/setup.sh which tries to simplify installation of
-necessary libraries and their versions. Try it:
+There is now setup.sh which tries to simplify installation of necessary
+libraries. Try it:
 
     $ setup.sh
 
-REMEMBER to clone submodules, too!
-
--------------------------------------------------------------------------------
-
-GAME CONTROLLER: Now, with emulated controller, games can be basically played
-without having a real one. But game controller is still recommended. My games
-are and will be made to be played with such (XBox).
-
+If everything goes right, it installs/updates your system side libraries,
+and installs DMD compiler. If everything does not go well, you may need to
+tweak your installation manually.
+	
 -------------------------------------------------------------------------------
 
 To successfully compile and run projects, you will need:
@@ -70,6 +69,18 @@ To successfully compile and run projects, you will need:
 
       testbench/pacman$ make default
 
-Sadly to Windows users, current build system utilizes common Linux side
-building tools and symbolic links. I will continue to simplify the build.
+   NOTE: Currently, most of the examples do not work, due to restructuring
+   of game engine.
+  
+-------------------------------------------------------------------------------
 
+NOTES:
+
+[1] REMEMBER to fetch submodules, too!
+
+[2] GAME CONTROLLER: Now, with emulated controller, games can be basically played
+without having a real one. But game controller is still recommended. My games
+are and will be made to be played with such (XBox).
+
+[3] Sadly to Windows users, current build system utilizes common Linux side
+building tools and symbolic links. I will continue to simplify the build.
