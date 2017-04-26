@@ -4,6 +4,15 @@
 
 print "Hey!"
 
+-- ----------------------------------------------------------------------------
+
+mytable = {
+    a = 1,
+    b = 2,
+}
+
+-- ----------------------------------------------------------------------------
+
 format = string.format
 
 function loadmessage()
@@ -13,7 +22,7 @@ end
 
 function howdy()
     print("Version:", _VERSION)
-    return 1, 2, 3
+    return { 1, 2, 3 }
 end
 
 function show(a, b, c)
@@ -23,4 +32,6 @@ end
 
 -- result = test.heya()
 -- write(format("Result: %d\n", result))
+
+return "All done!"
 

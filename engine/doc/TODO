@@ -6,6 +6,10 @@ DONE:
 
 WORKLIST:
 
+- render/ is for 2D/3D pipeline building blocks. ext/ and ext/simple/ will
+  contain fully assembled, generic, ready-to-use pipelines for common
+  situations.
+
 - Shader GLSL code need not to be included to BLOB. If it goes there
   automatically, it is OK. In other cases (e.g. stock shaders), we can
   always use import to link the GLSL.
