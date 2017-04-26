@@ -23,6 +23,23 @@ import std.stdio;
 //
 //*****************************************************************************
 
+private extern(C) int luaIoWrite(lua_State *L) nothrow
+{
+    try {
+        auto lua = new engine.asset.Lua(L);
+        write("Lua: ");
+        for(int i = 1; i <= lua_gettop(L); i++) write(lua.lookup(i), " ");
+        writeln();
+    } catch(Throwable) {
+    }
+    
+    return 0;
+}
+
+private const luaL_Reg[] globals = [
+    { "print", &luaIoWrite },
+    { null, null },
+];
 
 //-----------------------------------------------------------------------------
 // Creating interface for LUA to access D functions
@@ -30,8 +47,12 @@ import std.stdio;
 
 void main()
 {
-    auto lua = new engine.asset.Lua("data/test.lua");
+    auto lua = new engine.asset.Lua();
 
+    luaL_register(lua.L, "_G", globals.ptr);
+    lua_settop(lua.L, 0);
+    
+    lua.load("data/test.lua");
     lua.call("howdy");
     writeln(
         "show() returns: ",

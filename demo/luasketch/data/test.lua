@@ -2,17 +2,24 @@
 -- Testing...
 -- ----------------------------------------------------------------------------
 
+print "Hey!"
+
+format = string.format
+
 function loadmessage()
     message = blob.loadtext("data/message.txt");
     return message
 end
 
 function howdy()
-    io.write(string.format("Hello from %s\n", _VERSION))
+    print("Version:", _VERSION)
 end
 
 function show(num)
-    io.write(string.format("Hello from %f\n", num))
+    print(format("Hello from %f", num))
     return num
 end
+
+-- result = test.heya()
+-- write(format("Result: %d\n", result))
 

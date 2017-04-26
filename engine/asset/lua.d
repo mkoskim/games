@@ -23,7 +23,8 @@ import core.vararg;
 class Lua
 {
     lua_State *L;
-    
+    bool owner;
+        
     //-------------------------------------------------------------------------
 
     void checklua(int errno)
@@ -40,6 +41,8 @@ class Lua
     this()
     {
         L = luaL_newstate();
+        owner = true;
+
         //luaL_openlibs(L);
 
         luaL_requiref(L, "_G", luaopen_base, 1);
@@ -47,13 +50,19 @@ class Lua
         luaL_requiref(L, "table", luaopen_table, 1);
         luaL_requiref(L, "math", luaopen_math, 1);
 
-        luaL_requiref(L, "io", luaopen_io, 1);
+        //luaL_requiref(L, "io", luaopen_io, 1);
+        //luaL_requiref(L, "package", luaopen_package, 1);
+        //luaL_requiref(L, "os", luaopen_os, 1);
 /*
         //luaopen_debug(L);
-        //luaopen_package(L);
         //luaopen_os(L);
 */        
         lua_settop(L, 0);
+    }
+
+    this(lua_State *L) {
+        this.L = L;
+        owner = false;
     }
 
     this(string file)
@@ -62,7 +71,9 @@ class Lua
         load(file);
     }
 
-    ~this() { lua_close(L); }
+    ~this() {
+        if(owner) lua_close(L);
+    }
 
     //-------------------------------------------------------------------------
 
@@ -80,13 +91,14 @@ class Lua
     {
         final switch(type(index))
         {
-            case LUA_TNONE:     
+            case LUA_TNONE: 
             case LUA_TTABLE:   
             case LUA_TFUNCTION:
             case LUA_TUSERDATA:
             case LUA_TTHREAD:  
-            case LUA_TLIGHTUSERDATA: assert(false);
-
+            case LUA_TLIGHTUSERDATA:
+                writeln("Stack top = ", TypeName[type(index)]);
+                assert(false);
             
             case LUA_TNIL:     return Variant(null);
             case LUA_TNUMBER:  return Variant(lua_tonumber(L, index));
@@ -103,7 +115,7 @@ class Lua
 
     Variant call(int argc, int retc)
     {
-        lua_call(L, argc, 1);
+        lua_call(L, argc, retc);
 
         scope(exit) { lua_settop(L, 0); }
         
@@ -151,7 +163,7 @@ class Lua
     Variant eval(string s)
     {
         checklua(luaL_loadstring(L, toStringz(s)));
-        return call(0, 0);
+        return call(0, 1);
     }
 
     Variant load(string s)
