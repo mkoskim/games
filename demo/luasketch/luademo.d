@@ -5,8 +5,12 @@
 //*****************************************************************************
 
 import engine;
+import engine.game: Track;
 
 import std.stdio;
+
+alias engine.asset.Lua.LuaType LuaType;
+alias engine.asset.Lua.LuaObject LuaObject;
 
 //*****************************************************************************
 //
@@ -38,6 +42,8 @@ private extern(C) int luaIoWrite(lua_State *L) nothrow
 
 private const luaL_Reg[] globals = [
     { "print", &luaIoWrite },
+    //{ "gimme", &luaGimme },
+    //{ "crash", &luaCrash },
     { null, null },
 ];
 
@@ -45,25 +51,63 @@ private const luaL_Reg[] globals = [
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
 
-void main()
+void show(LuaObject[] result)
+{
+    write("(");
+    foreach(r; result) switch(r.type)
+    {
+        case LuaType.Bool:
+        case LuaType.Number:
+        case LuaType.String:
+            write(r.value); write(", "); break;
+        default:
+            write(r.type); write(", "); break;
+    }
+    writeln(")");
+}
+
+void test()
 {
     auto lua = new engine.asset.Lua();
 
     luaL_register(lua.L, "_G", globals.ptr);
-    lua_settop(lua.L, 0);
-    
+    lua.top = 0;
+
     lua.load("data/test.lua");
-    lua.call("howdy");
+
+    show(
+        lua["string", "format"]("Test %d", 12)
+    );
+
+    auto stringlib = lua["string"];
+    show(stringlib["format"]("Test %d", 13));
+
+    auto howdy = lua["howdy"];
+
+    writeln("howdy = ", howdy.type);    
+    write("howdy() returns: "); show(howdy());
+
+/*
+
+
+//*
     writeln(
         "show() returns: ",
-        lua.call("show", 1.2, 3.4, 5.6)
+        lua.gettable(null, "show").get!Reference(1.2, 3.4, 5.6)
     );
 
     writeln(
         "main.lua returns: ",
         lua.load("data/main.lua")
     );    
-
+/**/
+    Track.report();
     writeln("Done.");
+}
+
+void main()
+{
+    test();
+    Track.rungc();
 }
 

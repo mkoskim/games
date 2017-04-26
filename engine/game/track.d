@@ -30,7 +30,7 @@ debug abstract class Track
         void remove(Object what) { remove(what.classinfo.toString); }
         void remove(string info) {
             count[info]--;
-
+            if(!count[info]) count.remove(info);
             /* switch(info)
             {
                 case "engine.render.scene3d.types.transform.Transform": break;
@@ -51,7 +51,7 @@ debug abstract class Track
             {
                 writefln("%8d %s", value, key);
             }
-            writefln("%8d", total);
+            writefln("%8d Total", total);
         }
     }
 }
