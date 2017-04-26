@@ -6,6 +6,8 @@
 
 import engine;
 
+import std.stdio;
+
 //*****************************************************************************
 //
 // How I want it to work (sketch):
@@ -16,66 +18,31 @@ import engine;
 //
 //      skybox1.lua:
 //
-//          Cubemap cubemap = Cubemap("img1", "img2", ...);
+//          cubemap = Cubemap("img1", "img2", ...);
 //          return SkyBox(cubemap);
 //
 //*****************************************************************************
-
-import std.stdio;
-import std.string: toStringz;
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
-class Lua
-{
-    lua_State *L;
-    
-    //-------------------------------------------------------------------------
-    
-    this()
-    {
-        L = luaL_newstate();
-        luaL_openlibs(L);
-    }
-
-    ~this() { lua_close(L); }
-
-    //-------------------------------------------------------------------------
-            
-    //-------------------------------------------------------------------------
-    
-    void eval(string s)
-    {
-        if(luaL_loadstring(L, toStringz(s)) != 0)
-        {
-            lua_error(L);
-        }
-    }
-    
-    void load(string s)
-    {
-        eval(engine.asset.blob.text(s));
-    }
-
-    //-------------------------------------------------------------------------
-    
-}
 
 
 //-----------------------------------------------------------------------------
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
 
-import derelict.lua.lua;
-
 void main()
 {
-    auto lua = new Lua;
-    lua.load("data/test.lua");
+    auto lua = new engine.asset.Lua("data/test.lua");
 
-    lua_pcall(lua.L, 0, LUA_MULTRET, 0);
-    
+    lua.call("howdy");
+    writeln(
+        "show() returns: ",
+        lua.call("show", 1.2)
+    );
+
+    writeln(
+        "main.lua returns: ",
+        lua.load("data/main.lua")
+    );    
+
     writeln("Done.");
 }
 

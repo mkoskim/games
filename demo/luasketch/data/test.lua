@@ -4,8 +4,15 @@
 
 function loadmessage()
     message = blob.loadtext("data/message.txt");
-    return message, 1, "Yes";
+    return message
 end
 
-io.write(string.format("Hello from %s\n", _VERSION))
+function howdy()
+    io.write(string.format("Hello from %s\n", _VERSION))
+end
+
+function show(num)
+    io.write(string.format("Hello from %f\n", num))
+    return num
+end
 
