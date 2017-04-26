@@ -28,7 +28,7 @@ private extern(C) int luaIoWrite(lua_State *L) nothrow
     try {
         auto lua = new engine.asset.Lua(L);
         write("Lua: ");
-        for(int i = 1; i <= lua_gettop(L); i++) write(lua.lookup(i), " ");
+        for(int i = 1; i <= lua_gettop(L); i++) write(lua.fetch(i), " ");
         writeln();
     } catch(Throwable) {
     }
@@ -56,7 +56,7 @@ void main()
     lua.call("howdy");
     writeln(
         "show() returns: ",
-        lua.call("show", 1.2)
+        lua.call("show", 1.2, 3.4, 5.6)
     );
 
     writeln(

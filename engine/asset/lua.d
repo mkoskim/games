@@ -1,9 +1,10 @@
 //*****************************************************************************
 //
-// Lua bindings, inspired by LuaD.
+// Lua bindings, heavily inspired by LuaD.
 //
 // Why not LuaD? Because it (1) segfaults, (2) supports only Lua 5.1, and
-// (3) uses its own statically linked liblua.
+// (3) uses its own statically linked liblua. I would anyways need to make
+// a local branch from that...
 //
 //*****************************************************************************
 
@@ -22,9 +23,59 @@ import core.vararg;
 
 class Lua
 {
+    //-------------------------------------------------------------------------
+    //
+    // Lua state setup. This is mainly responsible for deallocating
+    // state when it is not needed anymore.
+    //
+    //-------------------------------------------------------------------------
+    
+    private class State
+    {
+        lua_State *L;
+
+        this()
+        {
+            L = luaL_newstate();
+
+            luaL_requiref(L, "_G", luaopen_base, 1);
+            luaL_requiref(L, "string", luaopen_string, 1);
+            luaL_requiref(L, "table", luaopen_table, 1);
+            luaL_requiref(L, "math", luaopen_math, 1);
+
+            //luaL_requiref(L, "io", luaopen_io, 1);
+            //luaL_requiref(L, "package", luaopen_package, 1);
+            //luaL_requiref(L, "os", luaopen_os, 1);
+            lua_settop(L, 0);
+        }
+        ~this() { lua_close(L); }
+    }
+
+    private State state;
+    
+    //-------------------------------------------------------------------------
+    // Lua interface
+    //-------------------------------------------------------------------------
+    
     lua_State *L;
-    bool owner;
         
+    this(lua_State *L) { this.L = L; }
+    this(Lua lua)      { this(lua.state.L); }
+    
+    this()
+    {
+        state = new State();
+        this(state.L);
+    }
+
+    this(string file)
+    {
+        this();
+        load(file);
+    }
+
+    ~this() { }
+
     //-------------------------------------------------------------------------
 
     void checklua(int errno)
@@ -37,46 +88,24 @@ class Lua
     }
 
     //-------------------------------------------------------------------------
+    // Loading Lua functions
+    //-------------------------------------------------------------------------
     
-    this()
+    Variant eval(string s, string from = "string")
     {
-        L = luaL_newstate();
-        owner = true;
-
-        //luaL_openlibs(L);
-
-        luaL_requiref(L, "_G", luaopen_base, 1);
-        luaL_requiref(L, "string", luaopen_string, 1);
-        luaL_requiref(L, "table", luaopen_table, 1);
-        luaL_requiref(L, "math", luaopen_math, 1);
-
-        //luaL_requiref(L, "io", luaopen_io, 1);
-        //luaL_requiref(L, "package", luaopen_package, 1);
-        //luaL_requiref(L, "os", luaopen_os, 1);
-/*
-        //luaopen_debug(L);
-        //luaopen_os(L);
-*/        
-        lua_settop(L, 0);
+        checklua(luaL_loadbuffer(L, s.ptr, s.length, toStringz(from)));
+        return _call();
     }
 
-    this(lua_State *L) {
-        this.L = L;
-        owner = false;
-    }
-
-    this(string file)
+    Variant load(string s)
     {
-        this();
-        load(file);
-    }
-
-    ~this() {
-        if(owner) lua_close(L);
+        return eval(blob.text(s), s);
     }
 
     //-------------------------------------------------------------------------
-
+    // Pushing arguments to stack
+    //-------------------------------------------------------------------------
+    
     void push()                { lua_pushnil(L); } 
     void push(bool b)          { lua_pushboolean(L, b); }
     void push(int  i)          { lua_pushnumber(L, i); }
@@ -85,9 +114,13 @@ class Lua
     void push(char *s, int l)  { lua_pushlstring(L, s, l); }
     void push(string s)        { lua_pushlstring(L, s.ptr, s.length); }
 
+    //-------------------------------------------------------------------------
+    // Stack inspection
+    //-------------------------------------------------------------------------
+    
     auto type(int index = -1) { return lua_type(L, index); }
 
-    Variant lookup(int index = -1)
+    Variant fetch(int index = -1)
     {
         final switch(type(index))
         {
@@ -107,40 +140,51 @@ class Lua
         }
     }
     
+    //-------------------------------------------------------------------------
+    // Popping values from stack
+    //-------------------------------------------------------------------------
+
     Variant pop()
     {
         scope(exit) { lua_pop(L, 1); }
-        return lookup();
+        return fetch();
     }
 
-    Variant call(int argc, int retc)
+    //-------------------------------------------------------------------------
+    // Making calls to Lua functions
+    //-------------------------------------------------------------------------
+    
+    private void getglobal(string s, int t)
+    {
+        lua_getglobal(L, s.toStringz);
+        assert(type() == t);
+    }
+
+    private Variant _call(int argc, int retc = LUA_MULTRET)
     {
         lua_call(L, argc, retc);
 
+        dump("return:");
         scope(exit) { lua_settop(L, 0); }
         
         return lua_gettop(L) ? pop() : Variant(null);
     }
     
-    Variant call(string f, ...)
+    private Variant _call()
     {
-        int  argc = cast(int)_arguments.length;
+        return _call(lua_gettop(L) - 1);
+    }
+    
+    Variant call(U...)(string f, U args)
+    {
+        int  argc = cast(int)args.length;
         
         lua_checkstack(L, argc + 1);
-        lua_getglobal(L, f.toStringz);
         
-        assert(type() == LUA_TFUNCTION);
-                
-        foreach(arg; _arguments) {
-            if     (arg == typeid(bool))   push(va_arg!(bool)(_argptr));
-            else if(arg == typeid(int))    push(va_arg!(int)(_argptr));
-            else if(arg == typeid(float))  push(va_arg!(float)(_argptr));
-            else if(arg == typeid(double)) push(va_arg!(double)(_argptr));
-            else if(arg == typeid(string)) push(va_arg!(string)(_argptr));
-            else assert(false);
-        }
-        
-        return call(argc, 1);
+        getglobal(f, LUA_TFUNCTION); 
+        foreach(arg; args) push(arg);
+        dump("call:");
+        return _call();
     }
             
     //-------------------------------------------------------------------------
@@ -156,19 +200,15 @@ class Lua
         LUA_TNUMBER: "Number",
         LUA_TBOOLEAN: "Bool",
         LUA_TSTRING: "String",
-   ];
+    ];
 
     //-------------------------------------------------------------------------
-    
-    Variant eval(string s)
-    {
-        checklua(luaL_loadstring(L, toStringz(s)));
-        return call(0, 1);
-    }
 
-    Variant load(string s)
+    void dump(string prefix)
     {
-        return eval(blob.text(s));
-    }
+        int top = lua_gettop(L);
+        writeln(prefix);
+        foreach(i; 1 .. top + 1) writefln("    [%d] : %s", i, TypeName[type(i)]);
+    }    
 }
 
