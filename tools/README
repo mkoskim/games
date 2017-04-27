@@ -1,8 +1,15 @@
 Various tools to be written...
 
-Planned: level editor to support development of various technologies
-related to levels and their uses in games.
+PLANNED:
 
-Other possible tools are related to "offline" processing of game assets,
+- Level editor to support development of various technologies related to
+  levels and their uses in games. There is a possibility that instead of
+  desktop application, level editor is implemented/modified as Blender
+  plugin (there is already one called BZTools).
+  
+- Object viewer -> asset explorer: It is intended that this software
+  could be used to check how assets look in the game engine.
+
+OTHER: Other possible tools are related to "offline" processing of game assets,
 when needed. What I should also do, is to learn to use scripted Blender
 to do the "offline" asset modifications.

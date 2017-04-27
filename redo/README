@@ -1,0 +1,30 @@
+
+
+						Game clones / ports
+						-------------------
+
+Some smaller games that are (incomplete) clones of some existing one.
+Here are few that I have been thinking:
+
+shmup/
+
+	Porting my Java applet shoot'em up.
+	
+diamonds/
+
+	Porting my Java applet diamonds game. This non-realtime game is more
+	about GUI.
+
+yofrankie/
+
+    Whenever I have support for loading Blender files, one project to
+    test it is to try to recreate "Yo Frankie!", using the original
+    Blender file(s) with recreated logic code.
+    
+    This is in fact demonstration project, but it would certainly teach
+    me a lot about implementing games.
+
+Other possibly interesting could be:
+
+- Space Invaders
+- Asteroids (either classic or 3D)

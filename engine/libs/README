@@ -3,11 +3,10 @@
                             STATIC LIBRARIES
                             ----------------
 
+							
 
-In general, I try to use system side libraries, but there may be exceptions to
-this rule to allow static linking. This is the directory for them.
+This directory contains D modules, which are compiled and linked to engine and
+games.
 
-- - -
-
-NOTE: LuaD is shipped with static lua library.
-
+For other libraries, I try to use system side dynamic ones, but there may be
+exceptions to this rule to allow static linking. This directory is also for them.

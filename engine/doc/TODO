@@ -6,6 +6,12 @@ DONE:
 
 WORKLIST:
 
+- Game VFS: https://github.com/kiith-sa/D-GameVFS - interesting, this is
+  something I have thought to make with BLOB (layering them to allow
+  patching).
+
+- Awesomium for GUI?
+
 - render/ is for 2D/3D pipeline building blocks. ext/ and ext/simple/ will
   contain fully assembled, generic, ready-to-use pipelines for common
   situations.

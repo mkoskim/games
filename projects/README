@@ -11,13 +11,15 @@ cylinderium/
 
     Shoot'em Up game with rolling mother ship.
 
-yofrankie/
+guerrilla/
 
-    Whenever I have support for loading Blender files, one project to
-    test it is to try to recreate "Yo Frankie!", using the original
-    Blender file(s) with recreated logic code.
-    
-    This is in fact demonstration project, but it would certainly teach
-    me a lot about implementing games.
+	Third person shooter
 
+strikeforce/
 
+	Real time strategy game
+	
+warriors/
+
+	Third person fantasy fighting game
+	
