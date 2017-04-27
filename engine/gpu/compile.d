@@ -11,7 +11,6 @@ module engine.gpu.compile;
 import engine.gpu.util;
 import engine.gpu.shader;
 import engine.game: screen;
-import blob = engine.asset.blob;
 import std.string: toStringz, countchars;
 import std.algorithm: map;
 import std.regex;

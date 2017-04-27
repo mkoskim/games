@@ -5,7 +5,7 @@
 //*****************************************************************************
 
 import engine;
-import engine.game: Track;
+debug import engine.game: Track;
 
 import std.stdio;
 import std.conv: to;
@@ -50,7 +50,7 @@ void printout(string prefix, Lua.Value[] args)
     printout(args);
 }
 
-private extern(C) int luaIoWrite(lua_State *L) nothrow
+private extern(C) int luaGimme(lua_State *L) nothrow
 {
     try {
         auto lua  = new Lua(L);
@@ -62,8 +62,8 @@ private extern(C) int luaIoWrite(lua_State *L) nothrow
 }
 
 private const luaL_Reg[] globals = [
-    { "print", &luaIoWrite },
-    //{ "gimme", &luaGimme },
+    //{ "print", &luaIoWrite },
+    { "gimme", &luaGimme },
     //{ "crash", &luaCrash },
     { null, null },
 ];
@@ -100,10 +100,16 @@ void test()
 
 //*
     auto howdy = lua["howdy"];
+    writeln("howdy = ", howdy.type);
+    
+    auto ret = howdy();
+    
+    printout("howdy():", ret);
+    ret[0].dumptable();
 
-    writeln("howdy = ", howdy.type);    
-    printout("howdy():", howdy());
+    howdy()[0].dumptable();
 
+    printout("main returns:", lua.load("data/main.lua"));
 /*
     writeln(
         "show() returns: ",
@@ -115,13 +121,17 @@ void test()
         lua.load("data/main.lua")
     );    
 /**/
-    Track.report();
+    debug Track.report();
     writeln("Done.");
 }
 
 void main()
 {
     test();
-    Track.rungc();
+
+    engine.game.rungc();
+    debug Track.report();
+
+    writeln("All done.");
 }
 
