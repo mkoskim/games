@@ -14,7 +14,7 @@ FEATURES: Current main features:
 
 - TTF fonts and bitmaps
 
-- Wavefront .obj loading
+- Wavefront .obj loading (ASSIMP integration on-going)
 
 - Texture and normal maps
 
@@ -60,7 +60,7 @@ engine/gpu/
 	
 engine/libs/
 
-	Possible static libraries.
+	Static D libraries. Possible other static libraries, too.
 	
 engine/render/
 

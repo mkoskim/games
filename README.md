@@ -27,6 +27,9 @@ tools/objectviewer
 
 Feel free to try it, and browse the rest of the code.
 
+**New:** This project now takes D libraries as git submodules, so dub is no
+more needed. Hopefully I can keep up with versions...
+
 ---
 
 **Description:** See:
@@ -41,6 +44,14 @@ Feel free to try it, and browse the rest of the code.
 
 ---
 
-**New:** This project now takes D libraries as git submodules, so dub is no
-more needed. Hopefully I can keep up with versions...
+**Other similar projects:**
 
+* [Dash](https://github.com/Circular-Studios/Dash)
+
+* [Dagon](https://github.com/gecko0307/dagon)
+
+* [GFM](https://github.com/d-gamedev-team/gfm)
+
+* [DAllegro](https://github.com/SiegeLord/DAllegro5)
+
+* [unecht](https://github.com/Extrawurst/unecht)
