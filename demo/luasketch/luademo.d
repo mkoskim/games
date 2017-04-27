@@ -8,9 +8,16 @@ import engine;
 import engine.game: Track;
 
 import std.stdio;
+import std.conv: to;
 
-alias engine.asset.Lua.LuaType LuaType;
-alias engine.asset.Lua.LuaObject LuaObject;
+import engine.asset.lua: Lua;
+/*
+    LuaType,
+    LuaObject, LuaNone, LuaNil,
+    LuaBool, LuaNumber, LuaString,
+    LuaReference,
+    LuaTable, LuaFunction;
+*/
 
 //*****************************************************************************
 //
@@ -27,13 +34,27 @@ alias engine.asset.Lua.LuaObject LuaObject;
 //
 //*****************************************************************************
 
+void printout(Lua.Value[] args)
+{
+    foreach(arg; args) writeln("    ", arg.to!string);
+}
+
+void printout(Lua.Value arg)
+{
+    printout([arg]);
+}
+
+void printout(string prefix, Lua.Value[] args)
+{
+    writeln(prefix);
+    printout(args);
+}
+
 private extern(C) int luaIoWrite(lua_State *L) nothrow
 {
     try {
-        auto lua = new engine.asset.Lua(L);
-        write("Lua: ");
-        for(int i = 1; i <= lua_gettop(L); i++) write(lua.fetch(i), " ");
-        writeln();
+        auto lua  = new Lua(L);
+        printout("Lua: ", lua.pop(lua.top()));
     } catch(Throwable) {
     }
     
@@ -51,46 +72,39 @@ private const luaL_Reg[] globals = [
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
 
-void show(LuaObject[] result)
-{
-    write("(");
-    foreach(r; result) switch(r.type)
-    {
-        case LuaType.Bool:
-        case LuaType.Number:
-        case LuaType.String:
-            write(r.value); write(", "); break;
-        default:
-            write(r.type); write(", "); break;
-    }
-    writeln(")");
-}
-
 void test()
 {
-    auto lua = new engine.asset.Lua();
+    auto lua = new Lua();
 
     luaL_register(lua.L, "_G", globals.ptr);
     lua.top = 0;
 
     lua.load("data/test.lua");
 
-    show(
+    printout("_G:", lua["_G"].keys());
+
+    printout("Keys:", lua["mytable"].keys());
+
+    printout(
+        "string.format:",
         lua["string", "format"]("Test %d", 12)
     );
 
     auto stringlib = lua["string"];
-    show(stringlib["format"]("Test %d", 13));
+    printout(
+        "string.format:",
+        stringlib["format"]("Test %d", 13)
+    );
 
+    printout("multiret:", lua["multiret"]());
+
+//*
     auto howdy = lua["howdy"];
 
     writeln("howdy = ", howdy.type);    
-    write("howdy() returns: "); show(howdy());
+    printout("howdy():", howdy());
 
 /*
-
-
-//*
     writeln(
         "show() returns: ",
         lua.gettable(null, "show").get!Reference(1.2, 3.4, 5.6)

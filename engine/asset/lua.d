@@ -18,6 +18,13 @@ import derelict.lua.lua;
 import std.variant: Variant;
 static import std.conv;
 
+//-----------------------------------------------------------------------------
+
+class LuaError : Exception {
+    this(string msg) { super(msg); }
+    this() { this("Lua error."); }
+}
+
 //*****************************************************************************
 //
 // Lua is lightweight (8 bytes) wrapper to lua_State.
@@ -73,11 +80,6 @@ class Lua
     // Error management
     //-------------------------------------------------------------------------
 
-    class LuaError : Exception {
-        this(string msg) { super(msg); }
-        this() { this("Lua error."); }
-    }
-
     void error(string msg)
     {
         luaL_error(L, msg.toStringz);
@@ -96,10 +98,10 @@ class Lua
     void check(int errcode) { errorif(errcode != LUA_OK); }
 
     //-------------------------------------------------------------------------
-    // Lua types
+    // Lua Value types for transmitting them to D side
     //-------------------------------------------------------------------------
 
-    enum LuaType
+    enum Type
     {
         None            = LUA_TNONE,
         Nil             = LUA_TNIL,
@@ -114,113 +116,164 @@ class Lua
     }
 
     //-------------------------------------------------------------------------
-    // References to Lua objects for storing them at D side
+
+    bool   toboolean(int index) { return std.conv.to!bool(lua_toboolean(L, index)); }
+    double tonumber(int index)  { return lua_tonumber(L, index); }
+    string tostring(int index)  { return std.conv.to!(string)(lua_tostring(L, index)); }
+    int    toref(int index)     { lua_pushvalue(L, index); return luaL_ref(L, LUA_REGISTRYINDEX); }
+    void   unref(int id)        { luaL_unref(L, LUA_REGISTRYINDEX, id); }
+
     //-------------------------------------------------------------------------
 
-    class LuaObject
+    class Value
     {
-        Lua lua;
-        LuaType type;
-        Variant value;
+        union Payload {
+            bool   _bool;
+            double _number;
+            string _string;
+            int    _id;
+        }
         
-        this(Lua lua, int index) {
+        Lua     lua;
+        Type    type;
+        Payload payload;
+
+        //---------------------------------------------------------------------
+
+        this(Lua lua, int index)
+        {
             Track.add(this);
 
-            this.lua = lua;
+            this.lua  = lua;
             this.type = lua.type(index);
             
-            final switch(type)
+            switch(type)
             {
-                case LuaType.None:
-                case LuaType.Nil: break;
-                case LuaType.Bool:   value = Variant(std.conv.to!bool(lua_toboolean(lua.L, index))); break;
-                case LuaType.Number: value = Variant(lua_tonumber(lua.L, index)); break;
-                case LuaType.String: value = Variant(lua_tostring(L, index)); break;
-                
-                case LuaType.Table:   
-                case LuaType.Function:
-                    value = Variant(lua.getref(index));
-                    break;
-
-                case LuaType.Thread:  
-                case LuaType.UserData:
-                case LuaType.LightUserData:
-                    error();
+                case Type.Nil:      break;
+                case Type.Bool:     payload._bool   = lua.toboolean(index); break;
+                case Type.Number:   payload._number = lua.tonumber(index); break;
+                case Type.String:   payload._string = lua.tostring(index); break;
+                case Type.Function:
+                case Type.Table:    payload._id     = lua.toref(index); break;
+                default:            error(); break;
             }
         }
 
-        ~this() {
+        ~this()
+        {
             Track.remove(this);
             switch(type)
             {
-                case LuaType.Table:   
-                case LuaType.Function:
-                    unref(value.get!int);
-                    break;
+                case Type.Table:
+                case Type.Function: lua.unref(payload._id); break;
                 default: break;
             }
-        }        
+        }
 
-        LuaObject[] opCall(U...)(U args)
+        //---------------------------------------------------------------------
+
+        void push()
         {
+            final switch(type)
+            {
+                case Type.None:     return;
+                case Type.Nil:      lua.push(); return;
+                case Type.Bool:     lua.push(payload._bool); return;
+                case Type.Number:   lua.push(payload._number); return;
+                case Type.String:   lua.push(payload._string); return;
+                case Type.Table:    
+                case Type.Function: lua_rawgeti(lua.L, LUA_REGISTRYINDEX, payload._id); return;
+
+                case Type.UserData:
+                case Type.LightUserData:
+                case Type.Thread:
+                    error();
+                    return;
+            }
+        }
+        
+        //---------------------------------------------------------------------
+
+        Value opIndex(U...)(U args)
+        {
+            errorif(type != Type.Table, "Not a table.");
+            return lua.gettable(this, args);
+        }
+
+        T get(T, U...)(U args) {
+            errorif(type != Type.Table, "Not a table.");
+            return cast(T)lua.gettable(this, args);
+        }
+
+        Value[] keys()
+        {
+            errorif(type != Type.Table, "Not a table.");
+            Value[] result;
+            
+            lua.push(this);
+            lua.push();
+            while(lua_next(lua.L, -2))
+            {
+                result ~= lua.fetch(-2);
+                lua.discard(1);
+            }
+            scope(exit) lua.discard(1);
+            return result;
+        }
+
+        //---------------------------------------------------------------------
+
+        Value[] opCall(U...)(U args)
+        {
+            errorif(type != Type.Function, "Not a function");
+
             lua.makeroom(args.length + 1);
             lua.push(this);
             foreach(arg; args) lua.push(arg);
             return lua._call();
-        }
-        
-        LuaObject opIndex(U...)(U args)
-        {
-            return lua.gettable(this, args);
-        }
-    }
+        }        
 
+        //---------------------------------------------------------------------
+
+        T to(T: string)()
+        {
+            switch(type)
+            {
+                case Type.Nil:      return "null";
+                case Type.Bool:     return std.conv.to!string(payload._bool);
+                case Type.Number:   return std.conv.to!string(payload._number);
+                case Type.String:   return std.conv.to!string(payload._string);
+                default:            return std.conv.to!string(type);
+            }
+        }
+
+    }
+        
     //-------------------------------------------------------------------------
     // Pushing arguments to stack
     //-------------------------------------------------------------------------
     
-    void push()                { lua_pushnil(L); } 
-    void push(bool b)          { lua_pushboolean(L, b); }
-    void push(int  i)          { lua_pushnumber(L, i); }
-    void push(float f)         { lua_pushnumber(L, f); }
-    void push(double d)        { lua_pushnumber(L, d); }
-    void push(char *s)         { lua_pushstring(L, s); }
-    void push(char *s, int l)  { lua_pushlstring(L, s, l); }
-    void push(string s)        { lua_pushlstring(L, s.ptr, s.length); }
-
-    void push(LuaObject o)     
-    { 
-        final switch(o.type)
-        {
-            case LuaType.None:   break;
-            case LuaType.Nil:    push(); break;
-            case LuaType.Bool:   push(o.value.get!bool); break;
-            case LuaType.Number: push(o.value.get!double); break;
-            case LuaType.String: push(o.value.get!string); break;
-            
-            case LuaType.Table:   
-            case LuaType.Function:
-                lua_rawgeti(L, LUA_REGISTRYINDEX, o.value.get!int);
-                break;
-
-            case LuaType.Thread:  
-            case LuaType.UserData:
-            case LuaType.LightUserData:
-                error();
-        }
-    }
+    void push()                 { lua_pushnil(L); } 
+    void push(bool b)           { lua_pushboolean(L, b); }
+    void push(int  i)           { lua_pushnumber(L, i); }
+    void push(float f)          { lua_pushnumber(L, f); }
+    void push(double d)         { lua_pushnumber(L, d); }
+    void push(char *s)          { lua_pushstring(L, s); }
+    void push(char *s, int l)   { lua_pushlstring(L, s, l); }
+    void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
+    void push(Value v)          { v.push(); }
 
     //-------------------------------------------------------------------------
     // Loading Lua functions
     //-------------------------------------------------------------------------
     
-    LuaObject[] eval(string s, string from = "string")
+    Value[] eval(string s, string from = "string")
     {
         check(luaL_loadbuffer(L, s.ptr, s.length, toStringz(from)));
         return _call();
     }
 
-    LuaObject[] load(string s)
+    Value[] load(string s)
     {
         return eval(blob.text(s), s);
     }
@@ -233,7 +286,7 @@ class Lua
     @property void top(int index) { lua_settop(L, index); }
     void makeroom(int elems)      { lua_checkstack(L, elems); }
     
-    LuaType type(int index = -1) { return cast(LuaType)lua_type(L, index); }
+    Type type(int index = -1) { return cast(Type)lua_type(L, index); }
 
     void expect(int expected, int index = -1)
     {
@@ -242,33 +295,20 @@ class Lua
 
     //-------------------------------------------------------------------------
 
-    private int getref(int index)
+    Value fetch(int index = -1)
     {
-        lua_pushvalue(L, index);
-        return luaL_ref(L, LUA_REGISTRYINDEX);
-    }
-
-    private int unref(int refno)
-    {
-        luaL_unref(L, LUA_REGISTRYINDEX, refno);
-        return LUA_REFNIL;
+        return new Value(this, index);
     }
 
     //-------------------------------------------------------------------------
 
-
-    LuaObject fetch(int index = -1)
-    {
-        return new LuaObject(this, index);
-    }
-
-    //-------------------------------------------------------------------------
-
-    private LuaObject gettable(U...)(LuaObject root, U args)
+    private Value gettable(U...)(Value root, U args)
     {
         makeroom(args.length + 1);
         if(root is null) lua_getglobal(L, "_G"); else push(root);
 
+        expect(Type.Table);
+        
         foreach(key; args)
         {
             push(key);
@@ -280,9 +320,14 @@ class Lua
 
     //-------------------------------------------------------------------------
 
-    LuaObject opIndex(U...)(U args)
+    Value opIndex(U...)(U args)
     {
         return gettable(null, args);
+    }
+
+    T get(T, U...)(U args)
+    {
+        return cast(T)gettable(null, args);
     }
 
     //-------------------------------------------------------------------------
@@ -291,11 +336,11 @@ class Lua
 
     //-------------------------------------------------------------------------
 
-    LuaObject[] pop(int n = 1)
+    Value[] pop(int n = 1)
     {
         scope(exit) discard(n);
         
-        LuaObject[] ret;
+        Value[] ret;
         foreach(i; 1 .. n + 1) ret ~= fetch(top - n + i);
         return ret;
     }
@@ -304,17 +349,17 @@ class Lua
     // Making calls to Lua functions
     //-------------------------------------------------------------------------
 
-    private LuaObject[] _call(int argc)
+    private Value[] _call(int argc)
     {
         int frame = top - argc;
 
-        errorif(type(frame) != LuaType.Function, "Not a function.");
+        expect(Type.Function, frame);
         
         lua_call(L, argc, LUA_MULTRET);
         return pop(top - frame + 1);
     }
     
-    private LuaObject[] _call()
+    private Value[] _call()
     {
         return _call(top - 1);
     }
