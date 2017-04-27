@@ -5,6 +5,7 @@
 //*****************************************************************************
 
 import engine;
+import vfs = engine.asset.vfs;
 
 //-----------------------------------------------------------------------------
 
@@ -23,7 +24,7 @@ void main()
 {
     game.init(800, 600);
 
-    engine.asset.blob.fallback = true;
+    engine.asset.vfs.fallback = true;
 
     //-------------------------------------------------------------------------
     // Load asset
@@ -92,8 +93,8 @@ void main()
     }
 
     auto shader = new gpu.Shader(
-        engine.asset.blob.text("data/simpleTBN.glsl")
-        //engine.asset.blob.text("data/simpleN.glsl")
+        vfs.text("data/simpleTBN.glsl")
+        //vfs.text("data/simpleN.glsl")
     );
 
     auto state = new gpu.State(shader)
@@ -102,9 +103,9 @@ void main()
 
     auto shader_normals = new gpu.Shader(
         shader.family,
-        engine.asset.blob.text("data/normals_vert.glsl"),
-        engine.asset.blob.text("data/normals_vert.glsl"),
-        engine.asset.blob.text("data/normals_vert.glsl")
+        vfs.text("data/normals_vert.glsl"),
+        vfs.text("data/normals_vert.glsl"),
+        vfs.text("data/normals_vert.glsl")
     );
 
     auto state_normals = new gpu.State(shader_normals);
