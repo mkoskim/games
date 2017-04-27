@@ -38,7 +38,8 @@ void quit(string msg = null)
 
     if(msg) writeln(msg);
 
-    debug terminate();      // Terminate runtime to call destructors...
+    rungc();
+    //debug terminate();    // Terminate runtime to call destructors...
     exit(0);                // ...and exit.
 }
 

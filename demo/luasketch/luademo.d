@@ -74,31 +74,59 @@ private const luaL_Reg[] globals = [
 
 void test()
 {
+    //-------------------------------------------------------------------------
+
     auto lua = new Lua();
 
     luaL_register(lua.L, "_G", globals.ptr);
     lua.top = 0;
 
+    //-------------------------------------------------------------------------
+    
     lua.load("data/test.lua");
 
+    //-------------------------------------------------------------------------
+    // Inspect global symbols
+    //-------------------------------------------------------------------------
+    
     printout("_G:", lua["_G"].keys());
 
+    //-------------------------------------------------------------------------
+    // Inspect table created in lua file
+    //-------------------------------------------------------------------------
+    
     printout("Keys:", lua["mytable"].keys());
 
+    //-------------------------------------------------------------------------
+    // Call library function: string.format
+    //-------------------------------------------------------------------------
+    
     printout(
         "string.format:",
         lua["string", "format"]("Test %d", 12)
     );
 
+    //-------------------------------------------------------------------------
+    // Get reference to string, and use it to call format
+    //-------------------------------------------------------------------------
+    
     auto stringlib = lua["string"];
     printout(
         "string.format:",
         stringlib["format"]("Test %d", 13)
     );
 
+    //-------------------------------------------------------------------------
+    // Check multi return
+    //-------------------------------------------------------------------------
+
     printout("multiret:", lua["multiret"]());
 
 //*
+    //-------------------------------------------------------------------------
+    // howdy() returns table, check it
+    //-------------------------------------------------------------------------
+
     auto howdy = lua["howdy"];
     writeln("howdy = ", howdy.type);
     
@@ -107,19 +135,12 @@ void test()
     printout("howdy():", ret);
     ret[0].dumptable();
 
-    howdy()[0].dumptable();
+    //-------------------------------------------------------------------------
+    // Load another file and check what main returns
+    //-------------------------------------------------------------------------
 
     printout("main returns:", lua.load("data/main.lua"));
-/*
-    writeln(
-        "show() returns: ",
-        lua.gettable(null, "show").get!Reference(1.2, 3.4, 5.6)
-    );
 
-    writeln(
-        "main.lua returns: ",
-        lua.load("data/main.lua")
-    );    
 /**/
     debug Track.report();
     writeln("Done.");
@@ -128,6 +149,9 @@ void test()
 void main()
 {
     test();
+
+    // It might be good idea to run GC after assets are loaded (I
+    // think it will produce lots of memory allocations).
 
     engine.game.rungc();
     debug Track.report();
