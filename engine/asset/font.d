@@ -13,8 +13,7 @@ module engine.asset.font;
 import std.file: FileException;
 import std.string: format, toStringz;
 import std.conv: to;
-
-import engine.asset.blob;
+import vfs = engine.asset.vfs;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
@@ -48,7 +47,7 @@ class Font
 
     private static TTF_Font* loadfont(string filename, int ptsize)
     {
-        auto buffer = extract(filename);
+        auto buffer = vfs.extract(filename);
         auto font = TTF_OpenFontRW(
             SDL_RWFromConstMem(buffer.ptr, cast(int)buffer.length),
             true, 

@@ -12,7 +12,7 @@ module engine.asset.scenegraph;
 //-----------------------------------------------------------------------------
 
 import engine.asset.util;
-import blob = engine.asset.blob;
+import vfs = engine.asset.vfs;
 import derelict.assimp3.assimp;
 
 import engine.asset.types.transform;
@@ -191,7 +191,7 @@ class SceneGraph
 
     static SceneGraph load(string filename, Option[] options...)
     {
-        auto buffer = blob.extract(filename);
+        auto buffer = vfs.extract(filename);
 
         aiPostProcessSteps postprocess = 
             aiProcess_Triangulate |

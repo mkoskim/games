@@ -1,10 +1,12 @@
 //*****************************************************************************
 //
-// Reading data from embedded ZIP file
+// Game VFS (Virtual File System). Main feature at the moment: loading
+// assets from embedded zip file. It is intended to extend this later
+// with "mount" feature, to make filesystem unions.
 //
 //*****************************************************************************
 
-module engine.asset.blob;
+module engine.asset.vfs;
 
 import engine.asset.util;
 

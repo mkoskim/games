@@ -48,24 +48,16 @@ subinfo:
 #------------------------------------------------------------------------------
 
 DMD = rdmd
-#ifneq ("$(USECOMPILER)","")
-#	DMD += --compiler=$(USECOMPILER)
-#endif
+
+#------------------------------------------------------------------------------
 
 #DMD += -m32
 
-#ifeq ("$(USECOMPILER)","gdc")
-#    DMD += $(addprefix -l, $(LIBS))
-#    DMD += $(OBJS)
-#    DMD += -o $(EXE)
-#else
-    DMD += $(addprefix -L-l, $(LIBS))
-    DMD += $(addprefix -L, $(OBJS))
-    DMD += -ofbin/$(EXE)
-#endif
-
+DMD += -ofbin/$(EXE)
 DMD += -J.
 DMD += $(addprefix -I, $(SRCPATH))
+DMD += $(addprefix -L-l, $(LIBS))
+DMD += $(addprefix -L, $(OBJS))
 
 #------------------------------------------------------------------------------
 
