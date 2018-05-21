@@ -60,6 +60,15 @@ DMD += $(addprefix -L-l, $(LIBS))
 DMD += $(addprefix -L, $(OBJS))
 
 #------------------------------------------------------------------------------
+# Transition flags for delaying code changes between compiler version changes.
+# To be removed when code changes are ready.
+#------------------------------------------------------------------------------
+
+DMD_TRANSITION_FLAGS += -transition=intpromote
+
+DMD += $(DMD_TRANSITION_FLAGS)
+
+#------------------------------------------------------------------------------
 
 note:
 	@echo "Use 'make help' for available options."
@@ -72,11 +81,11 @@ help:
 
 debug: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -debug -w -g -transition=intpromote --build-only $(MAIN)
+	$(DMD) -debug -w -g --build-only $(MAIN)
 
 release: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -release -O -transition=intpromote --build-only $(MAIN)
+	$(DMD) -release -O --build-only $(MAIN)
 	strip --strip-all bin/$(EXE)
 
 profile: BLOB.zip $(OBJS)
