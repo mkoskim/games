@@ -72,11 +72,11 @@ help:
 
 debug: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -debug -w -gc --build-only $(MAIN)
+	$(DMD) -debug -w -g -transition=intpromote --build-only $(MAIN)
 
 release: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -release -O --build-only $(MAIN)
+	$(DMD) -release -O -transition=intpromote --build-only $(MAIN)
 	strip --strip-all bin/$(EXE)
 
 profile: BLOB.zip $(OBJS)
