@@ -352,8 +352,8 @@ package class GameController : Joystick
                 ubyte prev = hats[event.jhat.hat];
                 ubyte current = event.jhat.value;
 
-                ubyte rising  =  current & ~prev;
-                ubyte falling = ~current &  prev;
+                ubyte rising  = current & cast(ubyte)(~int(prev));
+                ubyte falling = cast(ubyte)(~int(current)) &  prev;
 
                 ubyte btn = cast(ubyte)(HATBTN_FIRST + event.jhat.hat*4);
 
