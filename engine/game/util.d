@@ -34,7 +34,7 @@ private void terminate()
 
 void quit(string msg = null)
 {
-    import std.c.stdlib: exit;
+    import core.stdc.stdlib: exit;
 
     if(msg) writeln(msg);
 
