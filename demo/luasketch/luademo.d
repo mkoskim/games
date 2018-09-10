@@ -61,13 +61,6 @@ private extern(C) int luaGimme(lua_State *L) nothrow
     return 0;
 }
 
-private const luaL_Reg[] globals = [
-    //{ "print", &luaIoWrite },
-    { "gimme", &luaGimme },
-    //{ "crash", &luaCrash },
-    { null, null },
-];
-
 //-----------------------------------------------------------------------------
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
@@ -78,7 +71,8 @@ void test()
 
     auto lua = new Lua();
 
-    luaL_register(lua.L, "_G", globals.ptr);
+    /* LuaL_register is gone, there is new way to do this */
+    //luaL_register(lua.L, "_G", globals.ptr);
     lua.top = 0;
 
     //-------------------------------------------------------------------------
