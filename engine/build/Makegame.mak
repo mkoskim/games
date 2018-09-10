@@ -64,7 +64,7 @@ DMD += $(addprefix -L, $(OBJS))
 # To be removed when code changes are ready.
 #------------------------------------------------------------------------------
 
-DMD_TRANSITION_FLAGS += -transition=intpromote
+#DMD_TRANSITION_FLAGS += -transition=intpromote
 
 DMD += $(DMD_TRANSITION_FLAGS)
 
