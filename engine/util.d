@@ -42,7 +42,9 @@ void TODO(string msg = null,
 //
 //-----------------------------------------------------------------------------
 
-int _sdlattr(alias func)(int arg)
+import derelict.sdl2.sdl;
+
+int _sdlattr(alias func)(SDL_GLattr arg)
 {
     int result;
     func(arg, &result);

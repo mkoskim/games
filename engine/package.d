@@ -14,9 +14,6 @@ public {
     import game = engine.game;
     import asset = engine.asset;
     import gpu = engine.gpu;
-    //import render = engine.render;
-    //import scene3d = engine.render.scene3d;
-    //import postprocess = engine.render.postprocess;
 }
 
 //-----------------------------------------------------------------------------
@@ -32,7 +29,7 @@ public import engine.ext;
 
 public {
     import derelict.sdl2.sdl;
-    import derelict.opengl3.gl3;
+    import derelict.opengl.gl;
     import derelict.assimp3.assimp;
     import derelict.lua.lua;
     import gl3n.linalg;
@@ -53,12 +50,12 @@ import engine.util;
 
 static this()
 {
-    DerelictSDL2.load();
+    DerelictSDL2.load(SharedLibVersion(2, 0, 2));
     DerelictSDL2Image.load();
     DerelictSDL2ttf.load();
     DerelictGL3.load();
     DerelictASSIMP3.load();
-    DerelictLua.load();
+    DerelictLua.load("liblua5.3.so");
 
     //-------------------------------------------------------------------------
 

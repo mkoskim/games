@@ -20,7 +20,7 @@ debug public import engine.game.track: Track;
 //-----------------------------------------------------------------------------
 
 import derelict.sdl2.sdl;
-import derelict.opengl3.gl;
+import derelict.opengl;
 
 import render = engine.render;
 import engine.game.util;
