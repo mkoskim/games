@@ -29,8 +29,8 @@ void main()
         //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Cube/Cube.dae")
         //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
-        engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.dae")
-        //engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.blend")
+        //engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.dae")
+        engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.blend")
         ;
 
     auto mesh = scene.meshes[0];
@@ -52,10 +52,10 @@ void main()
         ;
 
     auto normalmap =
-        //nm_loader(vec4(0.5, 0.5, 1, 0))
+        nm_loader(vec4(0.5, 0.5, 1, 0))
         //nm_loader("engine/stock/generic/tiles/AlienCarving/NormalMap.png")
         //nm_loader("engine/stock/generic/tiles/Concrete/Crusty/NormalMap.png")
-        nm_loader("local/stockset/Humanoid/Female/NormalMap.png")
+        //nm_loader("local/stockset/Humanoid/Female/NormalMap.png")
     ;
 
     //-------------------------------------------------------------------------
