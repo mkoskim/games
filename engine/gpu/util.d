@@ -9,7 +9,7 @@ module engine.gpu.util;
 //-----------------------------------------------------------------------------
 
 public import engine.util;
-public import derelict.opengl3.gl3;
+public import derelict.opengl;
 public import gl3n.linalg;
 public import std.variant: Variant;
 public import std.string: toStringz;
@@ -43,13 +43,13 @@ const enum string[GLenum] GLenumName =
     GL_COMPRESSED_RGB: "GL_COMPRESSED_RGB",
     GL_COMPRESSED_RGBA: "GL_COMPRESSED_RGBA",
 
-    GL_COMPRESSED_RGB_S3TC_DXT1_EXT: "GL_COMPRESSED_RGB_S3TC_DXT1",
-    GL_COMPRESSED_RGBA_S3TC_DXT1_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT1",
-    GL_COMPRESSED_RGBA_S3TC_DXT3_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT3",
-    GL_COMPRESSED_RGBA_S3TC_DXT5_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT5",
+    //GL_COMPRESSED_RGB_S3TC_DXT1_EXT: "GL_COMPRESSED_RGB_S3TC_DXT1",
+    //GL_COMPRESSED_RGBA_S3TC_DXT1_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT1",
+    //GL_COMPRESSED_RGBA_S3TC_DXT3_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT3",
+    //GL_COMPRESSED_RGBA_S3TC_DXT5_EXT: "GL_COMPRESSED_RGBA_S3TC_DXT5",
 
-    0x86B0: "GL_COMPRESSED_RGB_FXT1_3DFX",
-    0x86B1: "GL_COMPRESSED_RGBA_FXT1_3DFX",
+    //0x86B0: "GL_COMPRESSED_RGB_FXT1_3DFX",
+    //0x86B1: "GL_COMPRESSED_RGBA_FXT1_3DFX",
 ];
 
 //-----------------------------------------------------------------------------

@@ -13,7 +13,7 @@ import engine.game.input;
 import engine.gpu.framebuffer;
 
 import derelict.sdl2.sdl;
-import derelict.opengl3.gl;
+import derelict.opengl.gl;
 
 //-----------------------------------------------------------------------------
 

@@ -12,6 +12,6 @@ public import engine.util;
 public import std.string: toStringz;
 
 // TODO: Get rid of these
-public import derelict.opengl3.gl3;
+public import derelict.opengl;
 public import gl3n.linalg;
 

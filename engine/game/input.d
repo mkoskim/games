@@ -276,7 +276,7 @@ package class GameController : Joystick
 
     void update(SDL_Event event)
     {
-        void emulate(ubyte btn, uint type)
+        void emulate(ubyte btn, SDL_EventType type)
         {
             SDL_Event ev;
             ev.type = type;
