@@ -10,8 +10,9 @@ sudo apt-get install\
     libsdl2-dev\
     libsdl2-image-dev\
     libsdl2-ttf-dev\
+    libsdl2-mixer-dev\
     libassimp-dev\
-    liblua5.2-dev
+    liblua5.3-dev
 
 ###############################################################################
 echo
@@ -21,7 +22,8 @@ echo
 
 #DMD=2.067.1
 #DMD=2.073.2
-DMD=2.080.0
+#DMD=2.080.0
+DMD=2.082.0
 
 DMDDEB=dmd_$DMD-0_amd64.deb
 DMDDEBFILE=local/$DMDDEB
