@@ -55,6 +55,8 @@ DMD = rdmd
 
 DMD += -ofbin/$(EXE)
 DMD += -J.
+DMD += -w
+DMD += -O
 DMD += $(addprefix -I, $(SRCPATH))
 DMD += $(addprefix -L-l, $(LIBS))
 DMD += $(addprefix -L, $(OBJS))
@@ -70,6 +72,14 @@ DMD += $(DMD_TRANSITION_FLAGS)
 
 #------------------------------------------------------------------------------
 
+#DBGINFO = -g
+
+ifeq ("$(DBGINFO)","")
+STRIP = strip --strip-all bin/$(EXE)
+endif
+
+#------------------------------------------------------------------------------
+
 note:
 	@echo "Use 'make help' for available options."
 
@@ -81,11 +91,12 @@ help:
 
 debug: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -debug -w -g --build-only $(MAIN)
+	$(DMD) -debug $(DBGINFO) --build-only $(MAIN)
+	$(STRIP)
 
 release: BLOB.zip $(OBJS)
 	rm -f bin/$(EXE)
-	$(DMD) -release -O --build-only $(MAIN)
+	$(DMD) -release --build-only $(MAIN)
 	strip --strip-all bin/$(EXE)
 
 profile: BLOB.zip $(OBJS)
