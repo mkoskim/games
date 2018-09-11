@@ -13,9 +13,9 @@ libraries. Try it:
 
     games$ ./setup.sh
 
-If everything goes right, it installs (1) system side libraries and (2) DMD
-compiler. If everything does not go well, you may need to tweak your
-installation manually.
+If everything go right, it installs (1) system side libraries and (2) DMD
+compiler. If everything do not go well, you may need to install necessary
+things manually.
 	
 -------------------------------------------------------------------------------
 
@@ -34,12 +34,13 @@ To successfully compile and run projects, you will need:
         * Assimp 3.0+         For loading 3D models
         * Lua 5.3             For scripting
    
-   You will need at least OpenGL 3.3. As this is an exploration project to
-   OpenGL and 3D graphics world, I like to use certain features not available
-   at earlier versions.
+   Your graphics driver need to support at least OpenGL 3.3. This is probably
+   true, if you use vendor's binary drivers, but not all open source drivers
+   have support. As this is an exploration project to OpenGL and 3D graphics
+   world, I like to use certain features not available at earlier versions.
 
    SDL is mainly used to get interface to game controllers. Because it was
-   used for that, it is nowadays also used for other important purposes:
+   chosen for that, it is nowadays used also for other important purposes:
    (1) loading image files, (2) rendering fonts, and (3) creating game window
    and OpenGL context.
    
@@ -80,12 +81,12 @@ To successfully compile and run projects, you will need:
 -------------------------------------------------------------------------------
 
 4) If everything is fine, you can compile and run some of the examples
-   using make. There is an empty project, which is used to test basic
-   building:
-
+   using make. I created empty project just to test building:
+   
       testbench/empty$ make
 
-   It just opens a black window, and waits user to press ESC to close it.
+   When ran, it just opens a black window, and waits user to press ESC to
+   close it.
    
    Usually, not many other projects work. This is because the shared side
    has been in heavy refactoring cycle all the time, and I have not had
