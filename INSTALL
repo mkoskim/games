@@ -1,7 +1,7 @@
 This project has been made with:
 
-    - Linux Mint 64-bit (Current: 18.1)
-    - DMD compiler (Current: 2.073.2)
+    - Linux Mint 64-bit (Current: 18.3)
+    - DMD compiler (Current: 2.082.0)
 
 You may encounter compatibility problems on other platforms and compilers.
 See notes at bottom.
@@ -21,64 +21,87 @@ installation manually.
 
 To successfully compile and run projects, you will need:
 
-1) SYSTEM LIBRARIES
+1) SYSTEM SIDE LIBRARIES
 
-   Linux users may find these from their distribution's repository, if not,
-   you can install them from sources.
+   If setup.sh works, it installs following system side libraries (on Linux
+   machines). If it does not work, you may need to install these manually,
+   maybe even from sources.
 
-        * OpenGL 2.1+         For graphics
-        * SDL 2               Input, CPU side graphics, ...
-        * SDL 2 TTF           For loading & rendering fonts
+        * OpenGL 3.3+         For graphics
+        * SDL 2               Input, image files, ...
         * SDL 2 Image         For loading images
+        * SDL 2 TTF           For loading & rendering fonts
         * Assimp 3.0+         For loading 3D models
-        * Lua 5.2             For scripting
+        * Lua 5.3             For scripting
+   
+   You will need at least OpenGL 3.3. As this is an exploration project to
+   OpenGL and 3D graphics world, I like to use certain features not available
+   at earlier versions.
+
+   SDL is mainly used to get interface to game controllers. Because it was
+   used for that, it is nowadays also used for other important purposes:
+   (1) loading image files, (2) rendering fonts, and (3) creating game window
+   and OpenGL context.
    
    Your system should have support at least for PNG images. I'm not sure how
    std.zip is implemented, but it may require zlib. Luckily, both are
    usually installed by default in Linux systems.
+   
+   ASSIMP was included to project to allow using of other than Wavefront
+   OBJ files (for which it is easy to write loader on your own).
+   
+   LUA was included to implement scripted "loaders". A freetime developer do
+   not have a privilege to have specifically prepared resource files for
+   assets, instead you grab files from many different sources. These resources
+   may need post-processing and organizing, and it would be best done with a
+   script in the same directory.
 
-   You will need at least OpenGL 3.3.
+   D side bindings to these libraries come with the project as submodules.
 
 -------------------------------------------------------------------------------
 
 2) BUILD TOOLS:
 
-   Usual Linux-side building tools:
-
-   * GNU make
-
-   This is usually installed to Linux systems by default.
+   Project uses GNU make to build the software. This is usually installed
+   to Linux systems by default.
 
 -------------------------------------------------------------------------------
 
 3) DMD D COMPILER:
 
-   This is easy to install to both Linux and Windows, and
-   you can get it here:
+   setup.sh retrieves the chosen DMD compiler installation package to games/local/
+   directory, and installs it for the system. In case the script does not work, you
+   can get DMD here (for both Linux and Windows):
 
         http://dlang.org/download.html
 
-   Current version in use is 2.073.2
+   Current version in use is 2.082.0
 
 -------------------------------------------------------------------------------
 
 4) If everything is fine, you can compile and run some of the examples
-   using make:
+   using make. There is an empty project, which is used to test basic
+   building:
 
-      testbench/pacman$ make default
+      testbench/empty$ make
 
-   NOTE: Currently, most of the examples do not work, due to restructuring
-   of game engine.
+   It just opens a black window, and waits user to press ESC to close it.
+   
+   Usually, not many other projects work. This is because the shared side
+   has been in heavy refactoring cycle all the time, and I have not had
+   time to bring the projects up to date.
   
 -------------------------------------------------------------------------------
 
-NOTES:
+5) ADDITIONAL INFO:
 
-[1] REMEMBER to fetch submodules, too!
+   GAME CONTROLLER: My aim is to make games which use XBox game controller.
+   Because of this reason, not all projects will work nicely without having one.
+   But I have implemented a game controller "emulator" on the top of keyboard,
+   so many projects should work without having an actual one. Moreover, I have
+   thought to implement a keyboard-mouse based emulator later (as it is one
+   of the most used control method in PC games).
 
-[2] GAME CONTROLLER: Now, with emulated controller, games can be basically played
-without having a real one. But game controller is still recommended. My games
-are and will be made to be played with such (XBox).
-
-[3] Sadly to Windows users, current build system utilizes common Linux side
-building tools and symbolic links. I will continue to simplify the build.
+   WINDOWS: Sadly to Windows users, current build system utilizes common Linux
+   side building tools and symbolic links. I will continue to simplify the
+   build, and maybe at some point I can make a working Windows version.
