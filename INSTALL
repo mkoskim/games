@@ -11,7 +11,7 @@ See notes at bottom.
 There is now setup.sh which tries to simplify installation of necessary
 libraries. Try it:
 
-    $ ./setup.sh
+    games$ ./setup.sh
 
 If everything goes right, it installs (1) system side libraries and (2) DMD
 compiler. If everything does not go well, you may need to tweak your
