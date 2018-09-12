@@ -4,10 +4,10 @@
 //
 //*****************************************************************************
 
-module engine.game.track;
+module engine.util.track;
 
 import std.stdio;
-import engine.game.util;
+import engine.util;
 
 debug abstract class Track
 {
@@ -40,7 +40,7 @@ debug abstract class Track
 
         void rungc()
         {
-            engine.game.util.rungc();
+            engine.util.rungc();
             debug report("Garbage collected:");
         }
 

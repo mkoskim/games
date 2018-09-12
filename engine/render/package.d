@@ -13,7 +13,6 @@ public import engine.gpu;
 import engine.game.instance;
 import engine.gpu.util;
 
-import std.stdio;
 import std.string;
 import std.array;
 
@@ -85,6 +84,7 @@ private void checkGPUCapabilities()
         return result;
     }
     
+    /*
     writefln("GPU Capablities");
     writefln("- Texture units..............: %d", getInt(GL_MAX_TEXTURE_IMAGE_UNITS));
     writefln("- Max. combined texture units: %d", getInt(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
@@ -98,6 +98,7 @@ private void checkGPUCapabilities()
     writefln("- Max. varying vectors.......: %d", getInt(GL_MAX_VARYING_VECTORS));
     
     writefln("- Max. vertex attributes.....: %d", getInt(GL_MAX_VERTEX_ATTRIBS));
+    */
 }
 
 //*****************************************************************************
@@ -114,7 +115,7 @@ private void checkGPUCapabilities()
 
 private void checkExtensions()
 {
-    writeln("OpenGL extension queries:");
+    //writeln("OpenGL extension queries:");
 
     bool[string] getExtensions()
     {
@@ -146,7 +147,7 @@ private void checkExtensions()
     {
         bool report(bool result, string msg)
         {
-            writefln("- %-4s: %s", msg, extension);
+            //writefln("- %-4s: %s", msg, extension);
             return result;
         }
         

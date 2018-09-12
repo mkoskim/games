@@ -56,6 +56,7 @@ const enum string[GLenum] GLenumName =
 
 void printmat(string name, mat4 matrix)
 {
+/*
     writeln(name);
     foreach(row; matrix)
     {
@@ -63,6 +64,7 @@ void printmat(string name, mat4 matrix)
         foreach(val; row) writef("%+.2f ", val);
         writeln();
     }
+*/
 }
 
 //-----------------------------------------------------------------------------

@@ -51,6 +51,7 @@ abstract class Joystick
 
     package static void status()
     {
+        /*
         writeln("Controllers:");
         foreach(joy; Joystick.available)
         {
@@ -59,6 +60,7 @@ abstract class Joystick
                 joy.name
             );
         }
+        */
     }
 
     package static void init()

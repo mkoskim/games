@@ -327,6 +327,7 @@ class Texture
 
         checkgl!glBindTexture(GL_TEXTURE_2D, ID);
 
+        /*
         writeln("Texture ID...: ", ID);
         writeln("- Dimensions.: ", getlvlparam(GL_TEXTURE_WIDTH), " x ", getlvlparam(GL_TEXTURE_HEIGHT));
         writeln("- Levels.....: ", getparam(GL_TEXTURE_MAX_LEVEL));
@@ -334,7 +335,7 @@ class Texture
         if(getlvlparam(GL_TEXTURE_COMPRESSED)) {
             writeln("- Size.......: ", getlvlparam(GL_TEXTURE_COMPRESSED_IMAGE_SIZE));
         }
-
+        */
         checkgl!glBindTexture(GL_TEXTURE_2D, 0);
         return this;
     }

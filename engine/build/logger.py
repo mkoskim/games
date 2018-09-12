@@ -100,6 +100,48 @@ from   tkinter import *
 import tkinter.ttk as ttk
 from tkinter.scrolledtext import ScrolledText
 
+class LogView(ScrolledText):
+
+    def __init__(self, master, **kw):
+        super(LogView, self).__init__(master)
+        self.configure(kw)
+
+    def add(self, tab, tag, entry, color):
+        atend = self.vbar.get()[1] == 1.0
+        self.config(state = NORMAL)
+
+        if tab is None:
+            self.insert(END, entry + "\n", color)
+        else:
+            self.insert(END, "%s:%s\n" % (tab, entry), color)
+
+        self.config(state = DISABLED)
+        if atend: self.yview(END)
+            
+class WatchView(ttk.Treeview):
+
+    def __init__(self, master, **kw):
+        super(WatchView, self).__init__(master)
+        self.configure(kw)
+        self.configure(columns=("Tag", "Value"))
+        
+        self.heading("#0", text="Tag")
+        self.heading("#1", text="Value")
+        self.column("#0", stretch=NO, anchor="w", width=100)
+        self.column("#1", stretch=NO, anchor="e", width=100)
+        self.column("#2", stretch=YES)
+        
+    def add(self, tab, tag, entry, color):
+        try:
+            self.item(tag, values=('"%s"' % entry))
+        except TclError:
+            self.insert(
+                '', END,
+                iid=tag,
+                text=tag,
+                values=(entry)
+            )
+
 class MainWindow(Frame):
 
     def __init__(self, master):
@@ -113,34 +155,51 @@ class MainWindow(Frame):
         Button(self.btnbar, text = "Clear", command = self.clear).pack(side=LEFT)
         self.btnbar.pack(side=TOP, anchor="w")
 
-        self.logbox = ScrolledText(self, state = DISABLED, wrap=WORD)
+        self.logbox = LogView(self, state = DISABLED, wrap=WORD)
         self.logbox.pack(fill=BOTH, expand=1)
-        self.pack(fill=BOTH, expand=1)
         
         self.logbox.tag_config("stdout")
         self.logbox.tag_config("logger", foreground="blue")
         
+        self.watchbox = WatchView(self)
+        self.watchbox.pack(fill=BOTH, expand=1)
+        
+        self.pack(fill=BOTH, expand=1)
+
         self.queue = Queue()
         self.check()
         self.worker = None
+
+    #--------------------------------------------------------------------------
+    # Log line parsing
+    #--------------------------------------------------------------------------
+
+    def parse(self, entry, color):
+        tab, tag = None, None
+        
+        if entry[0] == "@":
+            tag, entry = entry[1:].split(">", 1)
+            if tag.find(":") != -1:
+                tab, tag = tag.split(":", 1)
+            self.watchbox.add(tab, tag, entry.strip(), color)
+        else:
+            if entry[0] == ":":
+                tab, entry = entry[1:].split(">", 1)
+            self.logbox.add(tab, tag, entry.strip(), color)
 
     #--------------------------------------------------------------------------
     # Periodic update
     #--------------------------------------------------------------------------
     
     def check(self):
-        atend = self.logbox.vbar.get()[1] == 1.0
-        self.logbox.config(state = NORMAL)
         while self.queue.qsize():
-            tag, msg = self.queue.get(0)
+            color, msg = self.queue.get(0)
             if msg is None:
                 if self.worker is not None: self.worker.join()
-                self.logbox.insert(END, "Done.\n", ("logger"))
+                self.logbox.add(None, None, "Done.\n", ("logger"))
                 self.worker = None
             else:
-                self.logbox.insert(END, msg, tag)
-        self.logbox.config(state = DISABLED)
-        if atend: self.logbox.yview(END)
+                self.parse(msg, color)
         self.master.after(100, self.check)
 
     #--------------------------------------------------------------------------

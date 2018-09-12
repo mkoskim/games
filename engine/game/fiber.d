@@ -66,20 +66,5 @@ class FiberQueue
             );
         }
     }
-
-    //-------------------------------------------------------------------------
-
-    void reportperf()
-    {
-        addcallback(() {
-            static int ticks = 0;
-            if(SDL_GetTicks() - ticks < 1000) return;
-            writeln(Profile.info());
-            ticks = SDL_GetTicks();
-        });
-    }
 }
-
-//-----------------------------------------------------------------------------
-
 
