@@ -14,6 +14,8 @@ public {
     import game = engine.game;
     import asset = engine.asset;
     import gpu = engine.gpu;
+
+    import engine.util.logger: Log, Watch;
 }
 
 //-----------------------------------------------------------------------------

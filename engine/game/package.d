@@ -15,7 +15,7 @@ public import engine.game.events;
 public import engine.game.input;
 public import engine.game.util: quit, rungc;
 
-debug public import engine.game.track: Track;
+//debug public import engine.util.track: Track;
 
 //-----------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ import std.array: split;
 void init() { init("Unnamed"); }
 void init(int width, int height) { init("Unnamed", width, height); }
 
-void init(string name, int width = 640, int height = 480, float askfor = 3.3)
+void init(string name, int width = 640, int height = 480, int[2] askfor = [3, 3])
 {
     screen.width = width;
     screen.height = height;
@@ -46,8 +46,8 @@ void init(string name, int width = 640, int height = 480, float askfor = 3.3)
     //-------------------------------------------------------------------------
 
     // Ask for specified OpenGL version
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, to!int(askfor));
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, to!int(askfor*10) % 10);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, askfor[0]);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, askfor[1]);
     
     // Ask for standard 24-bit colors
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -72,7 +72,7 @@ void init(string name, int width = 640, int height = 480, float askfor = 3.3)
         SDL_GL_CreateContext(screen.window),
         format(
             "OpenGL context creation failed. " ~
-            "Do you have OpenGL %.1f or higher?", askfor
+            "Do you have OpenGL %d.%d or higher?", askfor[0], askfor[1]
         )
     );
 
@@ -97,14 +97,26 @@ void init(string name, int width = 640, int height = 480, float askfor = 3.3)
     SDL_GL_SetSwapInterval(-1);   // Tearing
 
     debug {
-        writeln ("OpenGL:");
-        writefln("- Context..: %.1f", screen.glversion);
-        writefln("- GLSL.....: %.2f", screen.glsl);
-        writefln("- Derelict.: %s",   to!string(DerelictGL3.loadedVersion()));
-        writeln ("- Driver...: ", to!string(glGetString(GL_RENDERER)));
-        writeln ("- Vendor...: ", to!string(glGetString(GL_VENDOR)));
-        writeln ("- Version..: ", to!string(glGetString(GL_VERSION)));
-        writeln ("- GLSL.....: ", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+        //Log("OpenGL")
+        Log("GLinfo") 
+            << format("Context..: %.1f", screen.glversion)
+            << format("GLSL.....: %.2f", screen.glsl)
+            << format("Derelict.: %s", to!string(DerelictGL3.loadedVersion()))
+        ;
+/*
+        trace("OpenGL", format("Driver...: %s", to!string(glGetString(GL_RENDERER))));
+        trace("OpenGL", format("Vendor...: %s", to!string(glGetString(GL_VENDOR))));
+        trace("OpenGL", format("Version..: %s", to!string(glGetString(GL_VERSION))));
+        trace("OpenGL", format("GLSL.....: %s", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION))));
+*/
+
+        //Watch
+        Log << format("%s = %s", "A", "B");
+        Watch.update("A", "B");
+
+        Log("Perf") << "X = Y";
+        Watch("Perf").update("X", "Y");
+        Watch("Perf").update("X", "Z");
     }
 
     render.init();
@@ -142,12 +154,12 @@ class Profile
 
     static void enable() { timers = new Profile(); }
 
-    static string info()
+    static void log(string group)
     {
         if(!timers)
         {
             enable();
-            return "--";
+            return;
         }
 
         float
@@ -155,14 +167,13 @@ class Profile
             busytime = timers.busy.average,
             rendertime = timers.render.average;
 
-        return format(
-            "FPS: %5.1f : busy %5.1f ms : %5.1f%% / %5.1f%% / %5.1f%%",
-            timers.fps,
-            busytime,
-            100.0*(busytime-rendertime)/frametime,
-            100.0*(rendertime)/frametime,
-            100.0*(frametime-busytime)/frametime,
-        );
+        Watch(group)
+            .update("FPS", format("%5.1f", timers.fps))
+            .update("Busy", format("%5.1f ms", busytime))
+            .update("CPU", format("%5.1f %%", 100.0*(busytime-rendertime)/frametime))
+            .update("GPU", format("%5.1f %%", 100.0*(rendertime)/frametime))
+            .update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))
+        ;
     }
 }
 

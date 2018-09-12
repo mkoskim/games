@@ -163,12 +163,14 @@ class Shader
 
     private void dump(string name, PARAM param)
     {
+    /*
         writefln("    %-20s@%d: %d x %s",
             name,
             param.location,
             param.size,
             GLenumName[param.type]
         );
+        */
     }
 
     //-------------------------------------------------------------------------
@@ -210,14 +212,14 @@ class Shader
 
     private void updateNameCache()
     {
-        writeln("- Active uniforms:");
+        //writeln("- Active uniforms:");
         
         foreach(uint i; 0 .. getProgramParam!int(GL_ACTIVE_UNIFORMS))
         {
             addUniform(i);
         }
 
-        writeln("- Active attributes:");
+        //writeln("- Active attributes:");
         
         foreach(uint i; 0 .. getProgramParam!int(GL_ACTIVE_ATTRIBUTES))
         {
@@ -229,8 +231,9 @@ class Shader
 
     private void dumpNameCache()
     {
+        /*
         writeln("- Uniforms:");
-        foreach(name, param; uniforms) 
+        foreach(name, param; uniforms) xxx
         writeln("- Attributes:");
         foreach(name, param; family.attributes) writefln("    %-20s@%d: %d x %s",
             name,
@@ -238,6 +241,7 @@ class Shader
             param.size,
             GLenumName[param.type]
         );
+        */
     }
 
     //*************************************************************************

@@ -311,15 +311,16 @@ class Lua
         {
             errorif(type != Type.Table, "Not a table.");
             
-            writefln("Table: 0x%08x", payload._ref);
+            //writefln("Table: 0x%08x", payload._ref);
             lua.push(this);
             lua.push();
             while(lua_next(lua.L, -2))
             {
-                writefln("    [%s] = %s",
+                /*writefln("    [%s] = %s",
                     lua.tovalue(-2).to!string(),
                     lua.tovalue(-1).to!string()
                 );
+                */
                 lua.discard(1);
             }
             lua.discard(1);
@@ -401,8 +402,8 @@ class Lua
     void dumpstack(string prefix)
     {
         int top = lua_gettop(L);
-        writeln(prefix);
-        foreach(i; 1 .. top + 1) writefln("    [%d] : %s", i, type(i));
+        //writeln(prefix);
+        //foreach(i; 1 .. top + 1) writefln("    [%d] : %s", i, type(i));
     }    
 
 }

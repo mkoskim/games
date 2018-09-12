@@ -69,11 +69,12 @@ class SceneGraph
             
             name = tostr(mesh.mName);
 
+            /*
             writefln("Mesh: %s", name);
             writeln("- Vertices: ", mesh.mNumVertices);
             writeln("- Faces...: ", mesh.mNumFaces);
             writeln("- Bones...: ", mesh.mNumBones);
-            
+            */
             foreach(i; 0 .. mesh.mNumVertices)
             {
                 pos ~= tovec3(mesh.mVertices[i]);
@@ -97,10 +98,12 @@ class SceneGraph
                 ];
             }
             
+            /*
             foreach(i; 0 .. mesh.mNumBones)
             {
                 writeln("- ", tostr(mesh.mBones[i].mName));
             }
+            */
         }
     }
 
@@ -169,7 +172,7 @@ class SceneGraph
 
     this(const aiScene* scene)
     {
-    //*
+    /*
         writeln("Root........: ", tostr(scene.mRootNode.mName));
         writeln("- Meshes....: ", scene.mNumMeshes);
         writeln("- Textures..: ", scene.mNumTextures);
@@ -219,7 +222,7 @@ class SceneGraph
 
         if(!loaded)
         {
-            writeln("Error: ", to!string(aiGetErrorString()));
+            //writeln("Error: ", to!string(aiGetErrorString()));
             return null;
         }
 
