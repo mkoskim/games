@@ -10,7 +10,30 @@ import sys
 
 if sys.version_info.major < 3:
     print("Need Python 3")
-    sys.exit(-1)
+    exit(-1)
+
+###############################################################################
+#
+# Parse arguments
+#
+###############################################################################
+
+def parseargs():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-C",   type=str, metavar="<dir>", dest="cwd", default = None, help = "Specify working directory")
+    parser.add_argument("exe", type=str, nargs="?", default = "make run", help = "Specify binary file")
+
+    return parser.parse_args()
+
+args = parseargs()
+
+#------------------------------------------------------------------------------
+
+if args.cwd != None:
+    import os
+    os.chdir(args.cwd)
 
 ###############################################################################
 #
@@ -218,7 +241,7 @@ class MainWindow(Frame):
 
     def run(self):
         self.clear()
-        self.worker = Worker("make run", self.queue)
+        self.worker = Worker(args.exe, self.queue)
         self.worker.start()
 
     def buildnrun(self):
