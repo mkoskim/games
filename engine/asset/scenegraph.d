@@ -12,7 +12,6 @@ module engine.asset.scenegraph;
 //-----------------------------------------------------------------------------
 
 import engine.asset.util;
-import vfs = engine.asset.vfs;
 import derelict.assimp3.assimp;
 
 import engine.asset.types.transform;

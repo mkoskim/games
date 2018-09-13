@@ -13,7 +13,6 @@ module engine.asset.font;
 import std.file: FileException;
 import std.string: format, toStringz;
 import std.conv: to;
-import vfs = engine.asset.vfs;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;

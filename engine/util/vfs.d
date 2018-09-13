@@ -6,9 +6,9 @@
 //
 //*****************************************************************************
 
-module engine.asset.vfs;
+module engine.util.vfs;
 
-import engine.asset.util;
+import engine.util;
 
 //-----------------------------------------------------------------------------
 // Fall back to filesystem if requested file is not in BLOB

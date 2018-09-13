@@ -8,14 +8,17 @@ module engine.util;
 
 //-----------------------------------------------------------------------------
 
-public import std.string: format;
-public import std.conv: to;
+public {
+    import std.string: format;
+    import std.conv: to;
 
-public import std.exception: enforce;
-public import engine.math;
+    import std.exception: enforce;
+    import engine.math;
 
-debug public import engine.util.track: Track;
-public import engine.util.logger: Log, Watch;
+    debug import engine.util.track: Track;
+    import engine.util.logger: Log, Watch;
+    import vfs = engine.util.vfs;
+}
 
 //-----------------------------------------------------------------------------
 

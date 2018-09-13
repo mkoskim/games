@@ -9,7 +9,6 @@ module engine.asset.bitmap;
 //-----------------------------------------------------------------------------
 
 import engine.asset.util;
-import vfs = engine.asset.vfs;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
