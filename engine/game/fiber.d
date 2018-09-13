@@ -14,12 +14,6 @@ import std.algorithm: remove, SwapStrategy;
 
 //-----------------------------------------------------------------------------
 
-import std.stdio: writeln;
-import derelict.sdl2.sdl: SDL_GetTicks;
-import engine.game: Profile;
-
-//-----------------------------------------------------------------------------
-
 class Fiber : CoreFiber
 {
     this(void delegate() dg) { super(dg); }
