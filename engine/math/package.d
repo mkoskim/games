@@ -35,7 +35,7 @@ class SlidingAverage
 
     void update(float value)
     {
-        const float window = 25.0;
+        const float window = 5.0;
         average += (value - average) / window;
     }
 }

@@ -15,9 +15,11 @@ public {
     import std.exception: enforce;
     import engine.math;
 
+    import engine.util.clock: Clock;
+    import vfs = engine.util.vfs;
+
     debug import engine.util.track: Track;
     import engine.util.logger: Log, Watch;
-    import vfs = engine.util.vfs;
 }
 
 //-----------------------------------------------------------------------------

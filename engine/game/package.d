@@ -147,8 +147,8 @@ class Profile
     auto render  = new PerfMeter();
     auto calls   = new SlidingAverage();
 
-    float fps()    { return 1000 / frame.average; }
-    float fpsmax() { return 1000 / busy.average; }
+    float fps()    { return 1 / frame.average; }
+    float fpsmax() { return 1 / busy.average; }
 
     static Profile timers;
 
@@ -169,10 +169,12 @@ class Profile
 
         Watch(group)
             .update("FPS", format("%5.1f", timers.fps))
-            .update("Busy", format("%5.1f ms", busytime))
-            .update("CPU", format("%5.1f %%", 100.0*(busytime-rendertime)/frametime))
-            .update("GPU", format("%5.1f %%", 100.0*(rendertime)/frametime))
-            .update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))
+            .update("Frame", format("%5.1f ms", 1000*frametime))
+            .update("Busy", format("%5.1f ms", 1000*busytime))
+            .update("Render", format("%5.1f ms", 1000*rendertime))
+            //.update("CPU", format("%5.1f %%", 100.0*(busytime-rendertime)/frametime))
+            //.update("GPU", format("%5.1f %%", 100.0*(rendertime)/frametime))
+            //.update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))
         ;
     }
 }

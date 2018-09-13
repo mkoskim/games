@@ -8,17 +8,16 @@ module engine.game.perfmeter;
 
 //-----------------------------------------------------------------------------
 
-import derelict.sdl2.sdl: SDL_GetTicks;
 import engine.util;
 
 //-----------------------------------------------------------------------------
 
 class PerfMeter : SlidingAverage
 {
-    private int ticks;
+    private Clock clock;
 
-    void start()   { ticks = SDL_GetTicks(); }
-    void stop()    { super.update(SDL_GetTicks() - ticks); }
+    void start()   { clock.start(); }
+    void stop()    { super.update(clock.elapsed()); }
     void restart() { stop(); start(); }
 }
 

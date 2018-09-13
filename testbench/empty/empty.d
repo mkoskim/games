@@ -6,6 +6,8 @@
 //*****************************************************************************
 
 import engine;
+import core.thread;
+import std.string: format;
 
 //-----------------------------------------------------------------------------
 
@@ -17,10 +19,13 @@ void main()
 
     void draw()
     {
-        static int ticks = 0;
-        if(SDL_GetTicks() - ticks < 500) return;
-        game.Profile.log("Perf");
-        ticks = SDL_GetTicks();
+        static engine.Clock clock;
+
+        if(clock.elapsed() > 0.5)
+        {
+            game.Profile.log("Perf");
+            clock.start();
+        }
     }
 
     simple.gameloop(
