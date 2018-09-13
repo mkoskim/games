@@ -17,20 +17,18 @@ void main()
 
     game.Profile.enable();
 
-    void draw()
+    void report()
     {
-        static engine.Clock clock;
-
-        if(clock.elapsed() > 0.5)
-        {
-            game.Profile.log("Perf");
-            clock.start();
-        }
+        game.Profile.log("Perf");
+        
+        game.qFrame.add(0.5, &report);
     }
 
+    report();
+    
     simple.gameloop(
         50,     // FPS (limit)
-        &draw,   // Drawing
+        null,   // Drawing
         null,   // list of actors
         null    // Event processing
     );

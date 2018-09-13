@@ -185,8 +185,6 @@ class Profile
 //
 //*****************************************************************************
 
-uint ticks = 0;
-
 private int framelength = 1000/50;
 
 @property void fps(int fps)
@@ -205,6 +203,8 @@ void startdraw()
     render.start();
 }
 
+Timer.Queue qFrame;
+
 void waitframe()
 {
     SDL_GL_SwapWindow(screen.window);
@@ -219,9 +219,12 @@ void waitframe()
     /* Here, we could try to do something useful instead just sleeping. We
      * may implement some sort of idle handler.
      */
+    
+    qFrame.tick(framelength * 1e-3);
+    
     static uint nextframe = 0;
-    ticks = SDL_GetTicks();
-    if(nextframe > ticks)
+    uint ticks = SDL_GetTicks();
+    if(nextframe - ticks < 0)
     {
         SDL_Delay(nextframe - ticks);
         ticks = nextframe;

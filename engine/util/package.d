@@ -16,6 +16,7 @@ public {
     import engine.math;
 
     import engine.util.clock: Clock;
+    import engine.util.timer: Timer;
     import vfs = engine.util.vfs;
 
     debug import engine.util.track: Track;
