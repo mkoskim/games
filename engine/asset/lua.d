@@ -12,7 +12,6 @@ module engine.asset.lua;
 //-----------------------------------------------------------------------------
 
 import engine.asset.util;
-import vfs = engine.asset.vfs;
 
 import derelict.lua.lua;
 import std.variant: Variant;
