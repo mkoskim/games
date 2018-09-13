@@ -9,6 +9,7 @@ MAIN=luademo.d
 #------------------------------------------------------------------------------
 
 EXE=
+ENGINE = ../../engine/
 
 LDFLAGS=
 LIBDIRS=
@@ -17,13 +18,19 @@ OBJS=
 
 BLOBFILES=data/
 
-#USECOMPILER = gdc
-
 #------------------------------------------------------------------------------
-# Add stock items to BLOB if you use them
+# Add items you use to BLOB.
 #------------------------------------------------------------------------------
 
-#BLOBFILES += engine/stock/
+#BLOBFILES += $(ENGINE)engine/stock/unsorted
 
-include engine/build/Makegame.mak
+#------------------------------------------------------------------------------
+# Directories containing files used by the engine itself.
+#------------------------------------------------------------------------------
+
+#BLOBFILES += $(ENGINE)/render/scene3d/glsl/
+#BLOBFILES += $(ENGINE)/render/postprocess/glsl/
+#BLOBFILES += $(ENGINE)/stock/system
+
+include $(ENGINE)/build/Makegame.mak
 

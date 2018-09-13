@@ -18,12 +18,13 @@ default: note debug run
 # D libraries
 #------------------------------------------------------------------------------
 
-SRCPATH += engine/libs/DerelictUtil/source/
-SRCPATH += engine/libs/DerelictGL3/source/
-SRCPATH += engine/libs/DerelictSDL2/source/
-SRCPATH += engine/libs/DerelictASSIMP3/source/
-SRCPATH += engine/libs/DerelictLua/source/
-SRCPATH += engine/libs/gl3n/
+SRCPATH += $(ENGINE)/../
+SRCPATH += $(ENGINE)/libs/DerelictUtil/source/
+SRCPATH += $(ENGINE)/libs/DerelictGL3/source/
+SRCPATH += $(ENGINE)/libs/DerelictSDL2/source/
+SRCPATH += $(ENGINE)/libs/DerelictASSIMP3/source/
+SRCPATH += $(ENGINE)/libs/DerelictLua/source/
+SRCPATH += $(ENGINE)/libs/gl3n/
 
 #------------------------------------------------------------------------------
 # Submodule versions (just as reminder)
@@ -54,7 +55,7 @@ DMD = rdmd
 #DMD += -m32
 
 DMD += -ofbin/$(EXE)
-DMD += -J.
+DMD += -Jbin/
 DMD += -w
 DMD += -O
 DMD += -g
@@ -83,17 +84,16 @@ help:
 	@echo "    make debug [run]"
 	@echo "    make release [run]"
 
-debug: BLOB.zip $(OBJS)
-	rm -f bin/$(EXE)
+#------------------------------------------------------------------------------
+
+debug: bin/BLOB.zip $(OBJS)
 	$(DMD) -debug --build-only $(MAIN)
 
-release: BLOB.zip $(OBJS)
-	rm -f bin/$(EXE)
+release: bin/BLOB.zip $(OBJS)
 	$(DMD) -release --build-only $(MAIN)
 	strip --strip-all bin/$(EXE)
 
-profile: BLOB.zip $(OBJS)
-	rm -f bin/$(EXE)
+profile: bin/BLOB.zip $(OBJS)
 	$(DMD) -profile --build-only $(MAIN)
 
 run:
@@ -102,15 +102,19 @@ run:
 
 #------------------------------------------------------------------------------
 
-BLOB.zip: FORCE
-	rm -f BLOB.zip
-	zip -q -r -9 -y BLOB.zip $(BLOBFILES)
+logger:
+	engine/build/logger.py -f bin/$(EXE) &
+
+#------------------------------------------------------------------------------
+
+bin/BLOB.zip: FORCE
+	-mkdir bin
+	zip -q -r -9 -y $@ $(BLOBFILES)
 
 #------------------------------------------------------------------------------
 
 clean:
-	rm -f BLOB.zip BLOB.zip.o
-	rm -f bin/$(EXE)
+	rm -rf bin/
 	find -L -name "*~" | xargs rm -f
 
 FORCE:

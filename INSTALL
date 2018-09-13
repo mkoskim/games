@@ -103,6 +103,3 @@ To successfully compile and run projects, you will need:
    thought to implement a keyboard-mouse based emulator later (as it is one
    of the most used control method in PC games).
 
-   WINDOWS: Sadly to Windows users, current build system utilizes common Linux
-   side building tools and symbolic links. I will continue to simplify the
-   build, and maybe at some point I can make a working Windows version.

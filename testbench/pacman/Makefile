@@ -5,6 +5,7 @@
 ###############################################################################
 
 EXE=pacman
+ENGINE = ../../engine/
 
 MAIN=pacman.d
 
@@ -18,9 +19,9 @@ LDFLAGS=
 
 #------------------------------------------------------------------------------
 
-#BLOBFILES += engine/stock/fonts/Courier\ Prime/
-BLOBFILES += engine/stock
-BLOBFILES += engine/render/shaders/glsl/
+#BLOBFILES += $(ENGINE)/stock/fonts/Courier\ Prime/
+BLOBFILES += $(ENGINE)/stock
+BLOBFILES += $(ENGINE)/render/shaders/glsl/
 
-include engine/build/Makegame.mak
+include $(ENGINE)/build/Makegame.mak
 

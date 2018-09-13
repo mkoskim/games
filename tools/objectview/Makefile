@@ -9,6 +9,7 @@ MAIN=objectview.d
 #------------------------------------------------------------------------------
 
 EXE=
+ENGINE = ../../engine/
 
 LDFLAGS=
 LIBDIRS=
@@ -27,7 +28,9 @@ BLOBFILES += engine/stock/generic
 # Directories containing files used by the engine itself.
 #------------------------------------------------------------------------------
 
-BLOBFILES += engine/stock/system
+BLOBFILES += $(ENGINE)/render/scene3d/glsl/
+BLOBFILES += $(ENGINE)/render/postprocess/glsl/
+BLOBFILES += $(ENGINE)/stock/system
 
-include engine/build/Makegame.mak
+include $(ENGINE)/build/Makegame.mak
 
