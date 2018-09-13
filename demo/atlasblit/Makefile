@@ -6,24 +6,24 @@
 
 MAIN=atlasblit.d
 
-BLOBFILES=data/
-
 #------------------------------------------------------------------------------
 
 EXE=
+ENGINE = ../../engine/
 
 #------------------------------------------------------------------------------
 
 LIBDIRS=
 LIBS=
 LDFLAGS=
+BLOBFILES=data/
 
 #------------------------------------------------------------------------------
 # Add stock items to BLOB if you use them
 #------------------------------------------------------------------------------
 
-BLOBFILES += engine/stock/
-BLOBFILES += engine/render/shaders/glsl/
+BLOBFILES += $(ENGINE)/stock/
+BLOBFILES += $(ENGINE)/render/shaders/glsl/
 
-include engine/build/Makegame.mak
+include $(ENGINE)/build/Makegame.mak
 

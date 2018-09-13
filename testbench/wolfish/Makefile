@@ -9,6 +9,7 @@ MAIN=wolfish.d
 #------------------------------------------------------------------------------
 
 EXE=
+ENGINE = ../../engine/
 
 LDFLAGS=
 LIBDIRS=
@@ -19,15 +20,15 @@ BLOBFILES=data/
 
 #------------------------------------------------------------------------------
 
-BLOBFILES += engine/stock/unsorted
+BLOBFILES += $(ENGINE)/stock/unsorted
 
 #------------------------------------------------------------------------------
 # Add items you use to BLOB.
 #------------------------------------------------------------------------------
 
-BLOBFILES += engine/render/scene3d/glsl/
-BLOBFILES += engine/render/postprocess/glsl/
-BLOBFILES += engine/stock/system
+BLOBFILES += $(ENGINE)/render/scene3d/glsl/
+BLOBFILES += $(ENGINE)/render/postprocess/glsl/
+BLOBFILES += $(ENGINE)/stock/system
 
-include engine/build/Makegame.mak
+include $(ENGINE)/build/Makegame.mak
 

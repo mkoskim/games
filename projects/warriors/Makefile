@@ -11,6 +11,7 @@ BLOBFILES=data/
 #------------------------------------------------------------------------------
 
 EXE=
+ENGINE = ../../engine/
 
 #------------------------------------------------------------------------------
 
@@ -19,10 +20,18 @@ LIBS=
 LDFLAGS=
 
 #------------------------------------------------------------------------------
+# Add items you use to BLOB.
+#------------------------------------------------------------------------------
 
-BLOBFILES += engine/stock/
-BLOBFILES += engine/render/shaders/glsl/
-BLOBFILES += data/
+BLOBFILES = data/
 
-include engine/build/Makegame.mak
+#------------------------------------------------------------------------------
+# Directories containing files used by the engine itself.
+#------------------------------------------------------------------------------
+
+BLOBFILES += $(ENGINE)/render/scene3d/glsl/
+BLOBFILES += $(ENGINE)/render/postprocess/glsl/
+BLOBFILES += $(ENGINE)/stock/system
+
+include $(ENGINE)/build/Makegame.mak
 
