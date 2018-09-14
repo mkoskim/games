@@ -102,21 +102,11 @@ void init(string name, int width = 640, int height = 480, int[2] askfor = [3, 3]
             << format("Context..: %.1f", screen.glversion)
             << format("GLSL.....: %.2f", screen.glsl)
             << format("Derelict.: %s", to!string(DerelictGL3.loadedVersion()))
+            << format("Driver...: %s", to!string(glGetString(GL_RENDERER)))
+            << format("Vendor...: %s", to!string(glGetString(GL_VENDOR)))
+            << format("Version..: %s", to!string(glGetString(GL_VERSION)))
+            << format("GLSL.....: %s", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)))
         ;
-/*
-        trace("OpenGL", format("Driver...: %s", to!string(glGetString(GL_RENDERER))));
-        trace("OpenGL", format("Vendor...: %s", to!string(glGetString(GL_VENDOR))));
-        trace("OpenGL", format("Version..: %s", to!string(glGetString(GL_VERSION))));
-        trace("OpenGL", format("GLSL.....: %s", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION))));
-*/
-
-        //Watch
-        Log << format("%s = %s", "A", "B");
-        Watch.update("A", "B");
-
-        Log("Perf") << "X = Y";
-        Watch("Perf").update("X", "Y");
-        Watch("Perf").update("X", "Z");
     }
 
     render.init();

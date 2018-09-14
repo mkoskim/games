@@ -37,7 +37,7 @@ Sketching the interface:
 
 public import std.string: format;
 
-private import std.stdio: writeln, writefln;
+private import std.stdio: writeln, writefln, stdout;
 
 //-----------------------------------------------------------------------------
 
@@ -64,6 +64,7 @@ class Log
             static if(op == "<<")
             {
                 writeln(":", channel, ">", entry);
+                stdout.flush();
                 return this;
             }
             else static assert(0, "Operator " ~ op ~ " not implemented.");
@@ -77,6 +78,7 @@ class Log
             static if(op == "<<")
             {
                 writeln(entry);
+                stdout.flush();
                 return this;
             }
             else static assert(0, "Operator " ~ op ~ " not implemented.");
@@ -103,6 +105,7 @@ class Watch
         auto update(string tag, string entry)
         {
             writeln("@", channel, ":", tag, ">", entry);
+            stdout.flush();
             return this;
         }
     }
@@ -114,6 +117,7 @@ class Watch
         auto update(string tag, string entry)
         {
             writeln("@", tag,">", entry);
+            stdout.flush();
             return this;
         }
     }
