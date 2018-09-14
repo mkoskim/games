@@ -6,12 +6,12 @@
 
 module engine.util.clock;
 
-import derelict.sdl2.sdl: SDL_GetTicks;
+import core.time;
 
 struct Clock
 {
-    private int ticks;
-
-    void  start()   { ticks = SDL_GetTicks(); }
-    float elapsed() { return (SDL_GetTicks() - ticks) * 1e-3; }
+    MonoTime ticks;
+    
+    void  start()   { ticks = MonoTime.currTime; }
+    float elapsed() { return (MonoTime.currTime - ticks).total!"nsecs" * 1e-9; }
 }
