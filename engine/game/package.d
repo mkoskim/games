@@ -169,9 +169,9 @@ class Profile
 
         Watch(group)
             .update("FPS", format("%5.1f", timers.fps))
-            .update("Frame", format("%5.1f ms", 1000*frametime))
-            .update("Busy", format("%5.1f ms", 1000*busytime))
-            .update("Render", format("%5.1f ms", 1000*rendertime))
+            .update("Frame", format("%5.1f ms", 1000 * frametime))
+            .update("Busy", format("%5.1f ms", 1000 * busytime))
+            .update("Render", format("%5.1f ms", 1000 * rendertime))
             //.update("CPU", format("%5.1f %%", 100.0*(busytime-rendertime)/frametime))
             //.update("GPU", format("%5.1f %%", 100.0*(rendertime)/frametime))
             //.update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))
@@ -203,7 +203,7 @@ void startdraw()
     render.start();
 }
 
-Timer.Queue qFrame;
+Timer.Queue frametimer;
 
 void waitframe()
 {
@@ -220,11 +220,11 @@ void waitframe()
      * may implement some sort of idle handler.
      */
     
-    qFrame.tick(framelength * 1e-3);
+    frametimer.tick(framelength * 1e-3);
     
     static uint nextframe = 0;
     uint ticks = SDL_GetTicks();
-    if(nextframe - ticks < 0)
+    if(nextframe > ticks)
     {
         SDL_Delay(nextframe - ticks);
         ticks = nextframe;

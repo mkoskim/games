@@ -47,15 +47,10 @@ void gameloop(
         if(draw) draw();
         game.waitframe();
 
-        /*
-        static int count = 50;
-        if(!count--) game.quit();
-        /*/
         foreach(event; game.getevents())
         {
             if(process) if(!process(event)) break loop;
         }
-        /**/
 
         if(actors) actors.update();
     }

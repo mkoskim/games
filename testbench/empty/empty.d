@@ -6,8 +6,6 @@
 //*****************************************************************************
 
 import engine;
-import core.thread;
-import std.string: format;
 
 //-----------------------------------------------------------------------------
 
@@ -21,7 +19,7 @@ void main()
     {
         game.Profile.log("Perf");
         
-        game.qFrame.add(0.5, &report);
+        game.frametimer.add(0.5, &report);
     }
 
     report();
