@@ -12,6 +12,10 @@ if sys.version_info.major < 3:
     print("Need Python 3")
     exit(-1)
 
+import platform
+
+print("Platform:", platform.system())
+
 ###############################################################################
 #
 # Parse arguments
@@ -74,30 +78,44 @@ class Worker(Thread):
         super(Worker, self).__init__(target = self.run)
         self.queue = queue
         self.cmd = cmd
-        
-    def run(self):
-
-        import pty, os, shlex
+    
+    def spawn(self):
         from subprocess import Popen, PIPE, DEVNULL, STDOUT
 
         self.queue.put(("logger", "Executing: " + self.cmd + "\n"))
-        
-        master, slave = pty.openpty()
 
-        self.p = Popen(
-            self.cmd,
-            shell = True,
-            stdout = slave,
-            stderr = STDOUT,
-            stdin = DEVNULL,
-            bufsize = 1,
-            close_fds = True,
-            preexec_fn=os.setsid,
-        )
+        if(platform.system() == "Windows"):
+            self.p = Popen(
+                self.cmd,
+                shell = True,
+                stdout = PIPE,
+                stderr = STDOUT,
+                stdin = DEVNULL,
+                bufsize = 0,
+                close_fds = True,
+                universal_newlines = True,
+            )
+            return self.p.stdout
+        else:
+            import pty, os
+            master, slave = pty.openpty()
 
-        os.close(slave)
-        pipe = os.fdopen(master)
+            self.p = Popen(
+                self.cmd,
+                shell = True,
+                stdout = slave,
+                stderr = STDOUT,
+                stdin = DEVNULL,
+                bufsize = 1,
+                close_fds = True,
+                preexec_fn=os.setsid,
+            )
+
+            os.close(slave)
+            return os.fdopen(master)
         
+    def run(self):
+        pipe = self.spawn()
         try:
             for msg in pipe:
                 self.queue.put(("stdout", msg))
@@ -240,7 +258,8 @@ class MainWindow(Frame):
 
     def build(self):
         self.clear()
-        self.worker = Worker("make debug DMDOPTS=-color=off", self.queue)
+        #self.worker = Worker("make debug DMDOPTS=-color=off", self.queue)
+        self.worker = Worker("scons", self.queue)
         self.worker.start()
 
     def run(self):
@@ -250,7 +269,8 @@ class MainWindow(Frame):
 
     def buildnrun(self):
         self.clear()
-        self.worker = Worker("make debug run DMDOPTS=-color=off", self.queue)
+        #self.worker = Worker("make debug run DMDOPTS=-color=off", self.queue)
+        self.worker = Worker("scons", self.queue)
         self.worker.start()
 
     def stop(self):
