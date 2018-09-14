@@ -55,16 +55,20 @@ version(linux) pragma(lib, "dl");
 
 static this()
 {
+    Log << "Loading libraries...";
+    
     //-------------------------------------------------------------------------
     // Load OpenGL
     //-------------------------------------------------------------------------
 
+    Log << "Loading: OpenGL...";
     DerelictGL3.load();
 
     //-------------------------------------------------------------------------
     // Load & Initialize SDL2
     //-------------------------------------------------------------------------
 
+    Log << "Loading: SDL2...";
     DerelictSDL2.load(SharedLibVersion(2, 0, 2));
     SDL_Init(0);
 
@@ -72,6 +76,7 @@ static this()
     // Load & initialize SDL2Image (problems loading PNG.DLL in Windows)
     //-------------------------------------------------------------------------
 
+    Log << "Loading: SDL2Image...";
     DerelictSDL2Image.load();
 
     version(Windows)
@@ -92,6 +97,7 @@ static this()
     version(Windows)
     {
     } else {
+        Log << "Loading: SDL2TTF...";
         DerelictSDL2ttf.load();
         TTF_Init();
     }
@@ -100,6 +106,7 @@ static this()
     // Load ASSIMP
     //-------------------------------------------------------------------------
 
+    Log << "Loading: ASSIMP...";
     DerelictASSIMP3.load();
 
     //-------------------------------------------------------------------------
@@ -107,6 +114,7 @@ static this()
     // library name
     //-------------------------------------------------------------------------
 
+    Log << "Loading: Lua...";
     version(linux)
     {
         DerelictLua.load("liblua5.3.so");        
@@ -115,6 +123,8 @@ static this()
     }
 
     //-------------------------------------------------------------------------
+
+    Log << "Libraries loaded.";
 }
 
 static ~this()
