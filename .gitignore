@@ -22,7 +22,10 @@
 
 .dub
 dub.selections.json
+
 .sconsign.dblite
+**/.sconf_temp/**
+
 dna.txt
 
 #------------------------------------------------------------------------------
