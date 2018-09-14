@@ -25,6 +25,7 @@ dub.selections.json
 
 .sconsign.dblite
 **/.sconf_temp/**
+config.log
 
 dna.txt
 
