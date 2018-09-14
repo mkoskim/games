@@ -41,8 +41,6 @@ public {
     import std.stdio: writeln, writefln;
 }
 
-pragma(lib, "dl");
-
 //-----------------------------------------------------------------------------
 
 import derelict.sdl2.image;
@@ -51,27 +49,72 @@ import engine.util;
 
 //-----------------------------------------------------------------------------
 
+version(linux) pragma(lib, "dl");
+
+//-----------------------------------------------------------------------------
+
 static this()
 {
-    DerelictSDL2.load(SharedLibVersion(2, 0, 2));
-    DerelictSDL2Image.load();
-    DerelictSDL2ttf.load();
-    DerelictGL3.load();
-    DerelictASSIMP3.load();
-    DerelictLua.load("liblua5.3.so");
-
+    //-------------------------------------------------------------------------
+    // Load OpenGL
     //-------------------------------------------------------------------------
 
+    DerelictGL3.load();
+
+    //-------------------------------------------------------------------------
+    // Load & Initialize SDL2
+    //-------------------------------------------------------------------------
+
+    DerelictSDL2.load(SharedLibVersion(2, 0, 2));
     SDL_Init(0);
 
-    int img_formats = IMG_INIT_PNG | IMG_INIT_JPG;
+    //-------------------------------------------------------------------------
+    // Load & initialize SDL2Image (problems loading PNG.DLL in Windows)
+    //-------------------------------------------------------------------------
+
+    DerelictSDL2Image.load();
+
+    version(Windows)
+    {
+        int img_formats = IMG_INIT_JPG;
+    } else {
+        int img_formats = IMG_INIT_PNG | IMG_INIT_JPG;
+    }
+
     if(IMG_Init(img_formats) != img_formats) {
         throw new Exception(format("IMG_Init: %s", to!string(IMG_GetError())));
     }
 
     //-------------------------------------------------------------------------
+    // Load & Init SDL TTF (does not yet work in Windows build)
+    //-------------------------------------------------------------------------
 
-    TTF_Init();
+    version(Windows)
+    {
+    } else {
+        DerelictSDL2ttf.load();
+        TTF_Init();
+    }
+
+    //-------------------------------------------------------------------------
+    // Load ASSIMP
+    //-------------------------------------------------------------------------
+
+    DerelictASSIMP3.load();
+
+    //-------------------------------------------------------------------------
+    // Linux Mint - and probably all Ubuntu variants - have obscure lua
+    // library name
+    //-------------------------------------------------------------------------
+
+    version(linux)
+    {
+        DerelictLua.load("liblua5.3.so");        
+    } else {
+        DerelictLua.load();
+    }
+
+    //-------------------------------------------------------------------------
 }
 
 static ~this()
