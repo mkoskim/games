@@ -1,0 +1,32 @@
+Windows build investigations
+
+-------------------------------------------------------------------------------
+
+Tools:
+
+Git:
+
+Python:
+
+Scons (later): python -m pip install scons
+
+DMD: https://dlang.org/download.html
+
+-------------------------------------------------------------------------------
+
+Libraries:
+
+OpenGL: ???
+
+SDL2: https://www.libsdl.org/download-2.0.php
+SDL2_image: https://www.libsdl.org/projects/SDL_image/
+SDL2_TTF: https://www.libsdl.org/projects/SDL_ttf/ (Not yet working!)
+
+ASSIMP: https://sourceforge.net/projects/assimp/files/assimp-3.1/assimp-3.1.1-win-binaries.zip/download
+
+Lua: http://luabinaries.sourceforge.net/download.html
+
+-------------------------------------------------------------------------------
+
+git pull
+submodule update

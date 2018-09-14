@@ -1,0 +1,67 @@
+#------------------------------------------------------------------------------
+
+import os
+import platform
+
+print("Platform:", platform.system())
+
+env = Environment(ENV = {"PATH": os.environ["PATH"]})
+env["ENGINE"] = "../../engine/"
+
+#------------------------------------------------------------------------------
+
+def findfiles(*dirs):
+    result = []
+    for root in dirs:
+        for dir, subdirs, files in os.walk(root):
+            for file in files:
+                result.append(dir + "/" + file)
+    return result
+
+#------------------------------------------------------------------------------
+
+BLOB_Files = findfiles(
+    env.Dir("$ENGINE/render/scene3d/glsl/").abspath,
+    env.Dir("$ENGINE/render/postprocess/glsl/").abspath,
+    env.Dir("$ENGINE/stock/system/").abspath,
+)
+
+#------------------------------------------------------------------------------
+
+def zipdir(target, source, env):
+    import zipfile
+
+    target = target[0]
+
+    zipf = zipfile.ZipFile(target.abspath, 'w', zipfile.ZIP_DEFLATED)
+
+    rootdir = env.Dir(env["ARCHIVEROOT"]).abspath
+
+    for file in source:
+        archivename = os.path.relpath(file.abspath, rootdir)
+        print(target.name, "<=", archivename)
+        zipf.write(file.abspath, arcname = archivename)
+
+    zipf.close()
+
+env["BUILDERS"]["BLOB"] = Builder(action = zipdir, suffix = '.zip')
+
+#------------------------------------------------------------------------------
+
+env["DFLAGS"] = [
+    "-debug",
+    "-Jbin/",
+    "-I$ENGINE/../",
+    "-I$ENGINE/libs/DerelictASSIMP3/source/",
+    "-I$ENGINE/libs/DerelictGL3/source/",
+    "-I$ENGINE/libs/DerelictLua/source/",
+    "-I$ENGINE/libs/DerelictSDL2/source/",
+    "-I$ENGINE/libs/DerelictUtil/source/",
+    "-I$ENGINE/libs/gl3n",
+]
+
+#------------------------------------------------------------------------------
+
+env.BLOB("bin/BLOB.zip", BLOB_Files, ARCHIVEROOT="$ENGINE/../")
+env.Command("bin/empty", "empty.d", "rdmd $DFLAGS -of$TARGET $SOURCES")
+#env.Program("empty.d")
