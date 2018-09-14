@@ -85,7 +85,8 @@ class Worker(Thread):
         master, slave = pty.openpty()
 
         self.p = Popen(
-            shlex.split(self.cmd),
+            self.cmd,
+            shell = True,
             stdout = slave,
             stderr = STDOUT,
             stdin = DEVNULL,
@@ -178,14 +179,17 @@ class MainWindow(Frame):
         Button(self.btnbar, text = "Clear", command = self.clear).pack(side=LEFT)
         self.btnbar.pack(side=TOP, anchor="w")
 
-        self.logbox = LogView(self, state = DISABLED, wrap=WORD)
-        self.logbox.pack(fill=BOTH, expand=1)
+        paned = PanedWindow(self, orient = HORIZONTAL)
+        paned.pack(fill = BOTH, expand = 1)
+        
+        self.logbox = LogView(paned, state = DISABLED, wrap=WORD)
+        paned.add(self.logbox) #self.logbox.pack(fill=BOTH, expand=1)
         
         self.logbox.tag_config("stdout")
         self.logbox.tag_config("logger", foreground="blue")
         
-        self.watchbox = WatchView(self)
-        self.watchbox.pack(fill=BOTH, expand=1)
+        self.watchbox = WatchView(paned)
+        paned.add(self.watchbox) #self.watchbox.pack(fill=BOTH, expand=1)
         
         self.pack(fill=BOTH, expand=1)
 
