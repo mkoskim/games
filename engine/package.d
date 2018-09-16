@@ -55,13 +55,13 @@ version(linux) pragma(lib, "dl");
 
 static this()
 {
-    Log << "Loading libraries...";
+    Log("Startup") << "Loading libraries...";
     
     //-------------------------------------------------------------------------
     // Load OpenGL
     //-------------------------------------------------------------------------
 
-    Log << "Loading: OpenGL...";
+    Log("Startup") << "Loading: OpenGL...";
     DerelictGL3.load();
 
     //-------------------------------------------------------------------------
