@@ -1,6 +1,6 @@
 env = Environment()
 
-env.Append(MAIN = "empty.d")
+env.Append(MAIN = "")
 
 env.SConscript("../../engine/build/scons/main.py", "env")
 
