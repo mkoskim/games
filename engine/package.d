@@ -38,7 +38,6 @@ public {
     import gl3n.linalg;
     
     import std.exception: enforce;
-    import std.stdio: writeln, writefln;
 }
 
 //-----------------------------------------------------------------------------
@@ -68,7 +67,7 @@ static this()
     // Load & Initialize SDL2
     //-------------------------------------------------------------------------
 
-    Log << "Loading: SDL2...";
+    Log("Startup") << "Loading: SDL2...";
     DerelictSDL2.load(SharedLibVersion(2, 0, 2));
     SDL_Init(0);
 
@@ -76,7 +75,7 @@ static this()
     // Load & initialize SDL2Image (problems loading PNG.DLL in Windows)
     //-------------------------------------------------------------------------
 
-    Log << "Loading: SDL2Image...";
+    Log("Startup") << "Loading: SDL2Image...";
     DerelictSDL2Image.load();
 
     version(Windows)
@@ -97,7 +96,7 @@ static this()
     version(Windows)
     {
     } else {
-        Log << "Loading: SDL2TTF...";
+        Log("Startup") << "Loading: SDL2TTF...";
         DerelictSDL2ttf.load();
         TTF_Init();
     }
@@ -106,7 +105,7 @@ static this()
     // Load ASSIMP
     //-------------------------------------------------------------------------
 
-    Log << "Loading: ASSIMP...";
+    Log("Startup") << "Loading: ASSIMP...";
     DerelictASSIMP3.load();
 
     //-------------------------------------------------------------------------
@@ -114,7 +113,7 @@ static this()
     // library name
     //-------------------------------------------------------------------------
 
-    Log << "Loading: Lua...";
+    Log("Startup") << "Loading: Lua...";
     version(linux)
     {
         DerelictLua.load("liblua5.3.so");        
@@ -124,7 +123,7 @@ static this()
 
     //-------------------------------------------------------------------------
 
-    Log << "Libraries loaded.";
+    Log("Startup") << "Libraries loaded.";
 }
 
 static ~this()
