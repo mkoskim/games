@@ -3,7 +3,7 @@
                             GAME ASSETS
                             -----------
 
-General data types needed for game, for example:
+DATA TYPES: General data types needed for game, for example:
 
     - Meshes
     - Bitmaps (textures)
@@ -14,4 +14,18 @@ These are used for:
     1) Loading assets (ASSIMP)
     2) Uploading GPU resources
 
+ASSET LOADING: Asset loading pipeline overview:
 
+    Files --> ASSIMP --> PLOP --> Shader
+
+ASSIMP library is used to load resource files. Because ASSIMP data structures can
+not be modified, we need to copy ASSIMP objects to intermediate format, and discard
+ASSIMP objects.
+
+Intermediate format is processed by PLOP (Post-LOad Processing) module. When it is
+ready, it feeds the modified object to shaders. Shaders upload the resource to graphics
+card, and discard the intermediate format.
+
+INTERMEDIATE FORMAT: Intermediate format is used to create VBOs (Vertex Buffer Objects).
+Because of this, intermediate format is game-specific: different games have different
+needs for VBOs.

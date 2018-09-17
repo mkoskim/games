@@ -49,9 +49,7 @@ class SceneGraph
         
         vec3[] pos;
         vec2[] uv;
-        vec3[] t;
-        vec3[] b;
-        vec3[] n;
+        vec3[] t, b, n;
         
         ushort[] triangles;
         
@@ -68,12 +66,6 @@ class SceneGraph
             
             name = tostr(mesh.mName);
 
-            /*
-            writefln("Mesh: %s", name);
-            writeln("- Vertices: ", mesh.mNumVertices);
-            writeln("- Faces...: ", mesh.mNumFaces);
-            writeln("- Bones...: ", mesh.mNumBones);
-            */
             foreach(i; 0 .. mesh.mNumVertices)
             {
                 pos ~= tovec3(mesh.mVertices[i]);
