@@ -1,16 +1,13 @@
 ###############################################################################
 #
-#
+# Building projects
 #
 ###############################################################################
 
+import os
 Import("*")
 
-#------------------------------------------------------------------------------
-
-import os, platform
-
-print("Platform:", platform.system())
+env.SConscript("setup.py", "env")
 
 ###############################################################################
 #
@@ -62,14 +59,13 @@ env["BUILDERS"]["BLOB"] = Builder(action = zipdir, suffix = '.zip')
 # Derived variables
 #------------------------------------------------------------------------------
 
-env.Append(ENGINE = env.Dir("../../").abspath)
 env.Append(ROOTDIR = env.Dir("#").abspath)
 env.Append(OUTDIR = "$ROOTDIR/bin/")
 env.Append(EXE = os.path.splitext(env.subst("$OUTDIR/$MAIN"))[0])
 env.Append(DEP = os.path.splitext(env.subst("$EXE"))[0] + ".dep")
 
-print("EXE:", env["EXE"])
-print("DEP:", env["DEP"])
+#print("EXE:", env["EXE"])
+#print("DEP:", env["DEP"])
 
 #------------------------------------------------------------------------------
 
@@ -102,9 +98,21 @@ env.BLOB(
 # Create dependencies for scons
 #------------------------------------------------------------------------------
 
-os.system(env.subst("mkdir -p $OUTDIR"))
-os.system(env.subst("rdmd -debug --makedepend $DFLAGS -of$EXE $ROOTDIR/$MAIN > $DEP"))
+def system(cmd):
+    print(cmd)
+    os.system(cmd)
+
+#------------------------------------------------------------------------------
+
+try:
+    os.mkdir(env.subst("$OUTDIR"))
+except OSError:
+    pass
+
+system(env.subst("rdmd -debug --makedepend $DFLAGS -of$EXE $ROOTDIR/$MAIN > $DEP"))
 env.ParseDepends("$DEP")
+
+#------------------------------------------------------------------------------
 
 env.Command(
     "$EXE", 

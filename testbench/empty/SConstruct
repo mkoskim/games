@@ -2,5 +2,4 @@ env = Environment()
 
 env.Append(MAIN = "empty.d")
 
-env.SConscript("../../engine/build/scons/main.py", "env")
-
+env.SConscript("../../engine/build/scons/build.py", "env")
