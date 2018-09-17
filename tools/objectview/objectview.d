@@ -180,6 +180,19 @@ void main()
 
     //-------------------------------------------------------------------------
 
+    game.Profile.enable();
+
+    void report()
+    {
+        game.Profile.log("Perf");
+        
+        game.frametimer.add(0.5, &report);
+    }
+
+    report();
+    
+    //-------------------------------------------------------------------------
+
     simple.gameloop(
         50,     // FPS (limit)
         &draw,  // Drawing

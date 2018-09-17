@@ -76,10 +76,18 @@ void init(string name, int width = 640, int height = 480, int[2] askfor = [3, 3]
         )
     );
 
+    //-------------------------------------------------------------------------
+    // Context created, configure it
+    //-------------------------------------------------------------------------
+
     DerelictGL3.reload();
 
+    SDL_GL_SetSwapInterval(0);    // Immediate
+    //SDL_GL_SetSwapInterval(1);    // VSync
+    //SDL_GL_SetSwapInterval(-1);   // Tearing
+
     //-------------------------------------------------------------------------
-    // Got it - fill in info
+    //Fill in info about context
     //-------------------------------------------------------------------------
 
     screen.fb = new render.Framebuffer(0, width, height);
@@ -91,23 +99,16 @@ void init(string name, int width = 640, int height = 480, int[2] askfor = [3, 3]
     screen.glsl = to!float(
         to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)).split()[0]
     );
-
-    //SDL_GL_SetSwapInterval(0);    // Immediate
-    //SDL_GL_SetSwapInterval(1);    // VSync
-    SDL_GL_SetSwapInterval(-1);   // Tearing
-
-    debug {
-        //Log("OpenGL")
-        Log("GLinfo") 
-            << format("Context..: %.1f", screen.glversion)
-            << format("GLSL.....: %.2f", screen.glsl)
-            << format("Derelict.: %s", to!string(DerelictGL3.loadedVersion()))
-            << format("Driver...: %s", to!string(glGetString(GL_RENDERER)))
-            << format("Vendor...: %s", to!string(glGetString(GL_VENDOR)))
-            << format("Version..: %s", to!string(glGetString(GL_VERSION)))
-            << format("GLSL.....: %s", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)))
-        ;
-    }
+    
+    debug Log("GLinfo") 
+        << format("Context..: %.1f", screen.glversion)
+        << format("GLSL.....: %.2f", screen.glsl)
+        << format("Derelict.: %s", to!string(DerelictGL3.loadedVersion()))
+        << format("Hardware.: %s", to!string(glGetString(GL_RENDERER)))
+        << format("Vendor...: %s", to!string(glGetString(GL_VENDOR)))
+        << format("Version..: %s", to!string(glGetString(GL_VERSION)))
+        << format("GLSL.....: %s", to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)))
+    ;
 
     render.init();
     Joystick.init();    
@@ -160,8 +161,9 @@ class Profile
         Watch(group)
             .update("FPS", format("%5.1f", timers.fps))
             .update("Frame", format("%5.1f ms", 1000 * frametime))
-            .update("Busy", format("%5.1f ms", 1000 * busytime))
-            .update("Render", format("%5.1f ms", 1000 * rendertime))
+            .update("Busy", format("%5.1f %%", 100.0 * busytime/frametime))
+            .update("Render", format("%5.1f %%", 100.0*rendertime/frametime))
+            .update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))
             //.update("CPU", format("%5.1f %%", 100.0*(busytime-rendertime)/frametime))
             //.update("GPU", format("%5.1f %%", 100.0*(rendertime)/frametime))
             //.update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))

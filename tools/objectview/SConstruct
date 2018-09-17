@@ -4,5 +4,5 @@ env.Append(MAIN = "objectview.d")
 
 env.Append(BLOBFILES = "$ENGINE/stock/generic/")
 
-env.SConscript("../../engine/build/scons/main.py", "env")
+env.SConscript("../../engine/build/scons/build.py", "env")
 
