@@ -27,7 +27,7 @@ def parseargs():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-C",   type=str, metavar="<dir>", dest="cwd", default = None, help = "Specify working directory")
-    parser.add_argument("exe", type=str, nargs="?", default = "make run", help = "Specify binary file")
+    parser.add_argument("exe", type=str, nargs="?", default = "scons run", help = "Specify binary file")
 
     return parser.parse_args()
 
@@ -270,7 +270,7 @@ class MainWindow(Frame):
     def buildnrun(self):
         self.clear()
         #self.worker = Worker("make debug run DMDOPTS=-color=off", self.queue)
-        self.worker = Worker("scons", self.queue)
+        self.worker = Worker("scons run", self.queue)
         self.worker.start()
 
     def stop(self):

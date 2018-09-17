@@ -70,6 +70,10 @@ env.Append(DEP = os.path.splitext(env.subst("$EXE"))[0] + ".dep")
 #------------------------------------------------------------------------------
 
 env.Append(DFLAGS = [
+        "-O",
+        "-g",
+        "-w",
+        "-debug",
         "-J$OUTDIR/",
         "-I$ENGINE/../",
         "-I$ENGINE/libs/DerelictASSIMP3/source/",
@@ -88,7 +92,7 @@ env.Append(BLOBFILES = "$ENGINE/render/scene3d/glsl/")
 env.Append(BLOBFILES = "$ENGINE/render/postprocess/glsl/")
 env.Append(BLOBFILES = "$ENGINE/stock/system/")
 
-env.BLOB(
+blob = env.BLOB(
     "$OUTDIR/BLOB.zip",
     findfiles(*env["BLOBFILES"]),
     ARCHIVEROOT = "$ENGINE/../"
@@ -96,27 +100,29 @@ env.BLOB(
 
 #------------------------------------------------------------------------------
 
-def system(cmd):
-    print(cmd)
-    os.system(cmd)
+def PhonyTarget(env, target, requires, action):
+    phony = env.Alias(target, None, action)
+    env.AlwaysBuild(phony)
+    env.Requires(phony, requires)
+    #env.Requires(env.AlwaysBuild(env.Alias(target, None, action)), requires)
 
 #------------------------------------------------------------------------------
 # Create dependencies for scons
 #------------------------------------------------------------------------------
 
-try:
-    os.mkdir(env.subst("$OUTDIR"))
-except OSError:
-    pass
-
-system(env.subst("rdmd -debug --makedepend $DFLAGS -of$EXE $ROOTDIR/$MAIN > $DEP"))
+env.Execute(Mkdir("$OUTDIR"))
+env.Execute("rdmd -debug --makedepend $DFLAGS -of$EXE $ROOTDIR/$MAIN > $DEP")
 env.ParseDepends("$DEP")
 
 #------------------------------------------------------------------------------
 
-env.Command(
+exe = env.Command(
     "$EXE", 
-    ["$ROOTDIR/$MAIN", "$OUTDIR/BLOB.zip"],
-    "rdmd -debug --build-only $DFLAGS -of$TARGET $ROOTDIR/$MAIN"
+    None,
+    "rdmd --build-only $DFLAGS -of$TARGET $ROOTDIR/$MAIN"
 )
+
+env.Depends(exe, blob)
+
+PhonyTarget(env, "run", exe, lambda target, source, env: os.system(env.subst("$EXE")))
 
