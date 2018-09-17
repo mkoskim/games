@@ -6,5 +6,6 @@ public {
     import engine.asset.font: Font;
     import engine.asset.lua: Lua;
     import geom = engine.asset.geom;
+    import plop = engine.asset.plop;
 }
 
