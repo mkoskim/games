@@ -17,6 +17,27 @@ not necessarily be bad idea, I could get 64-bit versions for them.
 
 -------------------------------------------------------------------------------
 
+Installation:
+
+1) Install Python 3.5+ to your machine:
+
+    https://www.python.org/downloads/windows/
+
+2) Install Scons: Depending on the python version you installed, you may
+need to upgrade certain packages (pip itself, setuptools and wheel):
+
+```
+$ python -m pip install -U pip
+$ python -m pip install -U setuptools
+$ python -m pip install -U wheel
+$ python -m pip install scons
+```
+
+To be continued... Looks like it is bit hard to install working Python & scons
+to Wine. Investigations on-going...
+
+-------------------------------------------------------------------------------
+
 Tools:
 
 Git:
