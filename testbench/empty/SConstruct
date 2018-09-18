@@ -2,4 +2,10 @@ env = Environment()
 
 env.Append(MAIN = "empty.d")
 
+env["BLOBFILES"] = [
+    "../../engine/render/scene3d/glsl/",
+    "../../engine/render/postprocess/glsl/",
+    "../../engine/stock/system/",
+]
+
 env.SConscript("../../engine/build/scons/build.py", "env")
