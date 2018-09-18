@@ -38,7 +38,7 @@ def zipdir(target, source, env):
     tgtname = target[0].name
     target  = target[0].abspath
 
-    zipdir = os.path.dirname(target)
+    zipdir = os.path.dirname(env.subst(target))
     if not os.path.exists(zipdir):
         os.mkdir(zipdir)
 
@@ -107,21 +107,19 @@ def PhonyTarget(env, target, requires, action):
 def GetDependencies(env, prog, main):
     print("Resolving dependencies:", env.subst(main))
 
-    from subprocess import PIPE, STDOUT, run
-    result = run(
-        env.subst("rdmd --makedepend -of{} $DFLAGS {}".format(prog, main)),
-        shell = True,
-        stdout = PIPE,
-        stderr = STDOUT,
-        universal_newlines = True,
-    )
-
-    if result.returncode:
-        print(result.stdout)
-        exit(result.returncode)
+    from subprocess import PIPE, STDOUT, check_output, CalledProcessError
+    try:
+        stdout = check_output(
+            env.subst("rdmd --makedepend -of{} $DFLAGS {}".format(prog, main)),
+            shell = True,
+            universal_newlines = True,
+        )
+    except CalledProcessError as e:
+        print(e.output)
+        exit(e.returncode)
 
     lines = []
-    for line in result.stdout.splitlines():
+    for line in stdout.splitlines():
         line = line.strip()
         if len(lines) and lines[-1].endswith("\\"):
             lines[-1] = lines[-1][:-1].strip() + " " + line
@@ -148,5 +146,12 @@ PhonyTarget(
     "run",
     exe,
     lambda target, source, env: os.system(env.subst("$EXE"))
+)
+
+PhonyTarget(
+    env,
+    "logger",
+    None,
+    lambda target, source, env: os.system(env.subst("$ENGINE/build/logger.py &"))
 )
 
