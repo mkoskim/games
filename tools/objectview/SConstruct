@@ -1,11 +1,15 @@
 env = Environment()
 
-env.Append(MAIN = "objectview.d")
+env["MAIN"] = "objectview.d"
 
-env.Append(BLOBFILES = [
-    "$ENGINE/stock/generic/",
+env["BLOBFILES"] = [
+    "../../engine/stock/generic/",
     "data/",
-])
+
+    "../../engine/render/scene3d/glsl/",
+    "../../engine/render/postprocess/glsl/",
+    "../../engine/stock/system/",
+]
 
 env.SConscript("../../engine/build/scons/build.py", "env")
 

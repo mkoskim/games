@@ -8,8 +8,8 @@ See notes at bottom.
 
 -------------------------------------------------------------------------------
 
-There is now setup.sh which tries to simplify installation of necessary
-libraries. Try it:
+Linux: There is now setup.sh which tries to simplify installation of
+necessary libraries. Try it:
 
     games$ ./setup.sh
 
@@ -63,8 +63,8 @@ To successfully compile and run projects, you will need:
 
 2) BUILD TOOLS:
 
-   Project uses GNU make to build the software. This is usually installed
-   to Linux systems by default.
+   Project is moving to use scons for building software. More about this
+   later.
 
 -------------------------------------------------------------------------------
 

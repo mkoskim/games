@@ -22,7 +22,8 @@ env.SConscript("setup.py", "env")
 def findfiles(*dirs):
     result = []
     for root in dirs:
-        for dir, subdirs, files in os.walk(env.subst(root)):
+        print("Scanning:", env.subst(root))
+        for dir, subdirs, files in os.walk(env.subst("$ROOTDIR/" + root)):
             for file in files:
                 result.append(dir + "/" + file)
     return result
@@ -34,15 +35,18 @@ def findfiles(*dirs):
 def zipdir(target, source, env):
     import zipfile
 
-    target = target[0]
+    tgtname = target[0].name
+    target  = target[0].abspath
 
-    zipf = zipfile.ZipFile(target.abspath, 'w', zipfile.ZIP_DEFLATED)
+    zipdir = os.path.dirname(target)
+    if not os.path.exists(zipdir):
+        os.mkdir(zipdir)
 
-    rootdir = env.Dir(env["ARCHIVEROOT"]).abspath
+    zipf = zipfile.ZipFile(target, 'w', zipfile.ZIP_DEFLATED)
 
     for file in source:
-        archivename = os.path.relpath(file.abspath, rootdir)
-        print(target.name, "<=", archivename)
+        archivename = os.path.relpath(file.abspath, env["ROOTDIR"])
+        print(tgtname, "<=", archivename)
         zipf.write(file.abspath, arcname = archivename)
 
     zipf.close()
@@ -59,13 +63,9 @@ env["BUILDERS"]["BLOB"] = Builder(action = zipdir, suffix = '.zip')
 # Derived variables
 #------------------------------------------------------------------------------
 
-env.Append(ROOTDIR = env.Dir("#").abspath)
-env.Append(OUTDIR = "$ROOTDIR/bin/")
-env.Append(EXE = os.path.splitext(env.subst("$OUTDIR/$MAIN"))[0] + env.subst("$PROGSUFFIX"))
-env.Append(DEP = os.path.splitext(env.subst("$EXE"))[0] + ".dep")
-
-#print("EXE:", env["EXE"])
-#print("DEP:", env["DEP"])
+env["ROOTDIR"] = env.Dir("#").abspath
+env["OUTDIR"]  = "$ROOTDIR/bin/"
+env["EXE"]     = os.path.splitext(env.subst("$OUTDIR/$MAIN"))[0] + env.subst("$PROGSUFFIX")
 
 #------------------------------------------------------------------------------
 
@@ -87,15 +87,10 @@ env.Append(DFLAGS = [
 
 #------------------------------------------------------------------------------
 
-env.Append(BLOBFILES = [])
-env.Append(BLOBFILES = "$ENGINE/render/scene3d/glsl/")
-env.Append(BLOBFILES = "$ENGINE/render/postprocess/glsl/")
-env.Append(BLOBFILES = "$ENGINE/stock/system/")
-
 blob = env.BLOB(
     "$OUTDIR/BLOB.zip",
     findfiles(*env["BLOBFILES"]),
-    ARCHIVEROOT = "$ENGINE/../"
+    env
 )
 
 #------------------------------------------------------------------------------
@@ -104,25 +99,49 @@ def PhonyTarget(env, target, requires, action):
     phony = env.Alias(target, None, action)
     env.AlwaysBuild(phony)
     env.Requires(phony, requires)
-    #env.Requires(env.AlwaysBuild(env.Alias(target, None, action)), requires)
 
 #------------------------------------------------------------------------------
 # Create dependencies for scons
 #------------------------------------------------------------------------------
 
-env.Execute(Mkdir("$OUTDIR"))
-env.Execute("rdmd --makedepend -of$EXE $DFLAGS $ROOTDIR/$MAIN > $DEP")
-env.ParseDepends("$DEP")
+def GetDependencies(env, prog, main):
+    print("Resolving dependencies:", env.subst(main))
+
+    from subprocess import PIPE, STDOUT, run
+    result = run(
+        env.subst("rdmd --makedepend -of{} $DFLAGS {}".format(prog, main)),
+        shell = True,
+        stdout = PIPE,
+        stderr = STDOUT,
+        universal_newlines = True,
+    )
+
+    if result.returncode:
+        print(result.stdout)
+        exit(result.returncode)
+
+    lines = []
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if len(lines) and lines[-1].endswith("\\"):
+            lines[-1] = lines[-1][:-1].strip() + " " + line
+        else:
+            if len(line): lines.append(line)
+
+    target, sources = lines[0].split(": ", 1)
+
+    if target != env.subst(prog):
+        print("Coudln't resolve dependencies.")
+        exit(-1)
+    return sources.split()
 
 #------------------------------------------------------------------------------
 
 exe = env.Command(
-    "$EXE", 
-    None,
+    "$EXE",
+    GetDependencies(env, "$EXE", "$ROOTDIR/$MAIN") + [blob],
     "rdmd -of$TARGET --build-only $DFLAGS $ROOTDIR/$MAIN"
 )
-
-env.Depends(exe, blob)
 
 PhonyTarget(
     env,

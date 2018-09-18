@@ -274,7 +274,9 @@ class MainWindow(Frame):
         self.worker.start()
 
     def stop(self):
-        if self.worker is not None and self.worker.is_alive():
+        if platform.system() == "Windows":
+            self.queue.put(("logger", "Stop (Windows) not yet implemented.\n"))
+        elif self.worker is not None and self.worker.is_alive():
             self.worker.stop()
             self.worker.join()
             self.worker = None

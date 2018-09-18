@@ -6,8 +6,16 @@
 							
 
 This directory contains D modules, which are compiled and linked to engine and
-games.
+games. For other libraries, I try to use system side dynamic ones, but there
+may be exceptions to this rule to allow static linking. This directory is
+also for them.
 
-For other libraries, I try to use system side dynamic ones, but there may be
-exceptions to this rule to allow static linking. This directory is also for them.
+Content:
 
+    DerelictASSIMP3/        D bindings for ASSIMP library
+    DerelictGL3/            D bindings for OpenGL
+    DerelictLua/            D bindings for Lua library
+    DerelictSDL2/           D bindings for SDL library, including:
+    DerelictUtil/           Utils for Derelict binders
+
+    gl3n/                   D library for CPU side 3D maths
