@@ -20,8 +20,6 @@ For more info: [INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
 
 **NEW:** I have made some preliminary 32-bit **Windows** build. Some information can be found here: [WINDOWS.txt](https://github.com/mkoskim/games/blob/master/WINDOWS.txt)
 
----
-
 At the moment, I can get few running versions of projects when using
 preliminary scons build script:
 
