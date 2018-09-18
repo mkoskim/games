@@ -87,14 +87,6 @@ env.Append(DFLAGS = [
 
 #------------------------------------------------------------------------------
 
-blob = env.BLOB(
-    "$OUTDIR/BLOB.zip",
-    findfiles(*env["BLOBFILES"]),
-    env
-)
-
-#------------------------------------------------------------------------------
-
 def PhonyTarget(env, target, requires, action):
     phony = env.Alias(target, None, action)
     env.AlwaysBuild(phony)
@@ -133,7 +125,17 @@ def GetDependencies(env, prog, main):
         exit(-1)
     return sources.split()
 
-#------------------------------------------------------------------------------
+###############################################################################
+#
+# Targets
+#
+###############################################################################
+
+blob = env.BLOB(
+    "$OUTDIR/BLOB.zip",
+    findfiles(*env["BLOBFILES"]),
+    env
+)
 
 exe = env.Command(
     "$EXE",
