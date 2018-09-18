@@ -44,14 +44,13 @@ debug abstract class Track
             debug report("Garbage collected:");
         }
 
-        void report(string title = null)
+        void report(string group)
         {
-            if(title) writeln(title);
             foreach(key, value; count)
             {
-                writefln("%8d %s", value, key);
+                Watch(group).update(key, to!string(value));
             }
-            writefln("%8d Total", total);
+            Watch(group).update("Total", to!string(total));
         }
     }
 }
