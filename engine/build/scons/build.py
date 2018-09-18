@@ -61,7 +61,7 @@ env["BUILDERS"]["BLOB"] = Builder(action = zipdir, suffix = '.zip')
 
 env.Append(ROOTDIR = env.Dir("#").abspath)
 env.Append(OUTDIR = "$ROOTDIR/bin/")
-env.Append(EXE = os.path.splitext(env.subst("$OUTDIR/$MAIN"))[0])
+env.Append(EXE = os.path.splitext(env.subst("$OUTDIR/$MAIN"))[0] + env.subst("$PROGSUFFIX"))
 env.Append(DEP = os.path.splitext(env.subst("$EXE"))[0] + ".dep")
 
 #print("EXE:", env["EXE"])
@@ -111,7 +111,7 @@ def PhonyTarget(env, target, requires, action):
 #------------------------------------------------------------------------------
 
 env.Execute(Mkdir("$OUTDIR"))
-env.Execute("rdmd -debug --makedepend $DFLAGS -of$EXE $ROOTDIR/$MAIN > $DEP")
+env.Execute("rdmd --makedepend -of$EXE $DFLAGS $ROOTDIR/$MAIN > $DEP")
 env.ParseDepends("$DEP")
 
 #------------------------------------------------------------------------------
@@ -119,10 +119,15 @@ env.ParseDepends("$DEP")
 exe = env.Command(
     "$EXE", 
     None,
-    "rdmd --build-only $DFLAGS -of$TARGET $ROOTDIR/$MAIN"
+    "rdmd -of$TARGET --build-only $DFLAGS $ROOTDIR/$MAIN"
 )
 
 env.Depends(exe, blob)
 
-PhonyTarget(env, "run", exe, lambda target, source, env: os.system(env.subst("$EXE")))
+PhonyTarget(
+    env,
+    "run",
+    exe,
+    lambda target, source, env: os.system(env.subst("$EXE"))
+)
 
