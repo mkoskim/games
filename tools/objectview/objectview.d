@@ -185,7 +185,8 @@ void main()
     void report()
     {
         game.Profile.log("Perf");
-        
+        engine.Track.report("Track");
+
         game.frametimer.add(0.5, &report);
     }
 
