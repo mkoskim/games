@@ -12,4 +12,3 @@ env["BLOBFILES"] = [
 ]
 
 env.SConscript("../../engine/build/scons/build.py", "env")
-
