@@ -16,33 +16,30 @@ games$ ./setup.sh
 
 For more info: [INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
 
-**NEW:** I have made some preliminary 32-bit **Windows** build. Some information can
-be found here:
+---
 
-https://github.com/mkoskim/games/blob/master/WINDOWS.txt
+**NEW:** I have made some preliminary 32-bit **Windows** build. Some information can be found here: [WINDOWS.txt](https://github.com/mkoskim/games/blob/master/WINDOWS.txt)
+
+---
 
 At the moment, I can get few running versions of projects when using
 preliminary scons build script:
 
 ```
-testbench/empty$ scons
-tools/objectview$ scons
+testbench/empty$ scons run
+tools/objectview$ scons run
 ```
 
-Getting objectview working is generally good news, as it opens OpenGL window, loads
-assets with ASSIMP, and shows them in the screen. SDL2 TTF is definitely not yet working.
-There were also problems to get PNG support working.
+Getting objectview working is generally good news, as it opens OpenGL
+window, loads assets with ASSIMP, and shows them in the screen. SDL2 TTF
+is definitely not yet working. There are also problems to get PNG support working.
 
 ---
 
 **NOTE:** Currently I am working - when working - with (1) new asset loading
 system based on assimp, (2) integrating lua for loading assets, and then
 (3) restructure shader engine to match the changes. At the moment, 
-most of the examples do not compile. The one that I am using to develop is:
-
-tools/objectviewer
-
-Feel free to try it, and browse the rest of the code.
+most of the examples do not compile. The one that I am using to develop is `tools/objectviewer`. Feel free to try it, and browse the rest of the code.
 
 ---
 

@@ -17,14 +17,14 @@ void main()
 {
     game.init(800, 600);
 
-    vfs.fallback = true;
+    //vfs.fallback = true;
 
     //-------------------------------------------------------------------------
     // Load asset
     //-------------------------------------------------------------------------
 
     auto scene =
-        engine.asset.SceneGraph.load("engine/stock/generic/mesh/Suzanne/Suzanne.obj")
+        engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Suzanne/Suzanne.obj")
         //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Cube/Cube.dae")
         //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/Girl/Girl.dae")

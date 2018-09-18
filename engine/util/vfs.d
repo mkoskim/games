@@ -1,7 +1,7 @@
 //*****************************************************************************
 //
 // Game VFS (Virtual File System). Main feature at the moment: loading
-// assets from embedded zip file. It is intended to extend this later
+// assets from baked zip file. It is intended to extend this later
 // with "mount" feature, to make filesystem unions.
 //
 //*****************************************************************************

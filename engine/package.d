@@ -82,7 +82,7 @@ static this()
     {
         int img_formats = IMG_INIT_JPG;
     } else {
-        int img_formats = IMG_INIT_PNG | IMG_INIT_JPG;
+        int img_formats = IMG_INIT_JPG | IMG_INIT_PNG;
     }
 
     if(IMG_Init(img_formats) != img_formats) {
@@ -93,13 +93,9 @@ static this()
     // Load & Init SDL TTF (does not yet work in Windows build)
     //-------------------------------------------------------------------------
 
-    version(Windows)
-    {
-    } else {
-        Log("Startup") << "Loading: SDL2TTF...";
-        DerelictSDL2ttf.load();
-        TTF_Init();
-    }
+    Log("Startup") << "Loading: SDL2TTF...";
+    DerelictSDL2ttf.load();
+    TTF_Init();
 
     //-------------------------------------------------------------------------
     // Load ASSIMP
