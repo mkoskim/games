@@ -9,7 +9,6 @@ import engine;
 //-----------------------------------------------------------------------------
 
 import std.random;
-import std.stdio;
 
 import engine.gpu.util;
 
@@ -37,6 +36,12 @@ void main()
     //-------------------------------------------------------------------------
     // Post-Load Processing
     //-------------------------------------------------------------------------
+
+    import gl3n.aabb;
+    //alias AABB = AABBT!(at, dimension);
+
+    auto aabb = gl3n.aabb.AABBT!(float).from_points(mesh.pos);
+    Log << format("AABB: %s - %s", to!string(aabb.min), to!string(aabb.max));
 
     //-------------------------------------------------------------------------
     // Textures are uploaded by loaders: these may have different sampling
