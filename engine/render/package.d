@@ -84,21 +84,17 @@ private void checkGPUCapabilities()
         return result;
     }
     
-    /*
-    writefln("GPU Capablities");
-    writefln("- Texture units..............: %d", getInt(GL_MAX_TEXTURE_IMAGE_UNITS));
-    writefln("- Max. combined texture units: %d", getInt(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
-    writefln("- Max. vertex texture units..: %d", getInt(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS));
-
-    writefln("- Max. uniform locations.....: %d", getInt(GL_MAX_UNIFORM_LOCATIONS));
-
-    writefln("- Max. uniform vectors.......: %d", getInt(GL_MAX_FRAGMENT_UNIFORM_VECTORS));
-    writefln("- Max. vertex uniform vectors: %d", getInt(GL_MAX_VERTEX_UNIFORM_VECTORS));
-
-    writefln("- Max. varying vectors.......: %d", getInt(GL_MAX_VARYING_VECTORS));
-    
-    writefln("- Max. vertex attributes.....: %d", getInt(GL_MAX_VERTEX_ATTRIBS));
-    */
+    Log("GLinfo")
+        << "GPU Capablities"
+        << format("- Texture units..............: %d", getInt(GL_MAX_TEXTURE_IMAGE_UNITS))
+        << format("- Max. combined texture units: %d", getInt(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS))
+        << format("- Max. vertex texture units..: %d", getInt(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS))
+        << format("- Max. uniform locations.....: %d", getInt(GL_MAX_UNIFORM_LOCATIONS))
+        << format("- Max. uniform vectors.......: %d", getInt(GL_MAX_FRAGMENT_UNIFORM_VECTORS))
+        << format("- Max. vertex uniform vectors: %d", getInt(GL_MAX_VERTEX_UNIFORM_VECTORS))
+        << format("- Max. varying vectors.......: %d", getInt(GL_MAX_VARYING_VECTORS))
+        << format("- Max. vertex attributes.....: %d", getInt(GL_MAX_VERTEX_ATTRIBS))
+    ;
 }
 
 //*****************************************************************************
@@ -115,7 +111,7 @@ private void checkGPUCapabilities()
 
 private void checkExtensions()
 {
-    //writeln("OpenGL extension queries:");
+    Log("GLinfo") << "OpenGL extension queries:";
 
     bool[string] getExtensions()
     {
@@ -147,7 +143,7 @@ private void checkExtensions()
     {
         bool report(bool result, string msg)
         {
-            //writefln("- %-4s: %s", msg, extension);
+            Log("GLinfo") << format("- %-4s: %s", msg, extension);
             return result;
         }
         
