@@ -6,15 +6,26 @@
 #
 ###############################################################################
 
+#------------------------------------------------------------------------------
+# Check Python version
+#------------------------------------------------------------------------------
+
 import sys
 
 if sys.version_info.major < 3:
     print("Need Python 3")
     exit(-1)
 
+#------------------------------------------------------------------------------
+# Check platform, and create platform check shortcuts
+#------------------------------------------------------------------------------
+
 import platform
 
 print("Platform:", platform.system())
+
+platform.windows = (platform.system() == "Windows")
+platform.linux   = (platform.system() == "linux")
 
 ###############################################################################
 #
@@ -69,6 +80,44 @@ from threading import Thread
 from queue import Queue
 
 #------------------------------------------------------------------------------
+# Running subprocesses
+#------------------------------------------------------------------------------
+
+def cmd2pipe(cmd):
+    from subprocess import Popen, PIPE, DEVNULL, STDOUT
+    
+    if(platform.windows):
+        return Popen(
+            cmd,
+            shell = True,
+            stdout = PIPE,
+            stderr = STDOUT,
+            stdin = DEVNULL,
+            bufsize = 0,
+            close_fds = True,
+            universal_newlines = True,
+        )
+    else:
+        import pty, os
+        master, slave = pty.openpty()
+
+        p = Popen(
+            cmd,
+            shell = True,
+            stdout = slave,
+            stderr = STDOUT,
+            stdin = DEVNULL,
+            bufsize = 1,
+            close_fds = True,
+            universal_newlines = True,
+            preexec_fn=os.setsid,
+        )
+
+        os.close(slave)
+        p.stdout = os.fdopen(master)
+        return p
+
+#------------------------------------------------------------------------------
 # Compile & run
 #------------------------------------------------------------------------------
 
@@ -78,41 +127,11 @@ class Worker(Thread):
         super(Worker, self).__init__(target = self.run)
         self.queue = queue
         self.cmd = cmd
-    
+
     def spawn(self):
-        from subprocess import Popen, PIPE, DEVNULL, STDOUT
-
         self.queue.put(("logger", "Executing: " + self.cmd + "\n"))
-
-        if(platform.system() == "Windows"):
-            self.p = Popen(
-                self.cmd,
-                shell = True,
-                stdout = PIPE,
-                stderr = STDOUT,
-                stdin = DEVNULL,
-                bufsize = 0,
-                close_fds = True,
-                universal_newlines = True,
-            )
-            return self.p.stdout
-        else:
-            import pty, os
-            master, slave = pty.openpty()
-
-            self.p = Popen(
-                self.cmd,
-                shell = True,
-                stdout = slave,
-                stderr = STDOUT,
-                stdin = DEVNULL,
-                bufsize = 1,
-                close_fds = True,
-                preexec_fn=os.setsid,
-            )
-
-            os.close(slave)
-            return os.fdopen(master)
+        self.p = cmd2pipe(self.cmd)
+        return self.p.stdout
         
     def run(self):
         pipe = self.spawn()
@@ -193,7 +212,9 @@ class MainWindow(Frame):
         Button(self.btnbar, text = "Build", command = self.build).pack(side=LEFT)
         Button(self.btnbar, text = "Run", command = self.run).pack(side=LEFT)
         Button(self.btnbar, text = "Build & Run", command = self.buildnrun).pack(side=LEFT)
+        Button(self.btnbar, text = "Clean", command = self.clean).pack(side=LEFT)
         Button(self.btnbar, text = "Stop", command = self.stop).pack(side=LEFT)
+        ttk.Separator(self.btnbar, orient=VERTICAL).pack(side=LEFT, fill = Y, padx = 5)
         Button(self.btnbar, text = "Clear", command = self.clear).pack(side=LEFT)
         self.btnbar.pack(side=TOP, anchor="w")
 
@@ -271,6 +292,11 @@ class MainWindow(Frame):
         self.clear()
         #self.worker = Worker("make debug run DMDOPTS=-color=off", self.queue)
         self.worker = Worker("scons run", self.queue)
+        self.worker.start()
+
+    def clean(self):
+        #self.worker = Worker("make debug run DMDOPTS=-color=off", self.queue)
+        self.worker = Worker("scons -c", self.queue)
         self.worker.start()
 
     def stop(self):
