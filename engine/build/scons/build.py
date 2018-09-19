@@ -7,7 +7,27 @@
 import os
 Import("*")
 
+#------------------------------------------------------------------------------
+# Helpers
+#------------------------------------------------------------------------------
+
+def exename(name):
+    return os.path.splitext(name)[0] + env.subst("$PROGSUFFIX")
+
+def dsrcname(name):
+    return os.path.splitext(name)[0] + ".d"
+
+###############################################################################
+#
+# Setting environment
+#
+###############################################################################
+
 env.SConscript("setup.py", "env")
+
+env["ROOTDIR"] = env.Dir("#").abspath
+env["OUTDIR"]  = "$ROOTDIR/bin/"
+env["EXE"]     = exename(env.subst("$OUTDIR/$MAIN"))
 
 ###############################################################################
 #
@@ -19,11 +39,12 @@ env.SConscript("setup.py", "env")
 # Find files in directory trees
 #------------------------------------------------------------------------------
 
-def findfiles(*dirs):
+def findfiles(env, dirs):
     result = []
     for root in dirs:
-        print("Scanning:", env.subst(root))
-        for dir, subdirs, files in os.walk(env.subst("$ROOTDIR/" + root)):
+        root = env.subst("$ROOTDIR/" + root)
+        print("Scanning:", root)
+        for dir, subdirs, files in os.walk(root):
             for file in files:
                 result.append(dir + "/" + file)
     return result
@@ -51,53 +72,23 @@ def zipdir(target, source, env):
 
     zipf.close()
 
-env["BUILDERS"]["BLOB"] = Builder(action = zipdir, suffix = '.zip')
-
-###############################################################################
-#
-# Setting environment
-#
-###############################################################################
-
-#------------------------------------------------------------------------------
-# Derived variables
-#------------------------------------------------------------------------------
-
-env["ROOTDIR"] = env.Dir("#").abspath
-env["OUTDIR"]  = "$ROOTDIR/bin/"
-env["EXE"]     = os.path.splitext(env.subst("$OUTDIR/$MAIN"))[0] + env.subst("$PROGSUFFIX")
-
-#------------------------------------------------------------------------------
-
-env.Append(DFLAGS = [
-        "-O",
-        "-g",
-        "-w",
-        "-debug",
-        "-J$OUTDIR/",
-        "-I$ENGINE/../",
-        "-I$ENGINE/libs/DerelictASSIMP3/source/",
-        "-I$ENGINE/libs/DerelictGL3/source/",
-        "-I$ENGINE/libs/DerelictLua/source/",
-        "-I$ENGINE/libs/DerelictSDL2/source/",
-        "-I$ENGINE/libs/DerelictUtil/source/",
-        "-I$ENGINE/libs/gl3n",
-    ]
+env["BUILDERS"]["BLOB"] = Builder(
+    action = zipdir,
+    #emitter = BLOB_Emitter,
 )
 
-#------------------------------------------------------------------------------
-
-def PhonyTarget(env, target, requires, action):
-    phony = env.Alias(target, None, action)
-    env.AlwaysBuild(phony)
-    env.Requires(phony, requires)
+###############################################################################
+#
+# D compiling
+#
+###############################################################################
 
 #------------------------------------------------------------------------------
 # Create dependencies for scons
 #------------------------------------------------------------------------------
 
 def GetDependencies(env, prog, main):
-    print("Resolving dependencies:", env.subst(main))
+    #print("Resolving dependencies:", env.subst(main))
 
     from subprocess import PIPE, STDOUT, check_output, CalledProcessError
     try:
@@ -125,6 +116,57 @@ def GetDependencies(env, prog, main):
         exit(-1)
     return sources.split()
 
+def RDMD_Emitter(target, source, env):
+
+    exe = target[0].abspath
+
+    if not len(source):
+        main = dsrcname(exe)
+    else:
+        main, source = source[0].abspath, source[1:]
+
+    return target, GetDependencies(env, exe, main) + source
+
+#------------------------------------------------------------------------------
+# RDMD builder
+#------------------------------------------------------------------------------
+
+env["BUILDERS"]["RDMD"] = Builder(
+    action = "rdmd -of$TARGET --build-only $DFLAGS $ROOTDIR/$MAIN",
+    emitter = RDMD_Emitter,
+)
+
+#------------------------------------------------------------------------------
+# Flags for building
+#------------------------------------------------------------------------------
+
+env.Append(DFLAGS = [
+        "-O",
+        "-g",
+        "-w",
+        "-debug",
+        "-J$OUTDIR/",
+        "-I$ENGINE/../",
+        "-I$ENGINE/libs/DerelictASSIMP3/source/",
+        "-I$ENGINE/libs/DerelictGL3/source/",
+        "-I$ENGINE/libs/DerelictLua/source/",
+        "-I$ENGINE/libs/DerelictSDL2/source/",
+        "-I$ENGINE/libs/DerelictUtil/source/",
+        "-I$ENGINE/libs/gl3n",
+    ]
+)
+
+###############################################################################
+#
+# Some helpers
+#
+###############################################################################
+
+def PhonyTarget(env, target, requires, action):
+    phony = env.Alias(target, None, action)
+    env.AlwaysBuild(phony)
+    env.Requires(phony, requires)
+
 ###############################################################################
 #
 # Targets
@@ -133,27 +175,11 @@ def GetDependencies(env, prog, main):
 
 blob = env.BLOB(
     "$OUTDIR/BLOB.zip",
-    findfiles(*env["BLOBFILES"]),
-    env
+    findfiles(env, env["BLOBFILES"])
 )
 
-exe = env.Command(
-    "$EXE",
-    GetDependencies(env, "$EXE", "$ROOTDIR/$MAIN") + [blob],
-    "rdmd -of$TARGET --build-only $DFLAGS $ROOTDIR/$MAIN"
-)
+exe = env.RDMD("$EXE", ["$ROOTDIR/$MAIN", blob])
 
-PhonyTarget(
-    env,
-    "run",
-    exe,
-    lambda target, source, env: os.system(env.subst("$EXE"))
-)
-
-PhonyTarget(
-    env,
-    "logger",
-    None,
-    lambda target, source, env: os.system(env.subst("$ENGINE/build/logger.py &"))
-)
+PhonyTarget(env, "run", exe, lambda target, source, env: os.system(env.subst("$EXE")))
+PhonyTarget(env, "logger", None, lambda target, source, env: os.system(env.subst("python $ENGINE/build/logger.py &")))
 

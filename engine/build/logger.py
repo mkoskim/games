@@ -300,8 +300,8 @@ class MainWindow(Frame):
         self.worker.start()
 
     def stop(self):
-        if platform.system() == "Windows":
-            self.queue.put(("logger", "Stop (Windows) not yet implemented.\n"))
+        if platform.windows:
+            self.queue.put(("logger", "Windows: Stop not yet implemented.\n"))
         elif self.worker is not None and self.worker.is_alive():
             self.worker.stop()
             self.worker.join()
@@ -322,10 +322,11 @@ class MainWindow(Frame):
 #
 ###############################################################################
 
+import os
+
 root = Tk()
-root.title("Logger")
+root.title("Logger: {}".format(os.getcwd()))
 root.geometry(settings["MainWindow"]["geometry"])
 main = MainWindow(root)
 root.protocol("WM_DELETE_WINDOW", main.on_close)
 root.mainloop()
-
