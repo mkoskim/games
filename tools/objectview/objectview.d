@@ -23,27 +23,45 @@ void main()
     //-------------------------------------------------------------------------
 
     auto scene =
-        //engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Suzanne/Suzanne.obj")
+        engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Suzanne/Suzanne.obj")
         //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Cube/Cube.dae")
         //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Chess/king.obj")
-        engine.asset.SceneGraph.load("data/Girl/Girl.dae")
+        //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
         //engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.dae")
         //engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.blend")
         ;
 
-    auto mesh = scene.meshes[0];
-
     scene.info();
+
+    auto mesh = scene.meshes[0];
 
     //-------------------------------------------------------------------------
     // Post-Load Processing
     //-------------------------------------------------------------------------
 
-    import gl3n.aabb;
-    //alias AABB = AABBT!(at, dimension);
+    // View mesh info
+    {
+        auto aabb = mesh.AABB();
+        Log << format("AABB: %s - %s", to!string(aabb.min), to!string(aabb.max));
+    }
 
-    auto aabb = gl3n.aabb.AABBT!(float).from_points(mesh.pos);
-    Log << format("AABB: %s - %s", to!string(aabb.min), to!string(aabb.max));
+    // Move mesh reference to correct position
+    {
+        auto aabb = mesh.AABB();
+        mesh.move(0, 0, -aabb.min.z);
+    }
+
+    // Scale mesh to unit size
+    {
+        auto dim = mesh.dim();
+        mesh.scale( 1 / dim.z);
+    }
+
+    // Check results
+    {
+        auto aabb = mesh.AABB();
+        Log << format("AABB: %s - %s", to!string(aabb.min), to!string(aabb.max));
+    }
 
     //-------------------------------------------------------------------------
     // Textures are uploaded by loaders: these may have different sampling
@@ -76,8 +94,8 @@ void main()
         1, 200
     );
 
-    auto mView = mat4.look_at(vec3(0, -20, 15), vec3(0, 0, 7), vec3(0, 0, 1));
-    auto pLight = vec3(5, 3, 7);
+    auto mView = mat4.look_at(vec3(0, -2, 0.5), vec3(0, 0, 0.5), vec3(0, 0, 1));
+    auto pLight = vec3(2, 2, 2);
     
     //-------------------------------------------------------------------------
     // Create shader from GLSL, and GPU/OpenGL "state" for the shader: it is

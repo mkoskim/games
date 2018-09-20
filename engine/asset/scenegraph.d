@@ -77,7 +77,6 @@ class SceneGraph
                     t ~= tovec3(mesh.mTangents[i]);
                     b ~= tovec3(mesh.mBitangents[i]);
                 }
-                //writeln("P=", pos[i], "n=", n[i]);
             }
             
             foreach(i; 0 .. mesh.mNumFaces)
@@ -96,6 +95,18 @@ class SceneGraph
             }
             */
         }
+
+        //---------------------------------------------------------------------
+
+        auto AABB() { return AABBT!(float).from_points(pos); }
+        auto dim()  {
+            auto aabb = AABB();
+            return aabb.max - aabb.min;
+        }
+
+        void scale(float f)   { foreach(ref p; pos) p *= f; }
+        void move(vec3 delta) { foreach(ref p; pos) p += delta; }
+        void move(float x, float y, float z) { move(vec3(x, y, z)); }
     }
 
     //*************************************************************************
@@ -161,17 +172,14 @@ class SceneGraph
 
     void info()
     {
-        /*
         Log("Loader")
-            << format("Root........: %s", tostr(scene.mRootNode.mName))
-            << format("- Meshes....: %d", scene.mNumMeshes)
-            << format("- Textures..: %d", scene.mNumTextures)
-            << format("- Materials.: %d", scene.mNumMaterials)
-            << format("- Animations: %d", scene.mNumAnimations)
-            << format("- Lights....: %d", scene.mNumLights)
-            << format("- Cameras...: %d", scene.mNumCameras)
+            << format("Meshes: %d", meshes.length)
         ;
-        */
+
+        foreach(i, mesh; meshes)
+        {
+            Log("Loader") << format("- Mesh %d: %s", i, mesh.name);
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -191,8 +199,6 @@ class SceneGraph
 
     static SceneGraph load(string filename, Option[] options...)
     {
-        auto buffer = vfs.extract(filename);
-
         aiPostProcessSteps postprocess = 
             aiProcess_Triangulate |
             //aiProcess_GenNormals |
@@ -209,6 +215,8 @@ class SceneGraph
             case SceneGraph.Option.FlipUV: postprocess |= aiProcess_FlipUVs; break;
             case SceneGraph.Option.CombineMeshes: postprocess |= aiProcess_OptimizeGraph; break;
         }
+
+        auto buffer = vfs.extract(filename);
 
         auto loaded = aiImportFileFromMemory(
             buffer.ptr,

@@ -8,10 +8,13 @@ module engine.asset.util;
 
 //-----------------------------------------------------------------------------
 
-public import engine.util;
-public import std.string: toStringz;
+public
+{
+    import engine.util;
+    import std.string: toStringz;
 
-// TODO: Get rid of these
-public import derelict.opengl;
-public import gl3n.linalg;
-
+    // TODO: Get rid of these
+    import derelict.opengl;
+    import gl3n.linalg;
+    import gl3n.aabb;
+}
