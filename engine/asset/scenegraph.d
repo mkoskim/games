@@ -50,8 +50,12 @@ class SceneGraph
         vec3[] pos;
         vec2[] uv;
         vec3[] t, b, n;
+        //mat3[] tbn;
         
-        ushort[] triangles;
+        struct Face {
+            ushort a, b, c;
+        }
+        Face[] triangles;
         
         //---------------------------------------------------------------------
 
@@ -70,22 +74,20 @@ class SceneGraph
             {
                 pos ~= tovec3(mesh.mVertices[i]);
                 if(mesh.mTextureCoords[0]) uv ~= tovec2(mesh.mTextureCoords[0][i]);
-                if(mesh.mNormals) {
-                    n ~= tovec3(mesh.mNormals[i]);
-                }
-                if(mesh.mTangents) {
+                if(mesh.mNormals && mesh.mTangents) {
                     t ~= tovec3(mesh.mTangents[i]);
                     b ~= tovec3(mesh.mBitangents[i]);
+                    n ~= tovec3(mesh.mNormals[i]);
                 }
             }
             
             foreach(i; 0 .. mesh.mNumFaces)
             {
-                triangles ~= [
+                triangles ~= Face(
                     cast(ushort)mesh.mFaces[i].mIndices[0],
                     cast(ushort)mesh.mFaces[i].mIndices[1],
                     cast(ushort)mesh.mFaces[i].mIndices[2]
-                ];
+                );
             }
             
             /*
@@ -104,9 +106,67 @@ class SceneGraph
             return aabb.max - aabb.min;
         }
 
-        void scale(float f)   { foreach(ref p; pos) p *= f; }
-        void move(vec3 delta) { foreach(ref p; pos) p += delta; }
+        void scale(float f)   { foreach(ref v; pos) v *= f; }
+        void move(vec3 delta) { foreach(ref v; pos) v += delta; }
         void move(float x, float y, float z) { move(vec3(x, y, z)); }
+
+        //---------------------------------------------------------------------
+        // Switch object WHD - Width, Height, Depth - axis if needed.
+        //---------------------------------------------------------------------
+
+        void WHD(string[3] game, string[3] object)
+        {
+            vec3 row(string spec)
+            {
+                final switch(spec)
+                {
+                    case "X":  return vec3( 1,  0,  0);
+                    case "Y":  return vec3( 0,  1,  0);
+                    case "Z":  return vec3( 0,  0,  1);
+                    case "-X": return vec3(-1,  0,  0);
+                    case "-Y": return vec3( 0, -1,  0);
+                    case "-Z": return vec3( 0,  0, -1);
+                }
+            }
+
+            bool handness(string[3] specs)
+            {
+                return row(specs[0]).cross(row(specs[1])).dot(row(specs[2])) > 0;
+            }
+
+            vec3 x, y, z;
+            //mat3 m;
+
+            foreach(i, gaxis; game)
+            {
+                auto oaxis = object[i];
+                Log << format("%s => %s", gaxis, oaxis);
+
+                final switch(gaxis)
+                {
+                    case "X": x = row(oaxis); break;
+                    case "Y": y = row(oaxis); break;
+                    case "Z": z = row(oaxis); break;
+                    case "-X": x = -row(oaxis); break;
+                    case "-Y": y = -row(oaxis); break;
+                    case "-Z": z = -row(oaxis); break;
+                }
+            }
+
+            mat3 m = mat3(x, y, z);
+
+            foreach(ref v; pos) v = m * v;
+            foreach(ref v; t) v = m * v;
+            foreach(ref v; b) v = m * v;
+            foreach(ref v; n) v = m * v;
+
+            if(handness(object) != handness(game)) foreach(ref face; triangles)
+            {
+                auto t = face.b;
+                face.b = face.c;
+                face.c = t;
+            }
+        }
     }
 
     //*************************************************************************

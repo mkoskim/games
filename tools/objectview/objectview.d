@@ -24,11 +24,9 @@ void main()
 
     auto scene =
         engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Suzanne/Suzanne.obj")
-        //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Cube/Cube.dae")
-        //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Chess/king.obj")
         //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
-        //engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.dae")
-        //engine.asset.SceneGraph.load("local/stockset/Humanoid/Female/Female.blend")
+        //engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Cube/Cube.dae")
+        //engine.asset.SceneGraph.load("engine/stock/generic/mesh/Chess/king.obj")
         ;
 
     scene.info();
@@ -39,22 +37,25 @@ void main()
     // Post-Load Processing
     //-------------------------------------------------------------------------
 
+    mesh.WHD(["X", "Z", "Y"], ["X", "Y", "Z"]);
+    //mesh.WHD(["X", "Z", "Y"], ["X", "Z", "Y"]);
+
     // View mesh info
     {
         auto aabb = mesh.AABB();
         Log << format("AABB: %s - %s", to!string(aabb.min), to!string(aabb.max));
     }
 
-    // Move mesh reference to correct position
-    {
-        auto aabb = mesh.AABB();
-        mesh.move(0, 0, -aabb.min.z);
-    }
-
     // Scale mesh to unit size
     {
         auto dim = mesh.dim();
         mesh.scale( 1 / dim.z);
+    }
+
+    // Move mesh reference to correct position
+    {
+        auto aabb = mesh.AABB();
+        mesh.move(0, 0, -aabb.min.z);
     }
 
     // Check results
@@ -148,7 +149,10 @@ void main()
         "vert_N": new engine.gpu.VBO(mesh.n),
     ];
 
-    auto ibo = new engine.gpu.IBO(mesh.triangles, GL_TRIANGLES);
+    auto ibo = new engine.gpu.IBO(
+        cast(ushort[])mesh.triangles,
+        GL_TRIANGLES
+    );
 
     //-------------------------------------------------------------------------
     // Create VAO to bind buffers together (automatize buffer bindings)
