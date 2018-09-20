@@ -159,19 +159,25 @@ class SceneGraph
         return node;
     }
 
+    void info()
+    {
+        /*
+        Log("Loader")
+            << format("Root........: %s", tostr(scene.mRootNode.mName))
+            << format("- Meshes....: %d", scene.mNumMeshes)
+            << format("- Textures..: %d", scene.mNumTextures)
+            << format("- Materials.: %d", scene.mNumMaterials)
+            << format("- Animations: %d", scene.mNumAnimations)
+            << format("- Lights....: %d", scene.mNumLights)
+            << format("- Cameras...: %d", scene.mNumCameras)
+        ;
+        */
+    }
+
     //-------------------------------------------------------------------------
 
     this(const aiScene* scene)
     {
-    /*
-        writeln("Root........: ", tostr(scene.mRootNode.mName));
-        writeln("- Meshes....: ", scene.mNumMeshes);
-        writeln("- Textures..: ", scene.mNumTextures);
-        writeln("- Materials.: ", scene.mNumMaterials);
-        writeln("- Animations: ", scene.mNumAnimations);
-        writeln("- Lights....: ", scene.mNumLights);
-        writeln("- Cameras...: ", scene.mNumCameras);
-    /**/
         loadMeshes(scene);
         root = loadNode(null, scene.mRootNode);
     }
@@ -211,11 +217,7 @@ class SceneGraph
             toStringz(std.path.extension(filename))
         ); 
 
-        if(!loaded)
-        {
-            //writeln("Error: ", to!string(aiGetErrorString()));
-            return null;
-        }
+        ERRORIF(!loaded, to!string(aiGetErrorString()));
 
         auto scene = new SceneGraph(loaded);
 

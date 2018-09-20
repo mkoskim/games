@@ -68,8 +68,9 @@ void init(string name, int width = 640, int height = 480, int[2] askfor = [3, 3]
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
     );
 
-    screen.glcontext = ERRORIF(
-        SDL_GL_CreateContext(screen.window),
+    screen.glcontext = SDL_GL_CreateContext(screen.window);
+    ERRORIF(
+        !screen.glcontext,
         format(
             "OpenGL context creation failed. " ~
             "Do you have OpenGL %d.%d or higher?", askfor[0], askfor[1]

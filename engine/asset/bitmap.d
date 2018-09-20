@@ -47,18 +47,17 @@ class Bitmap
 
     this(int width, int height)
     {
-        SDL_Surface* s = ERRORIF(
-            SDL_CreateRGBSurface(
-                0,
-                width, height,
-                32,
-                0x000000ff,
-                0x0000ff00,
-                0x00ff0000,
-                0xff000000
-            ),
-            to!string(SDL_GetError())
+        SDL_Surface* s = SDL_CreateRGBSurface(
+            0,
+            width, height,
+            32,
+            0x000000ff,
+            0x0000ff00,
+            0x00ff0000,
+            0xff000000
         );
+
+        ERRORIF(!s, to!string(SDL_GetError()));
         this(s);
     }
 
@@ -121,10 +120,8 @@ class Bitmap
     //-------------------------------------------------------------------------
 
     SDL_Renderer* renderer() {
-        if(!_renderer) _renderer = ERRORIF(
-            SDL_CreateSoftwareRenderer(surface),
-            to!string(SDL_GetError())
-        );
+        if(!_renderer) _renderer = SDL_CreateSoftwareRenderer(surface);
+        ERRORIF(!_renderer, to!string(SDL_GetError()));
         return _renderer;
     }
 

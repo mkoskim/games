@@ -160,7 +160,7 @@ private void checkExtensions()
     void require(string extension, float coreat)
     {
         ERRORIF(
-            check(extension, coreat),
+            !check(extension, coreat),
             format("OpenGL extension required: %s", extension)
         );
     }

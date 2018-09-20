@@ -89,17 +89,16 @@ void quit(string msg = null)
 {
     import core.stdc.stdlib: exit;
 
-    //if(msg) trace(msg);
+    if(msg) Log << msg;
 
-    rungc();
+    //rungc();
     //debug terminate();    // Terminate runtime to call destructors...
     exit(0);                // ...and exit.
 }
 
-T quitif(T)(T value, string msg = null)
+void quitif(bool value, lazy string msg = null)
 {
-    if(!value) quit(msg);
-    return value;
+    if(value) quit(msg());
 }
 
 //-----------------------------------------------------------------------------
@@ -109,9 +108,13 @@ void ERROR(string msg, string file = __FILE__, int line = __LINE__, string func 
     quit(format("ERROR: %s@%s:%d: %s", func, file, line, msg));
 }
 
-T ERRORIF(T)(T value, string msg, string file = __FILE__, int line = __LINE__, string func = __FUNCTION__)
+//-----------------------------------------------------------------------------
+// Use lazy msg parameter, because it may containg calls to
+// functions only working if the error happened.
+//-----------------------------------------------------------------------------
+
+void ERRORIF(bool value, lazy string msg, string file = __FILE__, int line = __LINE__, string func = __FUNCTION__)
 {
-    if(!value) ERROR(msg, file, line, func);
-    return value;
+    if(value) ERROR(msg(), file, line, func);
 }
 
