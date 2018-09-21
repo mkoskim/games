@@ -145,6 +145,7 @@ env.Append(DFLAGS = [
         "-g",
         "-w",
         "-debug",
+        "-color=off",
         "-J$OUTDIR/",
         "-I$ENGINE/../",
         "-I$ENGINE/libs/DerelictASSIMP3/source/",
