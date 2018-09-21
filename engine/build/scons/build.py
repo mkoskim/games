@@ -175,7 +175,10 @@ def PhonyTarget(env, target, requires, action):
 ###############################################################################
 
 
-PhonyTarget(env, "logger", None, lambda target, source, env: os.system(env.subst("$ENGINE/build/logger.py &")))
+if env["PLATFORM"] == "Windows":
+    PhonyTarget(env, "logger", None, lambda target, source, env: os.system(env.subst("python $ENGINE/build/logger.py &")))
+else:
+    PhonyTarget(env, "logger", None, lambda target, source, env: os.system(env.subst("$ENGINE/build/logger.py &")))
 
 #------------------------------------------------------------------------------
 # If logger is only target, no need to add others (which cause dependency
@@ -184,12 +187,7 @@ PhonyTarget(env, "logger", None, lambda target, source, env: os.system(env.subst
 
 if " ".join(COMMAND_LINE_TARGETS) != "logger":
 
-    blob = env.BLOB(
-        "$OUTDIR/BLOB.zip",
-        findfiles(env, env["BLOBFILES"])
-    )
-
+    blob = env.BLOB("$OUTDIR/BLOB.zip", findfiles(env, env["BLOBFILES"]))
     exe = env.RDMD("$EXE", ["$ROOTDIR/$MAIN", blob])
-
     PhonyTarget(env, "run", exe, lambda target, source, env: os.system(env.subst("$EXE")))
 
