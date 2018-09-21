@@ -15,6 +15,8 @@ env["ENGINE"] = env.Dir("../../").abspath
 import platform
 
 env["PLATFORM"] = platform.system()
+#env.platform.linux   = platform.system() == "linux"
+#env.platform.windows = platform.system() == "Windows"
 
 #------------------------------------------------------------------------------
 #

@@ -12,6 +12,7 @@
 
 import sys
 
+print("Python version:",  ".".join(map(str, sys.version_info[:3])))
 if sys.version_info.major < 3:
     print("Need Python 3")
     exit(-1)

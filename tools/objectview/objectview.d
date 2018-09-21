@@ -19,6 +19,10 @@ void main()
     //vfs.fallback = true;
 
     //-------------------------------------------------------------------------
+    // Configure asset loader
+    //-------------------------------------------------------------------------
+
+    //-------------------------------------------------------------------------
     // Load asset
     //-------------------------------------------------------------------------
 
@@ -106,9 +110,9 @@ void main()
 
     with(gpu.State)
     {
+        init(GL_FRONT, GL_CCW);
         init(GL_FRONT_AND_BACK, GL_FILL);
         init(GL_CULL_FACE_MODE, GL_BACK);
-        init(GL_FRONT, GL_CCW);
         init(GL_BLEND, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         init(GL_BLEND, GL_TRUE);
         init(GL_DEPTH_FUNC, GL_LESS);
