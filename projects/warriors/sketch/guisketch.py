@@ -28,6 +28,39 @@ import tkinter.ttk as ttk
 
 ###############################################################################
 #
+# 
+#
+###############################################################################
+
+#------------------------------------------------------------------------------
+# Specializations: Just listing some common MMORPG classes as example
+#------------------------------------------------------------------------------
+
+specs = [
+    "Warrior", "Barbarian", "Knight",
+    "Hunter", "Archer",
+    "Druid", "Sorcerer", "Mage",
+    "Thief", "Nightblade", "Assassin",
+]
+
+#------------------------------------------------------------------------------
+# Races: Races limit the class options you have. Just some example listing.
+#------------------------------------------------------------------------------
+
+races = [
+    "Nord", "Human",
+    "Elf", "Dwarf",
+]
+
+#------------------------------------------------------------------------------
+# Can we have something similar to Oblivion Birthsign / Skyrim Standing Stone
+# for toons? Something similar to GW2 Norn spirit guides (Raven, Bear, Wolf,
+# Snow Leopard)?
+#------------------------------------------------------------------------------
+
+
+###############################################################################
+#
 ###############################################################################
 
 #------------------------------------------------------------------------------
@@ -81,8 +114,87 @@ class Account:
             Build(self.toons[0], "Warrior"),
             Build(self.toons[0], "Hunter"),
         ]
+        
+        self.current = self.builds[0]
 
 account = Account()
+
+###############################################################################
+#
+# GUI structure
+#
+###############################################################################
+
+#------------------------------------------------------------------------------
+#
+# How GW2 does it:
+#
+# - Main level menu: game menu (options), contacts + LFG, Hero, inventory,
+#   mail, shop, guild, WvW, PvP
+# - Hero: equipment, build, training (hero points), story journal, crafting,
+#   achievements, masteris
+# - Hero/equipment: equipment, wardrobe (transmutations), dyes, outfits,
+#   miniatures, finishers, mail carriers, glider skins, mounts, novelties
+#
+# How we do it:
+#
+# 1) We put all the builds in one menu. You can choose & edit the build, or
+#    create a new one.
+# 2) All cosmetic options go to toon menu. Here you can (1) choose the
+#    "storyline" (achievements) for this toon, and then (2) choose from
+#    available options the outlook, including dyes, gliders, mounts and such.
+# 3) Dungeons menu contains all the dungeons / game modes: offline solo PvE,
+#    online PvE, PvP and such.
+# 4) Account wide achievements? Should they put in the toons menu as one
+#    option?
+#
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+class BuildWindow(Frame):
+
+    #--------------------------------------------------------------------------
+
+    def __init__(self, master=None):
+        super(BuildWindow, self).__init__(master, pady = 5, padx = 5)
+
+        self.buildlist = Listbox(self)
+        self.buildlist.pack(anchor = NW, side = LEFT)
+
+        for build in account.builds:
+            self.buildlist.insert(END, "%s: %s" % (build.toon.name, build.spec))
+        self.buildlist.insert(END, "<New build>")
+
+    #--------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+class ToonWindow(Frame):
+
+    #--------------------------------------------------------------------------
+
+    def __init__(self, master=None):
+        super(ToonWindow, self).__init__(master, pady = 5, padx = 5)
+
+        self.toonlist = Listbox(self)
+        self.toonlist.pack(anchor = NW, side = LEFT)
+
+        for toon in account.toons:
+            self.toonlist.insert(END, toon.name)
+        self.toonlist.insert(END, "<New toon>")
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+class DungeonWindow(Frame):
+
+    #--------------------------------------------------------------------------
+
+    def __init__(self, master=None):
+        super(DungeonWindow, self).__init__(master, pady = 5, padx = 5)
 
 ###############################################################################
 #
@@ -90,9 +202,6 @@ account = Account()
 
 class MainWindow(Frame):
 
-    def quit(self, event):
-        self.master.destroy()
-        
     #--------------------------------------------------------------------------
 
     def __init__(self, master=None):
@@ -106,46 +215,38 @@ class MainWindow(Frame):
         self.pack(fill=BOTH, expand=1)
 
         #----------------------------------------------------------------------
-        # Main selections
+        # Show current build
         #----------------------------------------------------------------------
 
-        self.mainmenu = Listbox(self)
-        self.mainmenu.pack(anchor = NW, side = LEFT)
+        self.selected = Label(self)
+        self.selected.config(text = "%s: %s" % (
+            account.current.toon.name,
+            account.current.spec,
+        ))
+        self.selected.pack(anchor = W)
+
+        #----------------------------------------------------------------------
+        # Menu
+        #----------------------------------------------------------------------
+
+        self.mainbook = ttk.Notebook(self)
+        self.mainbook.add(ToonWindow(),    text = "Toons")
+        self.mainbook.add(BuildWindow(),   text = "Builds")
+        self.mainbook.add(DungeonWindow(), text = "Dungeons")
+        self.mainbook.pack(fill = BOTH, expand = 1)
         
-        for choice in ["Dungeons", "Builds", "Toons", "Account"]:
-            self.mainmenu.insert(END, choice)
-
-        #----------------------------------------------------------------------
-        # Player's builds
-        #----------------------------------------------------------------------
-
-        self.buildlist = Listbox(self)
-        self.buildlist.pack(anchor = NW, side = LEFT)
-
-        for build in account.builds:
-            self.buildlist.insert(END, "%s: %s" % (build.toon.name, build.spec))
-        self.buildlist.insert(END, "<New build>")
-
-        #----------------------------------------------------------------------
-        # Player's toons
-        #----------------------------------------------------------------------
-
-        self.toonlist = Listbox(self)
-        self.toonlist.pack(anchor = NW, side = LEFT)
-
-        for toon in account.toons:
-            self.toonlist.insert(END, toon.name)
-        self.toonlist.insert(END, "<New toon>")
-
     #--------------------------------------------------------------------------
 
+    def quit(self, event):
+        self.master.destroy()
+        
 
 ###############################################################################
 #
 ###############################################################################
 
 root = Tk()
-root.geometry("1200x800")
+root.geometry("900x600")
 app = MainWindow(root)
 root.mainloop()
 
