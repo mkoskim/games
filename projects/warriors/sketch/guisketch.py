@@ -96,12 +96,21 @@ class Toon:
     def __init__(self, name, race):
         self.name = name
         self.race = race
-
+        
+        self.trophies = {}      # Achievements of this toon
+        self.diary = []         # Chosen achievements for cosmetics, titles etc
+        
 #------------------------------------------------------------------------------
-# Account ties all together (builds, toons and such)
+# Account ties all together (builds, toons and such). Should builds be part
+# of toons, or separate entities? If toon is deleted, what happens to builds
+# they were representing? Can you switch toon in a build? I'd say, yes, builds
+# are separate entities. If you delete a toon, build stays, but it has no
+# toon and thus can't be activated (until you choose a new toon for it).
 #------------------------------------------------------------------------------
 
 class Account:
+
+    #--------------------------------------------------------------------------
 
     def __init__(self):
         self.toons = [
@@ -115,9 +124,40 @@ class Account:
             Build(self.toons[0], "Hunter"),
         ]
         
-        self.current = self.builds[0]
+        self.location = None            # Location is account wide
+        self.current = self.builds[0]   # Current build, if any
+        self.trophies = {}              # Account wide achievements
+        self.wallet = {}                # Wallet hold currencies (incl. "crafting mats")
+
+    #--------------------------------------------------------------------------
+    # Give player a reward: Rewards are recorded by class, both for account
+    # and for character. 
+    #--------------------------------------------------------------------------
+    
+    def reward(self, trophy):
+        # This is recorded to:
+        # (1) as account wide reward
+        # (2) as class wide reward
+        # (3) for toon (and for class)
+        pass
+
+    #--------------------------------------------------------------------------
 
 account = Account()
+
+#------------------------------------------------------------------------------
+#
+# Achievements unlock things (dungeons, skins, ...). They are hold
+# "separately", as achievements may need both account and character wide
+# trophies. Achievement data is hold by account & toons: this is just
+# giving the structure, what to complete to get what.
+#
+# General rule: Character achievements are easier to reach, account wide
+# parts are harder to reach. This way: (1) if player makes new character,
+# achievements are easier reached, (2) for new player, achievements are
+# achievements.
+#
+#------------------------------------------------------------------------------
 
 ###############################################################################
 #
@@ -151,6 +191,7 @@ account = Account()
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
+# Build window lists builds and their specs
 #------------------------------------------------------------------------------
 
 class BuildWindow(Frame):
@@ -161,11 +202,30 @@ class BuildWindow(Frame):
         super(BuildWindow, self).__init__(master, pady = 5, padx = 5)
 
         self.buildlist = Listbox(self)
+        self.buildlist.bind('<<ListboxSelect>>', self.onselect)
         self.buildlist.pack(anchor = NW, side = LEFT)
 
         for build in account.builds:
             self.buildlist.insert(END, "%s: %s" % (build.toon.name, build.spec))
         self.buildlist.insert(END, "<New build>")
+
+        self.toonname = Label(self, text = "Character:")
+        self.toonname.pack(anchor = NW)
+        
+        self.clsname = Label(self, text = "Class:")
+        self.clsname.pack(anchor = NW)
+
+    #--------------------------------------------------------------------------
+
+    def onselect(self, event):
+        index = int(event.widget.curselection()[0])
+        try:
+            build = account.builds[index]
+            self.toonname["text"] = "Character: " + build.toon.name
+            self.clsname["text"]  = "Class: " + build.spec
+        except IndexError:
+            self.toonname["text"] = "Character: <Choose>"
+            self.clsname["text"]  = "Class: <Choose>"
 
     #--------------------------------------------------------------------------
 
@@ -230,8 +290,8 @@ class MainWindow(Frame):
         #----------------------------------------------------------------------
 
         self.mainbook = ttk.Notebook(self)
-        self.mainbook.add(ToonWindow(),    text = "Toons")
         self.mainbook.add(BuildWindow(),   text = "Builds")
+        self.mainbook.add(ToonWindow(),    text = "Toons")
         self.mainbook.add(DungeonWindow(), text = "Dungeons")
         self.mainbook.pack(fill = BOTH, expand = 1)
         
