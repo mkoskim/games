@@ -64,11 +64,6 @@ races = [
 ###############################################################################
 
 #------------------------------------------------------------------------------
-# Achievements data structure. When account is rewarded, check if that
-# completes some achievements.
-#------------------------------------------------------------------------------
-
-#------------------------------------------------------------------------------
 #
 # Dungeon reward structure: what trophies are given when dungeon is
 # completed. Rewards probably need to be divided to two parts: (1) rewards
@@ -113,6 +108,11 @@ class Vendor:
 		pass
 
 #------------------------------------------------------------------------------
+# Achievements data structure. When account is rewarded, check if that
+# completes some achievements.
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 # Toon is a visual representation of player / build. Toons have "diary":
 # it is list of chosen achievements, which then decide the options the player
 # has for outlook. Achievements come in two level: account-wide, and toon-
@@ -140,6 +140,16 @@ class Toon:
 	#--------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
+# Specializations / specification is the spec of the build: class, traits,
+# etc etc
+#------------------------------------------------------------------------------
+
+class Spec:
+
+    def __init__(self, cls):
+        self.cls = cls
+
+#------------------------------------------------------------------------------
 # Build is what player plays. It has specializations (including class) and
 # visual representation (toon).
 #------------------------------------------------------------------------------
@@ -149,16 +159,6 @@ class Build:
     def __init__(self, toon, spec):
         self.spec = spec
         self.toon = toon
-
-#------------------------------------------------------------------------------
-# Specializations / specification is the spec of the build: class, traits,
-# etc etc
-#------------------------------------------------------------------------------
-
-class Spec:
-
-    def __init__(self, cls):
-        self.cls = cls
 
 #------------------------------------------------------------------------------
 # Account ties all together (builds, toons and such)
@@ -187,8 +187,6 @@ class Account:
         
         self.location = None            # Location is account wide
         self.current = self.builds[0]   # Current build, if any
-        self.trophies = {}              # Account wide achievements
-        self.wallet = {}                # Wallet hold currencies (incl. "crafting mats")
 
         #----------------------------------------------------------------------
 		
@@ -274,6 +272,7 @@ class BuildWindow(Frame):
     #--------------------------------------------------------------------------
 
     def onselect(self, event):
+        print(event.widget.curselection())
         index = int(event.widget.curselection()[0])
         try:
             build = account.builds[index]
@@ -362,7 +361,7 @@ class MainWindow(Frame):
         self.mainbook.add(BuildWindow(),   text = "Builds")
         self.mainbook.add(ToonWindow(),    text = "Toons")
         self.mainbook.add(DungeonWindow(), text = "Dungeons")
-        self.mainbook.add(VendorWindow(), text = "Vendors")
+        self.mainbook.add(VendorWindow(),  text = "Vendors")
         self.mainbook.pack(fill = BOTH, expand = 1)
         
     #--------------------------------------------------------------------------
