@@ -64,6 +64,82 @@ races = [
 ###############################################################################
 
 #------------------------------------------------------------------------------
+# Achievements data structure. When account is rewarded, check if that
+# completes some achievements.
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+#
+# Dungeon reward structure: what trophies are given when dungeon is
+# completed. Rewards probably need to be divided to two parts: (1) rewards
+# tracked per class (for account and toon), and (2) generic rewards (like
+# gold coins, vendor currencies) which are tracked by account only.
+#
+# Let try this way: (1) rewards are account-wide items, (2) trophies are
+# class specific items for account & toon. Account tracks total number of
+# trophies received.
+#
+# TODO: How to implement mentor chest? This is given to other accounts, if
+# someone in the group gets the first achievement.
+# TODO: How to implement challenge quests? Challenges are optional objectives
+# for dungeons.
+#
+#------------------------------------------------------------------------------
+
+class Dungeon:
+
+	def __init__(self, name, trophies, rewards):
+		self.name = name
+		self.trophies = trophies
+		self.rewards  = rewards
+
+	def completed(self, account):
+		account.reward(self.trophies, self.rewards)
+
+dungeons = [
+	Dungeon("Dungeon A T1", ["Dungeon A T1"], [ "T1 chest" ]),
+	Dungeon("Dungeon A T2", ["Dungeon A T2"], [ "T1 chest", "T2 chest" ]),
+	Dungeon("Dungeon A T3", ["Dungeon A T3"], [ "T1 chest", "T2 chest", "T3 chest" ]),
+]
+
+#------------------------------------------------------------------------------
+# Vendors are entities, which translate items to another. These items are
+# trophies in account / toon wallet.
+#------------------------------------------------------------------------------
+
+class Vendor:
+
+	def __init__(self):
+		pass
+
+#------------------------------------------------------------------------------
+# Toon is a visual representation of player / build. Toons have "diary":
+# it is list of chosen achievements, which then decide the options the player
+# has for outlook. Achievements come in two level: account-wide, and toon-
+# specific.
+#------------------------------------------------------------------------------
+
+class Toon:
+
+    #--------------------------------------------------------------------------
+
+	def __init__(self, name, race):
+		self.name = name
+		self.race = race
+		
+		self.trophies = { }		# Trophies collected by this toon (per class)
+		self.diary = [ ]		# Chosen achievements (per story block)
+
+    #--------------------------------------------------------------------------
+
+	def reward(self, cls, trophies):
+		print("%s @ %s: %s" % (self.name, cls, trophies))
+		# self.trophies[cls][trophy] += 1
+		# Check if some achivement was completed
+		
+	#--------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 # Build is what player plays. It has specializations (including class) and
 # visual representation (toon).
 #------------------------------------------------------------------------------
@@ -85,27 +161,7 @@ class Spec:
         self.cls = cls
 
 #------------------------------------------------------------------------------
-# Toon is a visual representation of player / build. Toons have "diary":
-# it is list of chosen achievements, which then decide the options the player
-# has for outlook. Achievements come in two level: account-wide, and toon-
-# specific.
-#------------------------------------------------------------------------------
-
-class Toon:
-
-    def __init__(self, name, race):
-        self.name = name
-        self.race = race
-        
-        self.trophies = {}      # Achievements of this toon
-        self.diary = []         # Chosen achievements for cosmetics, titles etc
-        
-#------------------------------------------------------------------------------
-# Account ties all together (builds, toons and such). Should builds be part
-# of toons, or separate entities? If toon is deleted, what happens to builds
-# they were representing? Can you switch toon in a build? I'd say, yes, builds
-# are separate entities. If you delete a toon, build stays, but it has no
-# toon and thus can't be activated (until you choose a new toon for it).
+# Account ties all together (builds, toons and such)
 #------------------------------------------------------------------------------
 
 class Account:
@@ -113,11 +169,16 @@ class Account:
     #--------------------------------------------------------------------------
 
     def __init__(self):
+
+        #----------------------------------------------------------------------
+
         self.toons = [
             Toon("Toon A", "Nord"),
             Toon("Toon B", "Human"),
             Toon("Toon C", "Human"),
         ]
+
+        #----------------------------------------------------------------------
 
         self.builds = [
             Build(self.toons[0], "Warrior"),
@@ -129,35 +190,30 @@ class Account:
         self.trophies = {}              # Account wide achievements
         self.wallet = {}                # Wallet hold currencies (incl. "crafting mats")
 
+        #----------------------------------------------------------------------
+		
+        self.wallet   = { }		# Account wide items
+        self.trophies = { }		# Account wide trophies (by class)
+		
     #--------------------------------------------------------------------------
-    # Give player a reward: Rewards are recorded by class, both for account
-    # and for character. 
+	# Rewarding player: update account & toon trophy tables
     #--------------------------------------------------------------------------
-    
-    def reward(self, trophy):
-        # This is recorded to:
-        # (1) as account wide reward
-        # (2) as class wide reward
-        # (3) for toon (and for class)
-        pass
 
-    #--------------------------------------------------------------------------
+    def reward(self, trophies, rewards):
+    	# Update account wide trophies
+    	# Update character specific trophies
+		# Trophies are permanent: they can't be traded, lost or destroyed.
+        print("Trophy: %s" % (trophies))
+        self.current.toon.reward(self.current.spec, trophies)
+
+		# Rewards are account wide "currencies"
+		# Account wide currencies can be exchanged to other items, and for
+		# (certain) trophies.
+        print("Reward: %s" % (rewards))
 
 account = Account()
 
-#------------------------------------------------------------------------------
-#
-# Achievements unlock things (dungeons, skins, ...). They are hold
-# "separately", as achievements may need both account and character wide
-# trophies. Achievement data is hold by account & toons: this is just
-# giving the structure, what to complete to get what.
-#
-# General rule: Character achievements are easier to reach, account wide
-# parts are harder to reach. This way: (1) if player makes new character,
-# achievements are easier reached, (2) for new player, achievements are
-# achievements.
-#
-#------------------------------------------------------------------------------
+dungeons[0].completed(account)
 
 ###############################################################################
 #
@@ -191,7 +247,7 @@ account = Account()
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# Build window lists builds and their specs
+# Build Window to edit builds: choose toon, choose class, choose traits.
 #------------------------------------------------------------------------------
 
 class BuildWindow(Frame):
@@ -230,6 +286,7 @@ class BuildWindow(Frame):
     #--------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
+# Toon Window: Edit toons, create diaries, choose outfit.
 #------------------------------------------------------------------------------
 
 class ToonWindow(Frame):
@@ -247,6 +304,7 @@ class ToonWindow(Frame):
         self.toonlist.insert(END, "<New toon>")
 
 #------------------------------------------------------------------------------
+# Dungeon Window to simulate completions.
 #------------------------------------------------------------------------------
 
 class DungeonWindow(Frame):
@@ -255,6 +313,17 @@ class DungeonWindow(Frame):
 
     def __init__(self, master=None):
         super(DungeonWindow, self).__init__(master, pady = 5, padx = 5)
+
+#------------------------------------------------------------------------------
+# Vendor Window to simulate vendors (exchanging items to other items/trophies).
+#------------------------------------------------------------------------------
+
+class VendorWindow(Frame):
+
+    #--------------------------------------------------------------------------
+
+    def __init__(self, master=None):
+        super(VendorWindow, self).__init__(master, pady = 5, padx = 5)
 
 ###############################################################################
 #
@@ -293,6 +362,7 @@ class MainWindow(Frame):
         self.mainbook.add(BuildWindow(),   text = "Builds")
         self.mainbook.add(ToonWindow(),    text = "Toons")
         self.mainbook.add(DungeonWindow(), text = "Dungeons")
+        self.mainbook.add(VendorWindow(), text = "Vendors")
         self.mainbook.pack(fill = BOTH, expand = 1)
         
     #--------------------------------------------------------------------------
