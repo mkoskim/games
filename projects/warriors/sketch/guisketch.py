@@ -12,17 +12,6 @@ if sys.version_info.major < 3:
     print("Need Python 3")
     exit(-1)
     
-#------------------------------------------------------------------------------
-# How it works?
-#
-# Build window: In build window, you can (1) select a character or create new
-# one, (2) select a class, and (3) tailor your build.
-#
-# Character Window: Choose achievements to enable apparel, choose apparel to
-# certain dungeon blocks.
-#
-#------------------------------------------------------------------------------
-
 from tkinter import *
 import tkinter.ttk as ttk
 
@@ -64,9 +53,99 @@ races = [
 ###############################################################################
 
 #------------------------------------------------------------------------------
+# Let's try to create an example case. Let's go with LoTR lore.
+#
+# Let's say that your character wants to be a Mirkwood soldier. Let's say
+# s/he is human, so that s/he does not have birth rights for Mirkwood basics.
+#
+# To be able to wear Mirkwood/Lothlorien hunter armor, what the character
+# should do? S/he should be respected enough by Mirkwood elves for this. S/he
+# should have gathered enough renown amongst the elves and their leaders
+# (Thranduil; Galadriel and Celeborn). This would be done by fighting against
+# Dol Guldur, and protecting the woods against all sorts of corruptions.
+#
+# You'd need to show your braveness and dedication for the community, and
+# you'd need to have some great victories in that process.
+#
+# OK, you have done it, you have earned the trust and respect. To get the armor,
+# you'd need someone to craft it for you, from raw materials. Basically, you'd
+# need those materials - either gathered or bought - as well as some reward for
+# the one crafting it for you.
+#
+# Something like this:
+#
+# T1: No badges from tutorials
+# T2: No badges from tutorials
+# T3: Soldier badge  <- Mirkwood T3 completion (complete certain dungeons at T1)
+# T4: Sergeant badge <- Mirkwood T4 completion
+#     Mentor badge   <- Mirkwood T4 mentor completion
+# T5: Something special from T5
+#
+# Badges are achievement completion trophies, not dungeon rewards.
+#
+# Soldier badge + rep + mats + gold -> Soldier armor
+# Sergeant badge + rep + mats + gold -> Sergeant armor
+# Sergeant armor + Mentor badge + rep & mats & gold -> Veteran armor
+#
+# There is a need for:
+#
+# (1) some sort of generic currency / currencies, lets call it gold: these can
+#     be acquired from any content, these tell the "generic" play time of the
+#     player.
+# (2) Cluster specific currencies: These are gathered from dungeon cluster.
+#
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 # Achievements data structure. When account is rewarded, check if that
 # completes some achievements.
 #------------------------------------------------------------------------------
+
+class Achievement:
+
+	def __init__(self, reward, requirements):
+		self.reward = reward
+		self.requirements = requirements
+
+	def check(self):
+		# Check if this is already completed (reward in account)
+		# Check, if account trophies meets the requirements.
+		pass
+
+achievements = [
+	# "Mirkwood" achievements (sketching)
+	Achievement("Mirkwood Recruit", None),		# Join the elven army to protect region
+	Achievement("Mirkwood Soldier", None),		# Complete T3 dungeons
+	Achievement("Mirkwood Sergeant", None),		# Complete T4 dungeons (autocomplete T3)
+	Achievement("Mirkwood Mentor", None),		# Complete T4 mentor (autocomplete T4)
+]
+
+#------------------------------------------------------------------------------
+# Vendors are entities, which translate items to another. These items are
+# trophies in account / toon wallet. BTW, maybe not all armors are available
+# to all races - races too different can't wear those.
+#------------------------------------------------------------------------------
+
+class Vendor:
+
+	def __init__(self, item, price):
+		self.item  = item
+		self.price = price
+
+vendors = [
+	# "Mirkwood" cosmetics (sketching)
+	Vendor("Mirkwood Recruit Armor",  [ "Mirkwood Recruit",  "gold + mats" ]),
+	Vendor("Mirkwood Soldier Armor",  [ "Mirkwood Soldier",  "gold + mats", "rep" ]),
+	Vendor("Mirkwood Sergeant Armor", [ "Mirkwood Sergeant", "gold + mats", "rep" ]),
+	Vendor("Mirkwood Veteran Armor",  [ "Mirkwood Mentor",   "gold + mats", "rep" ]),
+
+	# "Shiverpeaks" cosmetics (sketching)
+	Vendor("Norn Raven Armor", None),
+	Vendor("Norn Lynx Armor", None),
+	Vendor("Norn Wolf Armor", None),
+	Vendor("Norn Bear Armor", None),
+	Vendor("Ancient Norn Armor", None),
+]
 
 #------------------------------------------------------------------------------
 #
@@ -80,7 +159,10 @@ races = [
 # trophies received.
 #
 # TODO: How to implement mentor chest? This is given to other accounts, if
-# someone in the group gets the first achievement.
+# someone in the group gets the first achievement. In addition to account &
+# char specific trophies and achievement checking, there should be also a
+# group wide achievements.
+#
 # TODO: How to implement challenge quests? Challenges are optional objectives
 # for dungeons.
 #
@@ -101,16 +183,6 @@ dungeons = [
 	Dungeon("Dungeon A T2", ["Dungeon A T2"], [ "T1 chest", "T2 chest" ]),
 	Dungeon("Dungeon A T3", ["Dungeon A T3"], [ "T1 chest", "T2 chest", "T3 chest" ]),
 ]
-
-#------------------------------------------------------------------------------
-# Vendors are entities, which translate items to another. These items are
-# trophies in account / toon wallet.
-#------------------------------------------------------------------------------
-
-class Vendor:
-
-	def __init__(self):
-		pass
 
 #------------------------------------------------------------------------------
 # Toon is a visual representation of player / build. Toons have "diary":
@@ -234,8 +306,8 @@ dungeons[0].completed(account)
 #
 # How we do it:
 #
-# 1) We put all the builds in one menu. You can choose & edit the build, or
-#    create a new one.
+# 1) We put all the builds (for all characters) in one menu. You can
+#    choose & edit the build, or create a new one.
 # 2) All cosmetic options go to toon menu. Here you can (1) choose the
 #    "storyline" (achievements) for this toon, and then (2) choose from
 #    available options the outlook, including dyes, gliders, mounts and such.
