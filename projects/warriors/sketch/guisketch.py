@@ -94,11 +94,45 @@ races = [
 #     player.
 # (2) Cluster specific currencies: These are gathered from dungeon cluster.
 #
+# TODO: How to implement mentor chest? This is given to other accounts, if
+# someone in the group gets the first achievement. In addition to account &
+# char specific trophies and achievement checking, there should be also a
+# group wide achievements.
+#
+# TODO: How to implement challenge quests? Challenges are optional objectives
+# for dungeons.
+#
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# Achievements data structure. When account is rewarded, check if that
-# completes some achievements.
+#
+# Dungeon gives rewards to account.
+#
+# Let try this way: (1) rewards are account-wide items, (2) trophies are
+# class specific items for account & toon. Account tracks total number of
+# trophies received.
+#
+#------------------------------------------------------------------------------
+
+class Dungeon:
+
+	def __init__(self, name, trophies, rewards):
+		self.name = name
+		self.trophies = trophies
+		self.rewards  = rewards
+
+	def completed(self, account):
+		account.reward(self.trophies, self.rewards)
+
+dungeons = [
+	Dungeon("Mirkwood/A/T1", ["Mirkwood/A/T1"], None),
+	Dungeon("Mirkwood/A/T2", ["Mirkwood/A/T2"], None),
+	Dungeon("Mirkwood/A/T3", ["Mirkwood/A/T3"], None),
+]
+
+#------------------------------------------------------------------------------
+# Achievements data structure. When account is rewarded from dungeon (or
+# vendor, from exchanging items!), check if that completes some achievements.
 #------------------------------------------------------------------------------
 
 class Achievement:
@@ -114,10 +148,10 @@ class Achievement:
 
 achievements = [
 	# "Mirkwood" achievements (sketching)
-	Achievement("Mirkwood Recruit", None),		# Join the elven army to protect region
-	Achievement("Mirkwood Soldier", None),		# Complete T3 dungeons
-	Achievement("Mirkwood Sergeant", None),		# Complete T4 dungeons (autocomplete T3)
-	Achievement("Mirkwood Mentor", None),		# Complete T4 mentor (autocomplete T4)
+	Achievement("Mirkwood/Recruit", None),		# Join the elven army to protect region
+	Achievement("Mirkwood/Soldier", None),		# Complete T3 dungeons
+	Achievement("Mirkwood/Sergeant", None),		# Complete T4 dungeons (autocomplete T3)
+	Achievement("Mirkwood/Mentor", None),		# Complete T4 mentor (autocomplete T4)
 ]
 
 #------------------------------------------------------------------------------
@@ -134,54 +168,10 @@ class Vendor:
 
 vendors = [
 	# "Mirkwood" cosmetics (sketching)
-	Vendor("Mirkwood Recruit Armor",  [ "Mirkwood Recruit",  "gold + mats" ]),
-	Vendor("Mirkwood Soldier Armor",  [ "Mirkwood Soldier",  "gold + mats", "rep" ]),
-	Vendor("Mirkwood Sergeant Armor", [ "Mirkwood Sergeant", "gold + mats", "rep" ]),
-	Vendor("Mirkwood Veteran Armor",  [ "Mirkwood Mentor",   "gold + mats", "rep" ]),
-
-	# "Shiverpeaks" cosmetics (sketching)
-	Vendor("Norn Raven Armor", None),
-	Vendor("Norn Lynx Armor", None),
-	Vendor("Norn Wolf Armor", None),
-	Vendor("Norn Bear Armor", None),
-	Vendor("Ancient Norn Armor", None),
-]
-
-#------------------------------------------------------------------------------
-#
-# Dungeon reward structure: what trophies are given when dungeon is
-# completed. Rewards probably need to be divided to two parts: (1) rewards
-# tracked per class (for account and toon), and (2) generic rewards (like
-# gold coins, vendor currencies) which are tracked by account only.
-#
-# Let try this way: (1) rewards are account-wide items, (2) trophies are
-# class specific items for account & toon. Account tracks total number of
-# trophies received.
-#
-# TODO: How to implement mentor chest? This is given to other accounts, if
-# someone in the group gets the first achievement. In addition to account &
-# char specific trophies and achievement checking, there should be also a
-# group wide achievements.
-#
-# TODO: How to implement challenge quests? Challenges are optional objectives
-# for dungeons.
-#
-#------------------------------------------------------------------------------
-
-class Dungeon:
-
-	def __init__(self, name, trophies, rewards):
-		self.name = name
-		self.trophies = trophies
-		self.rewards  = rewards
-
-	def completed(self, account):
-		account.reward(self.trophies, self.rewards)
-
-dungeons = [
-	Dungeon("Dungeon A T1", ["Dungeon A T1"], [ "T1 chest" ]),
-	Dungeon("Dungeon A T2", ["Dungeon A T2"], [ "T1 chest", "T2 chest" ]),
-	Dungeon("Dungeon A T3", ["Dungeon A T3"], [ "T1 chest", "T2 chest", "T3 chest" ]),
+	Vendor("Mirkwood/Recruit/Armor",  [ "Mirkwood/Recruit",  "gold + mats" ]),
+	Vendor("Mirkwood/Soldier/Armor",  [ "Mirkwood/Soldier",  "gold + mats", "rep" ]),
+	Vendor("Mirkwood/Sergeant/Armor", [ "Mirkwood/Sergeant", "gold + mats", "rep" ]),
+	Vendor("Mirkwood/Veteran/Armor",  [ "Mirkwood/Mentor",   "gold + mats", "rep" ]),
 ]
 
 #------------------------------------------------------------------------------
@@ -283,7 +273,13 @@ class Account:
 
 account = Account()
 
+#------------------------------------------------------------------------------
+# Test runs
+#------------------------------------------------------------------------------
+
 dungeons[0].completed(account)
+
+exit(0)
 
 ###############################################################################
 #
