@@ -102,11 +102,17 @@ races = [
 # TODO: How to implement challenge quests? Challenges are optional objectives
 # for dungeons.
 #
+# TODO: Loot lists. I am not a big fan for random rewards, but they might
+# have their place. For example, distributing material gains (lots of
+# different materials, not that many loot slots to use), and giving some
+# randomness for more rare gains (e.g. we could have achievement giving
+# reward at 10 completions, or the same item as loot with 10% chance).
+#
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 #
-# Dungeon gives rewards to account.
+# Dungeons give rewards to account.
 #
 # Let try this way: (1) rewards are account-wide items, (2) trophies are
 # class specific items for account & toon. Account tracks total number of
