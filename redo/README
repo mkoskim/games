@@ -6,6 +6,11 @@
 Some smaller games that are (incomplete) clones of some existing one.
 Here are few that I have been thinking:
 
+pacman/
+
+    The first project is simple pacman. It demonstrates some
+    fundamentals of maze based games, and games in general.
+
 shmup/
 
 	Porting my Java applet shoot'em up.
