@@ -8,13 +8,12 @@ Simple game projects in this directory serve as test bench for engine
 creation, and step-by-step approach for implementing some more ambitious
 game projects.
 
+    empty/
+    
+        Empty project just to test out compilation and linking.
+
 One line of development is to create 3D maze games. The planned road map
 is:
-
-    pacman/
-    
-        The first project is simple pacman. It demonstrates some
-        fundamentals of maze based games, and games in general.
 
     wolfish/
     
