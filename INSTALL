@@ -1,7 +1,7 @@
 This project has been made with:
 
     - Linux Mint 64-bit (Current: 18.3)
-    - DMD compiler (Current: 2.082.0)
+    - DMD compiler (Current: 2.085.1)
 
 You may encounter compatibility problems on other platforms and compilers.
 See notes at bottom.
@@ -76,7 +76,7 @@ To successfully compile and run projects, you will need:
 
         http://dlang.org/download.html
 
-   Current version in use is 2.082.0
+   Current version in use is 2.085.1
 
 -------------------------------------------------------------------------------
 
