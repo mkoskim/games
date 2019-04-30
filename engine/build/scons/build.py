@@ -174,7 +174,6 @@ def PhonyTarget(env, target, requires, action):
 #
 ###############################################################################
 
-
 if env["PLATFORM"] == "Windows":
     PhonyTarget(env, "logger", None, lambda target, source, env: os.system(env.subst("python $ENGINE/build/logger.py &")))
 else:
