@@ -18,6 +18,17 @@ For more info: [INSTALL](https://github.com/mkoskim/games/blob/master/INSTALL)
 
 ---
 
+**Building:** To get debugging logs from running executables, I wrote a script (engine/build/logger.py) which can be used to view and filter them. Consult also engine/utils/logger.d to see, how log lines are sent from executable to the tool. As I want this tool to be persistent, it can also be used to compile & run projects. The easiest way to use logger.py for any project is to use scons to launch it:
+
+```
+games$ cd tools/objectview
+objectview$ scons logger
+```
+
+Now you can press "Build & Run" button to build and run the project, and catch the log lines to the tool. The tool itself is of course anything but complete, but it will already help you by separating so called "log lines" (sort of oneshot info from execution) from "watch values" (sort of frequently updated values for certain tag) to separate tabs.
+
+---
+
 **NEW:** I have made some preliminary 32-bit **Windows** build. Some information can be found here: [WINDOWS.txt](https://github.com/mkoskim/games/blob/master/WINDOWS.txt)
 
 At the moment, I can get few running versions of projects when using
