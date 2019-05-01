@@ -63,30 +63,14 @@ debug abstract class Track
                 );
             }
             
-            auto heapused()
-            {
-                return core.memory.GC.stats().usedSize;
-            }
-            
-            auto heapfree()
-            {
-                return core.memory.GC.stats().freeSize;
-            }
-
-            auto heapsize()
+            void report(string group)
             {
                 auto stats = core.memory.GC.stats();
-                return stats.usedSize + stats.freeSize;
-            }
-
-            void report()
-            {
-                auto stats = core.memory.GC.stats();
-                Log << format("GC heap: %8d / %8d (%8d)",
-                    stats.usedSize,
-                    stats.freeSize,
-                    stats.usedSize + stats.freeSize
-                );
+                Watch(group)
+                    .update("Size", format("%.1f kB", (stats.usedSize + stats.freeSize) / 1024.0))
+                    .update("Used", format("%.1f kB", stats.usedSize / 1024.0))
+                    .update("Free", format("%.1f kB", stats.freeSize / 1024.0))
+                ;
             }
         }
     }

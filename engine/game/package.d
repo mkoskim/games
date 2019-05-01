@@ -160,14 +160,12 @@ class Profile
             rendertime = timers.render.average;
 
         Watch(group)
-            .update("FPS", format("%5.1f", timers.fps))
-            .update("Frame", format("%5.1f ms", 1000 * frametime))
-            .update("Busy", format("%5.1f %%", 100.0 * busytime/frametime))
-            .update("Render", format("%5.1f %%", 100.0*rendertime/frametime))
-            .update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))
-            //.update("CPU", format("%5.1f %%", 100.0*(busytime-rendertime)/frametime))
-            //.update("GPU", format("%5.1f %%", 100.0*(rendertime)/frametime))
-            //.update("Idle", format("%5.1f %%", 100.0*(frametime-busytime)/frametime))
+            .update("FPS", format("%.1f", timers.fps))
+            .update("Frame", format("%.1f ms", 1000 * frametime))
+            .update("Busy", format("%.1f %%", 100.0 * busytime/frametime))
+            .update("Render", format("%.1f %%", 100.0*rendertime/frametime))
+            .update("Idle", format("%.1f %%", 100.0*(frametime-busytime)/frametime))
+            .update("GL calls", format("%.1f", timers.calls.average))
         ;
     }
 }

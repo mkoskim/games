@@ -262,10 +262,7 @@ void main()
     {
         game.Profile.log("Perf");
         engine.Track.report("Track");
-
-        Watch("Mem").update("GC heap", to!string(engine.Track.GC.heapsize()));
-        Watch("Mem").update("- Used", to!string(engine.Track.GC.heapused()));
-        Watch("Mem").update("- Free", to!string(engine.Track.GC.heapfree()));
+        engine.Track.GC.report("Mem");
 
         game.frametimer.add(0.5, &report);
     }
