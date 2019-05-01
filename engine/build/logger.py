@@ -162,6 +162,10 @@ from   tkinter import *
 import tkinter.ttk as ttk
 from tkinter.scrolledtext import ScrolledText
 
+#------------------------------------------------------------------------------
+# Text box for log lines
+#------------------------------------------------------------------------------
+
 class LogView(ScrolledText):
 
     def __init__(self, master, **kw):
@@ -179,7 +183,16 @@ class LogView(ScrolledText):
 
         self.config(state = DISABLED)
         if atend: self.yview(END)
-            
+
+    def clear(self):
+        self.config(state = NORMAL)
+        self.delete("1.0", END)
+        self.config(state = DISABLED)
+                
+#------------------------------------------------------------------------------
+# Listbox for updated values
+#------------------------------------------------------------------------------
+
 class WatchView(ttk.Treeview):
 
     def __init__(self, master, **kw):
@@ -189,20 +202,28 @@ class WatchView(ttk.Treeview):
         
         self.heading("#0", text="Tag")
         self.heading("#1", text="Value")
-        self.column("#0", stretch=NO, anchor="w", width=100)
-        self.column("#1", stretch=NO, anchor="e", width=100)
-        self.column("#2", stretch=YES)
+        self.column("#0", anchor="w", stretch=YES)
+        self.column("#1", anchor="e", stretch=NO, width=100)
         
     def add(self, tab, tag, entry, color):
+        gid = tab
+        iid = tab + ":" + tag
+        
         try:
-            self.item(tag, values=('"%s"' % entry))
+            self.item(iid, values=('"%s"' % entry))
         except TclError:
+            if not self.exists(gid):
+                self.insert('', END, iid = gid, text = tab, open = True)
+
             self.insert(
-                '', END,
-                iid=tag,
+                gid, END,
+                iid=iid,
                 text=tag,
                 values=(entry)
             )
+
+    def clear(self):
+        self.delete(*self.get_children())
 
 class MainWindow(Frame):
 
@@ -223,13 +244,13 @@ class MainWindow(Frame):
         paned.pack(fill = BOTH, expand = 1)
         
         self.logbox = LogView(paned, state = DISABLED, wrap=WORD)
-        paned.add(self.logbox) #self.logbox.pack(fill=BOTH, expand=1)
+        paned.add(self.logbox)
         
         self.logbox.tag_config("stdout")
         self.logbox.tag_config("logger", foreground="blue")
         
         self.watchbox = WatchView(paned)
-        paned.add(self.watchbox) #self.watchbox.pack(fill=BOTH, expand=1)
+        paned.add(self.watchbox)
         
         self.pack(fill=BOTH, expand=1)
 
@@ -274,13 +295,11 @@ class MainWindow(Frame):
     #--------------------------------------------------------------------------
 
     def clear(self):
-        self.logbox.config(state = NORMAL)
-        self.logbox.delete("1.0", END)
-        self.logbox.config(state = DISABLED)
+        self.logbox.clear()
+        self.watchbox.clear()
 
     def build(self):
         self.clear()
-        #self.worker = Worker("make debug DMDOPTS=-color=off", self.queue)
         self.worker = Worker("scons", self.queue)
         self.worker.start()
 
@@ -291,12 +310,10 @@ class MainWindow(Frame):
 
     def buildnrun(self):
         self.clear()
-        #self.worker = Worker("make debug run DMDOPTS=-color=off", self.queue)
         self.worker = Worker("scons run", self.queue)
         self.worker.start()
 
     def clean(self):
-        #self.worker = Worker("make debug run DMDOPTS=-color=off", self.queue)
         self.worker = Worker("scons -c", self.queue)
         self.worker.start()
 

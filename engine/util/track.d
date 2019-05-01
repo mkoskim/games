@@ -55,8 +55,12 @@ debug abstract class Track
         {
             void run()
             {
+                auto before = core.memory.GC.stats();
                 engine.util.rungc();
-                debug report("Garbage collected:");
+                auto after = core.memory.GC.stats();
+                Log << format("GC: freed %d kB",
+                    (before.usedSize - after.usedSize) / 1024
+                );
             }
             
             auto heapused()
@@ -73,6 +77,16 @@ debug abstract class Track
             {
                 auto stats = core.memory.GC.stats();
                 return stats.usedSize + stats.freeSize;
+            }
+
+            void report()
+            {
+                auto stats = core.memory.GC.stats();
+                Log << format("GC heap: %8d / %8d (%8d)",
+                    stats.usedSize,
+                    stats.freeSize,
+                    stats.usedSize + stats.freeSize
+                );
             }
         }
     }

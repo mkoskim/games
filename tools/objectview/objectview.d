@@ -192,6 +192,13 @@ void main()
         //nm_loader("local/stockset/Humanoid/Female/NormalMap.png")
     ;
 
+    //-------------------------------------------------------------------------
+    // After loading is done, it might be a good idea to run GC, because
+    // loading can cause massive amounts of temporary objects.
+    //-------------------------------------------------------------------------
+
+    engine.Track.GC.run();
+
     //*************************************************************************
     // Draw settings
     //*************************************************************************
