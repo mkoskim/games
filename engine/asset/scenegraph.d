@@ -15,7 +15,22 @@ import engine.asset.util;
 import derelict.assimp3.assimp;
 
 import engine.asset.types.transform;
+import engine.asset.plop;
 import std.path;
+
+//*****************************************************************************
+//
+// Design:
+//
+// Current implementation needs too many temporary buffers. We should be
+// able to translate loaded ASSIMP models directly to the desired VBOs. Thus,
+// all the post-load processing should be implemented as translation matrix,
+// which is applied when VBOs are created:
+//
+// aiMesh -> analysis & translation matrix -> VBOs
+//
+//*****************************************************************************
+
 
 //*****************************************************************************
 //
@@ -116,22 +131,18 @@ class SceneGraph
 
         void WHD(string[3] game, string[3] object)
         {
-            vec3 row(string spec)
-            {
-                final switch(spec)
-                {
-                    case "X":  return vec3( 1,  0,  0);
-                    case "Y":  return vec3( 0,  1,  0);
-                    case "Z":  return vec3( 0,  0,  1);
-                    case "-X": return vec3(-1,  0,  0);
-                    case "-Y": return vec3( 0, -1,  0);
-                    case "-Z": return vec3( 0,  0, -1);
-                }
-            }
-
+            immutable vec3[string] row = [
+                "X":  vec3( 1,  0,  0),
+                "Y":  vec3( 0,  1,  0),
+                "Z":  vec3( 0,  0,  1),
+                "-X": vec3(-1,  0,  0),
+                "-Y": vec3( 0, -1,  0),
+                "-Z": vec3( 0,  0, -1),
+            ];
+            
             bool handness(string[3] specs)
             {
-                return row(specs[0]).cross(row(specs[1])).dot(row(specs[2])) > 0;
+                return row[specs[0]].cross(row[specs[1]]).dot(row[specs[2]]) > 0;
             }
 
             vec3 x, y, z;
@@ -144,12 +155,12 @@ class SceneGraph
 
                 final switch(gaxis)
                 {
-                    case "X": x = row(oaxis); break;
-                    case "Y": y = row(oaxis); break;
-                    case "Z": z = row(oaxis); break;
-                    case "-X": x = -row(oaxis); break;
-                    case "-Y": y = -row(oaxis); break;
-                    case "-Z": z = -row(oaxis); break;
+                    case "X": x = row[oaxis]; break;
+                    case "Y": y = row[oaxis]; break;
+                    case "Z": z = row[oaxis]; break;
+                    case "-X": x = -row[oaxis]; break;
+                    case "-Y": y = -row[oaxis]; break;
+                    case "-Z": z = -row[oaxis]; break;
                 }
             }
 
