@@ -12,8 +12,8 @@
 
 import sys
 
-print("Python version:",  ".".join(map(str, sys.version_info[:3])))
 if sys.version_info.major < 3:
+    print("Python version:",  ".".join(map(str, sys.version_info[:3])))
     print("Need Python 3")
     exit(-1)
 
@@ -23,7 +23,7 @@ if sys.version_info.major < 3:
 
 import platform
 
-print("Platform:", platform.system())
+#print("Platform:", platform.system())
 
 platform.windows = (platform.system() == "Windows")
 platform.linux   = (platform.system() == "linux")
@@ -348,3 +348,4 @@ root.geometry(settings["MainWindow"]["geometry"])
 main = MainWindow(root)
 root.protocol("WM_DELETE_WINDOW", main.on_close)
 root.mainloop()
+
