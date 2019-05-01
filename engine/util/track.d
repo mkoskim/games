@@ -8,6 +8,7 @@ module engine.util.track;
 
 import std.stdio;
 import engine.util;
+import core.memory;
 
 debug abstract class Track
 {
@@ -38,12 +39,6 @@ debug abstract class Track
             }*/
         }
 
-        void rungc()
-        {
-            engine.util.rungc();
-            debug report("Garbage collected:");
-        }
-
         void report(string group)
         {
             foreach(key, value; count)
@@ -51,6 +46,34 @@ debug abstract class Track
                 Watch(group).update(key, to!string(value));
             }
             Watch(group).update("Total", to!string(total));
+        }
+    }
+
+    static struct GC
+    {
+        static
+        {
+            void run()
+            {
+                engine.util.rungc();
+                debug report("Garbage collected:");
+            }
+            
+            auto heapused()
+            {
+                return core.memory.GC.stats().usedSize;
+            }
+            
+            auto heapfree()
+            {
+                return core.memory.GC.stats().freeSize;
+            }
+
+            auto heapsize()
+            {
+                auto stats = core.memory.GC.stats();
+                return stats.usedSize + stats.freeSize;
+            }
         }
     }
 }
