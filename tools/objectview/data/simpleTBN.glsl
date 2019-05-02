@@ -12,21 +12,9 @@
 attribute vec3 vert_pos;
 attribute vec2 vert_uv;
 attribute vec3 vert_T;
+attribute vec3 vert_B;
 attribute vec3 vert_N;
 #endif
-
-struct FragInput
-{
-    vec2 uv;
-    mat3 TBN;
-
-    vec3 light_dir;    // Light relative to fragment
-    vec3 view_dir;     // Viewer relative to fragment
-};
-
-//-----------------------------------------------------------------------------
-// Vertex data format
-//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Frame wide settings
@@ -58,7 +46,16 @@ struct LIGHT
 
 uniform LIGHT light;
 
-//-----------------------------------------------------------------------------
+//*****************************************************************************
+//*****************************************************************************
+
+struct FragInput
+{
+    vec2 uv;
+
+    vec3 light_dir;    // Light relative to fragment
+    vec3 view_dir;     // Viewer relative to fragment
+};
 
 //*****************************************************************************
 //
@@ -68,12 +65,12 @@ uniform LIGHT light;
 
 out FragInput frag;
 
-mat3 compute_TBN(mat4 mCamSpace, vec3 normal, vec3 tangent)
+mat3 compute_TBN(mat4 mCamSpace, vec3 tangent, vec3 bitangent, vec3 normal)
 {
     mat3 m = mat3(mCamSpace);
     vec3 n = normal;
     vec3 t = tangent;
-    vec3 b = cross(normal, tangent);
+    vec3 b = bitangent; //cross(normal, tangent);
 
     return m * mat3(t, b, n);
 }
@@ -82,13 +79,14 @@ void main()
 {
     mat4 mCamSpace = mView * mModel;
 
-    vec3 frag_pos = (mCamSpace * vec4(vert_pos, 1)).xyz;
+    vec3 frag_pos  = (mCamSpace * vec4(vert_pos, 1)).xyz;
+    vec3 light_pos = (mView * vec4(light.pos, 1)).xyz;
     gl_Position = mProjection * vec4(frag_pos, 1);
 
     frag.uv  = vert_uv;
-    frag.TBN = compute_TBN(mCamSpace, vert_N, vert_T);
-    frag.light_dir = normalize(light.pos - frag_pos);
-    frag.view_dir  = normalize(-frag_pos);
+    mat3 TBN = transpose(compute_TBN(mCamSpace, vert_T, vert_B, vert_N));
+    frag.light_dir = TBN * normalize(light_pos - frag_pos);
+    frag.view_dir  = TBN * normalize(-frag_pos);
 }
 #endif
 
@@ -118,22 +116,20 @@ void main(void)
 {
     vec4 texel = texture2D(material.colormap, frag.uv);
 
-    vec3 n = texture2D(material.normalmap, frag.uv).rgb*2.0 - 1.0;
-    n = frag.TBN * n;
-
+    vec3 n = texture2D(material.normalmap, frag.uv).rgb * 2.0 - 1.0;
     vec3 v = frag.view_dir;
     vec3 l = frag.light_dir; 
 
     float lighting = 
         Lambert_diffuse(n, v, l) +
-        Phong_specular(n, v, l) +
+        //Phong_specular(n, v, l) +
         0.25
     ;
     
     texel.rgb = lighting * texel.rgb;
 
     gl_FragColor = texel;
-    //gl_FragColor = vec4(n, 1);
+    //gl_FragColor = vec4(n*0.5 + 0.5, 1);
     //gl_FragColor = vec4(1, 0, 0, 1);
 }
 #endif
