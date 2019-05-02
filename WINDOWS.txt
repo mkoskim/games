@@ -2,7 +2,7 @@ Windows build investigations
 
 -------------------------------------------------------------------------------
 
-Current situation: objectview seems to work.
+Current situation: objectview seems to work. No quirks found yet.
 
 -------------------------------------------------------------------------------
 
@@ -10,10 +10,10 @@ Libraries:
 
 NOTE: Pay attention to choose 32-bit or 64-bit versions of libraries depending on
 your compiler/system bitness. I have used 32-bit libraries and compiler, because not
-all libraries might not be available as 64-bit versions.
+all libraries are available as 64-bit binaries.
 
-The other option would build libraries from sources for Windows. That would
-not necessarily be bad idea, I could get 64-bit versions for them.
+The other option would build libraries from sources for Windows. That would solve
+many problems.
 
 NOTE: Remember to add the directory containing libraries to your PATH.
 
