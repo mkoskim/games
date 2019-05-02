@@ -85,13 +85,11 @@ auto loadmesh(string filename, string[3] sWHD, Option[] options...)
 // Loading color and normal maps
 //*****************************************************************************
 
-engine.gpu.Texture.Loader loadcolormap;
-engine.gpu.Texture.Loader loadnormalmap;
+engine.asset.Material.Loader loadmaterial;
 
 static this()
 {
-    loadcolormap = engine.gpu.Texture.Loader.Compressed;
-    loadnormalmap = engine.gpu.Texture.Loader.Default;
+    loadmaterial = new engine.asset.Material.Loader();
 }
 
 //*****************************************************************************

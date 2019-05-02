@@ -4,12 +4,12 @@
 //
 //*****************************************************************************
 
-module engine.asset.types.material;
+module engine.asset.material;
 
 //-----------------------------------------------------------------------------
 
 import engine.asset.util;
-import engine.render.gpu.texture;
+import engine.gpu.texture;
 
 //-----------------------------------------------------------------------------
 //
@@ -67,6 +67,9 @@ class Material
         
         this()
         {
+            ColorMap = Texture.Loader.Compressed;
+            NormalMap = Texture.Loader.Default;
+            /*
             ColorMap = (new Texture.Loader())
                 .setMipmap(true)
                 .setFiltering(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
@@ -76,6 +79,7 @@ class Material
                 .setMipmap(true)
                 .setFiltering(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
             ;
+            */
         }
         
         this(Texture.Loader colormap, Texture.Loader normalmap)
@@ -86,50 +90,55 @@ class Material
 
         //---------------------------------------------------------------------
 
+        private Material load(Texture colormap, Texture normalmap, float roughness = 1.0)
+        {
+            return new Material(colormap, normalmap, roughness);
+        }
+
         Material opCall() { return new Material(null, null); }
 
         Material opCall(Texture colormap, Texture normalmap, float roughness = 1.0)
         {
-            return new Material(colormap, normalmap, roughness);
+            return load(colormap, normalmap, roughness);
         }
 
         // Materials without normal maps --------------------------------------
         
         Material opCall(string colormap, float roughness = 1.0)
         {
-            return this.opCall(ColorMap(colormap), null, roughness);
+            return load(ColorMap(colormap), null, roughness);
         }
 
         Material opCall(Bitmap colormap, float roughness = 1.0)
         {
-            return this.opCall(ColorMap(colormap), null, roughness);
+            return load(ColorMap(colormap), null, roughness);
         }
 
         Material opCall(vec4 color, float roughness = 1.0)
         {
-            return this.opCall(ColorMap(color), null, roughness);
+            return load(ColorMap(color), null, roughness);
         }
 
         // Materials with normal maps -----------------------------------------
         
         Material opCall(string colormap, string normalmap, float roughness = 1.0)
         {
-            return this.opCall(ColorMap(colormap), NormalMap(normalmap), roughness);
+            return load(ColorMap(colormap), NormalMap(normalmap), roughness);
         }
 
         Material opCall(vec4 color, string normalmap, float roughness = 1.0)
         {
-            return this.opCall(ColorMap(color), NormalMap(normalmap), roughness);
+            return load(ColorMap(color), NormalMap(normalmap), roughness);
         }
 
         Material opCall(string colormap, Texture normalmap, float roughness = 1.0)
         {
-            return this.opCall(ColorMap(colormap), normalmap, roughness);
+            return load(ColorMap(colormap), normalmap, roughness);
         }
 
         Material opCall(vec4 color, Texture normalmap, float roughness = 1.0)
         {
-            return this.opCall(ColorMap(color), normalmap, roughness);
+            return load(ColorMap(color), normalmap, roughness);
         }
     }    
 }
