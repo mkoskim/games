@@ -198,7 +198,7 @@ class WatchView(ttk.Treeview):
     def __init__(self, master, **kw):
         super(WatchView, self).__init__(master)
         self.configure(kw)
-        self.configure(columns=("Tag", "Value"))
+        self.configure(columns=("Value"))
         
         self.heading("#0", text="Tag")
         self.heading("#1", text="Value")
