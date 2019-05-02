@@ -9,6 +9,8 @@ import engine;
 //-----------------------------------------------------------------------------
 // We desperately need to give game programmers full control over creating
 // GPU side VBOs from loaded data. Let's try to sketch how this is done.
+// This is basically part of a pipeline: depending on your shader, you might
+// want to tweak the bindings, buffers and layouts.
 //-----------------------------------------------------------------------------
 
 class GPUMesh
@@ -58,6 +60,31 @@ class GPUMesh
         vao.bind();
         ibo.draw();
         vao.unbind();
+    }
+}
+
+//-----------------------------------------------------------------------------
+// We need to simplify setting up simple 3D pipelines. At the same time, we
+// need to make sure that you can build your own pipeline for your game when
+// you need/want one. Let's sketch it here.
+//-----------------------------------------------------------------------------
+
+class Model
+{
+    GPUMesh mesh;
+    engine.asset.Material material;
+    
+    this(
+        engine.gpu.Shader.Family family,
+        string filename, string[3] WHD, engine.asset.Option[] options,
+        engine.asset.Material material,
+        vec3 refpoint, vec3 saxis, float scale)
+    {
+        auto mesh = engine.asset.loadmesh(filename, WHD, options);
+        mesh.postprocess(refpoint, saxis, scale);
+
+        this.mesh = new GPUMesh(family, mesh);
+        this.material = material;
     }
 }
 
@@ -123,54 +150,29 @@ void main()
     engine.asset.SceneGraph.gWHD = engine.asset.SceneGraph.WHD("X", "Z", "Y");
 
     //-------------------------------------------------------------------------
-    //-------------------------------------------------------------------------
-
-    class Model
-    {
-        GPUMesh mesh;
-        engine.gpu.Texture colormap;
-        engine.gpu.Texture normalmap;
-        
-        this(
-            engine.gpu.Shader.Family family,
-            string filename, string[3] WHD, engine.asset.Option[] options,
-            engine.gpu.Texture colormap,
-            engine.gpu.Texture normalmap,
-            vec3 refpoint, vec3 saxis, float scale)
-        {
-            auto mesh = engine.asset.loadmesh(filename, WHD, options);
-            mesh.postprocess(refpoint, saxis, scale);
-            this.mesh = new GPUMesh(family, mesh);
-            this.colormap = colormap;
-            this.normalmap = normalmap;
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    // Load asset
+    // Load assets: This part should be simplified with Lua, allowing us to
+    // create scripts to bind meshes and materials (in case where they are
+    // not bind in the asset file itself).
     //-------------------------------------------------------------------------
 
     static if(0) auto model = new Model(
         state.shader.family,
         "data/Girl/Girl.dae", ["X", "Z", "-Y"], [engine.asset.Option.FlipUV],
-        engine.asset.loadcolormap("data/Girl/Girl_cm.png"),
-        engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
+        engine.asset.loadmaterial("data/Girl/Girl_cm.png"),
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
     static if(0) auto model = new Model(
         state.shader.family,
         "../../engine/stock/generic/mesh/Suzanne/Suzanne.obj", ["X", "Y", "Z"], [],
-        engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
-        engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
+        engine.asset.loadmaterial(vec4(0.5, 0.5, 0.5, 1)),
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
     static if(0) auto model = new Model(
         state.shader.family,
         "../../engine/stock/generic/mesh/Chess/king.obj", ["X", "Y", "Z"], [],
-        engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
-        engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
+        engine.asset.loadmaterial(vec4(0.5, 0.5, 0.5, 1)),
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
@@ -178,29 +180,35 @@ void main()
         state.shader.family,
         //"../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
         "../../engine/stock/generic/mesh/Cube/Cube.dae", ["X", "Z", "Y"], [],
-        //engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
-        engine.asset.loadcolormap("../../engine/stock/generic/tiles/BrickWall1/ColorMap.png"),
-        //engine.asset.loadcolormap("../../engine/stock/generic/mesh/Cube/NormalMap.png"),
-        engine.asset.loadnormalmap("../../engine/stock/generic/tiles/BrickWall1/NormalMap.png"),
-        //engine.asset.loadnormalmap("../../engine/stock/generic/tiles/AlienCarving/NormalMap.png"),
-        //engine.asset.loadnormalmap("../../engine/stock/generic/mesh/Cube/NormalMap.png"),
-        //engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
+        engine.asset.loadmaterial(
+            vec4(0.5, 0.5, 0.5, 1),
+            //"../../engine/stock/generic/tiles/BrickWall1/ColorMap.png",
+            "../../engine/stock/generic/mesh/Cube/NormalMap.png",
+            //"../../engine/stock/generic/tiles/BrickWall1/NormalMap.png",
+            //engine.asset.loadnormalmap("../../engine/stock/generic/tiles/AlienCarving/NormalMap.png"),
+            //engine.asset.loadnormalmap("../../engine/stock/generic/mesh/Cube/NormalMap.png"),
+            //engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)
+        ),
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0,
     );
 
     static if(0) auto model = new Model(
         state.shader.family,
         "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
-        engine.asset.loadcolormap("../../engine/stock/generic/tiles/AlienCarving/ColorMap.png"),
-        engine.asset.loadnormalmap("../../engine/stock/generic/tiles/AlienCarving/NormalMap.png"),
+        engine.asset.loadmaterial(
+            "../../engine/stock/generic/tiles/AlienCarving/ColorMap.png",
+            "../../engine/stock/generic/tiles/AlienCarving/NormalMap.png"
+        ),
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
     static if(0) auto model = new Model(
         state.shader.family,
         "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
-        engine.asset.loadcolormap("../../engine/stock/generic/tiles/Concrete/Crusty/ColorMap.png"),
-        engine.asset.loadnormalmap("../../engine/stock/generic/tiles/Concrete/Crusty/NormalMap.png"),
+        engine.asset.loadmaterial(
+            "../../engine/stock/generic/tiles/Concrete/Crusty/ColorMap.png",
+            "../../engine/stock/generic/tiles/Concrete/Crusty/NormalMap.png"
+        ),
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
@@ -248,8 +256,8 @@ void main()
         with(state.shader)
         {
             uniform("mModel", mModel);
-            uniform("material.colormap", model.colormap, 0);
-            uniform("material.normalmap", model.normalmap, 1);
+            uniform("material.colormap", model.material.colormap, 0);
+            uniform("material.normalmap", model.material.normalmap, 1);
         }
         model.mesh.draw();
         
