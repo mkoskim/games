@@ -45,6 +45,7 @@ public {
 import derelict.sdl2.image;
 import derelict.sdl2.ttf;
 import engine.util;
+import std.process: environment;
 
 //-----------------------------------------------------------------------------
 
@@ -68,7 +69,7 @@ static this()
     //-------------------------------------------------------------------------
 
     Log("Startup") << "Loading: SDL2...";
-    DerelictSDL2.load(SharedLibVersion(2, 0, 2));
+    DerelictSDL2.load();
     SDL_Init(0);
 
     //-------------------------------------------------------------------------
@@ -80,7 +81,7 @@ static this()
 
     version(Windows)
     {
-        int img_formats = IMG_INIT_JPG;
+        int img_formats = IMG_INIT_JPG | IMG_INIT_PNG;
     } else {
         int img_formats = IMG_INIT_JPG | IMG_INIT_PNG;
     }

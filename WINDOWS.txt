@@ -2,22 +2,38 @@ Windows build investigations
 
 -------------------------------------------------------------------------------
 
-Current situation: It is possible to get projects running on Windows, with
-few quirks:
+Current situation: objectview seems to work.
 
-- No PNG support yet
-- TTF loads OK, but support not tested
+-------------------------------------------------------------------------------
 
-Main problem is to find Windows images of libraries, new enough for the
-Derelict bindings used at Linux side. Downgrading Derelict does not sound
-good idea.
+Libraries:
+
+NOTE: Pay attention to choose 32-bit or 64-bit versions of libraries depending on
+your compiler/system bitness. I have used 32-bit libraries and compiler, because not
+all libraries might not be available as 64-bit versions.
 
 The other option would build libraries from sources for Windows. That would
 not necessarily be bad idea, I could get 64-bit versions for them.
 
+NOTE: Remember to add the directory containing libraries to your PATH.
+
+- assimp.dll                https://sourceforge.net/projects/assimp/files/assimp-3.1/assimp-3.1.1-win-binaries.zip/download
+- SDL2.dll                  https://www.libsdl.org/download-2.0.php
+- SDL2_image.dll            https://www.libsdl.org/projects/SDL_image/release
+- libjpeg-9.dll             - included in SDL_image release zip
+- libpng16-16.dll           - included in SDL_image release zip
+- zlib1.dll                 - included in SDL_image release zip
+- libtiff-5.dll             - included in SDL_image release zip
+- libwebp-7.dll             - included in SDL_image release zip
+- SDL2_ttf.dll              https://www.libsdl.org/projects/SDL_ttf/release/
+- libfreetype-6.dll         - Included in SDL_ttf release zip
+- lua53.dll                 http://luabinaries.sourceforge.net/download.html
+
+OpenGL: ???
+
 -------------------------------------------------------------------------------
 
-Installation:
+Python & Scons:
 
 1) Install Python 3.5+ to your machine:
 
@@ -38,31 +54,9 @@ to Wine. Investigations on-going...
 
 -------------------------------------------------------------------------------
 
-Tools:
-
-Git:
-
-Python:
-
-Scons (later): python -m pip install scons
+DMD:
 
 DMD: https://dlang.org/download.html
-
--------------------------------------------------------------------------------
-
-Libraries:
-
-- assimp.dll                https://sourceforge.net/projects/assimp/files/assimp-3.1/assimp-3.1.1-win-binaries.zip/download
-- SDL2.dll                  https://www.libsdl.org/download-2.0.php
-- SDL2_image.dll            https://www.libsdl.org/projects/SDL_image/
-- libjpeg-9.dll
-- libpng16-16.dll
-- SDL2_ttf.dll              https://www.libsdl.org/projects/SDL_ttf/
-- libfreetype-6.dll
-- zlib1.dll                 https://github.com/OctaForge/OF-Windows/blob/master/bin_win32/zlib1.dll
-- lua53.dll                 http://luabinaries.sourceforge.net/download.html
-
-OpenGL: ???
 
 -------------------------------------------------------------------------------
 
