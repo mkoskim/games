@@ -28,7 +28,7 @@ class GPUMesh
             "vert_pos": new engine.gpu.VBO(mesh.pos),
             "vert_uv": new engine.gpu.VBO(mesh.uv),
             "vert_T": new engine.gpu.VBO(mesh.t),
-            //"vert_B": new engine.gpu.VBO(mesh.b),
+            "vert_B": new engine.gpu.VBO(mesh.b),
             "vert_N": new engine.gpu.VBO(mesh.n),
         ];
 
@@ -174,11 +174,17 @@ void main()
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
-    static if(0) auto model = new Model(
+    static if(1) auto model = new Model(
         state.shader.family,
+        //"../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
         "../../engine/stock/generic/mesh/Cube/Cube.dae", ["X", "Z", "Y"], [],
+        //engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
         engine.asset.loadcolormap("../../engine/stock/generic/tiles/BrickWall1/ColorMap.png"),
+        //engine.asset.loadcolormap("../../engine/stock/generic/mesh/Cube/NormalMap.png"),
         engine.asset.loadnormalmap("../../engine/stock/generic/tiles/BrickWall1/NormalMap.png"),
+        //engine.asset.loadnormalmap("../../engine/stock/generic/tiles/AlienCarving/NormalMap.png"),
+        //engine.asset.loadnormalmap("../../engine/stock/generic/mesh/Cube/NormalMap.png"),
+        //engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0,
     );
 
@@ -190,7 +196,7 @@ void main()
         vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
-    static if(1) auto model = new Model(
+    static if(0) auto model = new Model(
         state.shader.family,
         "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
         engine.asset.loadcolormap("../../engine/stock/generic/tiles/Concrete/Crusty/ColorMap.png"),
@@ -216,7 +222,7 @@ void main()
     );
 
     auto mView = mat4.look_at(vec3(0, -2, 1.5), vec3(0, 0, 0.5), vec3(0, 0, 1));
-    auto pLight = vec3(2, 2, 2);
+    auto pLight = vec3(2, -2, 2);
     
     //*************************************************************************
     // Drawing
@@ -229,7 +235,8 @@ void main()
         angle += 0.005;
 
         mat4 mModel = mat4.identity().rotate(angle, vec3(0, 0, 1));
-
+        mat4 mLight = mat4.identity().rotate(angle, vec3(0, 0, -1));
+        
         state.activate();
         with(state.shader)
         {
@@ -257,7 +264,7 @@ void main()
             uniform("normal.color", vec4(0, 0.3, 0, 1));
         }
         
-        gpumesh.draw();
+        model.mesh.draw();
         /**/
     }
 
