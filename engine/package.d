@@ -45,7 +45,6 @@ public {
 import derelict.sdl2.image;
 import derelict.sdl2.ttf;
 import engine.util;
-import std.process: environment;
 
 //-----------------------------------------------------------------------------
 
@@ -79,12 +78,7 @@ static this()
     Log("Startup") << "Loading: SDL2Image...";
     DerelictSDL2Image.load();
 
-    version(Windows)
-    {
-        int img_formats = IMG_INIT_JPG | IMG_INIT_PNG;
-    } else {
-        int img_formats = IMG_INIT_JPG | IMG_INIT_PNG;
-    }
+    int img_formats = IMG_INIT_JPG | IMG_INIT_PNG;
 
     if(IMG_Init(img_formats) != img_formats) {
         throw new Exception(format("IMG_Init: %s", to!string(IMG_GetError())));
