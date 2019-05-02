@@ -136,10 +136,10 @@ void main()
             string filename, string[3] WHD, engine.asset.Option[] options,
             engine.gpu.Texture colormap,
             engine.gpu.Texture normalmap,
-            vec3 saxis, float scale, vec3 refpoint)
+            vec3 refpoint, vec3 saxis, float scale)
         {
             auto mesh = engine.asset.loadmesh(filename, WHD, options);
-            mesh.postprocess(saxis, scale, refpoint);
+            mesh.postprocess(refpoint, saxis, scale);
             this.mesh = new GPUMesh(family, mesh);
             this.colormap = colormap;
             this.normalmap = normalmap;
@@ -155,7 +155,7 @@ void main()
         "data/Girl/Girl.dae", ["X", "Z", "-Y"], [engine.asset.Option.FlipUV],
         engine.asset.loadcolormap("data/Girl/Girl_cm.png"),
         engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
-        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+        vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
     static if(0) auto model = new Model(
@@ -163,7 +163,7 @@ void main()
         "../../engine/stock/generic/mesh/Suzanne/Suzanne.obj", ["X", "Y", "Z"], [],
         engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
         engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
-        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+        vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
     static if(0) auto model = new Model(
@@ -171,15 +171,15 @@ void main()
         "../../engine/stock/generic/mesh/Chess/king.obj", ["X", "Y", "Z"], [],
         engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
         engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
-        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+        vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
-    static if(1) auto model = new Model(
+    static if(0) auto model = new Model(
         state.shader.family,
-        "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
+        "../../engine/stock/generic/mesh/Cube/Cube.dae", ["X", "Z", "Y"], [],
         engine.asset.loadcolormap("../../engine/stock/generic/tiles/BrickWall1/ColorMap.png"),
         engine.asset.loadnormalmap("../../engine/stock/generic/tiles/BrickWall1/NormalMap.png"),
-        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+        vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0,
     );
 
     static if(0) auto model = new Model(
@@ -187,15 +187,15 @@ void main()
         "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
         engine.asset.loadcolormap("../../engine/stock/generic/tiles/AlienCarving/ColorMap.png"),
         engine.asset.loadnormalmap("../../engine/stock/generic/tiles/AlienCarving/NormalMap.png"),
-        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+        vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
-    static if(0) auto model = new Model(
+    static if(1) auto model = new Model(
         state.shader.family,
         "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
         engine.asset.loadcolormap("../../engine/stock/generic/tiles/Concrete/Crusty/ColorMap.png"),
         engine.asset.loadnormalmap("../../engine/stock/generic/tiles/Concrete/Crusty/NormalMap.png"),
-        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+        vec3(0.5, 0.5, 0.0), vec3(0, 0, 1), 1.0
     );
 
     //-------------------------------------------------------------------------
@@ -215,7 +215,7 @@ void main()
         1, 200
     );
 
-    auto mView = mat4.look_at(vec3(0, -2, 0.5), vec3(0, 0, 0.5), vec3(0, 0, 1));
+    auto mView = mat4.look_at(vec3(0, -2, 1.5), vec3(0, 0, 0.5), vec3(0, 0, 1));
     auto pLight = vec3(2, 2, 2);
     
     //*************************************************************************
