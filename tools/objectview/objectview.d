@@ -33,7 +33,7 @@ class GPUMesh
         ];
 
         ibo = new engine.gpu.IBO(
-            cast(ushort[])mesh.triangles,
+            cast(ushort[])mesh.faces,
             GL_TRIANGLES
         );
 
@@ -120,77 +120,83 @@ void main()
     // Configure asset loader
     //-------------------------------------------------------------------------
 
+    engine.asset.SceneGraph.gWHD = engine.asset.SceneGraph.WHD("X", "Z", "Y");
+
+    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+
+    class Model
+    {
+        GPUMesh mesh;
+        engine.gpu.Texture colormap;
+        engine.gpu.Texture normalmap;
+        
+        this(
+            engine.gpu.Shader.Family family,
+            string filename, string[3] WHD, engine.asset.Option[] options,
+            engine.gpu.Texture colormap,
+            engine.gpu.Texture normalmap,
+            vec3 saxis, float scale, vec3 refpoint)
+        {
+            auto mesh = engine.asset.loadmesh(filename, WHD, options);
+            mesh.postprocess(saxis, scale, refpoint);
+            this.mesh = new GPUMesh(family, mesh);
+            this.colormap = colormap;
+            this.normalmap = normalmap;
+        }
+    }
+
     //-------------------------------------------------------------------------
     // Load asset
     //-------------------------------------------------------------------------
 
-    auto scene =
-        engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Suzanne/Suzanne.obj")
-        //engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Cube/Cube.dae")
-        //engine.asset.SceneGraph.load("../../engine/stock/generic/mesh/Chess/king.obj")
-        //engine.asset.SceneGraph.load("data/Girl/Girl.dae")
-        ;
+    static if(0) auto model = new Model(
+        state.shader.family,
+        "data/Girl/Girl.dae", ["X", "Z", "-Y"], [engine.asset.Option.FlipUV],
+        engine.asset.loadcolormap("data/Girl/Girl_cm.png"),
+        engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
+        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+    );
 
-    scene.info();
+    static if(0) auto model = new Model(
+        state.shader.family,
+        "../../engine/stock/generic/mesh/Suzanne/Suzanne.obj", ["X", "Y", "Z"], [],
+        engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
+        engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
+        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+    );
 
-    //-------------------------------------------------------------------------
-    // Post-Load Processing
-    //-------------------------------------------------------------------------
+    static if(0) auto model = new Model(
+        state.shader.family,
+        "../../engine/stock/generic/mesh/Chess/king.obj", ["X", "Y", "Z"], [],
+        engine.asset.loadcolormap(vec4(0.5, 0.5, 0.5, 1)),
+        engine.asset.loadnormalmap(vec4(0.5, 0.5, 1, 0)),
+        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+    );
 
-    auto mesh = scene.meshes[0];
+    static if(1) auto model = new Model(
+        state.shader.family,
+        "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
+        engine.asset.loadcolormap("../../engine/stock/generic/tiles/BrickWall1/ColorMap.png"),
+        engine.asset.loadnormalmap("../../engine/stock/generic/tiles/BrickWall1/NormalMap.png"),
+        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+    );
 
-    mesh.WHD(["X", "Z", "Y"], ["X", "Y", "Z"]);
-    //mesh.WHD(["X", "Z", "Y"], ["X", "Z", "Y"]);
+    static if(0) auto model = new Model(
+        state.shader.family,
+        "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
+        engine.asset.loadcolormap("../../engine/stock/generic/tiles/AlienCarving/ColorMap.png"),
+        engine.asset.loadnormalmap("../../engine/stock/generic/tiles/AlienCarving/NormalMap.png"),
+        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+    );
 
-    // View mesh info
-    {
-        auto aabb = mesh.AABB();
-        Log << format("AABB: %s - %s", to!string(aabb.min), to!string(aabb.max));
-    }
-
-    // Scale mesh to unit size
-    {
-        auto dim = mesh.dim();
-        mesh.scale( 1 / dim.z);
-    }
-
-    // Move mesh reference to correct position
-    {
-        auto aabb = mesh.AABB();
-        mesh.move(0, 0, -aabb.min.z);
-    }
-
-    // Check results
-    {
-        auto aabb = mesh.AABB();
-        Log << format("AABB: %s - %s", to!string(aabb.min), to!string(aabb.max));
-    }
-
-    // Upload model to GPU
-    auto gpumesh = new GPUMesh(state.shader.family, mesh);
-
-    //-------------------------------------------------------------------------
-    // Textures are uploaded by loaders: these may have different sampling
-    // parameters.
-    //-------------------------------------------------------------------------
-
-    auto cm_loader = engine.gpu.Texture.Loader.Compressed;
-    auto nm_loader = engine.gpu.Texture.Loader.Default;
-
-    auto colormap =
-        cm_loader(vec4(0.5, 0.5, 0.5, 1))
-        //cm_loader("engine/stock/generic/tiles/AlienCarving/ColorMap.png")
-        //cm_loader("engine/stock/generic/tiles/BrickWall1/ColorMap.png")
-        //cm_loader("data/Girl/Girl_cm.png")
-        //.info()
-        ;
-
-    auto normalmap =
-        nm_loader(vec4(0.5, 0.5, 1, 0))
-        //nm_loader("engine/stock/generic/tiles/AlienCarving/NormalMap.png")
-        //nm_loader("engine/stock/generic/tiles/Concrete/Crusty/NormalMap.png")
-        //nm_loader("local/stockset/Humanoid/Female/NormalMap.png")
-    ;
+    static if(0) auto model = new Model(
+        state.shader.family,
+        "../../engine/stock/generic/mesh/Cube/CubeWrap.obj", ["X", "Y", "Z"], [],
+        engine.asset.loadcolormap("../../engine/stock/generic/tiles/Concrete/Crusty/ColorMap.png"),
+        engine.asset.loadnormalmap("../../engine/stock/generic/tiles/Concrete/Crusty/NormalMap.png"),
+        vec3(0, 0, 1), 1.0, vec3(0.5, 0.5, 0.0)
+    );
 
     //-------------------------------------------------------------------------
     // After loading is done, it might be a good idea to run GC, because
@@ -229,13 +235,16 @@ void main()
         {
             uniform("mProjection", mProjection);
             uniform("mView", mView);
-            uniform("mModel", mModel);
-            uniform("material.colormap", colormap, 0);
-            uniform("material.normalmap", normalmap, 1);
             uniform("light.pos", pLight);
         }
 
-        gpumesh.draw();
+        with(state.shader)
+        {
+            uniform("mModel", mModel);
+            uniform("material.colormap", model.colormap, 0);
+            uniform("material.normalmap", model.normalmap, 1);
+        }
+        model.mesh.draw();
         
         /*
         state_normals.activate();
