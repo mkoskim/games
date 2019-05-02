@@ -242,24 +242,14 @@ class SceneGraph
         // Switch object WHD - Width, Height, Depth - axis if needed.
         //---------------------------------------------------------------------
 
-        void postprocess(vec3 saxis, float scale, vec3 refpoint)
+        void postprocess(vec3 refpoint, vec3 saxis, float scale)
         {
-            //-----------------------------------------------------------------
-            // Scale mesh to given size
-            //-----------------------------------------------------------------
-            
             auto AABB() { return AABBT!(float).from_points(pos); }
             auto dim(AABBT!(float) aabb)  { return aabb.max - aabb.min; }
 
-            Log << format("Dim(initial): %s", to!string(dim(AABB())));
-            
-            {
-                float s = scale / (dim(AABB()) * saxis);
-            
-                foreach(ref v; pos) v *= s;
-            }
-            
-            Log << format("Dim(scaled): %s", to!string(dim(AABB())));
+            //-----------------------------------------------------------------
+            // Move reference point to given point
+            //-----------------------------------------------------------------
             
             {
                 auto bb = AABB();
@@ -279,6 +269,24 @@ class SceneGraph
                 auto delta = cdesired - cnow;
                 foreach(ref v; pos) v -= delta;
             }
+            
+            //-----------------------------------------------------------------
+            // Scale mesh to given size
+            //-----------------------------------------------------------------
+            
+            Log << format("Dim(initial): %s", to!string(dim(AABB())));
+            
+            {
+                float s = scale / (dim(AABB()) * saxis);
+            
+                foreach(ref v; pos) v *= s;
+            }
+            
+            Log << format("Dim(scaled): %s", to!string(dim(AABB())));
+            
+            //-----------------------------------------------------------------
+            // Show results
+            //-----------------------------------------------------------------
             
             {
                 auto bb = AABB();
