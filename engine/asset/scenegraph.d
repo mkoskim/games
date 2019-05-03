@@ -22,14 +22,22 @@ import std.path;
 //
 // Design:
 //
-// I really need to rethink this. It is not necessarily a bad idea to first
-// make "D copies" from ASSIMP objects, and release all memory allocated by
-// ASSIMP. Then, we could post-process those D objects, before creating buffers
-// for GPU.
+// I really need to think this. Although making (temporal) copies of ASSIMP
+// objects does not sound sensible, it has its own strengths. With this, we can
+// discard memory allocated by ASSIMP early, leaving less room for errors. It
+// also greatly simplifies post-processing, before they are used to create
+// buffers for GPU.
 //
-// TODO: Lets try now make this implementation to use matrix transformation
-// operations for Mesh, nothing else. We may be able to use them to assimp
-// data, too.
+// Basically, the only real drawback is if you need just one or two assets
+// from large file. We could argue, that it would then better extract those
+// few assets from that mega file... In every case, the most probable use cases
+// for this asset loader are:
+//
+// - Loading single assets from 3D files containing only that single asset:
+//   this would mean loading lots of small files.
+//
+// - When loading a large file, most probably that file is tailored for the
+//   game and you need most of its content.
 //
 //*****************************************************************************
 
@@ -107,7 +115,6 @@ class SceneGraph
     //-------------------------------------------------------------------------
     
     static mat3 gWHD;  // Game-wise coordinate system
-    mat3 sWHD;         // Scene-specific coordinate system
 
     static mat3 WHD(string W, string H, string D)
     {
@@ -132,13 +139,14 @@ class SceneGraph
 
     //-------------------------------------------------------------------------
 
+    mat3 mGameSpace;        // Matrix to rotate objects to "game space"
     Mesh[int] meshes;
     
     this(const aiScene* scene, mat3 sWHD)
     {
-        this.sWHD = sWHD;
+        this.mGameSpace = gWHD * sWHD;
         
-        if(handness(gWHD) != handness(sWHD))
+        if(!handness(mGameSpace))
         {
             aiApplyPostProcessing(scene, aiProcess_FlipWindingOrder);
         }
@@ -153,7 +161,6 @@ class SceneGraph
     {
         this(scene, WHD(sWHD));
     }
-
 
     //*************************************************************************
     // Creating copies of buffers
@@ -200,7 +207,7 @@ class SceneGraph
         vec3[] t, b, n;
         
         Face[] faces;
-                        
+
         //---------------------------------------------------------------------
 
         struct Face {
@@ -224,20 +231,18 @@ class SceneGraph
             // Switch mesh coordinate system to game coordinate system
             //-----------------------------------------------------------------
             
-            mat3 m = gWHD * sWHD;
-
             name = tostr(mesh.mName);
-            pos  = tovec3(mesh.mNumVertices, mesh.mVertices, m);
-            t    = tovec3(mesh.mNumVertices, mesh.mTangents, m);
-            b    = tovec3(mesh.mNumVertices, mesh.mBitangents, m);
-            n    = tovec3(mesh.mNumVertices, mesh.mNormals, m);
+            pos  = tovec3(mesh.mNumVertices, mesh.mVertices, mGameSpace);
+            t    = tovec3(mesh.mNumVertices, mesh.mTangents, mGameSpace);
+            b    = tovec3(mesh.mNumVertices, mesh.mBitangents, mGameSpace);
+            n    = tovec3(mesh.mNumVertices, mesh.mNormals, mGameSpace);
             uv   = tovec2(mesh.mNumVertices, mesh.mTextureCoords[0]);
 
             for(int i = 0; i < mesh.mNumFaces; i++) faces ~= Face(mesh.mFaces[i]);
         }
 
         //---------------------------------------------------------------------
-        // Switch object WHD - Width, Height, Depth - axis if needed.
+        // Adjust scale & reference point
         //---------------------------------------------------------------------
 
         void postprocess(vec3 refpoint, vec3 saxis, float scale)
@@ -246,46 +251,28 @@ class SceneGraph
             auto dim(AABBT!(float) aabb)  { return aabb.max - aabb.min; }
 
             //-----------------------------------------------------------------
-            // Move reference point to given point
+            // Move reference point to given point and scale the mesh
             //-----------------------------------------------------------------
             
-            {
-                auto bb = AABB();
-                auto d  = dim(bb);
-                
-                auto cnow = (bb.min + bb.max) / 2;                
-                auto cdesired = bb.min + vec3(
-                    cnow.x + d.x * refpoint.x,
-                    cnow.y + d.y * refpoint.y,
-                    cnow.z + d.z * refpoint.z
-                );
+            //Log << format("Dim(initial): %s", to!string(dim(AABB())));
 
-                Log << format("Refpoint........: %s", to!string(refpoint));
-                Log << format("Center (now)....: %s", to!string(cnow));
-                Log << format("Center (desired): %s", to!string(cdesired));
-                
-                auto delta = cdesired - cnow;
-                foreach(ref v; pos) v -= delta;
-            }
-            
-            //-----------------------------------------------------------------
-            // Scale mesh to given size
-            //-----------------------------------------------------------------
-            
-            Log << format("Dim(initial): %s", to!string(dim(AABB())));
-            
-            {
-                float s = scale / (dim(AABB()) * saxis);
-            
-                foreach(ref v; pos) v *= s;
-            }
-            
-            Log << format("Dim(scaled): %s", to!string(dim(AABB())));
-            
-            //-----------------------------------------------------------------
-            // Show results
-            //-----------------------------------------------------------------
-            
+            auto bb = AABB();
+            auto d  = dim(bb);
+
+            float s = scale / (d * saxis);
+
+            auto rp_now = (bb.min + bb.max) / 2;
+            auto rp_desired = bb.min + vec3(
+                rp_now.x + d.x * refpoint.x,
+                rp_now.y + d.y * refpoint.y,
+                rp_now.z + d.z * refpoint.z
+            );
+
+            auto delta = rp_desired - rp_now;
+            foreach(ref v; pos) v = (v - delta) * s;
+
+            //Log << format("Dim(scaled): %s", to!string(dim(AABB())));
+            /*
             {
                 auto bb = AABB();
                 Log << format("AABB (%f - %f), (%f - %f), (%f - %f)",
@@ -293,7 +280,7 @@ class SceneGraph
                     bb.min.y, bb.max.y,
                     bb.min.z, bb.max.z
                 );
-            }
+            } */
         }
     }
 
@@ -353,4 +340,3 @@ class SceneGraph
         }
     }
 }
-

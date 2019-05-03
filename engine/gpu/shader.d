@@ -68,7 +68,20 @@ class Shader
     }
 
     //-------------------------------------------------------------------------
-
+    // Shaders are organized to families. In all simplicity, shader family
+    // ensures that attributes with same name get the same index number. Thus,
+    // when vertex buffers are bind to certain indices to feed the attributes, 
+    // all shaders in the same family receives them to attributes with same
+    // name --> you can bind attributes by shader family, and all shaders in
+    // that family can use the same bindings. Diagram:
+    //
+    // Binding      Family      Shader A    Shader B    Index
+    // vert_pos     vert_pos    vert_pos    vert_pos    1
+    // vert_TBN     vert_TBN    vert_TBN    -           2
+    // -            vert_extra  -           -           3
+    //
+    //-------------------------------------------------------------------------
+    
     static class Family
     {
         PARAM[string] attributes;
@@ -155,6 +168,17 @@ class Shader
             shader.attrib!(typeof(field))(name, field.offsetof, rowsize);
         }
     */
+    
+        void dumpNameCache()
+        {
+            Log << "Family Bindings:";
+            foreach(name, param; attributes) Log << format("    %-20s@%d: %d x %s",
+                name,
+                param.location,
+                param.size,
+                GLenumName[param.type]
+            );
+        }
     }
     
     Family family;
@@ -227,21 +251,6 @@ class Shader
         }
         
         //dumpNameCache();
-    }
-
-    private void dumpNameCache()
-    {
-        /*
-        writeln("- Uniforms:");
-        foreach(name, param; uniforms) xxx
-        writeln("- Attributes:");
-        foreach(name, param; family.attributes) writefln("    %-20s@%d: %d x %s",
-            name,
-            param.location,
-            param.size,
-            GLenumName[param.type]
-        );
-        */
     }
 
     //*************************************************************************
@@ -331,11 +340,17 @@ class Shader
 
     GLuint   programID;
     
-    private this(Family family, GLuint ID) {
+    private this(Family family, GLuint ID)
+    {
         debug Track.add(this);
         programID = ID;
         this.family = family;
         updateNameCache();
+    }
+
+    ~this() {
+        debug Track.remove(this);
+        if(programID) glDeleteProgram(programID);
     }
 
     //-------------------------------------------------------------------------
@@ -357,12 +372,4 @@ class Shader
 
     this(Family family, string source) { this(family, source, source); }
     this(string source)                { this(new Family(), source); }
-
-    //-------------------------------------------------------------------------
-
-    ~this() {
-        debug Track.remove(this);
-        if(programID) glDeleteProgram(programID);
-    }
 }
-

@@ -66,7 +66,10 @@ GLuint CompileProgram(
 )
 {
     //-------------------------------------------------------------------------
-
+    // Create program, and bind all the attributes from family
+    // to specific locations.
+    //-------------------------------------------------------------------------
+    
     GLuint programID = checkgl!glCreateProgram();
 
     foreach(name, param; family.attributes)
@@ -97,13 +100,10 @@ GLuint CompileProgram(
 
     //-------------------------------------------------------------------------
 
-    if(!getProgram!bool(programID, GL_LINK_STATUS))
-    {
-        throw new ShaderCompileError
-        (
-            "Linking:\n" ~ getProgramInfoLog(programID)
-        );
-    }
+    auto msg = getProgramInfoLog(programID);
+    if(msg.length) Log << msg;
+
+    ERRORIF(!getProgram!bool(programID, GL_LINK_STATUS), "Program link failed");
 
     //-------------------------------------------------------------------------
 
@@ -129,8 +129,7 @@ GLuint compileShader(GLenum shadertype, string[] srcs...)
     ];
 
     const(char)*[] source = [
-        //toStringz("#version 120\n"),
-        toStringz(format("#version %d\n", to!int(screen.glsl * 100))),
+        toStringz("#version 330\n"),
         toStringz(header[shadertype])
     ];
 
@@ -148,19 +147,15 @@ GLuint compileShader(GLenum shadertype, string[] srcs...)
     checkgl!glShaderSource(shaderID, cast(int)source.length, source.ptr, null);
     checkgl!glCompileShader(shaderID);
 
-    if(getShader!bool(shaderID, GL_COMPILE_STATUS))
-    {
-        return shaderID;
-    }
+    auto msg = getShaderInfoLog(shaderID);
+    if(msg.length) Log << msg;
 
-    //-------------------------------------------------------------------------
-    // In case of error, dump shader source
-    //-------------------------------------------------------------------------
+    ERRORIF(!getShader!bool(shaderID, GL_COMPILE_STATUS), "Shader compile failed.");
     
-    //debug writeln(getShaderSource(shaderID));
+    return shaderID;
 
-    string msg = getShaderInfoLog(shaderID);
 /*
+    //debug writeln(getShaderSource(shaderID));
     auto errorat = new Location(msg);
 
     foreach(i, content; source)
@@ -186,7 +181,6 @@ GLuint compileShader(GLenum shadertype, string[] srcs...)
         errorat.msg)
     );
 /*/
-    throw new ShaderCompileError(format("%s", msg));
 /**/
 }
 

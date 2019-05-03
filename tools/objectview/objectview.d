@@ -15,6 +15,16 @@ import engine;
 
 class GPUMesh
 {
+    // First one strange thing: You should notice that you can't free
+    // up VBOs after binding them to VAO. CPU-side buffers used to create
+    // thse buffers are free to go, but VBOs hold GPU side IDs on them!
+    // Now, the following code looks like the VBOs are discarded after VAO
+    // creation! Check this!
+    
+    // We could try to simplify things so, that VBOs and IBOs are created
+    // under VAO, which takes care of them. When VAO is released, also the
+    // IBO and VBO IDs are released.
+
     engine.gpu.VAO vao;     // Vertex attribute bindings
     engine.gpu.IBO ibo;     // Draw indexing
     
@@ -27,11 +37,11 @@ class GPUMesh
         //-------------------------------------------------------------------------
 
         engine.gpu.VBO[string] vbos = [
-            "vert_pos": new engine.gpu.VBO(mesh.pos),
-            "vert_uv": new engine.gpu.VBO(mesh.uv),
-            "vert_T": new engine.gpu.VBO(mesh.t),
-            "vert_B": new engine.gpu.VBO(mesh.b),
-            "vert_N": new engine.gpu.VBO(mesh.n),
+            "vert.pos": new engine.gpu.VBO(mesh.pos),
+            "vert.uv": new engine.gpu.VBO(mesh.uv),
+            "vert.T": new engine.gpu.VBO(mesh.t),
+            "vert.B": new engine.gpu.VBO(mesh.b),
+            "vert.N": new engine.gpu.VBO(mesh.n),
         ];
 
         ibo = new engine.gpu.IBO(
@@ -40,13 +50,19 @@ class GPUMesh
         );
 
         //-------------------------------------------------------------------------
-        // Create VAO to bind buffers together (automatize buffer bindings)
+        // Create VAO to bind buffers together (automatize buffer bindings).
+        // NOTICE: We go through _shader_family_ attributes, and locate them
+        // from our table: this way, if you have messed with shader families,
+        // this part crashes :)
         //-------------------------------------------------------------------------
 
         vao = new engine.gpu.VAO();
 
         vao.bind();
-        foreach(attrib; family.attributes.keys()) {
+        foreach(attrib; family.attributes.keys())
+        {
+            ERRORIF(!(attrib in vbos), format("Attribute '%s' not found.", attrib));
+            
             auto vbo = vbos[attrib];
             family.attrib(attrib, vbo.type, vbo);
         }
@@ -261,7 +277,7 @@ void main()
         }
         model.mesh.draw();
         
-        /*
+        //*
         state_normals.activate();
         with(state_normals.shader)
         {

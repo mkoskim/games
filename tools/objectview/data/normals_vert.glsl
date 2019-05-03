@@ -6,12 +6,16 @@
 
 //-----------------------------------------------------------------------------
 
-#ifdef VERTEX_SHADER
-attribute vec3 vert_pos;
-attribute vec3 vert_N;
-#endif
+struct VertInput
+{
+    vec3 pos;
+    vec2 uv;
+    vec3 T;
+    vec3 B;
+    vec3 N;
+};
 
-struct Vertex2Geom
+struct GeomInput
 {
     vec3 normal;
 };
@@ -43,13 +47,13 @@ uniform mat4 mModel;
 #ifdef VERTEX_SHADER
 //
 //*****************************************************************************
-
-out Vertex2Geom geom;
+in  VertInput vert;
+out GeomInput geom;
 
 void main()
 {
-    gl_Position = vec4(vert_pos, 1);
-    geom.normal = vert_N;
+    gl_Position = vec4(vert.pos, 1);
+    geom.normal = vert.N;
 }
 #endif
 
@@ -62,7 +66,7 @@ void main()
 layout(triangles) in;
 layout(line_strip, max_vertices=6) out;
 
-in  Vertex2Geom geom[];
+in  GeomInput geom[];
 
 void main()
 {
@@ -90,8 +94,10 @@ void main()
 //
 //*****************************************************************************
 
+out vec4 frag_color;
+
 void main(void)
 {
-    gl_FragColor = normal.color;
+    frag_color = normal.color;
 }
 #endif
