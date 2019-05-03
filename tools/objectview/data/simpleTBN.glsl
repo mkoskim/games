@@ -8,13 +8,14 @@
 
 //-----------------------------------------------------------------------------
 
-#ifdef VERTEX_SHADER
-attribute vec3 vert_pos;
-attribute vec2 vert_uv;
-attribute vec3 vert_T;
-attribute vec3 vert_B;
-attribute vec3 vert_N;
-#endif
+struct VertInput
+{
+    vec3 pos;
+    vec2 uv;
+    vec3 T;
+    vec3 B;
+    vec3 N;
+};
 
 //-----------------------------------------------------------------------------
 // Frame wide settings
@@ -63,6 +64,7 @@ struct FragInput
 //
 //*****************************************************************************
 
+in  VertInput vert;
 out FragInput frag;
 
 mat3 compute_TBN(mat4 mCamSpace, vec3 tangent, vec3 bitangent, vec3 normal)
@@ -79,12 +81,12 @@ void main()
 {
     mat4 mCamSpace = mView * mModel;
 
-    vec3 frag_pos  = (mCamSpace * vec4(vert_pos, 1)).xyz;
+    vec3 frag_pos  = (mCamSpace * vec4(vert.pos, 1)).xyz;
     vec3 light_pos = (mView * vec4(light.pos, 1)).xyz;
     gl_Position = mProjection * vec4(frag_pos, 1);
 
-    frag.uv  = vert_uv;
-    mat3 TBN = transpose(compute_TBN(mCamSpace, vert_T, vert_B, vert_N));
+    frag.uv  = vert.uv;
+    mat3 TBN = transpose(compute_TBN(mCamSpace, vert.T, vert.B, vert.N));
     frag.light_dir = TBN * normalize(light_pos - frag_pos);
     frag.view_dir  = TBN * normalize(-frag_pos);
 }
@@ -98,7 +100,8 @@ void main()
 
 layout(early_fragment_tests) in;
 
-in FragInput frag;
+in  FragInput frag;
+out vec4 frag_color;
 
 float Lambert_diffuse(vec3 n, vec3 v, vec3 l)
 {
@@ -128,8 +131,10 @@ void main(void)
     
     texel.rgb = lighting * texel.rgb;
 
-    gl_FragColor = texel;
-    //gl_FragColor = vec4(n*0.5 + 0.5, 1);
-    //gl_FragColor = vec4(1, 0, 0, 1);
+    frag_color =
+        texel
+        //vec4(n*0.5 + 0.5, 1)
+        //vec4(1, 0, 0, 1)
+    ;
 }
 #endif
