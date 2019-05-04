@@ -9,7 +9,13 @@ print "Hey!"
 mytable = {
     a = 1,
     b = 2,
+    c = {
+        [1] = "a",
+        [2] = "c"
+    }
 }
+
+print(mytable.a, _G.mytable.c[1])
 
 -- ----------------------------------------------------------------------------
 
@@ -30,12 +36,13 @@ function howdy()
 end
 
 function show(a, b, c)
-    print(format("show(%f, %f, %f)", a, b, c))
+    print(a, b, c)
     return a
 end
 
 function passthrough(...)
     gimme(...);
+    return 0
     end
 
 

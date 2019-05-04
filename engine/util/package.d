@@ -18,25 +18,10 @@ public {
     import engine.util.clock: Clock;
     import engine.util.timer: Timer;
     import vfs = engine.util.vfs;
+    import engine.util.lua;
 
     debug import engine.util.track: Track;
     import engine.util.logger: Log, Watch;
-}
-
-//-----------------------------------------------------------------------------
-
-void TODO(string msg = null,
-    string file = __FILE__,
-    int line = __LINE__,
-    string func = __FUNCTION__
-) {
-    //return;
-    //throw new Exception("Not done yet.");
-    if(msg) {
-        //trace("TODO", format("%s (%s)", msg, func));
-    } else {
-        //trace("TODO", format("%s", func));
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -105,7 +90,7 @@ void quitif(bool value, lazy string msg = null)
 
 void ERROR(string msg, string file = __FILE__, int line = __LINE__, string func = __FUNCTION__)
 {
-    quit(format("ERROR: %s@%s:%d: %s", func, file, line, msg));
+    throw new Exception(format("ERROR: %s@%s:%d: %s", func, file, line, msg));
 }
 
 //-----------------------------------------------------------------------------

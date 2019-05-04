@@ -39,8 +39,10 @@ debug abstract class Track
             }*/
         }
 
-        void report(string group)
+        void report()
         {
+            string group = "Track";
+
             foreach(key, value; count)
             {
                 Watch(group).update(key, to!string(value));

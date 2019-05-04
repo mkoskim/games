@@ -1,7 +1,9 @@
 env = Environment()
 
-env["MAIN"] = "XXX.d"
-env["BLOBFILES"] = []
+env["MAIN"] = "luademo.d"
+env["BLOBFILES"] = [
+    "data/",
+]
 
 env.SConscript("../../engine/build/scons/build.py", "env")
 
