@@ -19,6 +19,17 @@ import engine.asset.types.transform;
 import std.path;
 
 //*****************************************************************************
+// Loading color and normal maps
+//*****************************************************************************
+
+engine.asset.Material.Loader loadmaterial;
+
+static this()
+{
+    loadmaterial = new engine.asset.Material.Loader();
+}
+
+//*****************************************************************************
 //
 // Design:
 //
@@ -41,302 +52,178 @@ import std.path;
 //
 //*****************************************************************************
 
-enum Option {
-    FlipUV,
-    CombineMeshes,
-};
+bool handness(vec3 a, vec3 b, vec3 c) { return a.cross(b).dot(c) > 0; }
+bool handness(mat3 m) { return handness(vec3(m[0]), vec3(m[1]), vec3(m[2])); }
+bool handness(mat4 m) { return handness(mat3(m)); }
 
-//-------------------------------------------------------------------------
+//*****************************************************************************
+//
+// Specify coordinate system telling which axes specify Width, Height and
+// Depth.
+//
+//*****************************************************************************
 
-auto load(string filename, string[3] sWHD, Option[] options...)
+enum Plane {
+    XY,         // X grows right, Y grows forward, Z grows up
+    XZ,         // X grows right, Y grows up, Z grows backwards
+    XYF,        // For models only: XY plane, object looking forward
+    XZF,        // For models only: XZ plane, object looking forward
+}
+
+Plane gPlane;  // Game-wise coordinate system
+
+private mat3 mPlane(Plane s, Plane t)
 {
-    aiPostProcessSteps postprocess = 
-        aiProcess_Triangulate |
-        //aiProcess_GenNormals |
-        aiProcess_GenSmoothNormals |
-        aiProcess_CalcTangentSpace |
-        aiProcess_JoinIdenticalVertices |
-        aiProcess_ImproveCacheLocality |
-        aiProcess_OptimizeMeshes;
+    //Log << format("%s -> %s", to!string(s), to!string(t));
 
-    foreach(option; options) final switch(option)
+    final switch(t)
     {
-        case Option.FlipUV: postprocess |= aiProcess_FlipUVs; break;
-        case Option.CombineMeshes: postprocess |= aiProcess_OptimizeGraph; break;
+        case Plane.XY: final switch(s)
+        {
+            case Plane.XY:  return mat3.identity();
+            case Plane.XYF: return mat3.identity().rotatez(PI);
+            case Plane.XZ:  return mat3.identity().rotatex(PI_2);
+            case Plane.XZF: return mat3.identity().rotatex(PI_2).rotatez(PI);
+        }
+
+        case Plane.XZ: final switch(s)
+        {
+            case Plane.XZ:  return mat3.identity();
+            case Plane.XZF: return mat3.identity().rotatey(PI);
+            case Plane.XY:  return mat3.identity().rotatex(-PI_2);
+            case Plane.XYF: return mat3.identity().rotatez(PI).rotatex(-PI_2);
+        }
+
+        case Plane.XYF:
+        case Plane.XZF: break;
     }
 
-    auto buffer = vfs.extract(filename);
-
-    auto loaded = aiImportFileFromMemory(
-        buffer.ptr,
-        cast(uint)buffer.length,
-        postprocess,
-        toStringz(std.path.extension(filename))
-    ); 
-
-    ERRORIF(!loaded, to!string(aiGetErrorString()));
-
-    auto scene = new SceneGraph(loaded, sWHD);
-
-    aiReleaseImport(loaded);
-
-    return scene;
-}
-
-auto loadmesh(string filename, string[3] sWHD, Option[] options...)
-{
-    auto scene = load(filename, sWHD, options);
-    return scene.meshes[0];
-}
-
-//*****************************************************************************
-// Loading color and normal maps
-//*****************************************************************************
-
-engine.asset.Material.Loader loadmaterial;
-
-static this()
-{
-    loadmaterial = new engine.asset.Material.Loader();
+    ERROR(format("Invalid planes: %s -> %s", to!string(s), to!string(t)));
+    assert(0);
 }
 
 //*****************************************************************************
 //
-// Make a "local" copy of ASSIMP data structures. This allows us to modify
-// scene graph later (add and remove objects).
+// Abstract class to help manipulating ASSIMP objects
 //
 //*****************************************************************************
 
-class SceneGraph
+abstract class aiObject
 {
-    //-------------------------------------------------------------------------
-    // Specify coordinate system telling which axes specify Width, Height and
-    // Depth.
-    //-------------------------------------------------------------------------
-    
-    static mat3 gWHD;  // Game-wise coordinate system
+    vec3 tovec3(const aiVector3D v) { return vec3(v.x, v.y, v.z); }
+    vec2 tovec2(const aiVector3D v) { return vec2(v.x, v.y); }
+    vec2 tovec2(const aiVector2D v) { return vec2(v.x, v.y); }
 
-    static mat3 WHD(string W, string H, string D)
+    auto AABB(uint count, const aiVector3D* v)
     {
-        const vec3[string] row = [
-            "X":  vec3( 1,  0,  0),
-            "Y":  vec3( 0,  1,  0),
-            "Z":  vec3( 0,  0,  1),
-            "-X": vec3(-1,  0,  0),
-            "-Y": vec3( 0, -1,  0),
-            "-Z": vec3( 0,  0, -1),
-        ];
-
-        return mat3(vec3(row[W]), vec3(row[H]), vec3(row[D]));
+        AABBT!(float) aabb;
+        for(int i = 0; i < count; i++) aabb.expand(tovec3(v[i]));
+        return aabb;
     }
-    static mat3 WHD(string[3] whd)
-    {
-        return WHD(whd[0], whd[1], whd[2]);
-    }
-        
-    static bool handness(vec3 a, vec3 b, vec3 c) { return a.cross(b).dot(c) > 0; }
-    static bool handness(mat3 m) { return handness(vec3(m[0]), vec3(m[1]), vec3(m[2])); }
 
-    //-------------------------------------------------------------------------
+    auto dim(AABBT!(float) aabb)  { return aabb.max - aabb.min; }
+}
 
+//*****************************************************************************
+//
+// Load scene
+//
+//*****************************************************************************
+
+class Scene : aiObject
+{
     mat3 mGameSpace;        // Matrix to rotate objects to "game space"
-    Mesh[int] meshes;
+    const aiScene* scene;   // Loaded scene
     
-    this(const aiScene* scene, mat3 sWHD)
-    {
-        this.mGameSpace = gWHD * sWHD;
-        
-        if(!handness(mGameSpace))
-        {
-            aiApplyPostProcessing(scene, aiProcess_FlipWindingOrder);
-        }
-        
-        foreach(i; 0 .. scene.mNumMeshes)
-        {
-            meshes[i] = new Mesh(scene.mMeshes[i]);
-        }
-    }
-
-    this(const aiScene* scene, string[3] sWHD)
-    {
-        this(scene, WHD(sWHD));
-    }
-
-    //*************************************************************************
-    // Creating copies of buffers
-    //*************************************************************************
-
-    private string tostr(const aiString str)
-    {
-        return to!string(str.data[0 .. str.length]);
-    }
-
-    private vec3[] tovec3(const uint num, const aiVector3D* vec)
-    {
-        vec3[] result;
-        for(int i = 0; i < num; i++) result ~= vec3(vec[i].x, vec[i].y, vec[i].z);
-        return result;
-    }
-
-    private vec3[] tovec3(const uint num, const aiVector3D* vec, const mat3 m)
-    {
-        vec3[] result;
-        for(int i = 0; i < num; i++) result ~= m * vec3(vec[i].x, vec[i].y, vec[i].z);
-        return result;
-    }
-
-    private vec2[] tovec2(const uint num, const aiVector3D* vec)
-    {
-        vec2[] result;
-        for(int i = 0; i < num; i++) result ~= vec2(vec[i].x, vec[i].y);
-        return result;
-    }
-
-    //*************************************************************************
-    //
-    // Temporary Mesh object for processing
-    //
-    //*************************************************************************
-
-    class Mesh
-    {
-        string name;
-        
-        vec3[] pos;
-        vec2[] uv;
-        vec3[] t, b, n;
-        
-        Face[] faces;
-
-        //---------------------------------------------------------------------
-
-        struct Face {
-            ushort a, b, c;
-            this(const aiFace face)
-            {
-                assert(face.mNumIndices == 3);
-                a = cast(ushort)face.mIndices[0];
-                b = cast(ushort)face.mIndices[1];
-                c = cast(ushort)face.mIndices[2];
-            }
-        }
-
-        //---------------------------------------------------------------------
-        // Make a copy from ASSIMP mesh
-        //---------------------------------------------------------------------
-        
-        this(const aiMesh* mesh)
-        {
-            //-----------------------------------------------------------------
-            // Switch mesh coordinate system to game coordinate system
-            //-----------------------------------------------------------------
-            
-            name = tostr(mesh.mName);
-            pos  = tovec3(mesh.mNumVertices, mesh.mVertices, mGameSpace);
-            t    = tovec3(mesh.mNumVertices, mesh.mTangents, mGameSpace);
-            b    = tovec3(mesh.mNumVertices, mesh.mBitangents, mGameSpace);
-            n    = tovec3(mesh.mNumVertices, mesh.mNormals, mGameSpace);
-            uv   = tovec2(mesh.mNumVertices, mesh.mTextureCoords[0]);
-
-            for(int i = 0; i < mesh.mNumFaces; i++) faces ~= Face(mesh.mFaces[i]);
-        }
-
-        //---------------------------------------------------------------------
-        // Adjust scale & reference point
-        //---------------------------------------------------------------------
-
-        void postprocess(vec3 refpoint, vec3 saxis, float scale)
-        {
-            auto AABB() { return AABBT!(float).from_points(pos); }
-            auto dim(AABBT!(float) aabb)  { return aabb.max - aabb.min; }
-
-            //-----------------------------------------------------------------
-            // Move reference point to given point and scale the mesh
-            //-----------------------------------------------------------------
-            
-            //Log << format("Dim(initial): %s", to!string(dim(AABB())));
-
-            auto bb = AABB();
-            auto d  = dim(bb);
-
-            float s = scale / (d * saxis);
-
-            auto rp_now = (bb.min + bb.max) / 2;
-            auto rp_desired = bb.min + vec3(
-                rp_now.x + d.x * refpoint.x,
-                rp_now.y + d.y * refpoint.y,
-                rp_now.z + d.z * refpoint.z
-            );
-
-            auto delta = rp_desired - rp_now;
-            foreach(ref v; pos) v = (v - delta) * s;
-
-            //Log << format("Dim(scaled): %s", to!string(dim(AABB())));
-            /*
-            {
-                auto bb = AABB();
-                Log << format("AABB (%f - %f), (%f - %f), (%f - %f)",
-                    bb.min.x, bb.max.x,
-                    bb.min.y, bb.max.y,
-                    bb.min.z, bb.max.z
-                );
-            } */
-        }
-    }
-
-    //*************************************************************************
-    //*************************************************************************
-
-    class Node
-    {
-        string name;
-
-        Node parent;
-        Node[] children;
-
-        Transform transform;
-        int[] meshes;
-
-        this(Node parent, const aiNode *node)
-        {
-            this.parent = parent;
-            name = tostr(node.mName);
-            //writeln("Node: ", name);
-            foreach(i; 0 .. node.mNumMeshes)
-            {
-                meshes ~= node.mMeshes[i];
-                //writeln("- Mesh: ", node.mMeshes[i]);
-            }
-        }
-    }
-
     //-------------------------------------------------------------------------
 
-    Node root;
-    Node[string] lookup;
+    enum Flag {
+        FlipUV,
+        CombineMeshes,
+    };
 
-    Node loadNode(Node parent, const aiNode *loaded)
+    this(string filename, Plane sPlane, Flag[] flags...)
     {
-        auto node = new Node(parent, loaded);
+        Track.add(this);
 
-        if(node.name) lookup[node.name] = node;
-        
-        foreach(i; 0 .. loaded.mNumChildren)
+        auto getoptions()
         {
-            node.children ~= loadNode(node, loaded.mChildren[i]);
+            aiPostProcessSteps postprocess = 
+                //aiProcess_MakeLeftHanded |
+                aiProcess_Triangulate |
+                //aiProcess_GenNormals |
+                //aiProcess_GenSmoothNormals |
+                aiProcess_CalcTangentSpace |
+                aiProcess_JoinIdenticalVertices |
+                aiProcess_ImproveCacheLocality |
+                aiProcess_OptimizeMeshes;
+
+            foreach(flag; flags) final switch(flag)
+            {
+                case Flag.FlipUV: postprocess |= aiProcess_FlipUVs; break;
+                case Flag.CombineMeshes: postprocess |= aiProcess_OptimizeGraph; break;
+            }
+            
+            return postprocess;
         }
-        return node;
+        
+        mGameSpace = mPlane(sPlane, gPlane);
+        
+        //Log << to!string(mGameSpace);
+        
+        auto buffer = vfs.extract(filename);
+        
+        scene = aiImportFileFromMemory(
+            buffer.ptr,
+            cast(uint)buffer.length,
+            getoptions(),
+            toStringz(std.path.extension(filename))
+        ); 
+
+        ERRORIF(!scene, to!string(aiGetErrorString()));        
     }
 
-    void info()
+    ~this()
     {
-        Log("Loader")
-            << format("Meshes: %d", meshes.length)
-        ;
-
-        foreach(i, mesh; meshes)
-        {
-            Log("Loader") << format("- Mesh %d: %s", i, mesh.name);
-        }
+        Track.remove(this);
+        aiReleaseImport(scene);
     }
 }
+
+//*****************************************************************************
+//
+// Abstract class to help creating GPU buffers
+//
+//*****************************************************************************
+
+abstract class Mesh : aiObject
+{
+    const aiMesh* mesh;
+    
+    mat3 mGameSpace;
+    mat4 mPostProcess;
+        
+    this(const aiMesh* mesh, mat3 mGameSpace, vec3 refpoint, vec3 saxis, float scale)
+    {
+        this.mesh = mesh;
+        this.mGameSpace = mGameSpace;
+
+        auto bb = AABB(mesh.mNumVertices, mesh.mVertices);
+        bb.min  = mGameSpace * bb.min;
+        bb.max  = mGameSpace * bb.max;
+        auto d  = bb.extent();
+        
+        auto rp = refpoint;
+        auto delta = -vec3(d.x * rp.x, d.y * rp.y, d.z * rp.z) - bb.min;
+
+        float s = scale / (saxis * d);
+
+        mPostProcess = mat4.identity()
+            .translate(delta)
+            .scale(s, s, s)
+        ;
+    }
+}
+
+
+

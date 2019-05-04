@@ -22,13 +22,13 @@ debug abstract class Track
             return sum;
         }
 
-        void add(Object what) { add(what.classinfo.toString); }
+        void add(const Object what) { add(what.classinfo.toString); }
         void add(string info) {
             if(!(info in count)) count[info] = 0;
             count[info]++;
         }
 
-        void remove(Object what) { remove(what.classinfo.toString); }
+        void remove(const Object what) { remove(what.classinfo.toString); }
         void remove(string info) {
             count[info]--;
             if(!count[info]) count.remove(info);

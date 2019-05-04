@@ -36,6 +36,7 @@ public {
     import derelict.assimp3.assimp;
     import derelict.lua.lua;
     import gl3n.linalg;
+    import gl3n.aabb;
     
     import std.exception: enforce;
 }
