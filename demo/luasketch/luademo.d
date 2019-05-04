@@ -9,14 +9,7 @@ import engine;
 import std.stdio;
 import std.conv: to;
 
-import engine.asset.lua: Lua;
-/*
-    LuaType,
-    LuaObject, LuaNone, LuaNil,
-    LuaBool, LuaNumber, LuaString,
-    LuaReference,
-    LuaTable, LuaFunction;
-*/
+import engine.util.lua: Lua;
 
 //*****************************************************************************
 //
@@ -33,22 +26,32 @@ import engine.asset.lua: Lua;
 //
 //*****************************************************************************
 
-void printout(Lua.Value[] args)
+import std.variant: Variant;
+
+void printout(Variant[] args)
 {
     foreach(arg; args) writeln("    ", arg.to!string);
 }
 
-void printout(Lua.Value arg)
+void printout(Variant arg)
 {
     printout([arg]);
 }
 
-void printout(string prefix, Lua.Value[] args)
+void printout(string prefix, Variant[] args)
 {
     writeln(prefix);
     printout(args);
 }
 
+void printout(string prefix, Variant args)
+{
+    writeln(prefix);
+    printout(args);
+}
+
+static if(0)
+{
 private extern(C) int luaGimme(lua_State *L) nothrow
 {
     try {
@@ -59,6 +62,7 @@ private extern(C) int luaGimme(lua_State *L) nothrow
     
     return 0;
 }
+}
 
 //-----------------------------------------------------------------------------
 // Creating interface for LUA to access D functions
@@ -66,29 +70,39 @@ private extern(C) int luaGimme(lua_State *L) nothrow
 
 void test()
 {
-    //-------------------------------------------------------------------------
-
     auto lua = new Lua();
-
-    /* LuaL_register is gone, there is new way to do this */
-    //luaL_register(lua.L, "_G", globals.ptr);
-    lua.top = 0;
+    scope(exit) { lua.destroy(); }
 
     //-------------------------------------------------------------------------
     
-    lua.load("data/test.lua");
+    static if(0) printout("main.lua returns:", lua.load("data/main.lua"));
 
     //-------------------------------------------------------------------------
-    // Inspect global symbols
+    
+    printout("test.lua returns:", lua.load("data/test.lua"));
+
+    //-------------------------------------------------------------------------
+    // Call lua function:
     //-------------------------------------------------------------------------
     
-    printout("_G:", lua["_G"].keys());
+    printout("show:", lua["show"].call(1, 2, 3));
+    printout("show:", lua["show"].call(4, 5, 6));
+    printout("show:", lua["show"].call("A", 8, "B"));
+
+    //-------------------------------------------------------------------------
+    // Check multi return
+    //-------------------------------------------------------------------------
+
+    printout("multiret:", lua["multiret"].call());
 
     //-------------------------------------------------------------------------
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
-    
-    printout("Keys:", lua["mytable"].keys());
+
+    printout("mytable['a']:", lua["mytable", "a"].get());
+    printout("mytable['c'][1]:", lua["mytable", "c", 1].get());
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // Call library function: string.format
@@ -100,6 +114,18 @@ void test()
     );
 
     //-------------------------------------------------------------------------
+    // Inspect table created in lua file
+    //-------------------------------------------------------------------------
+    
+    printout("Keys:", lua["mytable"].keys());
+
+    //-------------------------------------------------------------------------
+    // Inspect global symbols
+    //-------------------------------------------------------------------------
+    
+    printout("_G:", lua["_G"].keys());
+
+    //-------------------------------------------------------------------------
     // Get reference to string, and use it to call format
     //-------------------------------------------------------------------------
     
@@ -108,12 +134,6 @@ void test()
         "string.format:",
         stringlib["format"]("Test %d", 13)
     );
-
-    //-------------------------------------------------------------------------
-    // Check multi return
-    //-------------------------------------------------------------------------
-
-    printout("multiret:", lua["multiret"]());
 
 //*
     //-------------------------------------------------------------------------
@@ -127,15 +147,12 @@ void test()
     
     printout("howdy():", ret);
     ret[0].dumptable();
-
+/**/
     //-------------------------------------------------------------------------
     // Load another file and check what main returns
     //-------------------------------------------------------------------------
 
-    printout("main returns:", lua.load("data/main.lua"));
-
-/**/
-    debug Track.report();
+}
     writeln("Done.");
 }
 
@@ -146,7 +163,6 @@ void main()
     // It might be good idea to run GC after assets are loaded (I
     // think it will produce lots of memory allocations).
 
-    engine.game.rungc();
     debug Track.report();
 
     writeln("All done.");

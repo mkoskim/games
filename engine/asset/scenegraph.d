@@ -72,13 +72,13 @@ enum Plane {
 
 Plane gPlane;  // Game-wise coordinate system
 
-private mat3 mPlane(Plane s, Plane t)
+private mat3 mPlane(Plane src, Plane tgt)
 {
     //Log << format("%s -> %s", to!string(s), to!string(t));
 
-    final switch(t)
+    final switch(tgt)
     {
-        case Plane.XY: final switch(s)
+        case Plane.XY: final switch(src)
         {
             case Plane.XY:  return mat3.identity();
             case Plane.XYF: return mat3.identity().rotatez(PI);
@@ -86,7 +86,7 @@ private mat3 mPlane(Plane s, Plane t)
             case Plane.XZF: return mat3.identity().rotatex(PI_2).rotatez(PI);
         }
 
-        case Plane.XZ: final switch(s)
+        case Plane.XZ: final switch(src)
         {
             case Plane.XZ:  return mat3.identity();
             case Plane.XZF: return mat3.identity().rotatey(PI);
@@ -98,7 +98,7 @@ private mat3 mPlane(Plane s, Plane t)
         case Plane.XZF: break;
     }
 
-    ERROR(format("Invalid planes: %s -> %s", to!string(s), to!string(t)));
+    ERROR(format("Invalid planes: %s -> %s", to!string(src), to!string(tgt)));
     assert(0);
 }
 

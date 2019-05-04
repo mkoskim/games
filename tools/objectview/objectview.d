@@ -259,7 +259,7 @@ void main()
     // not bind in the asset file itself).
     //-------------------------------------------------------------------------
 
-    static if(1) auto model = new Model(
+    static if(0) auto model = new Model(
         shader.family,
         "data/Girl/Girl.dae",
         engine.asset.loadmaterial("data/Girl/Girl_cm.png"),
@@ -267,7 +267,7 @@ void main()
         //vec3(0.5, 0.0, 0.5), vec3(0, 1, 0), 1.0
     );
 
-    static if(0) auto model = new Model(
+    static if(1) auto model = new Model(
         state.shader.family,
         "../../engine/stock/generic/mesh/Suzanne/Suzanne.obj",
         engine.asset.loadmaterial(vec4(0.5, 0.5, 0.5, 1)),
@@ -380,7 +380,7 @@ void main()
     void report()
     {
         game.Profile.log("Perf");
-        engine.Track.report("Track");
+        engine.Track.report();
         engine.Track.GC.report("Mem");
 
         game.frametimer.add(0.5, &report);

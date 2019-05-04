@@ -42,8 +42,8 @@ class Framebuffer
 
         checkgl!glBindFramebuffer(GL_FRAMEBUFFER, ID);
 
-        TODO("Use our fine Texture class here.");
-        TODO("Does this (texture as color buffer) really work?!?");
+        //TODO Use our fine Texture class here.
+        //TODO Does this (texture as color buffer) really work?!?
 
         checkgl!glGenTextures(1, &colorbuffer);
         checkgl!glBindTexture(GL_TEXTURE_2D, colorbuffer);
