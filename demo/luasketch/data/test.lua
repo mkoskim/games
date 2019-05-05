@@ -40,7 +40,7 @@ function show(a, b, c)
 end
 
 function callgimme(...)
-    return gimme(...);
+    return gimme.gimme(...);
     end
 
 

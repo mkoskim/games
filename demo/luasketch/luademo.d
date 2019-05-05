@@ -64,6 +64,10 @@ private extern(C) nothrow int luaGimme(lua_State *L)
     return 0;
 }
 
+luaL_Reg[] gimmelib = [
+    luaL_Reg("gimme", &luaGimme),
+];
+
 //-----------------------------------------------------------------------------
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
@@ -87,9 +91,11 @@ void test()
     // Call lua function:
     //-------------------------------------------------------------------------
     
-    printout("show:", lua["show"].call(1, 2, 3));
-    printout("show:", lua["show"].call(4, 5, 6));
-    printout("show:", lua["show"].call("A", 8, "B"));
+    printout("show:", lua["show"].call(&luaGimme, 2, 3));
+    //printout("show:", lua["show"].call(4, 5, 6));
+    //printout("show:", lua["show"].call("A", 8, "B"));
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // Check multi return
@@ -114,12 +120,11 @@ void test()
     // Register function and call it
     //-------------------------------------------------------------------------
 
-    lua.register("gimme", &luaGimme);
-    printout("gimme:", lua["gimme"].call("A", 1, 2, "C"));
+    //lua.register("gimme", &luaGimme);
+    lua.openlib("gimme", gimmelib);
+    printout("gimme:", lua["gimme", "gimme"].call("A", 1, 2, "C"));
     printout("gimme:", lua["callgimme"].call());
     
-static if(0) {
-
     //-------------------------------------------------------------------------
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
