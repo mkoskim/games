@@ -30,10 +30,6 @@ class LuaError : Exception
 //
 //*****************************************************************************
 
-// TODO: Writing and reading array fields, creating arrays
-// TODO: User data as parameter / return value
-// TODO: Register D functions inside a table (name space)
-
 // NOTE: Lua and D garbage collectors do not work nicely together.
 // Main problem are references (luaL_ref, luaL_unref). It is better not to
 // take them, and if you do, it is good to keep the scope limited, and ensure
@@ -128,7 +124,7 @@ abstract class LuaInterface
     {
         auto call(U...)(U args)
         {
-            expect(Type.Function);
+            expect(LUA_TFUNCTION);
             makeroom(args.length + 1);
 
             foreach(arg; args) push(arg);
@@ -174,7 +170,7 @@ abstract class LuaInterface
         {
             int frame = top - argc;
 
-            expect(Type.Function, frame);
+            expect(LUA_TFUNCTION, frame);
             lua_call(L, argc, LUA_MULTRET);
             return pop(top - frame + 1);
         }
@@ -188,12 +184,16 @@ abstract class LuaInterface
     {
         void push()                 { lua_pushnil(L); } 
         void push(bool b)           { lua_pushboolean(L, b); }
-        void push(int  i)           { lua_pushnumber(L, i); }
+        void push(int  i)           { lua_pushinteger(L, i); }
+        void push(long l)           { lua_pushinteger(L, l); }
         void push(float f)          { lua_pushnumber(L, f); }
         void push(double d)         { lua_pushnumber(L, d); }
         void push(char *s)          { lua_pushstring(L, s); }
         void push(char *s, int l)   { lua_pushlstring(L, s, l); }
         void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
+        void push(void *p)          { lua_pushlightuserdata(L, p); }
+
+        void push(T...)(T values)   { foreach(v; values) push(v); }
     }
     
     //-------------------------------------------------------------------------
@@ -202,21 +202,7 @@ abstract class LuaInterface
 
     private
     {
-        enum Type
-        {
-            None            = LUA_TNONE,
-            Nil             = LUA_TNIL,
-            Bool            = LUA_TBOOLEAN,
-            Number          = LUA_TNUMBER,
-            String          = LUA_TSTRING,
-            UserData        = LUA_TUSERDATA,
-            LightUserData   = LUA_TLIGHTUSERDATA,
-            Table           = LUA_TTABLE,
-            Function        = LUA_TFUNCTION,
-            Thread          = LUA_TTHREAD,
-        }
-
-        Type type(int index = -1) { return cast(Type)lua_type(L, index); }
+        int type(int index = -1) { return lua_type(L, index); }
 
         void expect(int expected, int index = -1)
         {
@@ -227,10 +213,17 @@ abstract class LuaInterface
         {
             switch(type(index))
             {
-                case Type.Nil:      return Variant(null);
-                case Type.Bool:     return Variant(lua_toboolean(L, index));
-                case Type.Number:   return Variant(lua_tonumber(L, index));
-                case Type.String:   return Variant(lua_tostring(L, index));
+                case LUA_TNIL:      return Variant(null);
+                case LUA_TBOOLEAN:  return Variant(lua_toboolean(L, index));
+                case LUA_TNUMBER:   return Variant(lua_tonumber(L, index));
+                case LUA_TSTRING:   return Variant(lua_tostring(L, index));
+                case LUA_TUSERDATA:
+                case LUA_TLIGHTUSERDATA: return Variant(lua_touserdata(L, index));
+
+                case LUA_TNONE:
+                case LUA_TTABLE:
+                case LUA_TFUNCTION:
+                case LUA_TTHREAD:
                 default: break;
             }
             ERROR(format("Invalid type: %s", to!string(type(index)))); assert(0);
@@ -258,11 +251,6 @@ abstract class LuaInterface
     // D functions
     //-------------------------------------------------------------------------
 
-    void register(string name, lua_CFunction f)
-    {
-        lua_register(L, toStringz(name), f);
-    }
-
     Variant[] args()
     {
         return pop(top());
@@ -270,8 +258,24 @@ abstract class LuaInterface
 
     int result(T...)(T results)
     {
-        foreach(r; results) push(r);
+        push(results);
         return results.length;
+    }
+
+    void register(string name, lua_CFunction f)
+    {
+        // Global function
+        lua_register(L, toStringz(name), f);
+    }
+
+    void openlib(string name, luaL_Reg[] ftable)
+    {
+        //Log << format("Openlib %s", name);
+        ftable ~= luaL_Reg(null, null);
+        lua_newtable(L);
+        luaL_setfuncs(L, ftable.ptr, 0);
+        lua_setglobal(L, toStringz(name));
+        //Log << "Done";
     }
 
     //-------------------------------------------------------------------------
