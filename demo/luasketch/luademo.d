@@ -5,10 +5,6 @@
 //*****************************************************************************
 
 import engine;
-
-import std.stdio;
-import std.conv: to;
-
 import engine.util.lua: Lua;
 
 //*****************************************************************************
@@ -30,7 +26,7 @@ import std.variant: Variant;
 
 void printout(Variant[] args)
 {
-    foreach(arg; args) writeln("    ", arg.to!string);
+    foreach(arg; args) Log << format("    %s", to!string(arg));
 }
 
 void printout(Variant arg)
@@ -40,31 +36,32 @@ void printout(Variant arg)
 
 void printout(string prefix, Variant[] args)
 {
-    writeln(prefix);
+    Log << prefix;
     printout(args);
 }
 
-void printout(string prefix, Variant args)
+void printout(string prefix, Variant arg)
 {
-    writeln(prefix);
-    printout(args);
+    printout(prefix, [arg]);
 }
 
-static if(0)
+private extern(C) nothrow int luaGimme(lua_State *L)
 {
-private extern(C) int luaGimme(lua_State *L) nothrow
-{
-    try {
+    try
+    {
         auto lua = Lua.attach(L);
-        // Get args
-        printout("Lua: ", lua.pop(lua.top()));
-        // store results
-        // return number of results
-    } catch(Throwable) {
+
+        auto args = lua.args();
+
+        Log << format("Args: %s", to!string(args));
+        
+        return lua.result("called");
+        
+    } catch(Throwable)
+    {
     }
     
     return 0;
-}
 }
 
 //-----------------------------------------------------------------------------
@@ -75,6 +72,8 @@ void test()
 {
     auto lua = new Lua();
     scope(exit) { lua.destroy(); }
+
+    vfs.fallback = true;
 
     //-------------------------------------------------------------------------
     
@@ -111,6 +110,14 @@ void test()
     printout("mytable['a']:", lua["mytable", "a"].get());
     printout("mytable['c'][1]:", lua["mytable", "c", 1].get());
 
+    //-------------------------------------------------------------------------
+    // Register function and call it
+    //-------------------------------------------------------------------------
+
+    lua.register("gimme", &luaGimme);
+    printout("gimme:", lua["gimme"].call("A", 1, 2, "C"));
+    printout("gimme:", lua["callgimme"].call());
+    
 static if(0) {
 
     //-------------------------------------------------------------------------
@@ -153,7 +160,7 @@ static if(0) {
     //-------------------------------------------------------------------------
 
 }
-    writeln("Done.");
+    Log << "Done.";
 }
 
 void main()
@@ -165,6 +172,6 @@ void main()
 
     debug Track.report();
 
-    writeln("All done.");
+    Log << "All done.";
 }
 

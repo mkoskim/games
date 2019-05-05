@@ -8,7 +8,8 @@ module engine.util;
 
 //-----------------------------------------------------------------------------
 
-public {
+public
+{
     import std.string: format;
     import std.conv: to;
 
@@ -17,8 +18,8 @@ public {
 
     import engine.util.clock: Clock;
     import engine.util.timer: Timer;
-    import vfs = engine.util.vfs;
     import engine.util.lua;
+    import vfs = engine.util.vfs;
 
     debug import engine.util.track: Track;
     import engine.util.logger: Log, Watch;

@@ -25,6 +25,7 @@ public {
 
 public import engine.math;
 public import engine.ext;
+public import engine.util;
 
 //-----------------------------------------------------------------------------
 // Default libraries (for types and functions to work with them)

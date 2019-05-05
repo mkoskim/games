@@ -11,11 +11,12 @@ module engine.util.lua;
 
 //-----------------------------------------------------------------------------
 
-import std.variant: Variant;
-
-import engine.asset.util;
+import engine.util;
 import derelict.lua.lua;
-static import std.conv;
+
+import std.string: toStringz;
+import std.variant: Variant;
+import std.conv: to;
 
 //-----------------------------------------------------------------------------
 
@@ -29,9 +30,9 @@ class LuaError : Exception
 //
 //*****************************************************************************
 
-// TODO: Next, register D functions and call them
 // TODO: Writing and reading array fields, creating arrays
 // TODO: User data as parameter / return value
+// TODO: Register D functions inside a table (name space)
 
 // NOTE: Lua and D garbage collectors do not work nicely together.
 // Main problem are references (luaL_ref, luaL_unref). It is better not to
@@ -59,8 +60,9 @@ class Lua : LuaInterface
         luaL_requiref(L, "string", luaopen_string, 1);
         luaL_requiref(L, "table", luaopen_table, 1);
         luaL_requiref(L, "math", luaopen_math, 1);
+        luaL_requiref(L, "debug", luaopen_debug, 1);
 
-        luaL_requiref(L, "io", luaopen_io, 1);
+        //luaL_requiref(L, "io", luaopen_io, 1);
         //luaL_requiref(L, "package", luaopen_package, 1);
         //luaL_requiref(L, "os", luaopen_os, 1);
         
@@ -73,16 +75,16 @@ class Lua : LuaInterface
         load(file);
     }
 
+    static Proxy attach(lua_State *L) { return new Proxy(L); }
+
     //-----------------------------------------------------------------------------
     // This just wraps lua_State with interface class
     //-----------------------------------------------------------------------------
 
-    static class Proxy : LuaInterface
+    protected static class Proxy : LuaInterface
     {
-        protected this(lua_State *L) { super(L); }
+        this(lua_State *L) { super(L); }
     }
-
-    static Proxy attach(lua_State *L) { return new Proxy(L); }
 }
 
 //*****************************************************************************
@@ -182,7 +184,7 @@ abstract class LuaInterface
     // Pushing arguments to stack
     //-------------------------------------------------------------------------
     
-    private
+    private 
     {
         void push()                 { lua_pushnil(L); } 
         void push(bool b)           { lua_pushboolean(L, b); }
@@ -193,7 +195,7 @@ abstract class LuaInterface
         void push(char *s, int l)   { lua_pushlstring(L, s, l); }
         void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
     }
-
+    
     //-------------------------------------------------------------------------
     // Lua value types
     //-------------------------------------------------------------------------
@@ -250,8 +252,28 @@ abstract class LuaInterface
         }
 
         void discard(int n) { lua_pop(L, n); }
-    }
+        }
     
+    //-------------------------------------------------------------------------
+    // D functions
+    //-------------------------------------------------------------------------
+
+    void register(string name, lua_CFunction f)
+    {
+        lua_register(L, toStringz(name), f);
+    }
+
+    Variant[] args()
+    {
+        return pop(top());
+    }
+
+    int result(T...)(T results)
+    {
+        foreach(r; results) push(r);
+        return results.length;
+    }
+
     //-------------------------------------------------------------------------
     // Lua sandbox errors
     //-------------------------------------------------------------------------
@@ -266,178 +288,5 @@ abstract class LuaInterface
         
         void check(int errcode) { errorif(errcode != LUA_OK, to!string(pop())); }
     }
-}
-
-//*****************************************************************************
-//
-//
-//
-//*****************************************************************************
-
-static if(0) class Dummy
-{
-    //-------------------------------------------------------------------------
-    // Getting values from stack
-    //-------------------------------------------------------------------------
-    
-    /*
-    bool   toboolean(int index = -1) { return std.conv.to!bool(lua_toboolean(L, index)); }
-    double tonumber(int index = -1)  { return lua_tonumber(L, index); }
-    string tostring(int index = -1)  { return std.conv.to!(string)(lua_tostring(L, index)); }
-    Value  tovalue(int index = -1)   { return new Value(this, index); }
-    */
-
-    //int    toref(int index = -1)     { lua_pushvalue(L, index); return luaL_ref(L, LUA_REGISTRYINDEX); }
-    //void   unref(int id)             { luaL_unref(L, LUA_REGISTRYINDEX, id); }
-
-    //-------------------------------------------------------------------------
-    // Lua value wrapper for interfacing to D
-    //-------------------------------------------------------------------------
-    
-    static class Value
-    {
-        union Payload {
-            bool   _bool;
-            double _number;
-            string _string;
-            void*  _data;
-            int    _ref;
-        }
-        
-        Type    type;
-        Payload payload;
-
-        //---------------------------------------------------------------------
-        // Creating value from D type (to be pushed later)... One way to do
-        // this: lua.push(bool); return lua.pop();
-        //---------------------------------------------------------------------
-
-/*
-        this(T: bool)  (T value) { payload._bool   = value; type = Type.Bool; }
-        this(T: int)   (T value) { payload._number = value; type = Type.Number; }
-        this(T: float) (T value) { payload._number = value; type = Type.Number; }
-        this(T: double)(T value) { payload._number = value; type = Type.Number; }
-        this(T: string)(T value) { payload._string = value; type = Type.String; }
-*/
-        //---------------------------------------------------------------------
-        // Creating value from stack. Do not use this directly, use
-        // lua.tovalue() instead.
-        //---------------------------------------------------------------------
-        
-        //---------------------------------------------------------------------
-
-        ~this()
-        {
-            debug Track.remove(this);
-            switch(type)
-            {
-                //case Type.Table:    lua.unref(payload._ref); break;
-                //case Type.Function: lua.unref(payload._ref); break;
-                default: break;
-            }
-        }
-
-        //---------------------------------------------------------------------
-
-        T to(T: string)()
-        {
-            switch(type)
-            {
-                case Type.Nil:      return "null";
-                case Type.Bool:     return std.conv.to!string(payload._bool);
-                case Type.Number:   return std.conv.to!string(payload._number);
-                case Type.String:   return std.conv.to!string(payload._string);
-                default:            ERROR(format("Invalid type: %s", std.conv.to!string(type)));
-            }
-            assert(0);
-        }
-
-        T to(T: int)()
-        {
-            switch(type)
-            {
-                case Type.Bool:     return std.conv.to!int(payload._bool);
-                case Type.Number:   return std.conv.to!int(payload._number);
-                default:            ERROR(format("Invalid type: %s", std.conv.to!string(type)));
-            }
-            assert(0);
-        }
-
-        //---------------------------------------------------------------------
-
-        void push(Lua lua)
-        {
-            switch(type)
-            {
-                case Type.None:     return;
-                case Type.Nil:      lua.push(); return;
-                case Type.Bool:     lua.push(payload._bool); return;
-                case Type.Number:   lua.push(payload._number); return;
-                case Type.String:   lua.push(payload._string); return;
-                //case Type.Table:    
-                //case Type.Function: lua_rawgeti(lua.L, LUA_REGISTRYINDEX, payload._ref); return;
-
-                default:
-                case Type.UserData:
-                case Type.LightUserData:
-                case Type.Thread:   lua.error(); return;
-            }
-        }
-        
-        Value opIndex(U...)(U args)
-        {
-            errorif(type != Type.Table, "Not a table.");
-            return lua.gettable(this, args);
-        }
-
-        Value[] keys()
-        {
-            errorif(type != Type.Table, "Not a table.");
-            Value[] result;
-            
-            lua.push(this);
-            lua.push();
-            while(lua_next(lua.L, -2))
-            {
-                result ~= lua.tovalue(-2);
-                lua.discard(1);
-            }
-            scope(exit) lua.discard(1);
-            return result;
-        }
-
-        //---------------------------------------------------------------------
-
-        Value[] opCall(U...)(U args)
-        {
-            errorif(type != Type.Function, "Not a function");
-
-            lua.makeroom(args.length + 1);
-            lua.push(this);
-            foreach(arg; args) lua.push(arg);
-            return lua._call();
-        }        
-
-        //---------------------------------------------------------------------
-
-        void dumptable()
-        {
-            errorif(type != Type.Table, "Not a table.");
-            
-            //writefln("Table: 0x%08x", payload._ref);
-            lua.push(this);
-            lua.push();
-            while(lua_next(lua.L, -2))
-            {
-                /*writefln("    [%s] = %s",
-                    lua.tovalue(-2).to!string(),
-                    lua.tovalue(-1).to!string()
-                );
-                */
-                lua.discard(1);
-            }
-            lua.discard(1);
-        }
-    }        
 }
 

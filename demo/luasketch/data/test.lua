@@ -2,7 +2,8 @@
 -- Testing...
 -- ----------------------------------------------------------------------------
 
-print "Hey!"
+local info = debug.getinfo(1,'S');
+print("Source:", info.source);
 
 -- ----------------------------------------------------------------------------
 
@@ -14,8 +15,6 @@ mytable = {
         [2] = "c"
     }
 }
-
-print(mytable.a, _G.mytable.c[1])
 
 -- ----------------------------------------------------------------------------
 
@@ -40,9 +39,8 @@ function show(a, b, c)
     return a
 end
 
-function passthrough(...)
-    gimme(...);
-    return 0
+function callgimme(...)
+    return gimme(...);
     end
 
 

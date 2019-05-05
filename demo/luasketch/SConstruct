@@ -2,7 +2,7 @@ env = Environment()
 
 env["MAIN"] = "luademo.d"
 env["BLOBFILES"] = [
-    "data/",
+    #"data/",
 ]
 
 env.SConscript("../../engine/build/scons/build.py", "env")
