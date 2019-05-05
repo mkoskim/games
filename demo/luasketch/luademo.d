@@ -175,6 +175,7 @@ void main()
     // It might be good idea to run GC after assets are loaded (I
     // think it will produce lots of memory allocations).
 
+    Track.GC.run();
     debug Track.report();
 
     Log << "All done.";

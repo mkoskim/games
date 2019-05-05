@@ -3,12 +3,13 @@ env = Environment()
 env["MAIN"] = "objectview.d"
 
 env["BLOBFILES"] = [
-    "../../engine/stock/generic/",
-    "data/",
+#    "../../engine/stock/generic/",
+#    "data/",
 
-    "../../engine/render/scene3d/glsl/",
-    "../../engine/render/postprocess/glsl/",
-    "../../engine/stock/system/",
+#    "../../engine/render/scene3d/glsl/",
+#    "../../engine/render/postprocess/glsl/",
+#    "../../engine/stock/system/",
 ]
 
 env.SConscript("../../engine/build/scons/build.py", "env")
+
