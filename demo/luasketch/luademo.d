@@ -55,8 +55,11 @@ static if(0)
 private extern(C) int luaGimme(lua_State *L) nothrow
 {
     try {
-        auto lua  = new Lua(L);
+        auto lua = Lua.attach(L);
+        // Get args
         printout("Lua: ", lua.pop(lua.top()));
+        // store results
+        // return number of results
     } catch(Throwable) {
     }
     
@@ -96,6 +99,12 @@ void test()
     printout("multiret:", lua["multiret"].call());
 
     //-------------------------------------------------------------------------
+    // Call function via table: string.format
+    //-------------------------------------------------------------------------
+    
+    printout("string.format:", lua["string", "format"].call("Test %d", 12));
+
+    //-------------------------------------------------------------------------
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
 
@@ -103,15 +112,6 @@ void test()
     printout("mytable['c'][1]:", lua["mytable", "c", 1].get());
 
 static if(0) {
-
-    //-------------------------------------------------------------------------
-    // Call library function: string.format
-    //-------------------------------------------------------------------------
-    
-    printout(
-        "string.format:",
-        lua["string", "format"]("Test %d", 12)
-    );
 
     //-------------------------------------------------------------------------
     // Inspect table created in lua file

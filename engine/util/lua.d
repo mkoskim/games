@@ -5,13 +5,6 @@
 // This module is meant to make calls to Lua subsystem, and install D
 // functions to Lua environment to be called.
 //
-// NOTE: Lua and D garbage collectors do not work nicely together. Main
-// problem is with types requiring ref/unref, like tables and functions.
-// Because of this, we need to simplify this code a lot, removing all
-// sorts of automations. That makes it more laborous to call the
-// functions and get results, but let's hope it won't matter that
-// much for our purposes.
-//
 //*****************************************************************************
 
 module engine.util.lua;
@@ -39,6 +32,11 @@ class LuaError : Exception
 // TODO: Next, register D functions and call them
 // TODO: Writing and reading array fields, creating arrays
 // TODO: User data as parameter / return value
+
+// NOTE: Lua and D garbage collectors do not work nicely together.
+// Main problem are references (luaL_ref, luaL_unref). It is better not to
+// take them, and if you do, it is good to keep the scope limited, and ensure
+// that ref gets undone.
 
 //-----------------------------------------------------------------------------
 // This creates actual Lua sandbox
