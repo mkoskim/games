@@ -183,7 +183,7 @@ void main()
 {
     game.init(800, 600);
 
-    //vfs.fallback = true;
+    vfs.fallback = true;
 
     //*************************************************************************
     // Before loading models, we create at least one shader to be able to
