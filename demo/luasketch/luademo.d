@@ -75,7 +75,9 @@ luaL_Reg[] bouncelib = [
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
 
-void test()
+Lua.Ref tbl;    // This is allowed?!? It's private, no this() constructor...
+
+auto test()
 {
     auto lua = new Lua();
     scope(exit) { lua.destroy(); }
@@ -90,14 +92,22 @@ void test()
     
     printout("test.lua returns:", lua.load("data/test.lua"));
 
+    lua["a"] = 101;
+    Log << to!string(lua["a"].get());
+
+    lua["mytable"]["c"][1] = "c";
+    Log << to!string(lua["mytable"]["c"][1].get());
+
+    Log << to!string(lua["show"].call(1, 2, 3));
+
     //-------------------------------------------------------------------------
     // Call lua function:
     //-------------------------------------------------------------------------
     
-    printout("show:", lua["show"].call(&bounceback, 2, 3));
     printout("show:", lua["show"].call(1, 2, 3));
     printout("show:", lua["show"].call(4, 5, 6));
     printout("show:", lua["show"].call("A", 8, "B"));
+    //printout("show:", lua["show"].call(&bounceback, 2, 3));
 
     //-------------------------------------------------------------------------
     // Check multi return
@@ -109,7 +119,7 @@ void test()
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
 
-    lua["mytable"]["c"][1].set("c");
+    lua["mytable"]["c"][1] = "c";
     printout("mytable['a'] = ", lua["mytable"]["a"].get());
     printout("mytable['c'][1] = ", lua["mytable"]["c"][1].get());
 
@@ -117,15 +127,10 @@ void test()
     printout("mytable['1'] = ", lua["mytable"]["1"].get());
 
     //-------------------------------------------------------------------------
-    // Inspect table created in lua file
+    // Inspect tables
     //-------------------------------------------------------------------------
     
     printout("Keys:", lua["mytable"].keys());
-
-    //-------------------------------------------------------------------------
-    // Inspect global symbols
-    //-------------------------------------------------------------------------
-    
     printout("_G:", lua["_G"].keys());
 
     //-------------------------------------------------------------------------
@@ -138,45 +143,54 @@ void test()
     // Register function and call it
     //-------------------------------------------------------------------------
 
-    lua["gbounce"].set(&bounceback);
+    lua["gbounce"] = &bounceback;
     printout("bounce (global):", lua["gbounce"].call(1, 2));
 
-    lua["mytable"]["bounce"].set(&bounceback);
+    lua["mytable"]["bounce"] = &bounceback;
     printout("bounce (mytable):", lua["mytable"]["bounce"].call(1, 2));
 
-    lua["bounce"].set(bouncelib);
+    lua["bounce"] = bouncelib;
     printout("bounce:", lua["bounce"]["bounceback"].call("A", 1, 2, "C"));
+
     printout("bounce:", lua["callbounce"].call());
 
     //-------------------------------------------------------------------------
-    // Invalid uses of indexing
+    // Fixed: Leaves carbage to stack
     //-------------------------------------------------------------------------
 
-    lua["show"];  // Fixed: Leaves carbage to stack
-
-    auto luashow = lua["show"];
-    luashow.call(1);
-    auto multiret = lua["multiret"];
-    printout("luashow", luashow.call(1));
-    //luashow.call(2);
-
-static if(0) {
+    lua["show"];
 
     //-------------------------------------------------------------------------
     // Get reference to string, and use it to call format
     //-------------------------------------------------------------------------
     
-    auto stringlib = lua["string"];
-    printout(
-        "string.format:",
-        stringlib["format"]("Test %d", 13)
-    );
+static if(0) {
 
-//*
+    {
+        auto luashow = lua["show"];
+        luashow.call(1);
+        luashow.call(2);
+        auto multiret = lua["multiret"];
+        printout("luashow", luashow.call(1));
+    }
+    
+    {
+        auto stringlib = lua["string"];
+        printout(
+            "string.format:",
+            stringlib["format"].call("%s.%s (1)", "string", "format")
+        );
+        printout(
+            "string.format:",
+            stringlib["format"].call("%s.%s (2)", "string", "format")
+        );
+    }
+
     //-------------------------------------------------------------------------
     // howdy() returns table, check it
     //-------------------------------------------------------------------------
 
+/*
     auto howdy = lua["howdy"];
     writeln("howdy = ", howdy.type);
     
@@ -185,8 +199,24 @@ static if(0) {
     printout("howdy():", ret);
     ret[0].dumptable();
 /**/
+
 }
+    //-------------------------------------------------------------------------
+
     Log << "Done.";
+
+    //-------------------------------------------------------------------------
+    // Give ref outside of function: asserts. It is still possible to get
+    // ref out of lua_State scope and get undefined behavior.
+    //-------------------------------------------------------------------------
+
+    //tbl = lua["mytable"];
+
+    //-------------------------------------------------------------------------
+    // Another way to get ref out from scope.
+    //-------------------------------------------------------------------------
+
+    //return lua["mytable"];
 }
 
 void main()
