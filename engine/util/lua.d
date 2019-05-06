@@ -156,24 +156,18 @@ abstract class LuaInterface
         }
 
         // Set head value
-        void set(T)(T value)
-        {
-            push(value);
-            lua_settable(L, -3);
-            discard();
-        }
-
-        void set(lua_CFunction f)
-        {
-            lua_pushcfunction(L, f);
-            lua_settable(L, -3);
-            discard();
-        }
+        void set(T)(T value)      { push(value); _set(); }
+        void set(lua_CFunction f) { lua_pushcfunction(L, f); _set(); }
 
         void set(luaL_Reg[] ftable)
         {
             lua_newtable(L);
             luaL_setfuncs(L, ftable.ptr, 0);
+            _set();
+        }
+
+        private void _set()
+        {
             lua_settable(L, -3);
             discard();
         }

@@ -115,6 +115,9 @@ void test()
     printout("mytable['a'] = ", lua["mytable"]["a"].get());
     printout("mytable['c'][1] = ", lua["mytable"]["c"][1].get());
 
+    printout("mytable[1]   = ", lua["mytable"][1].get());
+    printout("mytable['1'] = ", lua["mytable"]["1"].get());
+
     //-------------------------------------------------------------------------
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
