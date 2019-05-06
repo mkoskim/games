@@ -46,7 +46,7 @@ void printout(string prefix, Variant arg)
 }
 
 //lua_CFunction luaGimme
-extern(C) nothrow int luaGimme(lua_State *L)
+extern(C) nothrow int bounceback(lua_State *L)
 {
     try
     {
@@ -54,9 +54,10 @@ extern(C) nothrow int luaGimme(lua_State *L)
 
         auto args = lua.args();
 
-        Log << format("Args: %s", to!string(args));
+        Log << format("bounceback(): %s", to!string(args));
         
         return lua.result("called");
+        //return lua.result(args);
         
     } catch(Throwable)
     {
@@ -65,8 +66,8 @@ extern(C) nothrow int luaGimme(lua_State *L)
     return 0;
 }
 
-luaL_Reg[] gimmelib = [
-    luaL_Reg("gimme", &luaGimme),
+luaL_Reg[] bouncelib = [
+    luaL_Reg("bounceback", &bounceback),
     luaL_Reg(null, null)
 ];
 
@@ -93,7 +94,7 @@ void test()
     // Call lua function:
     //-------------------------------------------------------------------------
     
-    printout("show:", lua["show"].call(&luaGimme, 2, 3));
+    printout("show:", lua["show"].call(&bounceback, 2, 3));
     printout("show:", lua["show"].call(1, 2, 3));
     printout("show:", lua["show"].call(4, 5, 6));
     printout("show:", lua["show"].call("A", 8, "B"));
@@ -136,15 +137,15 @@ void test()
     // Register function and call it
     //-------------------------------------------------------------------------
 
-    lua["globalgimme"].set(&luaGimme);
-    printout("gimme (global):", lua["globalgimme"].call(1, 2));
+    lua["gbounce"].set(&bounceback);
+    printout("bounce (global):", lua["gbounce"].call(1, 2));
 
-    lua["mytable"]["gimme"].set(&luaGimme);
-    printout("gimme (mytable):", lua["mytable"]["gimme"].call(1, 2));
+    lua["mytable"]["bounce"].set(&bounceback);
+    printout("bounce (mytable):", lua["mytable"]["bounce"].call(1, 2));
 
-    lua["gimme"].set(gimmelib);
-    printout("gimme:", lua["gimme"]["gimme"].call("A", 1, 2, "C"));
-    printout("gimme:", lua["callgimme"].call());
+    lua["bounce"].set(bouncelib);
+    printout("bounce:", lua["bounce"]["bounceback"].call("A", 1, 2, "C"));
+    printout("bounce:", lua["callbounce"].call());
 
 static if(0) {
 
