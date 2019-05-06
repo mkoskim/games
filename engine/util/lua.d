@@ -139,9 +139,11 @@ abstract class LuaInterface
         {
             if(top == lua.top) lua.discard(2);
         }
+
+        @disable this(this);
         
         // Go deeper to table hierarchy
-        auto opIndex(T)(T arg)
+        ref Top opIndex(T)(T arg)
         in(lua.top == top)
         {
             lua_gettable(lua.L, -2);
