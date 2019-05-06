@@ -117,99 +117,84 @@ abstract class LuaInterface
     //
     //-------------------------------------------------------------------------
 
-    Top opIndex(T)(T arg)
+    auto opIndex(string key)
     {
-        lua_getglobal(L, toStringz("_G"));
-        push(arg);
-        return Top(this);
+        return Ref(this, key);
     }
 
-    private struct Top
+    void opIndexAssign(U)(U value, string key)
+    {
+        push(value);
+        lua_setglobal(L, toStringz(key));
+    }
+
+    private struct Ref
     {
         LuaInterface lua;
-        int top;
+        int r;
         
-        this(LuaInterface lua)
+        this(LuaInterface lua, string key)
         {
             this.lua = lua;
-            this.top = lua.top;
+            lua_getglobal(lua.L, toStringz(key));
+            r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
         }
         
-        ~this()
+        this(Ref p, int newref)
         {
-            if(top == lua.top) lua.discard(2);
+            this.lua = p.lua;
+            this.r   = newref;
+        }
+        
+        this(this)
+        {
+            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
+            r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
         }
 
-        @disable this(this);
+        ~this() in(lua !is null, "Lua.Ref.~this: lua is null") 
+        {
+            luaL_unref(lua.L, LUA_REGISTRYINDEX, r);
+        }
         
         // Go deeper to table hierarchy
-        ref Top opIndex(T)(T arg)
-        in(lua.top == top)
+        auto opIndex(T)(T key)
         {
-            lua_gettable(lua.L, -2);
-            lua_remove(lua.L, -2);
-            lua.push(arg);
-            return this;
-        }
-
-        // Call head
-        auto call(T...)(T args)
-        in(lua.top == top)
-        {
-            lua_gettable(lua.L, -2);
-            lua.expect(LUA_TFUNCTION);
-
-            lua.pushargs(args);
-            
-            scope(exit) lua.discard();
-            return lua._call(args.length);        
-        }
-        
-        // Get head value
-        auto get()
-        in(lua.top == top)
-        {
+            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
+            lua.push(key);
             lua_gettable(lua.L, -2);
             scope(exit) lua.discard();
-            return lua.pop();
+            return Ref(this, luaL_ref(lua.L, LUA_REGISTRYINDEX));
         }
 
-        // Set head value
-        void set(T)(T value)
-        in(lua.top == top)
+        // Set value
+        void opIndexAssign(T, U)(U value, T key)
         {
+            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
+            lua.push(key);
             lua.push(value);
-            _set();
-        }
-
-        void set(lua_CFunction f)
-        in(lua.top == top)
-        {
-            lua_pushcfunction(lua.L, f);
-            _set();
-        }
-
-        void set(luaL_Reg[] ftable)
-        in(lua.top == top)
-        {
-            lua_newtable(lua.L);
-            luaL_setfuncs(lua.L, ftable.ptr, 0);
-            _set();
-        }
-
-        private void _set()
-        {
             lua_settable(lua.L, -3);
             lua.discard();
         }
-
-        // Get table keys. Mainly for debugging purposes
-        auto keys()
-        in(lua.top == top)
+        
+        // Get value
+        auto get()
         {
-            lua_gettable(lua.L, -2);
-            lua_remove(lua.L, -2);
+            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
+            return lua.pop();
+        }
 
+        // Call
+        auto call(T...)(T args)
+        {
+            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
+            lua.pusha(args);
+            return lua._call(args.length);        
+        }
+
+        auto keys()
+        {
+            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
             Variant[] k;
             lua_pushnil(lua.L);
             while(lua_next(lua.L, -2) != 0)
@@ -242,8 +227,6 @@ abstract class LuaInterface
         auto _call(int argc = 0)
         {
             int frame = top - argc;
-
-            expect(LUA_TFUNCTION, frame);
             lua_call(L, argc, LUA_MULTRET);
             return pop(top - frame + 1);
         }
@@ -273,9 +256,17 @@ abstract class LuaInterface
         void push(char *s)          { lua_pushstring(L, s); }
         void push(char *s, int l)   { lua_pushlstring(L, s, l); }
         void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
+
         void push(void *p)          { lua_pushlightuserdata(L, p); }
 
-        void pushargs(T...)(T values)
+        void push(lua_CFunction f)  { lua_pushcfunction(L, f); }
+        void push(luaL_Reg[] ftable)
+        {
+            lua_newtable(L);
+            luaL_setfuncs(L, ftable.ptr, 0);
+        }
+
+        void pusha(T...)(T values)
         {
             checkstack(values.length);
             foreach(v; values) push(v);
@@ -292,7 +283,7 @@ abstract class LuaInterface
 
         void expect(int expected, int index = -1)
         {
-            errorif(type(index) != expected, format("Wrong type: %d != %d", type(index), expected));
+            errorif(type(index) != expected);
         }
 
         Variant peek(int index)
@@ -302,13 +293,13 @@ abstract class LuaInterface
                 case LUA_TBOOLEAN:  return Variant(lua_toboolean(L, index));
                 case LUA_TNUMBER:   return Variant(lua_tonumber(L, index));
                 case LUA_TSTRING:   return Variant(lua_tostring(L, index));
-                case LUA_TUSERDATA:
-                case LUA_TLIGHTUSERDATA: return Variant(lua_touserdata(L, index));
+                case LUA_TLIGHTUSERDATA:
+                case LUA_TUSERDATA: return Variant(lua_touserdata(L, index));
 
+                case LUA_TFUNCTION: 
                 case LUA_TNONE:
                 case LUA_TNIL:      //return Variant(null);
                 case LUA_TTABLE:
-                case LUA_TFUNCTION:
                 case LUA_TTHREAD:
                 default: break;
             }
@@ -344,7 +335,7 @@ abstract class LuaInterface
 
     int result(T...)(T results)
     {
-        pushargs(results);
+        pusha(results);
         return results.length;
     }
 
