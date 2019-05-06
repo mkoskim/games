@@ -26,7 +26,7 @@ import std.variant: Variant;
 
 void printout(Variant[] args)
 {
-    foreach(arg; args) Log << format("    %s", to!string(arg));
+    foreach(arg; args) Log << format("    %s", arg.to!string);
 }
 
 void printout(Variant arg)
@@ -54,7 +54,7 @@ extern(C) nothrow int bounceback(lua_State *L)
 
         auto args = lua.args();
 
-        Log << format("bounceback(): %s", to!string(args));
+        Log << format("bounceback(): %s", args.to!string);
         
         return lua.result("called");
         //return lua.result(args);
@@ -82,8 +82,6 @@ auto test()
     auto lua = new Lua();
     scope(exit) { lua.destroy(); }
 
-    vfs.fallback = true;
-
     //-------------------------------------------------------------------------
     
     static if(0) printout("main.lua returns:", lua.load("data/main.lua"));
@@ -93,10 +91,10 @@ auto test()
     printout("test.lua returns:", lua.load("data/test.lua"));
 
     lua["a"] = 101;
-    Log << to!string(lua["a"].get());
+    Log << lua["a"].value();
 
     lua["mytable"]["c"][1] = "c";
-    Log << to!string(lua["mytable"]["c"][1].get());
+    Log << lua["mytable"]["c"][1].value();
 
     Log << to!string(lua["show"].call(1, 2, 3));
 
@@ -120,11 +118,11 @@ auto test()
     //-------------------------------------------------------------------------
 
     lua["mytable"]["c"][1] = "c";
-    printout("mytable['a'] = ", lua["mytable"]["a"].get());
-    printout("mytable['c'][1] = ", lua["mytable"]["c"][1].get());
+    printout("mytable['a'] = ", lua["mytable"]["a"].value());
+    printout("mytable['c'][1] = ", lua["mytable"]["c"][1].value());
 
-    printout("mytable[1]   = ", lua["mytable"][1].get());
-    printout("mytable['1'] = ", lua["mytable"]["1"].get());
+    printout("mytable[1]   = ", lua["mytable"][1].value());
+    printout("mytable['1'] = ", lua["mytable"]["1"].value());
 
     //-------------------------------------------------------------------------
     // Inspect tables
@@ -221,6 +219,8 @@ static if(0) {
 
 void main()
 {
+    vfs.fallback = true;
+
     test();
 
     // It might be good idea to run GC after assets are loaded (I
