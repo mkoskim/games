@@ -99,8 +99,6 @@ void test()
     printout("show:", lua["show"].call(4, 5, 6));
     printout("show:", lua["show"].call("A", 8, "B"));
 
-    //lua["show"];  // Leaves carbage to stack
-
     //-------------------------------------------------------------------------
     // Check multi return
     //-------------------------------------------------------------------------
@@ -149,6 +147,18 @@ void test()
     lua["bounce"].set(bouncelib);
     printout("bounce:", lua["bounce"]["bounceback"].call("A", 1, 2, "C"));
     printout("bounce:", lua["callbounce"].call());
+
+    //-------------------------------------------------------------------------
+    // Invalid uses of indexing
+    //-------------------------------------------------------------------------
+
+    lua["show"];  // Fixed: Leaves carbage to stack
+
+    auto luashow = lua["show"];
+    luashow.call(1);
+    auto multiret = lua["multiret"];
+    printout("luashow", luashow.call(1));
+    //luashow.call(2);
 
 static if(0) {
 

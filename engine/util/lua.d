@@ -121,74 +121,103 @@ abstract class LuaInterface
     {
         lua_getglobal(L, toStringz("_G"));
         push(arg);
-        return new Top();
+        return Top(this);
     }
 
-    private class Top
+    private struct Top
     {
+        LuaInterface lua;
+        int top;
+        
+        this(LuaInterface lua)
+        {
+            this.lua = lua;
+            this.top = lua.top;
+        }
+        
+        ~this()
+        {
+            if(top == lua.top) lua.discard(2);
+        }
+        
         // Go deeper to table hierarchy
         auto opIndex(T)(T arg)
+        in(lua.top == top)
         {
-            lua_gettable(L, -2);
-            lua_remove(L, -2);
-            push(arg);
+            lua_gettable(lua.L, -2);
+            lua_remove(lua.L, -2);
+            lua.push(arg);
             return this;
         }
 
         // Call head
         auto call(T...)(T args)
+        in(lua.top == top)
         {
-            lua_gettable(L, -2);
-            expect(LUA_TFUNCTION);
+            lua_gettable(lua.L, -2);
+            lua.expect(LUA_TFUNCTION);
 
-            pushargs(args);
+            lua.pushargs(args);
             
-            scope(exit) discard();
-            return _call(args.length);        
+            scope(exit) lua.discard();
+            return lua._call(args.length);        
         }
         
         // Get head value
         auto get()
+        in(lua.top == top)
         {
-            lua_gettable(L, -2);
-            scope(exit) discard();
-            return pop();
+            lua_gettable(lua.L, -2);
+            scope(exit) lua.discard();
+            return lua.pop();
         }
 
         // Set head value
-        void set(T)(T value)      { push(value); _set(); }
-        void set(lua_CFunction f) { lua_pushcfunction(L, f); _set(); }
+        void set(T)(T value)
+        in(lua.top == top)
+        {
+            lua.push(value);
+            _set();
+        }
+
+        void set(lua_CFunction f)
+        in(lua.top == top)
+        {
+            lua_pushcfunction(lua.L, f);
+            _set();
+        }
 
         void set(luaL_Reg[] ftable)
+        in(lua.top == top)
         {
-            lua_newtable(L);
-            luaL_setfuncs(L, ftable.ptr, 0);
+            lua_newtable(lua.L);
+            luaL_setfuncs(lua.L, ftable.ptr, 0);
             _set();
         }
 
         private void _set()
         {
-            lua_settable(L, -3);
-            discard();
+            lua_settable(lua.L, -3);
+            lua.discard();
         }
 
         // Get table keys. Mainly for debugging purposes
         auto keys()
+        in(lua.top == top)
         {
-            lua_gettable(L, -2);
-            lua_remove(L, -2);
+            lua_gettable(lua.L, -2);
+            lua_remove(lua.L, -2);
 
             Variant[] k;
-            lua_pushnil(L);
-            while(lua_next(L, -2) != 0)
+            lua_pushnil(lua.L);
+            while(lua_next(lua.L, -2) != 0)
             {
-                discard();
-                k ~= peek(-1);
+                lua.discard();
+                k ~= lua.peek(-1);
             }
-            scope(exit) discard();
+            scope(exit) lua.discard();
             return k;
         }
-
     }
 
     //-------------------------------------------------------------------------
