@@ -45,21 +45,17 @@ void printout(string prefix, Variant arg)
     printout(prefix, [arg]);
 }
 
-//lua_CFunction luaGimme
+//-----------------------------------------------------------------------------
+
 extern(C) nothrow int bounceback(lua_State *L)
 {
     try
     {
         auto lua = Lua.attach(L);
-
         auto args = lua.args();
-
-        Log << format("bounceback(): %s", args.to!string);
-        
-        return lua.result("called");
-        //return lua.result(args);
-        
-    } catch(Throwable)
+        return lua.result(args);
+    }
+    catch(Throwable)
     {
     }
     
@@ -75,8 +71,6 @@ luaL_Reg[] bouncelib = [
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
 
-Lua.Ref tbl;    // This is allowed?!? It's private, no this() constructor...
-
 auto test()
 {
     auto lua = new Lua();
@@ -91,12 +85,12 @@ auto test()
     printout("test.lua returns:", lua.load("data/test.lua"));
 
     lua["a"] = 101;
-    Log << lua["a"].value();
+    lua["a"].value() >> Log;
 
     lua["mytable"]["c"][1] = "c";
-    Log << lua["mytable"]["c"][1].value();
+    lua["mytable"]["c"][1].value() >> Log;
 
-    Log << to!string(lua["show"].call(1, 2, 3));
+    lua["show"].call(1, 2, 3) >> Log;
 
     //-------------------------------------------------------------------------
     // Call lua function:
@@ -142,15 +136,17 @@ auto test()
     //-------------------------------------------------------------------------
 
     lua["gbounce"] = &bounceback;
-    printout("bounce (global):", lua["gbounce"].call(1, 2));
+    lua["gbounce"].call("global", "bounce") >> Log;
 
     lua["mytable"]["bounce"] = &bounceback;
-    printout("bounce (mytable):", lua["mytable"]["bounce"].call(1, 2));
+    lua["mytable"]["bounce"].call("mytable", "bounce") >> Log;
 
     lua["bounce"] = bouncelib;
-    printout("bounce:", lua["bounce"]["bounceback"].call("A", 1, 2, "C"));
+    lua["bounce"]["bounceback"].call("bounce", "lib") >> Log;
 
-    printout("bounce:", lua["callbounce"].call());
+    printout("callbounce:", lua["callbounce"].call(1));
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // Fixed: Leaves carbage to stack
@@ -162,8 +158,6 @@ auto test()
     // Get reference to string, and use it to call format
     //-------------------------------------------------------------------------
     
-static if(0) {
-
     {
         auto luashow = lua["show"];
         luashow.call(1);
@@ -201,14 +195,7 @@ static if(0) {
 }
     //-------------------------------------------------------------------------
 
-    Log << "Done.";
-
-    //-------------------------------------------------------------------------
-    // Give ref outside of function: asserts. It is still possible to get
-    // ref out of lua_State scope and get undefined behavior.
-    //-------------------------------------------------------------------------
-
-    //tbl = lua["mytable"];
+    "Done." >> Log;
 
     //-------------------------------------------------------------------------
     // Another way to get ref out from scope.
@@ -229,6 +216,6 @@ void main()
     Track.GC.run();
     debug Track.report();
 
-    Log << "All done.";
+    "All done." >> Log;
 }
 
