@@ -36,22 +36,25 @@ Sketching the interface:
 ******************************************************************************/
 
 public import std.string: format;
+public import std.conv: to;
 
 private import std.stdio: writeln, writefln, stdout;
 
 //-----------------------------------------------------------------------------
 
-class Log
+static class Log
 {
-    static opCall(string channel) { return new Named(channel); }
-    static opBinary(string op)(string entry)
+    static auto opCall(string channel) { return new Named(channel); }
+    static auto opBinary(string op, T)(T entry)
     {
         static if(op == "<<")
         {
-            return new Unnamed() << entry;
+            return unnamed << to!string(entry);
         }
         else static assert(0, "Operator " ~ op ~ " not implemented.");
     }
+
+    //-------------------------------------------------------------------------
 
     private static class Named
     {
@@ -59,11 +62,11 @@ class Log
         
         this(string channel) { this.channel = channel; }
         
-        auto opBinary(string op)(string entry)
+        auto opBinary(string op, T)(T entry)
         {
             static if(op == "<<")
             {
-                writeln(":", channel, ">", entry);
+                writeln(":", channel, ">", to!string(entry));
                 stdout.flush();
                 return this;
             }
@@ -71,17 +74,25 @@ class Log
         }
     }
 
-    private static class Unnamed
+    //-------------------------------------------------------------------------
+
+    private
     {
-        auto opBinary(string op)(string entry)
+        static Unnamed unnamed;
+        static this() { unnamed = new Unnamed(); }
+    
+        static class Unnamed
         {
-            static if(op == "<<")
+            auto opBinary(string op)(string entry)
             {
-                writeln(entry);
-                stdout.flush();
-                return this;
+                static if(op == "<<")
+                {
+                    writeln(entry);
+                    stdout.flush();
+                    return this;
+                }
+                else static assert(0, "Operator " ~ op ~ " not implemented.");
             }
-            else static assert(0, "Operator " ~ op ~ " not implemented.");
         }
     }
 }
@@ -112,8 +123,6 @@ class Watch
 
     private static class Unnamed
     {
-        //this() { }
-        
         auto update(string tag, string entry)
         {
             writeln("@", tag,">", entry);

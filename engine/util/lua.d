@@ -5,6 +5,10 @@
 // This module is meant to make calls to Lua subsystem, and install D
 // functions to Lua environment to be called.
 //
+// NOTE: Lua and D garbage collectors do not work nicely together. You need
+// to be extra careful that you delete lua_State before carbage collector,
+// and that you don't have loosen references outside of lua_State scope.
+//
 //*****************************************************************************
 
 module engine.util.lua;
@@ -17,22 +21,9 @@ import derelict.lua.lua;
 import std.variant: Variant;
 import std.conv: to;
 
-//-----------------------------------------------------------------------------
-
-class LuaError : Exception
-{
-    this(string msg) { super(msg); }
-    this() { this("Lua error."); }
-}
-
 //*****************************************************************************
 //
 //*****************************************************************************
-
-// NOTE: Lua and D garbage collectors do not work nicely together.
-// Main problem are references (luaL_ref, luaL_unref). It is better not to
-// take them, and if you do, it is good to keep the scope limited, and ensure
-// that ref gets undone.
 
 //-----------------------------------------------------------------------------
 // This creates actual Lua sandbox
@@ -178,7 +169,7 @@ abstract class LuaInterface
         }
         
         // Get value
-        auto get()
+        auto value()
         {
             lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
             return lua.pop();
@@ -354,3 +345,12 @@ abstract class LuaInterface
         void check(int errcode) { errorif(errcode != LUA_OK, to!string(pop())); }
     }
 }
+
+class LuaError : Exception
+{
+    this(string msg) { super(msg); }
+    this() { this("Lua error."); }
+}
+
+//-----------------------------------------------------------------------------
+
