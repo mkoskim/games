@@ -124,6 +124,10 @@ abstract class LuaInterface
         LuaInterface lua;
         int r;
         
+        //---------------------------------------------------------------------
+        
+        @disable this();
+
         this(LuaInterface lua, string key)
         {
             this.lua = lua;
@@ -148,6 +152,7 @@ abstract class LuaInterface
             luaL_unref(lua.L, LUA_REGISTRYINDEX, r);
         }
         
+        //---------------------------------------------------------------------
         // Go deeper to table hierarchy
         auto opIndex(T)(T key)
         {
@@ -157,6 +162,8 @@ abstract class LuaInterface
             scope(exit) lua.discard();
             return Ref(this, luaL_ref(lua.L, LUA_REGISTRYINDEX));
         }
+
+        //---------------------------------------------------------------------
 
         // Set value
         void opIndexAssign(T, U)(U value, T key)
@@ -182,6 +189,8 @@ abstract class LuaInterface
             lua.pusha(args);
             return lua._call(args.length);        
         }
+
+        //---------------------------------------------------------------------
 
         auto keys()
         {
@@ -257,10 +266,29 @@ abstract class LuaInterface
             luaL_setfuncs(L, ftable.ptr, 0);
         }
 
-        void pusha(T...)(T values)
+        void push(Variant v)
+        {
+	        if(!v.hasValue()) lua_pushnil(L);
+            else if(v.peek!(bool)) push(v.get!(bool));
+            else if(v.peek!(int)) push(v.get!(int));
+            else if(v.peek!(float)) push(v.get!(float));
+            else if(v.peek!(double)) push(v.get!(double));
+            else if(v.peek!(string)) push(v.get!(string));
+            else assert(false);
+        }
+
+        int pusha(Variant[] values)
+        {
+            checkstack(cast(int)values.length);
+            foreach(v; values) push(v);
+            return cast(int)values.length;
+        }
+
+        int pusha(T...)(T values)
         {
             checkstack(values.length);
             foreach(v; values) push(v);
+            return values.length;
         }
     }
     
@@ -283,7 +311,7 @@ abstract class LuaInterface
             {
                 case LUA_TBOOLEAN:  return Variant(lua_toboolean(L, index));
                 case LUA_TNUMBER:   return Variant(lua_tonumber(L, index));
-                case LUA_TSTRING:   return Variant(lua_tostring(L, index));
+                case LUA_TSTRING:   return Variant(lua_tostring(L, index).to!string);
                 case LUA_TLIGHTUSERDATA:
                 case LUA_TUSERDATA: return Variant(lua_touserdata(L, index));
 
@@ -326,8 +354,7 @@ abstract class LuaInterface
 
     int result(T...)(T results)
     {
-        pusha(results);
-        return results.length;
+        return pusha(results);
     }
 
     //-------------------------------------------------------------------------

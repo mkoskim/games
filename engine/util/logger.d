@@ -42,78 +42,68 @@ private import std.stdio: writeln, writefln, stdout;
 
 //-----------------------------------------------------------------------------
 
-static class Log
+class Log
 {
-    static auto opCall(string channel) { return new Named(channel); }
-    static auto opBinary(string op, T)(T entry)
-    {
-        static if(op == "<<")
-        {
-            return unnamed << to!string(entry);
-        }
-        else static assert(0, "Operator " ~ op ~ " not implemented.");
-    }
+    static opCall(string channel) { return Named(channel); }
 
-    //-------------------------------------------------------------------------
-
-    private static class Named
+    private struct Named
     {
         string channel;
         
         this(string channel) { this.channel = channel; }
+        @disable this();
         
-        auto opBinary(string op, T)(T entry)
+        auto opBinary(string op, T)(T entry) if(op == "<<")
         {
-            static if(op == "<<")
-            {
-                writeln(":", channel, ">", to!string(entry));
-                stdout.flush();
-                return this;
-            }
-            else static assert(0, "Operator " ~ op ~ " not implemented.");
+            log(to!string(entry));
+            return this;
+        }
+        void opBinaryRight(string op, T)(T entry) if(op == ">>")
+        {
+            log(to!string(entry));
+        }
+
+        private void log(string entry)
+        {
+            writeln(":", channel, ">", entry);
+            stdout.flush();
         }
     }
 
     //-------------------------------------------------------------------------
 
-    private
+    static opBinary(string op, T)(T entry) if(op == "<<")
     {
-        static Unnamed unnamed;
-        static this() { unnamed = new Unnamed(); }
-    
-        static class Unnamed
-        {
-            auto opBinary(string op)(string entry)
-            {
-                static if(op == "<<")
-                {
-                    writeln(entry);
-                    stdout.flush();
-                    return this;
-                }
-                else static assert(0, "Operator " ~ op ~ " not implemented.");
-            }
-        }
+        log(to!string(entry));
     }
+
+    static opBinaryRight(string op, T)(T entry) if(op == ">>")
+    {
+        log(to!string(entry));
+    }
+
+    static private auto log(string entry)
+    {
+        writeln(entry);
+        stdout.flush();
+    }
+
 }
 
 //-----------------------------------------------------------------------------
 
 class Watch
 {
-    static opCall(string channel) { return new Named(channel); }
-    static update(string tag, string value)
-    {
-        return (new Unnamed()).update(tag, value);
-    }
+    static opCall(string channel) { return Named(channel); }
 
-    private static class Named
+    private struct Named
     {
         string channel;
         
         this(string channel) { this.channel = channel; }
+        @disable this();
         
-        auto update(string tag, string entry)
+        ref Named update(string tag, string entry)
         {
             writeln("@", channel, ":", tag, ">", entry);
             stdout.flush();
@@ -121,9 +111,16 @@ class Watch
         }
     }
 
-    private static class Unnamed
+    //-------------------------------------------------------------------------
+
+    static update(string tag, string value)
     {
-        auto update(string tag, string entry)
+        return Unnamed().update(tag, value);
+    }
+
+    private struct Unnamed
+    {
+        ref Unnamed update(string tag, string entry)
         {
             writeln("@", tag,">", entry);
             stdout.flush();
