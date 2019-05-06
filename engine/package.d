@@ -14,18 +14,7 @@ public {
     import game = engine.game;
     import asset = engine.asset;
     import gpu = engine.gpu;
-
-    import engine.util.logger: Log, Watch;
-    debug import engine.util.track: Track;
 }
-
-//-----------------------------------------------------------------------------
-// Some helpers
-//-----------------------------------------------------------------------------
-
-public import engine.math;
-public import engine.ext;
-public import engine.util;
 
 //-----------------------------------------------------------------------------
 // Default libraries (for types and functions to work with them)
@@ -37,9 +26,20 @@ public {
     import derelict.assimp3.assimp;
     import derelict.lua.lua;
     import gl3n.linalg;
-    import gl3n.aabb;
-    
+    import gl3n.aabb;    
+}
+
+//-----------------------------------------------------------------------------
+// Some helpers
+//-----------------------------------------------------------------------------
+
+public {
+    import engine.math;
+    import engine.ext;
+    import engine.util;
     import std.exception: enforce;
+    import engine.util.logger: Log, Watch;
+    debug import engine.util.track: Track;
 }
 
 //-----------------------------------------------------------------------------

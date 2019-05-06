@@ -45,7 +45,8 @@ void printout(string prefix, Variant arg)
     printout(prefix, [arg]);
 }
 
-private extern(C) nothrow int luaGimme(lua_State *L)
+//lua_CFunction luaGimme
+extern(C) nothrow int luaGimme(lua_State *L)
 {
     try
     {
@@ -66,6 +67,7 @@ private extern(C) nothrow int luaGimme(lua_State *L)
 
 luaL_Reg[] gimmelib = [
     luaL_Reg("gimme", &luaGimme),
+    luaL_Reg(null, null)
 ];
 
 //-----------------------------------------------------------------------------
@@ -92,39 +94,26 @@ void test()
     //-------------------------------------------------------------------------
     
     printout("show:", lua["show"].call(&luaGimme, 2, 3));
-    //printout("show:", lua["show"].call(4, 5, 6));
-    //printout("show:", lua["show"].call("A", 8, "B"));
+    printout("show:", lua["show"].call(1, 2, 3));
+    printout("show:", lua["show"].call(4, 5, 6));
+    printout("show:", lua["show"].call("A", 8, "B"));
 
-static if(0) {
+    //lua["show"];  // Leaves carbage to stack
 
     //-------------------------------------------------------------------------
     // Check multi return
     //-------------------------------------------------------------------------
 
     printout("multiret:", lua["multiret"].call());
-
-    //-------------------------------------------------------------------------
-    // Call function via table: string.format
-    //-------------------------------------------------------------------------
     
-    printout("string.format:", lua["string", "format"].call("Test %d", 12));
-
     //-------------------------------------------------------------------------
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
 
-    printout("mytable['a']:", lua["mytable", "a"].get());
-    printout("mytable['c'][1]:", lua["mytable", "c", 1].get());
+    lua["mytable"]["c"][1].set("c");
+    printout("mytable['a'] = ", lua["mytable"]["a"].get());
+    printout("mytable['c'][1] = ", lua["mytable"]["c"][1].get());
 
-    //-------------------------------------------------------------------------
-    // Register function and call it
-    //-------------------------------------------------------------------------
-
-    //lua.register("gimme", &luaGimme);
-    lua.openlib("gimme", gimmelib);
-    printout("gimme:", lua["gimme", "gimme"].call("A", 1, 2, "C"));
-    printout("gimme:", lua["callgimme"].call());
-    
     //-------------------------------------------------------------------------
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
@@ -136,6 +125,28 @@ static if(0) {
     //-------------------------------------------------------------------------
     
     printout("_G:", lua["_G"].keys());
+
+    //-------------------------------------------------------------------------
+    // Call function via table: string.format
+    //-------------------------------------------------------------------------
+    
+    printout("string.format:", lua["string"]["format"].call("Test %d", 12));
+
+    //-------------------------------------------------------------------------
+    // Register function and call it
+    //-------------------------------------------------------------------------
+
+    lua["globalgimme"].set(&luaGimme);
+    printout("gimme (global):", lua["globalgimme"].call(1, 2));
+
+    lua["mytable"]["gimme"].set(&luaGimme);
+    printout("gimme (mytable):", lua["mytable"]["gimme"].call(1, 2));
+
+    lua["gimme"].set(gimmelib);
+    printout("gimme:", lua["gimme"]["gimme"].call("A", 1, 2, "C"));
+    printout("gimme:", lua["callgimme"].call());
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // Get reference to string, and use it to call format
@@ -160,10 +171,6 @@ static if(0) {
     printout("howdy():", ret);
     ret[0].dumptable();
 /**/
-    //-------------------------------------------------------------------------
-    // Load another file and check what main returns
-    //-------------------------------------------------------------------------
-
 }
     Log << "Done.";
 }

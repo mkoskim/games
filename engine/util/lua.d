@@ -14,7 +14,6 @@ module engine.util.lua;
 import engine.util;
 import derelict.lua.lua;
 
-import std.string: toStringz;
 import std.variant: Variant;
 import std.conv: to;
 
@@ -43,6 +42,7 @@ class Lua : LuaInterface
 {
     ~this()
     {
+        Log << format("Top @ %d", top);
         lua_close(L);
         debug Track.remove(this);
     }
@@ -104,38 +104,84 @@ abstract class LuaInterface
     // First, get identifier at the top of stack with indexing. Then, use
     // Top object returned by indexing. For example:
     //
-    //      lua["math", "abs"].call(100);       // math.abs = function
+    //      lua["math"]["abs"].call(100);       // math.abs = function
     //      lua["math"].keys();                 // math = table
     //
     //-------------------------------------------------------------------------
 
-    Top opIndex(U...)(string root, U args)
+    Top opIndex(T)(T arg)
     {
-        lua_getglobal(L, toStringz(root));
-        foreach(key; args)
-        {
-            push(key);
-            lua_gettable(L, -2);
-        }
+        lua_getglobal(L, toStringz("_G"));
+        push(arg);
         return new Top();
     }
 
-    class Top
+    private class Top
     {
-        auto call(U...)(U args)
+        auto opIndex(T)(T arg)
         {
-            expect(LUA_TFUNCTION);
-            makeroom(args.length + 1);
+            lua_gettable(L, -2);
+            lua_remove(L, -2);
+            push(arg);
+            return this;
+        }
 
-            foreach(arg; args) push(arg);
+        auto call(T...)(T args)
+        {
+            lua_gettable(L, -2);
+            expect(LUA_TFUNCTION);
+
+            pushargs(args);
             
+            scope(exit) discard();
             return _call(args.length);        
         }
         
         auto get()
         {
+            lua_gettable(L, -2);
+            scope(exit) discard();
             return pop();
         }
+
+        void set(lua_CFunction f)
+        {
+            lua_pushcfunction(L, f);
+            lua_settable(L, -3);
+            discard();
+        }
+
+        void set(luaL_Reg[] ftable)
+        {
+            lua_newtable(L);
+            luaL_setfuncs(L, ftable.ptr, 0);
+            lua_settable(L, -3);
+            discard();
+        }
+
+        void set(T)(T value)
+        {
+            push(value);
+            lua_settable(L, -3);
+            discard();
+        }
+
+        auto keys()
+        {
+            lua_gettable(L, -2);
+            lua_remove(L, -2);
+
+            Variant[] k;
+            lua_pushnil(L);
+            while(lua_next(L, -2) != 0)
+            {
+                discard();
+                k ~= peek(-1);
+            }
+            scope(exit) discard();
+            return k;
+        }
+
     }
 
     //-------------------------------------------------------------------------
@@ -146,8 +192,8 @@ abstract class LuaInterface
     {
         @property int  top()          { return lua_gettop(L); }
         @property void top(int index) { lua_settop(L, index); }
-        void makeroom(int elems)      { lua_checkstack(L, elems); }
-    }    
+        void checkstack(int elems)    { lua_checkstack(L, elems); }
+    }
 
     //-------------------------------------------------------------------------
     // Loading Lua functions
@@ -175,14 +221,13 @@ abstract class LuaInterface
             return pop(top - frame + 1);
         }
     }
-            
+
     //-------------------------------------------------------------------------
     // Pushing arguments to stack
     //-------------------------------------------------------------------------
     
     private 
     {
-        void push()                 { lua_pushnil(L); } 
         void push(bool b)           { lua_pushboolean(L, b); }
         void push(int  i)           { lua_pushinteger(L, i); }
         void push(long l)           { lua_pushinteger(L, l); }
@@ -193,11 +238,15 @@ abstract class LuaInterface
         void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
         void push(void *p)          { lua_pushlightuserdata(L, p); }
 
-        void push(T...)(T values)   { foreach(v; values) push(v); }
+        void pushargs(T...)(T values)
+        {
+            checkstack(values.length);
+            foreach(v; values) push(v);
+        }
     }
     
     //-------------------------------------------------------------------------
-    // Lua value types
+    // Popping values
     //-------------------------------------------------------------------------
 
     private
@@ -206,10 +255,10 @@ abstract class LuaInterface
 
         void expect(int expected, int index = -1)
         {
-            errorif(type(index) != expected, "Wrong type.");
+            errorif(type(index) != expected, format("Wrong type: %d != %d", type(index), expected));
         }
 
-        Variant get(int index)
+        Variant peek(int index)
         {
             switch(type(index))
             {
@@ -232,20 +281,20 @@ abstract class LuaInterface
         Variant pop()
         {
             scope(exit) discard(1);
-            return get(-1);
+            return peek(-1);
         }
 
-        Variant[] pop(int n = 1)
+        Variant[] pop(int n)
         {
             scope(exit) discard(n);
             
             Variant[] ret = new Variant[n];
-            foreach(i; 0 .. n) ret[i] = get(top - n + i + 1);
+            foreach(i; 0 .. n) ret[i] = peek(top - n + i + 1);
             return ret;
         }
 
-        void discard(int n) { lua_pop(L, n); }
-        }
+        void discard(int n = 1) { lua_pop(L, n); }
+    }
     
     //-------------------------------------------------------------------------
     // D functions
@@ -258,24 +307,8 @@ abstract class LuaInterface
 
     int result(T...)(T results)
     {
-        push(results);
+        pushargs(results);
         return results.length;
-    }
-
-    void register(string name, lua_CFunction f)
-    {
-        // Global function
-        lua_register(L, toStringz(name), f);
-    }
-
-    void openlib(string name, luaL_Reg[] ftable)
-    {
-        //Log << format("Openlib %s", name);
-        ftable ~= luaL_Reg(null, null);
-        lua_newtable(L);
-        luaL_setfuncs(L, ftable.ptr, 0);
-        lua_setglobal(L, toStringz(name));
-        //Log << "Done";
     }
 
     //-------------------------------------------------------------------------

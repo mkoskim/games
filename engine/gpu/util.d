@@ -11,8 +11,6 @@ module engine.gpu.util;
 public import engine.util;
 public import derelict.opengl;
 public import gl3n.linalg;
-public import std.variant: Variant;
-public import std.string: toStringz;
 
 //-----------------------------------------------------------------------------
 

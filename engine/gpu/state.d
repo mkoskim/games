@@ -16,6 +16,7 @@ import engine.gpu.util;
 import engine.gpu.shader;
 import engine.gpu.framebuffer;
 import engine.game.instance;
+import std.variant: Variant;
 
 class State
 {
