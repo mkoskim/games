@@ -107,6 +107,14 @@ abstract class LuaInterface
     //      lua["math"]["abs"].call(100);       // math.abs = function
     //      lua["math"].keys();                 // math = table
     //
+    // BUG: If none of the final operations are called, this mechanism
+    // leaves two values to stack:
+    //
+    //      lua["math"]["abs"];     // Two values left to stack
+    //
+    // Adding stack cleaning to destructor won't help, it leads to segfault
+    // at least when program terminates.
+    //
     //-------------------------------------------------------------------------
 
     Top opIndex(T)(T arg)
@@ -118,6 +126,7 @@ abstract class LuaInterface
 
     private class Top
     {
+        // Go deeper to table hierarchy
         auto opIndex(T)(T arg)
         {
             lua_gettable(L, -2);
@@ -126,6 +135,7 @@ abstract class LuaInterface
             return this;
         }
 
+        // Call head
         auto call(T...)(T args)
         {
             lua_gettable(L, -2);
@@ -137,11 +147,20 @@ abstract class LuaInterface
             return _call(args.length);        
         }
         
+        // Get head value
         auto get()
         {
             lua_gettable(L, -2);
             scope(exit) discard();
             return pop();
+        }
+
+        // Set head value
+        void set(T)(T value)
+        {
+            push(value);
+            lua_settable(L, -3);
+            discard();
         }
 
         void set(lua_CFunction f)
@@ -159,13 +178,7 @@ abstract class LuaInterface
             discard();
         }
 
-        void set(T)(T value)
-        {
-            push(value);
-            lua_settable(L, -3);
-            discard();
-        }
-
+        // Get table keys. Mainly for debugging purposes
         auto keys()
         {
             lua_gettable(L, -2);
@@ -185,18 +198,7 @@ abstract class LuaInterface
     }
 
     //-------------------------------------------------------------------------
-    // Stack management & inspection
-    //-------------------------------------------------------------------------
-
-    private
-    {
-        @property int  top()          { return lua_gettop(L); }
-        @property void top(int index) { lua_settop(L, index); }
-        void checkstack(int elems)    { lua_checkstack(L, elems); }
-    }
-
-    //-------------------------------------------------------------------------
-    // Loading Lua functions
+    // Load & execute Lua scripts
     //-------------------------------------------------------------------------
     
     auto load(string s)
@@ -223,14 +225,24 @@ abstract class LuaInterface
     }
 
     //-------------------------------------------------------------------------
+    // Stack management & inspection
+    //-------------------------------------------------------------------------
+
+    private
+    {
+        @property int  top()          { return lua_gettop(L); }
+        @property void top(int index) { lua_settop(L, index); }
+        void checkstack(int elems)    { lua_checkstack(L, elems); }
+    }
+
+    //-------------------------------------------------------------------------
     // Pushing arguments to stack
     //-------------------------------------------------------------------------
     
     private 
     {
         void push(bool b)           { lua_pushboolean(L, b); }
-        void push(int  i)           { lua_pushinteger(L, i); }
-        void push(long l)           { lua_pushinteger(L, l); }
+        void push(int  i)           { lua_pushnumber(L, i); }
         void push(float f)          { lua_pushnumber(L, f); }
         void push(double d)         { lua_pushnumber(L, d); }
         void push(char *s)          { lua_pushstring(L, s); }
@@ -262,7 +274,6 @@ abstract class LuaInterface
         {
             switch(type(index))
             {
-                case LUA_TNIL:      return Variant(null);
                 case LUA_TBOOLEAN:  return Variant(lua_toboolean(L, index));
                 case LUA_TNUMBER:   return Variant(lua_tonumber(L, index));
                 case LUA_TSTRING:   return Variant(lua_tostring(L, index));
@@ -270,6 +281,7 @@ abstract class LuaInterface
                 case LUA_TLIGHTUSERDATA: return Variant(lua_touserdata(L, index));
 
                 case LUA_TNONE:
+                case LUA_TNIL:      //return Variant(null);
                 case LUA_TTABLE:
                 case LUA_TFUNCTION:
                 case LUA_TTHREAD:
@@ -297,7 +309,7 @@ abstract class LuaInterface
     }
     
     //-------------------------------------------------------------------------
-    // D functions
+    // Args & return values for D functions
     //-------------------------------------------------------------------------
 
     Variant[] args()
@@ -326,4 +338,3 @@ abstract class LuaInterface
         void check(int errcode) { errorif(errcode != LUA_OK, to!string(pop())); }
     }
 }
-
