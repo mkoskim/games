@@ -10,6 +10,7 @@ module engine.util;
 
 public
 {
+    import std.string: toStringz;
     import std.string: format;
     import std.conv: to;
 
