@@ -53,6 +53,7 @@ extern(C) nothrow int bounceback(lua_State *L)
     {
         auto lua = Lua.attach(L);
         auto args = lua.args();
+        Log("bounce: %s", args);
         return lua.result(args);
     }
     catch(Throwable)
@@ -102,11 +103,23 @@ auto test()
 
     //-------------------------------------------------------------------------
     
-    //printout("main.lua returns:", lua.load("data/main.lua"));
+    printout("test.lua returns:", lua.load("data/test.lua"));
 
     //-------------------------------------------------------------------------
-    
-    printout("test.lua returns:", lua.load("data/test.lua"));
+    // These are "equal" (one is Ref, another is Variant(Ref)
+    //-------------------------------------------------------------------------
+
+    lua["math"] >> Log;
+    lua["math"].value >> Log;
+
+    //-------------------------------------------------------------------------
+    // These are not. First is Ref, another is Variant(3.14)
+    //-------------------------------------------------------------------------
+
+    lua["math"]["pi"] >> Log;
+    lua["math"]["pi"].value >> Log;
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // Inspect table created in lua file
@@ -114,11 +127,11 @@ auto test()
 
     //lua["mytable"].value();
 
-    printout("mytable['a'] = ", lua["mytable"]["a"].value());
-    printout("mytable['c'][1] = ", lua["mytable"]["c"][1].value());
+    printout("mytable['a'] = ", lua["mytable"]["a"].value);
+    printout("mytable['c'][1] = ", lua["mytable"]["c"][1].value);
 
-    printout("mytable[1]   = ", lua["mytable"][1].value());
-    printout("mytable['1'] = ", lua["mytable"]["1"].value());
+    printout("mytable[1]   = ", lua["mytable"][1].value);
+    printout("mytable['1'] = ", lua["mytable"]["1"].value);
 
     //-------------------------------------------------------------------------
     
@@ -138,8 +151,6 @@ auto test()
     printout("show:", lua["show"].call(4, 5, lua["math"]["abs"]));
     printout("show:", lua["show"].call("A", 8, "B"));
     //printout("show:", lua["show"].call(&bounceback, 2, 3));
-
-static if(0) {
 
     //-------------------------------------------------------------------------
     // Check multi return
@@ -226,7 +237,7 @@ static if(0) {
     //-------------------------------------------------------------------------
 
     "Done." >> Log;
-
+    
     //-------------------------------------------------------------------------
     // Another way to get ref out from scope.
     //-------------------------------------------------------------------------
