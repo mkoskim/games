@@ -107,24 +107,24 @@ abstract class LuaInterface
     private struct Ref
     {
         LuaInterface lua;
-        int r;
+        Type type;
+        int  r;
         
         //---------------------------------------------------------------------
         
-        this(LuaInterface lua, string key)
+        this(LuaInterface lua, int index = -1)
         {
             this.lua = lua;
-            lua_getglobal(lua.L, toStringz(key));
+            type = lua.type();
+            r    = luaL_ref(lua.L, LUA_REGISTRYINDEX);
             //lua.type() >> Log;
-            r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
             //format("ref(%d)", r) >> Log;
         }
         
-        this(Ref p, int newref)
+        this(LuaInterface lua, string key)
         {
-            this.lua = p.lua;
-            this.r   = newref;
-            //format("ref(%d)", r) >> Log;
+            lua_getglobal(lua.L, toStringz(key));
+            this(lua);
         }
         
         this(this)
@@ -134,7 +134,7 @@ abstract class LuaInterface
             //format("ref(%d)", r) >> Log;
         }
 
-        ~this() in(lua !is null, "Lua.Ref.~this: lua is null") 
+        ~this()
         {
             luaL_unref(lua.L, LUA_REGISTRYINDEX, r);
             //format("unref(%d)", r) >> Log;
@@ -146,11 +146,10 @@ abstract class LuaInterface
 
         auto opIndex(T)(T key)
         {
-            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
-            lua.push(key);
+            lua.pusha(this, key);
             lua_gettable(lua.L, -2);
             scope(exit) lua.discard();
-            return Ref(this, luaL_ref(lua.L, LUA_REGISTRYINDEX));
+            return Ref(lua);
         }
 
         //---------------------------------------------------------------------
@@ -158,9 +157,7 @@ abstract class LuaInterface
         // Set value
         void opIndexAssign(T, U)(U value, T key)
         {
-            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
-            lua.push(key);
-            lua.push(value);
+            lua.pusha(this, key, value);
             lua_settable(lua.L, -3);
             lua.discard();
         }
@@ -168,17 +165,14 @@ abstract class LuaInterface
         // Get value
         auto value()
         {
-            r >> Log;
-            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
-            lua.type() >> Log;
+            lua.push(this);
             return lua.pop();
         }
 
         // Call
         auto call(T...)(T args)
         {
-            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
-            lua.pusha(args);
+            lua.pusha(this, args);
             return lua._call(args.length);        
         }
 
@@ -186,7 +180,7 @@ abstract class LuaInterface
 
         auto keys()
         {
-            lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
+            lua.push(this);
             Variant[] k;
             lua_pushnil(lua.L);
             while(lua_next(lua.L, -2) != 0)
@@ -248,7 +242,8 @@ abstract class LuaInterface
         void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
         void push(char *s)          { lua_pushstring(L, s); }
         void push(char *s, int l)   { lua_pushlstring(L, s, l); }
-
+        void push(Ref r)            { lua_rawgeti(L, LUA_REGISTRYINDEX, r.r); }
+        
         //---------------------------------------------------------------------
         
         void push(void *p)          { lua_pushlightuserdata(L, p); }
@@ -296,8 +291,23 @@ abstract class LuaInterface
 
     private
     {
-        auto type(int index = -1)     { return lua_type(L, index); }
-        auto typename(int index = -1) { return to!string(luaL_typename(L, index)); }
+        enum Type // To get reference types to strings
+        {
+            None        = LUA_TNONE,
+            Nil         = LUA_TNIL,
+            Boolean     = LUA_TBOOLEAN,
+            LUserData   = LUA_TLIGHTUSERDATA,
+            Number      = LUA_TNUMBER,
+            String      = LUA_TSTRING,
+            Table       = LUA_TTABLE,
+            Function    = LUA_TFUNCTION,
+            UserData    = LUA_TUSERDATA,
+            Thread      = LUA_TTHREAD,
+            NumTags     = LUA_NUMTAGS,
+        }
+        
+        auto type(int index = -1)     { return cast(Type)lua_type(L, index); }
+        auto typename(int index = -1) { return type(index).to!string; }
 
         void expect(int expected, int index = -1)
         {
@@ -308,16 +318,14 @@ abstract class LuaInterface
         {
             switch(type(index))
             {
-                case LUA_TBOOLEAN:  return Variant(lua_toboolean(L, index));
-                case LUA_TNUMBER:   return Variant(lua_tonumber(L, index));
-                case LUA_TSTRING:   return Variant(lua_tostring(L, index).to!string);
-                case LUA_TLIGHTUSERDATA:
-                case LUA_TUSERDATA: return Variant(lua_touserdata(L, index));
-
-                case LUA_TFUNCTION: 
-                case LUA_TTABLE:
-                case LUA_TNONE:
-                case LUA_TNIL:
+                case Type.Boolean:  return Variant(lua_toboolean(L, index));
+                case Type.Number:   return Variant(lua_tonumber(L, index));
+                case Type.String:   return Variant(lua_tostring(L, index).to!string);
+                case Type.LUserData:
+                case Type.UserData: return Variant(lua_touserdata(L, index));
+                case Type.Function: 
+                case Type.Table:    return Variant(Ref(this));
+                case Type.Nil:
                 default: break;
             }
             ERROR(format("Invalid type: %s", typename(index))); assert(0);

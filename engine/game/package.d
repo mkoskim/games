@@ -101,7 +101,7 @@ void init(string name, int width = 640, int height = 480, int[2] askfor = [3, 3]
         to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)).split()[0]
     );
     
-    debug Log("GLinfo") 
+    debug Log["GLinfo"]
         << format("Context..: %.1f", screen.glversion)
         << format("GLSL.....: %.2f", screen.glsl)
         << format("Derelict.: %s", to!string(DerelictGL3.loadedVersion()))
@@ -146,7 +146,7 @@ class Profile
 
     static void enable() { timers = new Profile(); }
 
-    static void log(string group)
+    static void log()
     {
         if(!timers)
         {
@@ -159,7 +159,7 @@ class Profile
             busytime = timers.busy.average,
             rendertime = timers.render.average;
 
-        Watch(group)
+        Watch["Perf"]
             .update("FPS", format("%.1f", timers.fps))
             .update("Frame", format("%.1f ms", 1000 * frametime))
             .update("Busy", format("%.1f %%", 100.0 * busytime/frametime))

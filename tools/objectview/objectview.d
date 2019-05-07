@@ -104,7 +104,7 @@ class Model : engine.asset.Mesh
 
         {
             auto bb = AABBT!(float).from_points(pos);
-            Log << format("AABB (%f - %f), (%f - %f), (%f - %f)",
+            Log("AABB (%f - %f), (%f - %f), (%f - %f)",
                 bb.min.x, bb.max.x,
                 bb.min.y, bb.max.y,
                 bb.min.z, bb.max.z
@@ -250,7 +250,7 @@ void main()
         vec4( 0,  0,  0,  1),
     );
     /**/
-    Log << to!string(mView);
+    Log << mView;
     Log << (engine.asset.handness(mView) ? "Right" : "Left");
 
     //-------------------------------------------------------------------------
@@ -379,9 +379,9 @@ void main()
 
     void report()
     {
-        game.Profile.log("Perf");
+        game.Profile.log();
         engine.Track.report();
-        engine.Track.GC.report("Mem");
+        engine.Track.GC.report();
 
         game.frametimer.add(0.5, &report);
     }

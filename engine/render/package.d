@@ -84,7 +84,7 @@ private void checkGPUCapabilities()
         return result;
     }
     
-    Log("GLinfo")
+    Log["GLinfo"]
         << "GPU Capablities"
         << format("- Texture units..............: %d", getInt(GL_MAX_TEXTURE_IMAGE_UNITS))
         << format("- Max. combined texture units: %d", getInt(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS))
@@ -111,7 +111,9 @@ private void checkGPUCapabilities()
 
 private void checkExtensions()
 {
-    Log("GLinfo") << "OpenGL extension queries:";
+    auto log = Log["GLinfo"];
+    
+    "OpenGL extension queries:" >> log;
 
     bool[string] getExtensions()
     {
@@ -143,7 +145,7 @@ private void checkExtensions()
     {
         bool report(bool result, string msg)
         {
-            Log("GLinfo") << format("- %-4s: %s", msg, extension);
+            log("- %-4s: %s", msg, extension);
             return result;
         }
         
