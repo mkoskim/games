@@ -31,7 +31,7 @@ class Lua : LuaInterface
     {
         debug Track.add(this);
         super(luaL_newstate());
-
+        
         luaL_requiref(L, "_G", luaopen_base, 1);
         luaL_requiref(L, "string", luaopen_string, 1);
         luaL_requiref(L, "table", luaopen_table, 1);
@@ -47,7 +47,7 @@ class Lua : LuaInterface
 
     ~this()
     {
-        format("Top @ %d", top) >> Log;
+        Log("Top @ %d", top);
         lua_close(L);
         debug Track.remove(this);
     }
@@ -81,7 +81,6 @@ abstract class LuaInterface
     private lua_State *L;
 
     this(lua_State *L) { this.L = L; }
-    @disable this();
     
     //-------------------------------------------------------------------------
     // Access variables inside Lua sandbox
@@ -266,8 +265,7 @@ abstract class LuaInterface
 
         void push(Variant v)
         {
-	        if(!v.hasValue()) lua_pushnil(L);
-            else if(v.peek!(bool)) push(v.get!(bool));
+            if(v.peek!(bool)) push(v.get!(bool));
             else if(v.peek!(int)) push(v.get!(int));
             else if(v.peek!(float)) push(v.get!(float));
             else if(v.peek!(double)) push(v.get!(double));
