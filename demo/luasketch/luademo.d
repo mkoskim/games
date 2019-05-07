@@ -119,6 +119,8 @@ auto test()
     lua["math"]["pi"] >> Log;       // Ref 2 number
     lua["math"]["pi"].value >> Log; // Variant(3.14)
 
+    //lua["math"]["abs"]["x"] = 1; // Should crash
+
 static if(0) {
 
     //-------------------------------------------------------------------------

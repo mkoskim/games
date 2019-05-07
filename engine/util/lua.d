@@ -187,6 +187,8 @@ abstract class LuaInterface
         auto keys()
         {
             lua.push(this);
+            scope(exit) lua.discard();
+
             Variant[] k;
             lua_pushnil(lua.L);
             while(lua_next(lua.L, -2) != 0)
@@ -194,7 +196,6 @@ abstract class LuaInterface
                 lua.discard();
                 k ~= lua.peek(-1);
             }
-            scope(exit) lua.discard();
             return k;
         }
     }
@@ -241,6 +242,10 @@ abstract class LuaInterface
     
     private 
     {
+        //---------------------------------------------------------------------
+        // Basic types        
+        //---------------------------------------------------------------------
+        
         void push(bool b)           { lua_pushboolean(L, b); }
         void push(int  i)           { lua_pushnumber(L, i); }
         void push(float f)          { lua_pushnumber(L, f); }
@@ -251,16 +256,13 @@ abstract class LuaInterface
         void push(Ref r)            { lua_rawgeti(L, LUA_REGISTRYINDEX, r.r); }
         
         //---------------------------------------------------------------------
-        
+        // User data (D objects and references)
+        //---------------------------------------------------------------------
+
         void push(void *p)          { lua_pushlightuserdata(L, p); }
 
-        void push(lua_CFunction f)  { lua_pushcfunction(L, f); }
-        void push(luaL_Reg[] ftable)
-        {
-            lua_newtable(L);
-            luaL_setfuncs(L, ftable.ptr, 0);
-        }
-
+        //---------------------------------------------------------------------
+        // Variants - values that are (most probably) pop'd from LuA
         //---------------------------------------------------------------------
 
         void push(Variant v)
@@ -271,6 +273,17 @@ abstract class LuaInterface
             else if(v.peek!(double)) push(v.get!(double));
             else if(v.peek!(string)) push(v.get!(string));
             else assert(false);
+        }
+
+        //---------------------------------------------------------------------
+        // Special types
+        //---------------------------------------------------------------------
+        
+        void push(lua_CFunction f)  { lua_pushcfunction(L, f); }
+        void push(luaL_Reg[] ftable)
+        {
+            lua_newtable(L);
+            luaL_setfuncs(L, ftable.ptr, 0);
         }
 
         //---------------------------------------------------------------------
