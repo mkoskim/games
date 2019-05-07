@@ -109,15 +109,15 @@ auto test()
     // These are "equal" (one is Ref, another is Variant(Ref)
     //-------------------------------------------------------------------------
 
-    lua["math"] >> Log;
-    lua["math"].value >> Log;
+    lua["math"] >> Log;         // Ref 2 table
+    lua["math"].value >> Log;   // Variant(Ref 2 table)
 
     //-------------------------------------------------------------------------
     // These are not. First is Ref, another is Variant(3.14)
     //-------------------------------------------------------------------------
 
-    lua["math"]["pi"] >> Log;
-    lua["math"]["pi"].value >> Log;
+    lua["math"]["pi"] >> Log;       // Ref 2 number
+    lua["math"]["pi"].value >> Log; // Variant(3.14)
 
 static if(0) {
 
