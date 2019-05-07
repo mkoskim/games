@@ -41,13 +41,13 @@ debug abstract class Track
 
         void report()
         {
-            string group = "Track";
+            auto watch = Watch["Track"];
 
             foreach(key, value; count)
             {
-                Watch(group).update(key, to!string(value));
+                watch.update(key, to!string(value));
             }
-            Watch(group).update("Total", to!string(total));
+            watch.update("Total", to!string(total));
         }
     }
 
@@ -60,15 +60,13 @@ debug abstract class Track
                 auto before = core.memory.GC.stats();
                 engine.util.rungc();
                 auto after = core.memory.GC.stats();
-                Log << format("GC: freed %d kB",
-                    (before.usedSize - after.usedSize) / 1024
-                );
+                Log["GC"]("Freed %d kB", (before.usedSize - after.usedSize) / 1024);
             }
             
-            void report(string group)
+            void report()
             {
                 auto stats = core.memory.GC.stats();
-                Watch(group)
+                Watch["GC"]
                     .update("Size", format("%.1f kB", (stats.usedSize + stats.freeSize) / 1024.0))
                     .update("Used", format("%.1f kB", stats.usedSize / 1024.0))
                     .update("Free", format("%.1f kB", stats.freeSize / 1024.0))

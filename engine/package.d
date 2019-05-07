@@ -56,20 +56,22 @@ version(linux) pragma(lib, "dl");
 
 static this()
 {
-    Log("Startup") << "Loading libraries...";
+    auto log = Log["Startup"];
+    
+    "Loading libraries..." >> log;
     
     //-------------------------------------------------------------------------
     // Load OpenGL
     //-------------------------------------------------------------------------
 
-    Log("Startup") << "Loading: OpenGL...";
+    "Loading: OpenGL..." >> log;
     DerelictGL3.load();
 
     //-------------------------------------------------------------------------
     // Load & Initialize SDL2
     //-------------------------------------------------------------------------
 
-    Log("Startup") << "Loading: SDL2...";
+    "Loading: SDL2..." >> log;
     DerelictSDL2.load(SharedLibVersion(2, 0, 4));
     SDL_Init(0);
 
@@ -77,7 +79,7 @@ static this()
     // Load & initialize SDL2Image (problems loading PNG.DLL in Windows)
     //-------------------------------------------------------------------------
 
-    Log("Startup") << "Loading: SDL2Image...";
+    "Loading: SDL2Image..." >> log;
     DerelictSDL2Image.load();
 
     int img_formats = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -90,7 +92,7 @@ static this()
     // Load & Init SDL TTF (does not yet work in Windows build)
     //-------------------------------------------------------------------------
 
-    Log("Startup") << "Loading: SDL2TTF...";
+    "Loading: SDL2TTF..." >> log;
     DerelictSDL2ttf.load();
     TTF_Init();
 
@@ -98,7 +100,7 @@ static this()
     // Load ASSIMP
     //-------------------------------------------------------------------------
 
-    Log("Startup") << "Loading: ASSIMP...";
+    "Loading: ASSIMP..." >> log;
     DerelictASSIMP3.load();
 
     //-------------------------------------------------------------------------
@@ -106,7 +108,7 @@ static this()
     // library name
     //-------------------------------------------------------------------------
 
-    Log("Startup") << "Loading: Lua...";
+    "Loading: Lua..." >> log;
     version(linux)
     {
         DerelictLua.load("liblua5.3.so");        
@@ -116,7 +118,7 @@ static this()
 
     //-------------------------------------------------------------------------
 
-    Log("Startup") << "Libraries loaded.";
+    "Libraries loaded." >> log;
 }
 
 static ~this()

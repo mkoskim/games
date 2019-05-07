@@ -44,33 +44,10 @@ private import std.stdio: writeln, writefln, stdout;
 
 class Log
 {
-    static opCall(string channel) { return Named(channel); }
-
-    private struct Named
+    static opCall(C, A...)(in C[] fmt, A args)
     {
-        string channel;
-        
-        this(string channel) { this.channel = channel; }
-        @disable this();
-        
-        auto opBinary(string op, T)(T entry) if(op == "<<")
-        {
-            log(to!string(entry));
-            return this;
-        }
-        void opBinaryRight(string op, T)(T entry) if(op == ">>")
-        {
-            log(to!string(entry));
-        }
-
-        private void log(string entry)
-        {
-            writeln(":", channel, ">", entry);
-            stdout.flush();
-        }
+        log(format(fmt, args));
     }
-
-    //-------------------------------------------------------------------------
 
     static opBinary(string op, T)(T entry) if(op == "<<")
     {
@@ -88,13 +65,45 @@ class Log
         stdout.flush();
     }
 
+    //-------------------------------------------------------------------------
+
+    static opIndex(string channel) { return Named(channel); }
+    
+    private struct Named
+    {
+        string channel;
+        
+        this(string channel) { this.channel = channel; }
+        @disable this();
+        
+        auto opCall(C, A...)(in C[] fmt, A args)
+        {
+            log(format(fmt, args));
+        }
+
+        auto opBinary(string op, T)(T entry) if(op == "<<")
+        {
+            log(to!string(entry));
+            return this;
+        }
+        void opBinaryRight(string op, T)(T entry) if(op == ">>")
+        {
+            log(to!string(entry));
+        }
+
+        private void log(string entry)
+        {
+            writeln(":", channel, ">", entry);
+            stdout.flush();
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 class Watch
 {
-    static opCall(string channel) { return Named(channel); }
+    static opIndex(string channel) { return Named(channel); }
 
     private struct Named
     {

@@ -68,34 +68,37 @@ luaL_Reg[] bouncelib = [
 ];
 
 //-----------------------------------------------------------------------------
+// Windows build has problems with rawgeti - investigating.
+//-----------------------------------------------------------------------------
+
+auto checkrefs()
+{
+    lua_State *L = luaL_newstate();
+    luaL_requiref(L, "_G", luaopen_base, 1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, toStringz("_G"));
+    format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
+    int t1 = lua_type(L, -1);
+    auto r = luaL_ref(L, LUA_REGISTRYINDEX);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, r);
+    format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
+    int t2 = lua_type(L, -1);
+    format("ref(%d)", r) >> Log;
+
+    lua_close(L);
+
+    assert((t1 != LUA_TNIL) && (t1 == t2));
+}
+    
+//-----------------------------------------------------------------------------
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
 
 auto test()
 {
-    {
-        lua_State *L = luaL_newstate();
-        luaL_requiref(L, "_G", luaopen_base, 1);
-        lua_pop(L, 1);
-
-        lua_getglobal(L, toStringz("_G"));
-        format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
-        int t1 = lua_type(L, -1);
-        auto r = luaL_ref(L, LUA_REGISTRYINDEX);
-        lua_rawgeti(L, LUA_REGISTRYINDEX, r);
-        format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
-        int t2 = lua_type(L, -1);
-        format("ref(%d)", r) >> Log;
-
-        lua_close(L);
-
-        assert((t1 != LUA_TNIL) && (t1 == t2));
-    }
-    
     auto lua = new Lua();
     scope(exit) { lua.destroy(); }
-
-static if(0) {
 
     //-------------------------------------------------------------------------
     
@@ -109,7 +112,7 @@ static if(0) {
     // Inspect table created in lua file
     //-------------------------------------------------------------------------
 
-    lua["mytable"].value();
+    //lua["mytable"].value();
 
     printout("mytable['a'] = ", lua["mytable"]["a"].value());
     printout("mytable['c'][1] = ", lua["mytable"]["c"][1].value());
@@ -131,10 +134,12 @@ static if(0) {
     // Call lua function:
     //-------------------------------------------------------------------------
     
-    printout("show:", lua["show"].call(1, 2, 3));
-    printout("show:", lua["show"].call(4, 5, 6));
+    printout("show:", lua["show"].call(1, 2, lua["math"]));
+    printout("show:", lua["show"].call(4, 5, lua["math"]["abs"]));
     printout("show:", lua["show"].call("A", 8, "B"));
     //printout("show:", lua["show"].call(&bounceback, 2, 3));
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // Check multi return
@@ -198,6 +203,9 @@ static if(0) {
             "string.format:",
             stringlib["format"].call("%s.%s (2)", "string", "format")
         );
+
+        stringlib.to!string >> Log;
+        stringlib["format"].to!string >> Log;
     }
 
     //-------------------------------------------------------------------------
@@ -230,6 +238,7 @@ void main()
 {
     vfs.fallback = true;
 
+    checkrefs();
     test();
 
     // It might be good idea to run GC after assets are loaded (I
