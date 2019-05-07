@@ -26,7 +26,7 @@ import std.variant: Variant;
 
 void printout(Variant[] args)
 {
-    foreach(arg; args) Log << format("    %s", arg.to!string);
+    foreach(arg; args) format("    %s", arg.to!string) >> Log;
 }
 
 void printout(Variant arg)
@@ -73,17 +73,52 @@ luaL_Reg[] bouncelib = [
 
 auto test()
 {
+    {
+        lua_State *L = luaL_newstate();
+        luaL_requiref(L, "_G", luaopen_base, 1);
+        lua_pop(L, 1);
+
+        lua_getglobal(L, toStringz("_G"));
+        format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
+        int t1 = lua_type(L, -1);
+        auto r = luaL_ref(L, LUA_REGISTRYINDEX);
+        lua_rawgeti(L, LUA_REGISTRYINDEX, r);
+        format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
+        int t2 = lua_type(L, -1);
+        format("ref(%d)", r) >> Log;
+
+        lua_close(L);
+
+        assert((t1 != LUA_TNIL) && (t1 == t2));
+    }
+    
     auto lua = new Lua();
     scope(exit) { lua.destroy(); }
 
+static if(0) {
+
     //-------------------------------------------------------------------------
     
-    static if(0) printout("main.lua returns:", lua.load("data/main.lua"));
+    //printout("main.lua returns:", lua.load("data/main.lua"));
 
     //-------------------------------------------------------------------------
     
     printout("test.lua returns:", lua.load("data/test.lua"));
 
+    //-------------------------------------------------------------------------
+    // Inspect table created in lua file
+    //-------------------------------------------------------------------------
+
+    lua["mytable"].value();
+
+    printout("mytable['a'] = ", lua["mytable"]["a"].value());
+    printout("mytable['c'][1] = ", lua["mytable"]["c"][1].value());
+
+    printout("mytable[1]   = ", lua["mytable"][1].value());
+    printout("mytable['1'] = ", lua["mytable"]["1"].value());
+
+    //-------------------------------------------------------------------------
+    
     lua["a"] = 101;
     lua["a"].value() >> Log;
 
@@ -107,17 +142,6 @@ auto test()
 
     printout("multiret:", lua["multiret"].call());
     
-    //-------------------------------------------------------------------------
-    // Inspect table created in lua file
-    //-------------------------------------------------------------------------
-
-    lua["mytable"]["c"][1] = "c";
-    printout("mytable['a'] = ", lua["mytable"]["a"].value());
-    printout("mytable['c'][1] = ", lua["mytable"]["c"][1].value());
-
-    printout("mytable[1]   = ", lua["mytable"][1].value());
-    printout("mytable['1'] = ", lua["mytable"]["1"].value());
-
     //-------------------------------------------------------------------------
     // Inspect tables
     //-------------------------------------------------------------------------
@@ -145,8 +169,6 @@ auto test()
     lua["bounce"]["bounceback"].call("bounce", "lib") >> Log;
 
     printout("callbounce:", lua["callbounce"].call(1));
-
-static if(0) {
 
     //-------------------------------------------------------------------------
     // Fixed: Leaves carbage to stack

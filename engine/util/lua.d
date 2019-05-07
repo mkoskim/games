@@ -25,19 +25,8 @@ import std.conv: to;
 //
 //*****************************************************************************
 
-//-----------------------------------------------------------------------------
-// This creates actual Lua sandbox
-//-----------------------------------------------------------------------------
-
 class Lua : LuaInterface
 {
-    ~this()
-    {
-        Log << format("Top @ %d", top);
-        lua_close(L);
-        debug Track.remove(this);
-    }
-
     this()
     {
         debug Track.add(this);
@@ -56,19 +45,26 @@ class Lua : LuaInterface
         top = 0;
     }
 
+    ~this()
+    {
+        format("Top @ %d", top) >> Log;
+        lua_close(L);
+        debug Track.remove(this);
+    }
+
     this(string file)
     {
         this();
         load(file);
     }
 
+    //-----------------------------------------------------------------------------
+    // Attaching to lua_State (for D function implementations)
+    //-----------------------------------------------------------------------------
+    
     static Proxy attach(lua_State *L) { return new Proxy(L); }
 
-    //-----------------------------------------------------------------------------
-    // This just wraps lua_State with interface class
-    //-----------------------------------------------------------------------------
-
-    protected static class Proxy : LuaInterface
+    private static class Proxy : LuaInterface
     {
         this(lua_State *L) { super(L); }
     }
@@ -84,34 +80,14 @@ abstract class LuaInterface
 {
     private lua_State *L;
 
+    this(lua_State *L) { this.L = L; }
+    @disable this();
+    
     //-------------------------------------------------------------------------
-
-    this(lua_State *L)
-    {
-        this.L = L;
-    }
-
-    //-------------------------------------------------------------------------
-    // First, get identifier at the top of stack with indexing. Then, use
-    // Top object returned by indexing. For example:
     //
-    //      lua["math"]["abs"].call(100);       // math.abs = function
-    //      lua["math"].keys();                 // math = table
-    //
-    // BUG: If none of the final operations are called, this mechanism
-    // leaves two values to stack:
-    //
-    //      lua["math"]["abs"];     // Two values left to stack
-    //
-    // Adding stack cleaning to destructor won't help, it leads to segfault
-    // at least when program terminates.
+    // Get values from Lua sandbox
     //
     //-------------------------------------------------------------------------
-
-    auto opIndex(string key)
-    {
-        return Ref(this, key);
-    }
 
     void opIndexAssign(U)(U value, string key)
     {
@@ -119,6 +95,15 @@ abstract class LuaInterface
         lua_setglobal(L, toStringz(key));
     }
 
+    auto opIndex(string key)
+    {
+        return Ref(this, key);
+    }
+
+    //-------------------------------------------------------------------------
+    // References to Lua data
+    //-------------------------------------------------------------------------
+    
     private struct Ref
     {
         LuaInterface lua;
@@ -126,34 +111,39 @@ abstract class LuaInterface
         
         //---------------------------------------------------------------------
         
-        @disable this();
-
         this(LuaInterface lua, string key)
         {
             this.lua = lua;
             lua_getglobal(lua.L, toStringz(key));
+            //lua.type() >> Log;
             r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
+            //format("ref(%d)", r) >> Log;
         }
         
         this(Ref p, int newref)
         {
             this.lua = p.lua;
             this.r   = newref;
+            //format("ref(%d)", r) >> Log;
         }
         
         this(this)
         {
             lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
             r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
+            //format("ref(%d)", r) >> Log;
         }
 
         ~this() in(lua !is null, "Lua.Ref.~this: lua is null") 
         {
             luaL_unref(lua.L, LUA_REGISTRYINDEX, r);
+            //format("unref(%d)", r) >> Log;
         }
         
+        @disable this();
+
         //---------------------------------------------------------------------
-        // Go deeper to table hierarchy
+
         auto opIndex(T)(T key)
         {
             lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
@@ -178,7 +168,9 @@ abstract class LuaInterface
         // Get value
         auto value()
         {
+            r >> Log;
             lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
+            lua.type() >> Log;
             return lua.pop();
         }
 
@@ -253,10 +245,12 @@ abstract class LuaInterface
         void push(int  i)           { lua_pushnumber(L, i); }
         void push(float f)          { lua_pushnumber(L, f); }
         void push(double d)         { lua_pushnumber(L, d); }
+        void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
         void push(char *s)          { lua_pushstring(L, s); }
         void push(char *s, int l)   { lua_pushlstring(L, s, l); }
-        void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
 
+        //---------------------------------------------------------------------
+        
         void push(void *p)          { lua_pushlightuserdata(L, p); }
 
         void push(lua_CFunction f)  { lua_pushcfunction(L, f); }
@@ -265,6 +259,8 @@ abstract class LuaInterface
             lua_newtable(L);
             luaL_setfuncs(L, ftable.ptr, 0);
         }
+
+        //---------------------------------------------------------------------
 
         void push(Variant v)
         {
@@ -276,6 +272,8 @@ abstract class LuaInterface
             else if(v.peek!(string)) push(v.get!(string));
             else assert(false);
         }
+
+        //---------------------------------------------------------------------
 
         int pusha(Variant[] values)
         {
@@ -298,14 +296,15 @@ abstract class LuaInterface
 
     private
     {
-        int type(int index = -1) { return lua_type(L, index); }
+        auto type(int index = -1)     { return lua_type(L, index); }
+        auto typename(int index = -1) { return to!string(luaL_typename(L, index)); }
 
         void expect(int expected, int index = -1)
         {
             errorif(type(index) != expected);
         }
 
-        Variant peek(int index)
+        Variant peek(int index = -1)
         {
             switch(type(index))
             {
@@ -316,22 +315,15 @@ abstract class LuaInterface
                 case LUA_TUSERDATA: return Variant(lua_touserdata(L, index));
 
                 case LUA_TFUNCTION: 
-                case LUA_TNONE:
-                case LUA_TNIL:      //return Variant(null);
                 case LUA_TTABLE:
-                case LUA_TTHREAD:
+                case LUA_TNONE:
+                case LUA_TNIL:
                 default: break;
             }
-            ERROR(format("Invalid type: %s", to!string(type(index)))); assert(0);
+            ERROR(format("Invalid type: %s", typename(index))); assert(0);
         }
 
-        Variant pop()
-        {
-            scope(exit) discard(1);
-            return peek(-1);
-        }
-
-        Variant[] pop(int n)
+        Variant[] pop(int n = 1)
         {
             scope(exit) discard(n);
             
