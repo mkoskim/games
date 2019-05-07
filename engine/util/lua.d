@@ -84,9 +84,7 @@ abstract class LuaInterface
     @disable this();
     
     //-------------------------------------------------------------------------
-    //
-    // Get values from Lua sandbox
-    //
+    // Access variables inside Lua sandbox
     //-------------------------------------------------------------------------
 
     void opIndexAssign(U)(U value, string key)
@@ -112,8 +110,21 @@ abstract class LuaInterface
         
         //---------------------------------------------------------------------
         
-        this(LuaInterface lua, int index = -1)
+        this(LuaInterface lua, string key)
         {
+            lua_getglobal(lua.L, toStringz(key));
+            this(lua);
+        }
+        
+        this(LuaInterface lua, int index)
+        {
+            lua_pushvalue(lua.L, index);
+            this(lua);
+        }
+        
+        private this(LuaInterface lua)
+        {
+            Track.add("Lua.Ref");
             this.lua = lua;
             type = lua.type();
             r    = luaL_ref(lua.L, LUA_REGISTRYINDEX);
@@ -121,14 +132,9 @@ abstract class LuaInterface
             //format("ref(%d)", r) >> Log;
         }
         
-        this(LuaInterface lua, string key)
-        {
-            lua_getglobal(lua.L, toStringz(key));
-            this(lua);
-        }
-        
         this(this)
         {
+            Track.add("Lua.Ref");
             lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
             r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
             //format("ref(%d)", r) >> Log;
@@ -136,6 +142,7 @@ abstract class LuaInterface
 
         ~this()
         {
+            Track.remove("Lua.Ref");
             luaL_unref(lua.L, LUA_REGISTRYINDEX, r);
             //format("unref(%d)", r) >> Log;
         }
@@ -324,14 +331,20 @@ abstract class LuaInterface
                 case Type.LUserData:
                 case Type.UserData: return Variant(lua_touserdata(L, index));
                 case Type.Function: 
-                case Type.Table:    return Variant(Ref(this));
+                case Type.Table:    return Variant(Ref(this, index));
                 case Type.Nil:
                 default: break;
             }
             ERROR(format("Invalid type: %s", typename(index))); assert(0);
         }
 
-        Variant[] pop(int n = 1)
+        Variant pop()
+        {
+            scope(exit) discard();
+            return peek();
+        }
+                
+        Variant[] pop(int n)
         {
             scope(exit) discard(n);
             
