@@ -1,13 +1,11 @@
 //*****************************************************************************
 //
-// Lua bindings, inspired by LuaD.
-//
-// This module is meant to make calls to Lua subsystem, and install D
-// functions to Lua environment to be called.
+// Interaction with Lua, heavily inspired by LuaD.
 //
 // NOTE: Lua and D garbage collectors do not work nicely together. You need
 // to be extra careful that you delete lua_State before carbage collector,
-// and that you don't have loosen references outside of lua_State scope.
+// and that you don't have loosen references to Lua objects outside of
+// lua_State scope.
 //
 //*****************************************************************************
 
@@ -123,7 +121,6 @@ abstract class LuaInterface
         
         private this(LuaInterface lua)
         {
-            Track.add("Lua.Ref");
             this.lua = lua;
             type = lua.type();
             r    = luaL_ref(lua.L, LUA_REGISTRYINDEX);
@@ -133,7 +130,6 @@ abstract class LuaInterface
         
         this(this)
         {
-            Track.add("Lua.Ref");
             lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
             r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
             //format("ref(%d)", r) >> Log;
@@ -141,7 +137,6 @@ abstract class LuaInterface
 
         ~this()
         {
-            Track.remove("Lua.Ref");
             luaL_unref(lua.L, LUA_REGISTRYINDEX, r);
             //format("unref(%d)", r) >> Log;
         }
@@ -396,6 +391,8 @@ abstract class LuaInterface
         void check(int errcode) { errorif(errcode != LUA_OK, to!string(pop())); }
     }
 }
+
+//-----------------------------------------------------------------------------
 
 class LuaError : Exception
 {
