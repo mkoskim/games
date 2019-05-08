@@ -23,14 +23,16 @@ void main()
 
     lua_getglobal(L, toStringz("_G"));
     int t1 = lua_type(L, -1);
-    auto r = luaL_ref(L, LUA_REGISTRYINDEX);
+    int r = luaL_ref(L, LUA_REGISTRYINDEX);
     
+    writefln("Dereferencing:");
     lua_rawgeti(L, LUA_REGISTRYINDEX, r);
     int t2 = lua_type(L, -1);
     
     lua_close(L);
 
-    // Linux output: Ref: 3, types: 5, 5
+    // Linux   output: Ref: 3, types: 5, 5 (LUA_TTABLE)
+    // Windows output: Ref: 3, types: 5, 0 (LUA_TNIL)
     writefln("Ref: %d, types: %d, %d", r, t1, t2);
     
     assert(r != LUA_REFNIL);
