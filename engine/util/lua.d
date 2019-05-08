@@ -45,7 +45,8 @@ class Lua : LuaInterface
 
     ~this()
     {
-        Log("Top @ %d", top);
+        Log("Top  = %d", top);
+        Log("Refs = %d", refcount);
         lua_close(L);
         debug Track.remove(this);
     }
@@ -193,6 +194,12 @@ abstract class LuaInterface
             }
             return k;
         }
+    }
+
+    int refcount()
+    {
+        lua_len(L, LUA_REGISTRYINDEX);
+        return cast(int)(pop().get!(double));
     }
 
     //-------------------------------------------------------------------------
