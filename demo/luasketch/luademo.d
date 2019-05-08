@@ -102,6 +102,10 @@ auto test()
     scope(exit) { lua.destroy(); }
 
     //-------------------------------------------------------------------------
+
+    Log("Refs = %d", lua.refcount);    
+
+    //-------------------------------------------------------------------------
     
     printout("test.lua returns:", lua.load("data/test.lua"));
 
@@ -120,8 +124,6 @@ auto test()
     lua["math"]["pi"].value >> Log; // Variant(3.14)
 
     //lua["math"]["abs"]["x"] = 1; // Should crash
-
-static if(0) {
 
     //-------------------------------------------------------------------------
     // Inspect table created in lua file
@@ -220,6 +222,8 @@ static if(0) {
         stringlib.to!string >> Log;
         stringlib["format"].to!string >> Log;
     }
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // howdy() returns table, check it
