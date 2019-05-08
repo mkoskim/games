@@ -10,9 +10,9 @@
 [submodule "engine/libs/DerelictASSIMP3"]
 	path = engine/libs/DerelictASSIMP3
 	url = https://github.com/DerelictOrg/DerelictASSIMP3.git
-[submodule "engine/libs/DerelictLua"]
-	path = engine/libs/DerelictLua
-	url = https://github.com/DerelictOrg/DerelictLua.git
 [submodule "engine/libs/gl3n"]
 	path = engine/libs/gl3n
 	url = https://github.com/Dav1dde/gl3n.git
+[submodule "engine/libs/DerelictLua"]
+	path = engine/libs/DerelictLua
+	url = https://github.com/mkoskim/DerelictLua
