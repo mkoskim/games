@@ -1,7 +1,5 @@
 env = Environment()
 
-#env["DFLAGS"] = "-unittest"
-#env["MAIN"] = "../../engine/util/lua.d"
 env["MAIN"] = "luademo.d"
 env["BLOBFILES"] = []
 
