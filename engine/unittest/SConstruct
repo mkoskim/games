@@ -1,0 +1,9 @@
+env = Environment()
+
+env["DFLAGS"] = "-unittest"
+
+env["MAIN"] = "../util/lua.d"
+env["BLOBFILES"] = []
+
+env.SConscript("../build/scons/build.py", "env")
+

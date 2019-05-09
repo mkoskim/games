@@ -69,30 +69,6 @@ luaL_Reg[] bouncelib = [
 ];
 
 //-----------------------------------------------------------------------------
-// Windows build has problems with rawgeti - investigating.
-//-----------------------------------------------------------------------------
-
-auto checkrefs()
-{
-    lua_State *L = luaL_newstate();
-    luaL_requiref(L, "_G", luaopen_base, 1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, toStringz("_G"));
-    format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
-    int t1 = lua_type(L, -1);
-    auto r = luaL_ref(L, LUA_REGISTRYINDEX);
-    lua_rawgeti(L, LUA_REGISTRYINDEX, r);
-    format("type@%d = %s", lua_gettop(L), luaL_typename(L, -1).to!string) >> Log;
-    int t2 = lua_type(L, -1);
-    format("ref(%d)", r) >> Log;
-
-    lua_close(L);
-
-    assert((t1 != LUA_TNIL) && (t1 == t2));
-}
-    
-//-----------------------------------------------------------------------------
 // Creating interface for LUA to access D functions
 //-----------------------------------------------------------------------------
 
@@ -108,6 +84,8 @@ auto test()
     //-------------------------------------------------------------------------
     
     printout("test.lua returns:", lua.load("data/test.lua"));
+
+static if(1) {
 
     //-------------------------------------------------------------------------
     // These are "equal" (one is Ref, another is Variant(Ref)
@@ -202,28 +180,29 @@ auto test()
     
     {
         auto luashow = lua["show"];
-        luashow.call(1);
-        luashow.call(2);
+        luashow.call("1", "2", "3");
+        luashow.call("4", "5", "6");
         auto multiret = lua["multiret"];
-        printout("luashow", luashow.call(1));
+        printout("luashow", luashow.call("7", "8", "9"));
     }
     
     {
         auto stringlib = lua["string"];
+        auto stringfmt = stringlib["format"];
+        
         printout(
             "string.format:",
-            stringlib["format"].call("%s.%s (1)", "string", "format")
+            stringfmt.call("%s.%s (%d)", "string", "format", 1)
+            //stringlib["format"].call("%s.%s (%d)", "string", "format", 1)
         );
         printout(
             "string.format:",
-            stringlib["format"].call("%s.%s (2)", "string", "format")
+            stringlib["format"].call("%s.%s (%d)", "string", "format", 2)
         );
 
         stringlib.to!string >> Log;
         stringlib["format"].to!string >> Log;
     }
-
-static if(0) {
 
     //-------------------------------------------------------------------------
     // howdy() returns table, check it
@@ -255,7 +234,6 @@ void main()
 {
     vfs.fallback = true;
 
-    checkrefs();
     test();
 
     // It might be good idea to run GC after assets are loaded (I
@@ -266,4 +244,3 @@ void main()
 
     "All done." >> Log;
 }
-

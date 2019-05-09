@@ -148,7 +148,7 @@ abstract class LuaInterface
 
         auto opIndex(T)(T key)
         {
-            lua.pusha(this, key);
+            lua.pushm(this, key);
             lua_gettable(lua.L, -2);
             scope(exit) lua.discard();
             return Ref(lua);
@@ -159,7 +159,7 @@ abstract class LuaInterface
         // Set value
         void opIndexAssign(T, U)(U value, T key)
         {
-            lua.pusha(this, key, value);
+            lua.pushm(this, key, value);
             lua_settable(lua.L, -3);
             lua.discard();
         }
@@ -174,8 +174,8 @@ abstract class LuaInterface
         // Call
         auto call(T...)(T args)
         {
-            lua.pusha(this, args);
-            return lua._call(args.length);        
+            lua.pushm(this, args);
+            return lua._call(args.length);
         }
 
         //---------------------------------------------------------------------
@@ -199,7 +199,7 @@ abstract class LuaInterface
     int refcount()
     {
         lua_len(L, LUA_REGISTRYINDEX);
-        return cast(int)(pop().get!(double));
+        return cast(int)(pop().get!(LUA_NUMBER));
     }
 
     //-------------------------------------------------------------------------
@@ -253,10 +253,9 @@ abstract class LuaInterface
         void push(float f)          { lua_pushnumber(L, f); }
         void push(double d)         { lua_pushnumber(L, d); }
         void push(string s)         { lua_pushlstring(L, s.ptr, s.length); }
-        void push(char *s)          { lua_pushstring(L, s); }
-        void push(char *s, int l)   { lua_pushlstring(L, s, l); }
+        void push(const char *s)    { lua_pushstring(L, s); }
         void push(Ref r)            { lua_rawgeti(L, LUA_REGISTRYINDEX, r.r); }
-        
+
         //---------------------------------------------------------------------
         // User data (D objects and references)
         //---------------------------------------------------------------------
@@ -290,14 +289,14 @@ abstract class LuaInterface
 
         //---------------------------------------------------------------------
 
-        int pusha(Variant[] values)
+        int pushm(Variant[] values)
         {
             checkstack(cast(int)values.length);
             foreach(v; values) push(v);
             return cast(int)values.length;
         }
 
-        int pusha(T...)(T values)
+        int pushm(T...)(T values)
         {
             checkstack(values.length);
             foreach(v; values) push(v);
@@ -375,12 +374,12 @@ abstract class LuaInterface
 
     Variant[] args()
     {
-        return pop(top());
+        return pop(top);
     }
 
     int result(T...)(T results)
     {
-        return pusha(results);
+        return pushm(results);
     }
 
     //-------------------------------------------------------------------------
@@ -409,3 +408,11 @@ class LuaError : Exception
 
 //-----------------------------------------------------------------------------
 
+unittest
+{
+    writefln("Unit test...");
+    
+    import engine;
+    
+    "Unit test..." >> Log;
+}
