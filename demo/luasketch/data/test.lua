@@ -3,7 +3,9 @@
 -- ----------------------------------------------------------------------------
 
 local info = debug.getinfo(1,'S');
-print("Source:", info.source);
+print("Loading:", info.source);
+
+-- print(string.format("Testi: %s", "OK"));
 
 -- ----------------------------------------------------------------------------
 
@@ -20,8 +22,6 @@ mytable = {
 }
 
 -- ----------------------------------------------------------------------------
-
-format = string.format
 
 function loadmessage()
     message = blob.loadtext("data/message.txt");
@@ -50,5 +50,4 @@ function callbounce(...)
 -- result = test.heya()
 -- write(format("Result: %d\n", result))
 
-return "All done!"
-
+return "Load done."
