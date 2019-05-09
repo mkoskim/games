@@ -8,6 +8,12 @@ import os
 Import("*")
 
 #------------------------------------------------------------------------------
+# Print out some info
+#------------------------------------------------------------------------------
+
+os.system("dmd --version");
+
+#------------------------------------------------------------------------------
 # Helpers
 #------------------------------------------------------------------------------
 
@@ -76,6 +82,18 @@ env["BUILDERS"]["BLOB"] = Builder(
     action = zipdir,
     #emitter = BLOB_Emitter,
 )
+
+###############################################################################
+#
+# Run target
+#
+###############################################################################
+
+def runtarget(target, source, env):
+    exe = env.subst("$EXE")
+    print("")
+    print("Running %s" % exe)
+    os.system(exe)
 
 ###############################################################################
 #
@@ -190,5 +208,5 @@ if " ".join(COMMAND_LINE_TARGETS) != "logger":
 
     blob = env.BLOB("$OUTDIR/BLOB.zip", findfiles(env, env["BLOBFILES"]))
     exe = env.RDMD("$EXE", ["$ROOTDIR/$MAIN", blob])
-    PhonyTarget(env, "run", exe, lambda target, source, env: os.system(env.subst("$EXE")))
+    PhonyTarget(env, "run", exe, runtarget)
 
