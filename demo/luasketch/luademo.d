@@ -47,13 +47,22 @@ void printout(string prefix, Variant arg)
 
 //-----------------------------------------------------------------------------
 
+class TestClass
+{
+    string name;
+    
+    this(string name) { this.name = name; }
+}
+
+//-----------------------------------------------------------------------------
+
 extern(C) nothrow int bounceback(lua_State *L)
 {
     try
     {
         auto lua = Lua.attach(L);
         auto args = lua.args();
-        Log("bounce: %s", args);
+        Log("called: bounce(%s)", args);
         return lua.result(args);
     }
     catch(Throwable)
@@ -85,7 +94,19 @@ auto test()
     
     printout("test.lua returns:", lua.load("data/test.lua"));
 
-static if(1) {
+    //-------------------------------------------------------------------------
+    // Sending and receiving D objects
+    //-------------------------------------------------------------------------
+
+/*
+    {
+        auto a = new TestClass("a");
+        auto r = lua.call(&bounceback, cast(void*)a);
+        r[0].get!(TestClass).name >> Log;
+    }
+*/
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // These are "equal" (one is Ref, another is Variant(Ref)
@@ -187,21 +208,17 @@ static if(1) {
     }
     
     {
+        lua["string"]["format"].call("Test: %s %d", "test", 1) >> Log;
+
         auto stringlib = lua["string"];
         auto stringfmt = stringlib["format"];
         
-        printout(
-            "string.format:",
-            stringfmt.call("%s.%s (%d)", "string", "format", 1)
-            //stringlib["format"].call("%s.%s (%d)", "string", "format", 1)
-        );
-        printout(
-            "string.format:",
-            stringlib["format"].call("%s.%s (%d)", "string", "format", 2)
-        );
-
         stringlib.to!string >> Log;
         stringlib["format"].to!string >> Log;
+        stringfmt.to!string >> Log;
+
+        stringlib["format"].call("%s.%s (%d)", "string", "format", 2) >> Log;
+        stringfmt.call("%s.%s (%d)", "string", "format", 1) >> Log;
     }
 
     //-------------------------------------------------------------------------
@@ -218,7 +235,7 @@ static if(1) {
     ret[0].dumptable();
 /**/
 
-}
+    }
     //-------------------------------------------------------------------------
 
     "Done." >> Log;

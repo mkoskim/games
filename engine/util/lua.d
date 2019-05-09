@@ -99,13 +99,13 @@ abstract class LuaInterface
     //-------------------------------------------------------------------------
     // References to Lua data
     //-------------------------------------------------------------------------
-    
+
     private struct Ref
     {
         LuaInterface lua;
         Type type;
         int  r;
-        
+
         //---------------------------------------------------------------------
         
         this(LuaInterface lua, string key)
@@ -215,6 +215,12 @@ abstract class LuaInterface
     {
         check(luaL_loadbuffer(L, s.ptr, s.length, toStringz(from)));
         return _call();
+    }
+
+    auto call(T...)(lua_CFunction f, T args)
+    {
+        pushm(f, args);
+        return _call(args.length);
     }
 
     private
