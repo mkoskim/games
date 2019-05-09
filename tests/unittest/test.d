@@ -1,12 +1,17 @@
 import std.stdio;
 
-void main()
+static this()
 {
-    writeln("main()");
+    writeln("Running: static this()");
 }
 
 unittest
 {
-    writeln("unit test.");
+    writeln("Running: unit test.");
+}
+
+void main()
+{
+    writeln("Running: main()");
 }
 

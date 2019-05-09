@@ -1,0 +1,2 @@
+rdmd -unittest test.d
+
