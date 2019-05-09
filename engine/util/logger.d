@@ -42,7 +42,7 @@ private import std.stdio: writeln, writefln, stdout;
 
 //-----------------------------------------------------------------------------
 
-class Log
+static class Log
 {
     static opCall(C, A...)(in C[] fmt, A args)
     {
@@ -51,18 +51,12 @@ class Log
 
     static opBinary(string op, T)(T entry) if(op == "<<")
     {
-        log(to!string(entry));
+        log(entry.to!string);
     }
 
     static opBinaryRight(string op, T)(T entry) if(op == ">>")
     {
-        log(to!string(entry));
-    }
-
-    static private auto log(string entry)
-    {
-        writeln(entry);
-        stdout.flush();
+        log(entry.to!string);
     }
 
     //-------------------------------------------------------------------------
@@ -78,30 +72,39 @@ class Log
         
         auto opCall(C, A...)(in C[] fmt, A args)
         {
-            log(format(fmt, args));
+            log(channel, format(fmt, args));
         }
 
         auto opBinary(string op, T)(T entry) if(op == "<<")
         {
-            log(to!string(entry));
+            log(channel, entry.to!string);
             return this;
         }
+
         void opBinaryRight(string op, T)(T entry) if(op == ">>")
         {
-            log(to!string(entry));
+            log(channel, entry.to!string);
         }
+    }
 
-        private void log(string entry)
-        {
-            writeln(":", channel, ">", entry);
-            stdout.flush();
-        }
+    //-------------------------------------------------------------------------
+
+    static void log(string entry)
+    {
+        writeln(entry);
+        stdout.flush;
+    }
+
+    static void log(string channel, string entry)
+    {
+        writefln(":%s>%s", channel, entry);
+        stdout.flush;
     }
 }
 
 //-----------------------------------------------------------------------------
 
-class Watch
+static class Watch
 {
     static opIndex(string channel) { return Named(channel); }
 
@@ -114,7 +117,7 @@ class Watch
         
         ref Named update(string tag, string entry)
         {
-            writeln("@", channel, ":", tag, ">", entry);
+            writefln("@%s:%s>%s", channel, tag, entry);
             stdout.flush();
             return this;
         }
@@ -131,7 +134,7 @@ class Watch
     {
         ref Unnamed update(string tag, string entry)
         {
-            writeln("@", tag,">", entry);
+            writefln("@%s>", tag, entry);
             stdout.flush();
             return this;
         }

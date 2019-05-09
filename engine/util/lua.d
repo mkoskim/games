@@ -266,7 +266,8 @@ abstract class LuaInterface
         // User data (D objects and references)
         //---------------------------------------------------------------------
 
-        void push(void *p)          { lua_pushlightuserdata(L, p); }
+        //void push(void *p)  { lua_pushlightuserdata(L, p); }
+        void push(Object o) { lua_pushlightuserdata(L, cast(void*)o); }
 
         //---------------------------------------------------------------------
         // Variants - values that are (most probably) pop'd from LuA
@@ -279,6 +280,7 @@ abstract class LuaInterface
             else if(v.peek!(float)) push(v.get!(float));
             else if(v.peek!(double)) push(v.get!(double));
             else if(v.peek!(string)) push(v.get!(string));
+            else if(v.peek!(Object)) push(v.get!(Object));
             else assert(false);
         }
 
@@ -347,7 +349,7 @@ abstract class LuaInterface
                 case Type.Number:   return Variant(lua_tonumber(L, index));
                 case Type.String:   return Variant(lua_tostring(L, index).to!string);
                 case Type.LUserData:
-                case Type.UserData: return Variant(lua_touserdata(L, index));
+                case Type.UserData: return Variant(cast(Object)lua_touserdata(L, index));
                 case Type.Function: 
                 case Type.Table:    return Variant(Ref(this, index));
                 case Type.Nil:
@@ -416,8 +418,6 @@ class LuaError : Exception
 
 unittest
 {
-    writefln("Unit test...");
-    
     import engine;
     
     "Unit test..." >> Log;

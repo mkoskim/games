@@ -47,7 +47,14 @@ void printout(string prefix, Variant arg)
 
 //-----------------------------------------------------------------------------
 
-class TestClass
+class TestClass1
+{
+    string name;
+    
+    this(string name) { this.name = name; }
+}
+
+class TestClass2
 {
     string name;
     
@@ -65,11 +72,11 @@ extern(C) nothrow int bounceback(lua_State *L)
         Log("called: bounce(%s)", args);
         return lua.result(args);
     }
-    catch(Throwable)
+    catch(Throwable e)
     {
+        try e >> Log; catch(Throwable) {}
+        assert(0);
     }
-    
-    return 0;
 }
 
 luaL_Reg[] bouncelib = [
@@ -98,13 +105,15 @@ auto test()
     // Sending and receiving D objects
     //-------------------------------------------------------------------------
 
-/*
     {
-        auto a = new TestClass("a");
-        auto r = lua.call(&bounceback, cast(void*)a);
-        r[0].get!(TestClass).name >> Log;
+        auto a = new TestClass2("a");
+        lua["print"].call(a);
+        auto r = lua.call(&bounceback, a);
+        r >> Log;
+        //r[0].get!(Object*) >> Log;
+        //(cast(Object)r[0].get!(void*)).classinfo.toString >> Log;
+        //(cast(TestClass1)r[0].get!(void*)).name >> Log;
     }
-*/
 
 static if(0) {
 
