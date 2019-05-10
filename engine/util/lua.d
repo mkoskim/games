@@ -46,7 +46,7 @@ class Lua : LuaInterface
     ~this()
     {
         Log("Top  = %d", top);
-        Log("Refs = %d", refcount);
+        refdump();
         lua_close(L);
         debug Track.remove(this);
     }
@@ -125,15 +125,14 @@ abstract class LuaInterface
             this.lua = lua;
             type = lua.type();
             r    = luaL_ref(lua.L, LUA_REGISTRYINDEX);
-            //lua.type() >> Log;
-            //format("ref(%d)", r) >> Log;
+            //toString() >> Log;
         }
         
         this(this)
         {
             lua_rawgeti(lua.L, LUA_REGISTRYINDEX, r);
             r = luaL_ref(lua.L, LUA_REGISTRYINDEX);
-            //format("ref(%d)", r) >> Log;
+            //toString() >> Log;
         }
 
         ~this()
@@ -194,12 +193,14 @@ abstract class LuaInterface
             }
             return k;
         }
-    }
 
-    int refcount()
-    {
-        lua_len(L, LUA_REGISTRYINDEX);
-        return cast(int)(pop().get!(LUA_NUMBER));
+        //---------------------------------------------------------------------
+
+        string toString()
+        {
+            return format("<Ref %s>", lua.ref2string(r));
+        }
+
     }
 
     //-------------------------------------------------------------------------
@@ -403,6 +404,42 @@ abstract class LuaInterface
         void errorif(bool cond, lazy string msg) { if(cond) error(msg); }
         
         void check(int errcode) { errorif(errcode != LUA_OK, to!string(pop())); }
+    }
+
+    //-------------------------------------------------------------------------
+    // Inspecting internals (for debugging)
+    //-------------------------------------------------------------------------
+
+    int reflen()
+    {
+        lua_len(L, LUA_REGISTRYINDEX);
+        scope(success) discard();
+        return cast(int)lua_tonumber(L, -1);
+    }
+
+    string ref2string(int r)
+    {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, r);
+        scope(success) discard();
+        switch(type)
+        {
+            case Type.Number: return format("[%d] %s(%f)", r, type.to!string, lua_tonumber(L, -1));
+            case Type.String: return format("[%d] %s(%s)", r, type.to!string, lua_tostring(L, -1).to!string);
+            default: break;
+        }
+        return format("[%d] %s", r, type.to!string);
+    }
+
+    void refdump(int n = -1)
+    {
+        if(n < 0) n = reflen();
+        
+        for(int i = 0; i < n; i++)
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, i);
+            ref2string(i) >> Log;
+            discard();
+        }
     }
 }
 

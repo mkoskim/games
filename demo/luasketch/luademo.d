@@ -94,12 +94,37 @@ auto test()
     scope(exit) { lua.destroy(); }
 
     //-------------------------------------------------------------------------
-
-    Log("Refs = %d", lua.refcount);    
+    
+    lua["_VERSION"].value >> Log;
+    lua.load("data/test.lua").to!string >> Log;
 
     //-------------------------------------------------------------------------
+    // Get reference to string, and use it to call format
+    //-------------------------------------------------------------------------
     
-    printout("test.lua returns:", lua.load("data/test.lua"));
+    {
+        auto luashow = lua["show"];
+        luashow.call("1", "2", "3");
+        luashow.call("4", "5", "6");
+        auto multiret = lua["multiret"];
+        printout("luashow", luashow.call("7", "8", "9"));
+    }
+    
+    {
+        lua["string"]["format"].call("Test: %s %d", "test", 1) >> Log;
+
+        auto stringlib = lua["string"];
+        auto stringfmt = stringlib["format"];
+        
+        stringlib.to!string >> Log;
+        stringlib["format"].to!string >> Log;
+        stringfmt.to!string >> Log;
+
+        stringlib["format"].call("%s.%s (%d)", "string", "format", 2) >> Log;
+        stringfmt.call("%s.%s (%d)", "string", "format", 1) >> Log;
+    }
+
+static if(0) {
 
     //-------------------------------------------------------------------------
     // Sending and receiving D objects
@@ -114,8 +139,6 @@ auto test()
         //(cast(Object)r[0].get!(void*)).classinfo.toString >> Log;
         //(cast(TestClass1)r[0].get!(void*)).name >> Log;
     }
-
-static if(0) {
 
     //-------------------------------------------------------------------------
     // These are "equal" (one is Ref, another is Variant(Ref)
@@ -204,31 +227,6 @@ static if(0) {
 
     lua["show"];
 
-    //-------------------------------------------------------------------------
-    // Get reference to string, and use it to call format
-    //-------------------------------------------------------------------------
-    
-    {
-        auto luashow = lua["show"];
-        luashow.call("1", "2", "3");
-        luashow.call("4", "5", "6");
-        auto multiret = lua["multiret"];
-        printout("luashow", luashow.call("7", "8", "9"));
-    }
-    
-    {
-        lua["string"]["format"].call("Test: %s %d", "test", 1) >> Log;
-
-        auto stringlib = lua["string"];
-        auto stringfmt = stringlib["format"];
-        
-        stringlib.to!string >> Log;
-        stringlib["format"].to!string >> Log;
-        stringfmt.to!string >> Log;
-
-        stringlib["format"].call("%s.%s (%d)", "string", "format", 2) >> Log;
-        stringfmt.call("%s.%s (%d)", "string", "format", 1) >> Log;
-    }
 
     //-------------------------------------------------------------------------
     // howdy() returns table, check it

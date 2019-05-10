@@ -2,8 +2,8 @@
 -- Testing...
 -- ----------------------------------------------------------------------------
 
-local info = debug.getinfo(1,'S');
-print("Loading:", info.source);
+-- local info = debug.getinfo(1,'S');
+-- print("Loading:", info.source);
 
 -- print(string.format("Testi: %s", "OK"));
 
@@ -50,4 +50,4 @@ function callbounce(...)
 -- result = test.heya()
 -- write(format("Result: %d\n", result))
 
-return "Load done."
+return string.format("Loaded: %s", debug.getinfo(1,'S').source);
