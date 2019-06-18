@@ -7,6 +7,8 @@ echo
 ###############################################################################
 
 sudo apt-get install\
+    python3\
+    python3-tk\
     scons\
     libsdl2-dev\
     libsdl2-image-dev\
