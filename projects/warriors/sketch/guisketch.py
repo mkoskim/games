@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 ###############################################################################
 #
-# Sketching GUI (non-realtime part)
+# Sketching GUI (non-realtime parts): Builds, achievements and so on.
 #
 ###############################################################################
 
@@ -17,42 +17,16 @@ import tkinter.ttk as ttk
 
 ###############################################################################
 #
-# 
+# How it works?
 #
-###############################################################################
-
-#------------------------------------------------------------------------------
-# Specializations: Just listing some common MMORPG classes as example
-#------------------------------------------------------------------------------
-
-specs = [
-    "Warrior", "Barbarian", "Knight",
-    "Hunter", "Archer",
-    "Druid", "Sorcerer", "Mage",
-    "Thief", "Nightblade", "Assassin",
-]
-
-#------------------------------------------------------------------------------
-# Races: Races limit the class options you have. Just some example listing.
-#------------------------------------------------------------------------------
-
-races = [
-    "Nord", "Human",
-    "Elf", "Dwarf",
-]
-
-#------------------------------------------------------------------------------
-# Can we have something similar to Oblivion Birthsign / Skyrim Standing Stone
-# for toons? Something similar to GW2 Norn spirit guides (Raven, Bear, Wolf,
-# Snow Leopard)?
-#------------------------------------------------------------------------------
-
-
-###############################################################################
+# - Player has account.
+# - Account has list of toons and builds.
+# - A build combines toon to "spec" (class, specialization, "gears", ...)
+# - Dungeon completition gives rewards
+# - These rewards include "tokens"/"badges" for achievements
 #
-###############################################################################
-
 #------------------------------------------------------------------------------
+#
 # Let's try to create an example case. Let's go with LoTR lore.
 #
 # Let's say that your character wants to be a Mirkwood soldier. Let's say
@@ -68,7 +42,7 @@ races = [
 # you'd need to have some great victories in that process.
 #
 # OK, you have done it, you have earned the trust and respect. To get the armor,
-# you'd need someone to craft it for you, from raw materials. Basically, you'd
+# you'd need someone to craft it for you, from "materials". Basically, you'd
 # need those materials - either gathered or bought - as well as some reward for
 # the one crafting it for you.
 #
@@ -186,26 +160,36 @@ vendors = [
 # has for outlook. Achievements come in two level: account-wide, and toon-
 # specific.
 #------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+# Can we have something similar to Oblivion Birthsign / Skyrim Standing Stone
+# for toons? Something similar to GW2 Norn spirit guides (Raven, Bear, Wolf,
+# Snow Leopard)?
+#------------------------------------------------------------------------------
 
 class Toon:
 
     #--------------------------------------------------------------------------
 
-	def __init__(self, name, race):
-		self.name = name
-		self.race = race
-		
-		self.trophies = { }		# Trophies collected by this toon (per class)
-		self.diary = [ ]		# Chosen achievements (per story block)
+    def __init__(self, name, race):
+	    self.name = name
+	    self.race = race
+	    
+	    self.trophies = { }		# Trophies collected by this toon (per class)
+	    self.diary = [ ]		# Chosen achievements (per story block)
 
     #--------------------------------------------------------------------------
 
-	def reward(self, cls, trophies):
-		print("%s @ %s: %s" % (self.name, cls, trophies))
-		# self.trophies[cls][trophy] += 1
-		# Check if some achivement was completed
-		
-	#--------------------------------------------------------------------------
+    def reward(self, cls, trophies):
+	    print("%s @ %s: %s" % (self.name, cls, trophies))
+	    # self.trophies[cls][trophy] += 1
+	    # Check if some achivement was completed
+	    
+    #--------------------------------------------------------------------------
+
+    races = [
+        "Nord", "Human",
+        "Elf", "Dwarf",
+    ]
 
 #------------------------------------------------------------------------------
 # Specializations / specification is the spec of the build: class, traits,
@@ -217,6 +201,13 @@ class Spec:
     def __init__(self, cls):
         self.cls = cls
 
+    specs = [
+        "Warrior", "Barbarian", "Knight",
+        "Hunter", "Archer",
+        "Druid", "Sorcerer", "Mage",
+        "Thief", "Nightblade", "Assassin",
+    ]
+
 #------------------------------------------------------------------------------
 # Build is what player plays. It has specializations (including class) and
 # visual representation (toon).
@@ -225,8 +216,8 @@ class Spec:
 class Build:
 
     def __init__(self, toon, spec):
-        self.spec = spec
         self.toon = toon
+        self.spec = spec
 
 #------------------------------------------------------------------------------
 # Account ties all together (builds, toons and such)
@@ -252,9 +243,9 @@ class Account:
             Build(self.toons[0], "Warrior"),
             Build(self.toons[0], "Hunter"),
         ]
+        self.current  = 0       # Current build, if any
         
-        self.location = None            # Location is account wide
-        self.current = self.builds[0]   # Current build, if any
+        self.location = None    # Location is account wide
 
         #----------------------------------------------------------------------
 		
@@ -270,7 +261,8 @@ class Account:
     	# Update character specific trophies
 		# Trophies are permanent: they can't be traded, lost or destroyed.
         print("Trophy: %s" % (trophies))
-        self.current.toon.reward(self.current.spec, trophies)
+        build = self.builds[self.current]
+        build.toon.reward(build.spec, trophies)
 
 		# Rewards are account wide "currencies"
 		# Account wide currencies can be exchanged to other items, and for
@@ -285,7 +277,7 @@ account = Account()
 
 dungeons[0].completed(account)
 
-exit(0)
+#exit(0)
 
 ###############################################################################
 #
@@ -343,18 +335,28 @@ class BuildWindow(Frame):
         self.clsname = Label(self, text = "Class:")
         self.clsname.pack(anchor = NW)
 
+        self.onBuildSwitch()
+
     #--------------------------------------------------------------------------
 
     def onselect(self, event):
         print(event.widget.curselection())
-        index = int(event.widget.curselection()[0])
-        try:
+        account.current = int(event.widget.curselection()[0])
+        if account.current >= len(account.builds):
+            account.current = None
+        self.onBuildSwitch()
+
+    def onBuildSwitch(self):
+        index = account.current
+        if index is None:
+            self.toonname["text"] = "Character: <Choose>"
+            self.clsname["text"]  = "Class: <Choose>"
+        else:
             build = account.builds[index]
             self.toonname["text"] = "Character: " + build.toon.name
             self.clsname["text"]  = "Class: " + build.spec
-        except IndexError:
-            self.toonname["text"] = "Character: <Choose>"
-            self.clsname["text"]  = "Class: <Choose>"
+
+        self.master.onBuildSwitch()
 
     #--------------------------------------------------------------------------
 
@@ -421,32 +423,36 @@ class MainWindow(Frame):
         #----------------------------------------------------------------------
 
         self.selected = Label(self)
-        self.selected.config(text = "%s: %s" % (
-            account.current.toon.name,
-            account.current.spec,
-        ))
         self.selected.pack(anchor = W)
+        #self.onBuildSwitch()
 
         #----------------------------------------------------------------------
         # Menu
         #----------------------------------------------------------------------
 
         self.mainbook = ttk.Notebook(self)
-        self.mainbook.add(BuildWindow(),   text = "Builds")
-        self.mainbook.add(ToonWindow(),    text = "Toons")
-        self.mainbook.add(DungeonWindow(), text = "Dungeons")
-        self.mainbook.add(VendorWindow(),  text = "Vendors")
+        self.mainbook.add(BuildWindow(self),   text = "Builds")
+        self.mainbook.add(ToonWindow(self),    text = "Toons")
+        self.mainbook.add(DungeonWindow(self), text = "Dungeons")
+        self.mainbook.add(VendorWindow(self),  text = "Vendors")
         self.mainbook.pack(fill = BOTH, expand = 1)
         
+    #--------------------------------------------------------------------------
+
+    def onBuildSwitch(self):
+        if account.current is None:
+            name, spec = "<None>", "<None>"
+        else:
+            build = account.builds[account.current]
+            name, spec = build.toon.name, build.spec
+            
+        self.selected.config(text = "%s: %s" % (name, spec))
+
     #--------------------------------------------------------------------------
 
     def quit(self, event):
         self.master.destroy()
         
-
-###############################################################################
-#
-###############################################################################
 
 root = Tk()
 root.geometry("900x600")
