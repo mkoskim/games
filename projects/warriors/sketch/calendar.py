@@ -20,11 +20,11 @@ def info(deg, year = 2019):
     date2 = datetime.date(year,  1,  1) + datetime.timedelta(yday)
     hour = deg2time(deg)
     
-    print("[%02d:%02d] %02d / %02d - %02d/%02d (%3d degs)" % (
+    print("%3d deg: [%02d:%02d] %02d / %02d" % (
+        deg,
         hour.hour, hour.minute,
         date1.day, date1.month,
-        date2.day, date2.month,
-        deg,
+        #date2.day, date2.month,
     ))
 
 info( 0)
