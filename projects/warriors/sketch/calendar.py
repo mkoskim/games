@@ -12,18 +12,20 @@ import datetime
 def deg2time(deg):
     #deg = (deg + 2*15) % 360
     #print(deg * 24 / 360.0)
-    return datetime.time(deg * 24 / 360, (deg % 15) * 60 / 15)
+    return datetime.time(
+        int(deg * 24 / 360),
+        int((deg % 15) * 60 / 15)
+    )
     
 def info(deg, year = 2019):
     yday = (deg * 365 / 360)
-    date1 = datetime.date(year, 12, 24) + datetime.timedelta(yday)
-    date2 = datetime.date(year,  1,  1) + datetime.timedelta(yday)
+    date = datetime.date(year, 12, 22) + datetime.timedelta(yday)
     hour = deg2time(deg)
     
     print("%3d deg: [%02d:%02d] %02d / %02d" % (
         deg,
         hour.hour, hour.minute,
-        date1.day, date1.month,
+        date.day, date.month,
         #date2.day, date2.month,
     ))
 
